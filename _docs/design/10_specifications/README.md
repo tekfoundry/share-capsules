@@ -17,3 +17,4 @@ An implementation MUST satisfy every applicable requirement and published fixtur
 - [Capsule Payload Encryption V1](capsule/payload-encryption-v1.md)
 - [Capsule Entry Commitments V1](capsule/entry-commitments-v1.md)
 - [Static Image Content Profile V1](capsule/static-image-profile-v1.md)
+- [CTX Embedded Policy V1](ctx/policy-v1.md)

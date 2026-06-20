@@ -107,6 +107,37 @@ export {
     resolveContentProfile,
 } from './content-profile.js';
 
+export {
+    ACCOUNT_ACTIVE_PREDICATE,
+    ACCOUNT_CAPSULE_LIFETIME_LIMIT_PREDICATE,
+    AUTOMATION_RISK_NOT_HIGH_PREDICATE,
+    CAPSULE_LIFETIME_LIMIT_PREDICATE,
+    CTX_POLICY_COMBINER,
+    CTX_POLICY_LIMIT_MAXIMUM,
+    CTX_POLICY_PREDICATE_ORDER,
+    CTX_POLICY_REQUIRED_PREDICATES,
+    CTX_POLICY_TYPE,
+    CTX_POLICY_VERSION,
+    DEVICE_REGISTERED_PREDICATE,
+    EMAIL_VERIFIED_PREDICATE,
+    PolicyValidationError,
+    VIEW_EVENT_CONSENT_PREDICATE,
+    parseCtxPolicyV1,
+    validateCtxPolicyV1,
+} from './policy.js';
+
+export type {
+    AccountCapsuleLifetimeLimitRequirementV1,
+    AutomationRiskNotHighRequirementV1,
+    BooleanPolicyRequirementV1,
+    CapsuleLifetimeLimitRequirementV1,
+    CtxPolicyRequirementV1,
+    CtxPolicyV1,
+    PolicyValidationIssue,
+} from './policy.js';
+
+export { canonicalizeCtxPolicyV1, ctxPolicySha256 } from './policy-digest.js';
+
 export type {
     ContentProfile,
     ContentProfileValidationIssue,

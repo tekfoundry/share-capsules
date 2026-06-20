@@ -1,7 +1,7 @@
 # CTX Policy Model
 
-Status: Draft
-Last updated: 2026-06-19
+Status: Accepted
+Last updated: 2026-06-20
 
 ## Purpose
 
@@ -29,9 +29,9 @@ The profile contains these stable requirement types:
 
 The first four requirements are mandatory in every valid V1 policy. The creator may configure either lifetime limit, both, or neither, and may require the V1 automation-risk gate. Omitting creator gates does not disable separate Share Capsules operational abuse controls. V1 tooling emits the complete policy rather than asking creators to manipulate JSON or predicate identifiers.
 
-## Conceptual representation
+## V1 representation
 
-The exact schema and identifier spelling belong in the specification, but the structure should resemble:
+The exact schema, identifier spelling, canonical requirement order, value bounds, validation behavior, and digest construction are defined by [CTX Embedded Policy V1](../10_specifications/ctx/policy-v1.md). A complete policy may resemble:
 
 ```json
 {
@@ -62,6 +62,8 @@ The exact schema and identifier spelling belong in the specification, but the st
 ```
 
 The example values `5` and `3` are illustrative, not platform defaults. The creator selects each value independently. The automation-risk requirement is also optional and identifies the accepted assertion issuer.
+
+V1 lifetime maximums are positive safe JSON integers. Omission means the creator did not configure that gate; zero and `null` are not unlimited sentinels. Usage means a committed broker content-key release, not a page load or authorization attempt.
 
 The per-account maximum applies to one persistent CTX account, not a verified unique human. Viewer and creator explanations must preserve that distinction.
 
@@ -109,3 +111,4 @@ Adding future semantics requires an explicit policy-version or predicate-version
 - [Authorization and key release](authorization-and-key-release.md)
 - [Capsule design intent](../04_capsule/design-intent.md)
 - [V1 automation risk](automation-risk.md)
+- [CTX Embedded Policy V1](../10_specifications/ctx/policy-v1.md)

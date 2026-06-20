@@ -1,0 +1,101 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://sharecapsules.com/specifications/ctx/policy-v1.schema.json",
+    "title": "CTX Policy V1",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["type", "version", "combiner", "requirements"],
+    "properties": {
+        "type": { "const": "ctx-policy" },
+        "version": { "const": 1 },
+        "combiner": { "const": "all" },
+        "requirements": {
+            "type": "array",
+            "minItems": 4,
+            "maxItems": 7,
+            "items": {
+                "oneOf": [
+                    { "$ref": "#/$defs/emailVerified" },
+                    { "$ref": "#/$defs/accountActive" },
+                    { "$ref": "#/$defs/deviceRegistered" },
+                    { "$ref": "#/$defs/viewEventConsent" },
+                    { "$ref": "#/$defs/capsuleLifetimeLimit" },
+                    { "$ref": "#/$defs/accountCapsuleLifetimeLimit" },
+                    { "$ref": "#/$defs/automationRiskNotHigh" }
+                ]
+            }
+        }
+    },
+    "$defs": {
+        "emailVerified": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["predicate", "equals"],
+            "properties": {
+                "predicate": { "const": "ctx.account.email-verified" },
+                "equals": { "const": true }
+            }
+        },
+        "accountActive": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["predicate", "equals"],
+            "properties": {
+                "predicate": { "const": "ctx.account.active" },
+                "equals": { "const": true }
+            }
+        },
+        "deviceRegistered": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["predicate", "equals"],
+            "properties": {
+                "predicate": { "const": "ctx.viewer.device-registered" },
+                "equals": { "const": true }
+            }
+        },
+        "viewEventConsent": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["predicate", "equals"],
+            "properties": {
+                "predicate": { "const": "ctx.consent.capsule-view-event" },
+                "equals": { "const": true }
+            }
+        },
+        "limitMaximum": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+        },
+        "capsuleLifetimeLimit": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["predicate", "scope", "maximum"],
+            "properties": {
+                "predicate": { "const": "ctx.usage.capsule-lifetime-limit" },
+                "scope": { "const": "capsule" },
+                "maximum": { "$ref": "#/$defs/limitMaximum" }
+            }
+        },
+        "accountCapsuleLifetimeLimit": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["predicate", "scope", "maximum"],
+            "properties": {
+                "predicate": { "const": "ctx.usage.capsule-account-lifetime-limit" },
+                "scope": { "const": "account-and-capsule" },
+                "maximum": { "$ref": "#/$defs/limitMaximum" }
+            }
+        },
+        "automationRiskNotHigh": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["predicate", "issuer"],
+            "properties": {
+                "predicate": { "const": "ctx.risk.ecosystem-automation-not-high" },
+                "issuer": { "type": "string", "format": "uri", "maxLength": 2048 }
+            }
+        }
+    }
+}

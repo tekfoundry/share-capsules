@@ -59,7 +59,7 @@ The JSON Schema is necessary but not sufficient. After schema validation, an imp
 - Revision `1` is used when no predecessor exists.
 - The actual archive names exactly equal the derived allowlist.
 
-Unknown top-level or defined nested manifest fields fail closed. The `policy` object is structurally reserved here and is validated by the separate CTX Policy V1 contract before authorization. No network request carrying credentials or device proof may occur before complete manifest, signature, suite, content-profile, and policy validation.
+Unknown top-level or defined nested manifest fields fail closed. The `policy` object MUST satisfy the separate [CTX Embedded Policy V1](../ctx/policy-v1.md) contract before authorization. No network request carrying credentials or device proof may occur before complete manifest, signature, suite, content-profile, and policy validation.
 
 ## Encodings
 
@@ -79,6 +79,7 @@ A format `1.0` reader MUST reject any other `format_version`, unknown required f
 - [Capsule Payload Encryption V1](payload-encryption-v1.md)
 - [Capsule Entry Commitments V1](entry-commitments-v1.md)
 - [Static Image Content Profile V1](static-image-profile-v1.md)
+- [CTX Embedded Policy V1](../ctx/policy-v1.md)
 - [V1 cryptographic design intent](../../07_security-and-privacy/cryptographic-suite-v1.md)
 - [CTX policy model](../../05_ctx/policy-model.md)
 - [Viewer content profiles](../../06_viewer/content-profiles.md)

@@ -80,14 +80,7 @@
             "minProperties": 1
         },
         "policy": {
-            "type": "object",
-            "required": ["type", "version", "combiner", "requirements"],
-            "properties": {
-                "type": { "type": "string" },
-                "version": { "type": "integer" },
-                "combiner": { "type": "string" },
-                "requirements": { "type": "array" }
-            }
+            "$ref": "https://sharecapsules.com/specifications/ctx/policy-v1.schema.json"
         },
         "ctx": {
             "type": "object",

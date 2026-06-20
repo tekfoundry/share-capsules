@@ -28,7 +28,12 @@ export const validManifestV1: CapsuleManifestV1 = {
         type: 'ctx-policy',
         version: 1,
         combiner: 'all',
-        requirements: [],
+        requirements: [
+            { predicate: 'ctx.account.email-verified', equals: true },
+            { predicate: 'ctx.account.active', equals: true },
+            { predicate: 'ctx.viewer.device-registered', equals: true },
+            { predicate: 'ctx.consent.capsule-view-event', equals: true },
+        ],
     },
     ctx: {
         issuer: 'https://sharecapsules.com',

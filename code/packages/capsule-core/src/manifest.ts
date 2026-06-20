@@ -8,6 +8,8 @@ import {
     STATIC_IMAGE_PROFILE_V1,
     STATIC_IMAGE_PROFILE_VERSION,
 } from './content-profile.js';
+import { PolicyValidationError, validateCtxPolicyV1, type CtxPolicyV1 } from './policy.js';
+import policySchema from './schema/ctx-policy-v1.schema.json' with { type: 'json' };
 import { CAPSULE_SUITE_ID, MANIFEST_SIGNATURE_ALGORITHM_ID } from './cryptographic-suite.js';
 import manifestSchema from './schema/capsule-manifest-v1.schema.json' with { type: 'json' };
 
@@ -70,7 +72,7 @@ export interface CapsuleManifestV1 {
         creator_display_name?: string;
         original_filename?: string;
     };
-    policy: Record<string, unknown>;
+    policy: CtxPolicyV1;
     ctx: {
         issuer: string;
     };
@@ -91,6 +93,7 @@ export class ManifestValidationError extends Error {
 
 const ajv = new Ajv2020({ allErrors: true, strict: true });
 addFormats(ajv);
+ajv.addSchema(policySchema);
 const validateManifestSchema = ajv.compile<CapsuleManifestV1>(manifestSchema);
 
 export function isPayloadId(value: string): boolean {
@@ -114,6 +117,18 @@ export function parseCapsuleManifest(value: unknown): CapsuleManifestV1 {
 
     const issues: ManifestValidationIssue[] = [];
     const payload = value.payloads[0];
+
+    try {
+        validateCtxPolicyV1(value.policy);
+    } catch (error) {
+        if (error instanceof PolicyValidationError) {
+            for (const issue of error.issues) {
+                issues.push({ path: `/policy${issue.path}`, message: issue.message });
+            }
+        } else {
+            throw error;
+        }
+    }
 
     validateEncodedLength(
         value.creator.signing_key.public_key,
