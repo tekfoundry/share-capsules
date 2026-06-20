@@ -272,6 +272,7 @@ Before archiving a plan, confirm all of the following:
 
 ## Coding and Design Rules
 
+- Follow the repository [coding standards](coding-standards.md) for OOP, DRY, language-specific design, boundaries, error handling, and tests.
 - Prefer explicit names and straightforward control flow.
 - Avoid adding dependencies unless the existing stack cannot solve the problem cleanly.
 - Keep error semantics consistent within a code path.

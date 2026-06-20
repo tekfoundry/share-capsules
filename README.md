@@ -16,7 +16,7 @@ The project is implementing its initial proof of concept and MVP. The current su
 3. Embed it with a `<capsule-viewer>` element and public fallback content.
 4. Require a viewer to satisfy the Capsule's signed CTX policy before local decryption and rendering by the browser extension.
 
-The [design documentation](_docs/design/README.md) describes the intended architecture, security and privacy boundaries, threat model, and experimental specifications. The [initial MVP plan](_docs/plans/initial-mvp.md) tracks implementation progress.
+The [design documentation](_docs/design/README.md) describes the intended architecture, security and privacy boundaries, threat model, and experimental specifications. The [initial MVP plan](_docs/plans/initial-mvp.md) tracks implementation progress. Implementation follows the repository's [coding standards](_docs/coding-standards.md) and [agent workflow](_docs/agent-workflow.md).
 
 ## Open ecosystem
 
