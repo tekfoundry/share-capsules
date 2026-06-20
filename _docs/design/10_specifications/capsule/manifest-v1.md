@@ -65,7 +65,7 @@ Unknown top-level or defined nested manifest fields fail closed. The `policy` ob
 
 Binary values in the manifest use unpadded base64url. SHA-256 and Ed25519 public-key values therefore contain exactly 43 characters; the 96-bit AES-GCM nonce contains exactly 16 characters. Opaque key and release identifiers contain only ASCII letters, digits, `_`, or `-` and are 16–128 characters.
 
-`manifest.json` MUST be valid UTF-8 Internet JSON and is signed using its RFC 8785 canonical representation. The detached signature encoding is specified with the V1 cryptographic operations.
+`manifest.json` MUST be valid UTF-8 Internet JSON and is signed using its RFC 8785 canonical representation. `manifest.sig` contains exactly the raw 64-byte Ed25519 signature defined by [Capsule Manifest Signature V1](manifest-signature-v1.md).
 
 ## Compatibility
 
@@ -75,6 +75,7 @@ A format `1.0` reader MUST reject any other `format_version`, unknown required f
 
 - [Capsule design intent](../../04_capsule/design-intent.md)
 - [Capsule Cryptographic Suite V1](cryptographic-suite-v1.md)
+- [Capsule Manifest Signature V1](manifest-signature-v1.md)
 - [V1 cryptographic design intent](../../07_security-and-privacy/cryptographic-suite-v1.md)
 - [CTX policy model](../../05_ctx/policy-model.md)
 - [Viewer content profiles](../../06_viewer/content-profiles.md)

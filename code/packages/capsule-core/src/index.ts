@@ -20,6 +20,20 @@ export type {
 } from './cryptographic-suite.js';
 
 export {
+    ED25519_PUBLIC_KEY_BYTES,
+    ED25519_SIGNATURE_BYTES,
+    ManifestSignatureError,
+    canonicalizeCapsuleManifest,
+    importEd25519PublicKey,
+    signCapsuleManifest,
+    signDetachedEd25519,
+    verifyCapsuleManifestSignature,
+    verifyDetachedEd25519,
+} from './manifest-signature.js';
+
+export type { Ed25519CryptoProvider } from './manifest-signature.js';
+
+export {
     CAPSULE_FORMAT_VERSION,
     CAPSULE_MANIFEST_TYPE,
     ManifestValidationError,
@@ -33,3 +47,12 @@ export {
 } from './manifest.js';
 
 export type { CapsuleManifestV1, CapsulePayloadV1, ManifestValidationIssue } from './manifest.js';
+export {
+    JsonCanonicalizationError,
+    MAX_CANONICAL_JSON_DEPTH,
+    canonicalizeJson,
+    canonicalizeJsonBytes,
+} from './canonical-json.js';
+
+export type { JsonPrimitive, JsonValue } from './canonical-json.js';
+export { Base64UrlError, decodeBase64Url, encodeBase64Url } from './base64url.js';

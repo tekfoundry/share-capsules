@@ -7,7 +7,7 @@ Last updated: 2026-06-20
 
 Define the selected cryptographic building blocks and downgrade boundaries for the V1 Capsule and Share Capsules reference implementation.
 
-This document captures design intent. The exact suite identifier, primitive mapping, parameters, and downgrade behavior are defined by the [Capsule Cryptographic Suite V1 specification](../10_specifications/capsule/cryptographic-suite-v1.md). Operation-specific byte encodings, labels, and test vectors belong in their respective normative specifications.
+This document captures design intent. The exact suite identifier, primitive mapping, parameters, and downgrade behavior are defined by the [Capsule Cryptographic Suite V1 specification](../10_specifications/capsule/cryptographic-suite-v1.md). Canonical manifest bytes, creator-key binding, and the detached signature are defined by [Capsule Manifest Signature V1](../10_specifications/capsule/manifest-signature-v1.md). Other operation-specific byte encodings, labels, and test vectors belong in their respective normative specifications.
 
 ## One named suite
 
@@ -36,7 +36,7 @@ A content-key and nonce combination must never be reused. Authentication failure
 
 ## Creator signatures
 
-The creator signs the RFC 8785 canonical UTF-8 bytes of `manifest.json` using Ed25519. `manifest.sig` carries the detached signature in one specified encoding.
+The creator signs the RFC 8785 canonical UTF-8 bytes of `manifest.json` using Ed25519. `manifest.sig` carries the raw 64-byte detached signature.
 
 The manifest identifies the signing key and suite. Verification must complete before policy presentation, authorization, key release, or payload decryption. Signature keys are used only for signatures and never for key agreement or encryption.
 

@@ -5,7 +5,7 @@ Last updated: 2026-06-20
 
 ## Scope
 
-This specification defines the exact cryptographic primitive set selected by Capsule suite `ctx-capsule-v1` and its downgrade boundary. Operation-specific byte construction, canonicalization, authenticated context, detached-signature representation, and deterministic vectors are defined by their respective V1 operation specifications.
+This specification defines the exact cryptographic primitive set selected by Capsule suite `ctx-capsule-v1` and its downgrade boundary. Operation-specific byte construction, canonicalization, authenticated context, detached-signature representation, and deterministic vectors are defined by their respective V1 operation specifications, beginning with [Capsule Manifest Signature V1](manifest-signature-v1.md).
 
 The machine-readable implementation contract is [`cryptographic-suite.ts`](../../../../code/packages/capsule-core/src/cryptographic-suite.ts).
 
@@ -74,6 +74,7 @@ The Share Capsules reference tests are in [`cryptographic-suite-v1.test.ts`](../
 ## Related specifications
 
 - [Capsule Manifest V1](manifest-v1.md)
+- [Capsule Manifest Signature V1](manifest-signature-v1.md)
 - [V1 cryptographic design intent](../../07_security-and-privacy/cryptographic-suite-v1.md)
 
 ## Standards references
