@@ -179,6 +179,7 @@ The extension sends the CTX Provider:
 
 - Capsule ID and revision
 - Payload ID
+- Opaque broker release handle
 - Canonical embedded-policy digest
 - Requested action such as `render`
 - Approved disclosures
@@ -191,7 +192,7 @@ The CTX Provider evaluates verified email, account and device status, consent, c
 
 ### 8. Return authorization or failure
 
-If policy succeeds, CTX returns a signed Ed25519 JWT ticket with a normal 60-second lifetime, exact broker audience, unique single-use identifier, and bindings to the Capsule, revision, policy digest, payload, action, suite, and both Viewer device keys.
+If policy succeeds, CTX returns a signed Ed25519 JWT ticket with an exact 60-second lifetime, exact broker audience, unique single-use identifier, and bindings to the Capsule, revision, policy digest, payload, opaque broker release handle, action, suite, and both Viewer device keys.
 
 The ticket contains no global account identifier, raw trust profile, password, content key, or recovery material.
 
@@ -199,7 +200,7 @@ If policy fails, CTX returns a structured privacy-safe reason. Raw scores, globa
 
 ### 9. Redeem the ticket and release the content key
 
-The extension sends the ticket and a fresh device proof to the identified broker. The broker validates the fixed ticket type and algorithm, issuer key, exact audience, time window, identifiers, action, suite, and device-key bindings.
+The extension sends the ticket and a fresh `ctx-key-release-proof+jwt` proof to the identified broker. The proof binds its HTTP method, broker endpoint, creation time, unique identifier, and the exact ticket hash. The broker validates the fixed ticket and proof types and algorithms, issuer key, exact audience, time window, identifiers, action, suite, ticket hash, and device-key bindings.
 
 The broker prepares the content key HPKE-wrapped to the registered X25519 agreement key, then redeems the ticket online. Redemption atomically:
 

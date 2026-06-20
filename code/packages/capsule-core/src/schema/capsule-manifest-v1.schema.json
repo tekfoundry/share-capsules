@@ -87,7 +87,12 @@
             "additionalProperties": false,
             "required": ["issuer"],
             "properties": {
-                "issuer": { "type": "string", "format": "uri", "maxLength": 2048 }
+                "issuer": {
+                    "type": "string",
+                    "format": "uri",
+                    "maxLength": 2048,
+                    "pattern": "^https://"
+                }
             }
         },
         "payloads": {
@@ -146,7 +151,12 @@
                         "additionalProperties": false,
                         "required": ["broker", "handle"],
                         "properties": {
-                            "broker": { "type": "string", "format": "uri", "maxLength": 2048 },
+                            "broker": {
+                                "type": "string",
+                                "format": "uri",
+                                "maxLength": 2048,
+                                "pattern": "^https://"
+                            },
                             "handle": { "$ref": "#/$defs/opaqueId" }
                         }
                     },

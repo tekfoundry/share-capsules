@@ -61,6 +61,8 @@ The JSON Schema is necessary but not sufficient. After schema validation, an imp
 
 Unknown top-level or defined nested manifest fields fail closed. The `policy` object MUST satisfy the separate [CTX Embedded Policy V1](../ctx/policy-v1.md) contract before authorization. No network request carrying credentials or device proof may occur before complete manifest, signature, suite, content-profile, and policy validation.
 
+The CTX issuer and key-broker identities MUST be absolute HTTPS URLs without user information, a query, or a fragment. They are identities used for validated discovery, not endpoints to which the Viewer blindly sends credentials. Discovery and live-message rules are defined by [CTX Protocol Contracts V1](../ctx/protocol-contracts-v1.md).
+
 ## Encodings
 
 Binary values in the manifest use unpadded base64url. SHA-256 and Ed25519 public-key values therefore contain exactly 43 characters; the 96-bit AES-GCM nonce contains exactly 16 characters. Opaque key and release identifiers contain only ASCII letters, digits, `_`, or `-` and are 16–128 characters.
@@ -80,6 +82,7 @@ A format `1.0` reader MUST reject any other `format_version`, unknown required f
 - [Capsule Entry Commitments V1](entry-commitments-v1.md)
 - [Static Image Content Profile V1](static-image-profile-v1.md)
 - [CTX Embedded Policy V1](../ctx/policy-v1.md)
+- [CTX Protocol Contracts V1](../ctx/protocol-contracts-v1.md)
 - [V1 cryptographic design intent](../../07_security-and-privacy/cryptographic-suite-v1.md)
 - [CTX policy model](../../05_ctx/policy-model.md)
 - [Viewer content profiles](../../06_viewer/content-profiles.md)

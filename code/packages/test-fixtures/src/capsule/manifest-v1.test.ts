@@ -43,6 +43,30 @@ describe('Capsule Manifest V1', () => {
         expect(() => parseCapsuleManifest(value)).toThrow(ManifestValidationError);
     });
 
+    it.each([
+        'http://trust.example',
+        'https://user:secret@trust.example',
+        'https://trust.example?tenant=1',
+        'https://trust.example#identity',
+    ])('rejects unsafe CTX issuer identity %s before discovery', (issuer) => {
+        const value = structuredClone(validManifestV1);
+        value.ctx.issuer = issuer;
+
+        expect(() => parseCapsuleManifest(value)).toThrow(ManifestValidationError);
+    });
+
+    it.each([
+        'http://broker.example',
+        'https://user:secret@broker.example',
+        'https://broker.example?release=1',
+        'https://broker.example#identity',
+    ])('rejects unsafe broker identity %s before discovery', (broker) => {
+        const value = structuredClone(validManifestV1);
+        value.payloads[0].key_release.broker = broker;
+
+        expect(() => parseCapsuleManifest(value)).toThrow(ManifestValidationError);
+    });
+
     it('rejects duplicate, missing, and undeclared archive entries', () => {
         const manifest = parseCapsuleManifest(structuredClone(validManifestV1));
 

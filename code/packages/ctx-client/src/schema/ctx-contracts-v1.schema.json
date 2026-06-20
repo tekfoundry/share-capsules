@@ -1,0 +1,304 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://sharecapsules.com/specifications/ctx/contracts-v1.schema.json",
+    "title": "CTX Protocol Contracts V1",
+    "$defs": {
+        "httpsUrl": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 2048,
+            "pattern": "^https://"
+        },
+        "identifier": {
+            "type": "string",
+            "minLength": 16,
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "sha256": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{43}$"
+        },
+        "ed25519PublicJwk": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kty", "crv", "x"],
+            "properties": {
+                "kty": { "const": "OKP" },
+                "crv": { "const": "Ed25519" },
+                "x": { "$ref": "#/$defs/sha256" }
+            }
+        },
+        "ticketSigningJwk": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kty", "crv", "x", "use", "alg", "kid"],
+            "properties": {
+                "kty": { "const": "OKP" },
+                "crv": { "const": "Ed25519" },
+                "x": { "$ref": "#/$defs/sha256" },
+                "use": { "const": "sig" },
+                "alg": { "const": "EdDSA" },
+                "kid": { "$ref": "#/$defs/identifier" }
+            }
+        },
+        "ticketSigningJwks": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["keys"],
+            "properties": {
+                "keys": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 16,
+                    "items": { "$ref": "#/$defs/ticketSigningJwk" }
+                }
+            }
+        },
+        "providerMetadata": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "issuer",
+                "protocol_versions_supported",
+                "authorization_endpoint",
+                "ticket_redemption_endpoint",
+                "jwks_uri",
+                "ticket_types_supported",
+                "ticket_signing_alg_values_supported",
+                "dpop_signing_alg_values_supported"
+            ],
+            "properties": {
+                "issuer": { "$ref": "#/$defs/httpsUrl" },
+                "protocol_versions_supported": {
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": { "const": "ctx-1" }
+                },
+                "authorization_endpoint": { "$ref": "#/$defs/httpsUrl" },
+                "ticket_redemption_endpoint": { "$ref": "#/$defs/httpsUrl" },
+                "jwks_uri": { "$ref": "#/$defs/httpsUrl" },
+                "ticket_types_supported": {
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": { "const": "ctx-key-release+jwt" }
+                },
+                "ticket_signing_alg_values_supported": {
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": { "const": "EdDSA" }
+                },
+                "dpop_signing_alg_values_supported": {
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": { "const": "EdDSA" }
+                }
+            }
+        },
+        "brokerMetadata": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "broker",
+                "protocol_versions_supported",
+                "key_release_endpoint",
+                "ticket_types_supported",
+                "cryptographic_suites_supported"
+            ],
+            "properties": {
+                "broker": { "$ref": "#/$defs/httpsUrl" },
+                "protocol_versions_supported": {
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": { "const": "ctx-1" }
+                },
+                "key_release_endpoint": { "$ref": "#/$defs/httpsUrl" },
+                "ticket_types_supported": {
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": { "const": "ctx-key-release+jwt" }
+                },
+                "cryptographic_suites_supported": {
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": { "const": "ctx-capsule-v1" }
+                }
+            }
+        },
+        "ticketHeader": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["typ", "alg", "kid"],
+            "properties": {
+                "typ": { "const": "ctx-key-release+jwt" },
+                "alg": { "const": "EdDSA" },
+                "kid": { "$ref": "#/$defs/identifier" }
+            }
+        },
+        "ticketClaims": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["iss", "aud", "jti", "iat", "nbf", "exp", "ctx"],
+            "properties": {
+                "iss": { "$ref": "#/$defs/httpsUrl" },
+                "aud": { "$ref": "#/$defs/httpsUrl" },
+                "jti": { "$ref": "#/$defs/identifier" },
+                "iat": { "type": "integer", "minimum": 0 },
+                "nbf": { "type": "integer", "minimum": 0 },
+                "exp": { "type": "integer", "minimum": 0 },
+                "ctx": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "version",
+                        "capsule_id",
+                        "capsule_revision",
+                        "policy_sha256",
+                        "payload_id",
+                        "release_handle",
+                        "action",
+                        "cryptographic_suite",
+                        "proof_jkt",
+                        "agreement_jkt"
+                    ],
+                    "properties": {
+                        "version": { "const": 1 },
+                        "capsule_id": {
+                            "type": "string",
+                            "format": "uri",
+                            "pattern": "^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+                        },
+                        "capsule_revision": { "type": "integer", "minimum": 1 },
+                        "policy_sha256": { "$ref": "#/$defs/sha256" },
+                        "payload_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64,
+                            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+                        },
+                        "release_handle": { "$ref": "#/$defs/identifier" },
+                        "action": { "const": "render" },
+                        "cryptographic_suite": { "const": "ctx-capsule-v1" },
+                        "proof_jkt": { "$ref": "#/$defs/sha256" },
+                        "agreement_jkt": { "$ref": "#/$defs/sha256" }
+                    }
+                }
+            }
+        },
+        "dpopHeader": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["typ", "alg", "jwk"],
+            "properties": {
+                "typ": { "const": "dpop+jwt" },
+                "alg": { "const": "EdDSA" },
+                "jwk": { "$ref": "#/$defs/ed25519PublicJwk" }
+            }
+        },
+        "dpopClaims": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["jti", "htm", "htu", "iat", "ath"],
+            "properties": {
+                "jti": { "$ref": "#/$defs/identifier" },
+                "htm": { "const": "POST" },
+                "htu": { "$ref": "#/$defs/httpsUrl" },
+                "iat": { "type": "integer", "minimum": 0 },
+                "ath": { "$ref": "#/$defs/sha256" },
+                "nonce": {
+                    "type": "string",
+                    "minLength": 16,
+                    "maxLength": 256,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                }
+            }
+        },
+        "ticketProofHeader": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["typ", "alg", "jwk"],
+            "properties": {
+                "typ": { "const": "ctx-key-release-proof+jwt" },
+                "alg": { "const": "EdDSA" },
+                "jwk": { "$ref": "#/$defs/ed25519PublicJwk" }
+            }
+        },
+        "ticketProofClaims": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["jti", "htm", "htu", "iat", "tth"],
+            "properties": {
+                "jti": { "$ref": "#/$defs/identifier" },
+                "htm": { "const": "POST" },
+                "htu": { "$ref": "#/$defs/httpsUrl" },
+                "iat": { "type": "integer", "minimum": 0 },
+                "tth": { "$ref": "#/$defs/sha256" },
+                "nonce": {
+                    "type": "string",
+                    "minLength": 16,
+                    "maxLength": 256,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                }
+            }
+        },
+        "hpkeEnvelope": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "type",
+                "version",
+                "ticket_jti",
+                "cryptographic_suite",
+                "enc",
+                "ciphertext"
+            ],
+            "properties": {
+                "type": { "const": "ctx-key-release" },
+                "version": { "const": 1 },
+                "ticket_jti": { "$ref": "#/$defs/identifier" },
+                "cryptographic_suite": { "const": "ctx-capsule-v1" },
+                "enc": { "type": "string", "pattern": "^[A-Za-z0-9_-]{43}$" },
+                "ciphertext": { "type": "string", "pattern": "^[A-Za-z0-9_-]{64}$" }
+            }
+        },
+        "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type", "version", "code", "retryable"],
+            "properties": {
+                "type": { "const": "ctx-error" },
+                "version": { "const": 1 },
+                "code": {
+                    "enum": [
+                        "invalid_request",
+                        "authentication_required",
+                        "email_verification_required",
+                        "account_unavailable",
+                        "device_registration_required",
+                        "consent_required",
+                        "policy_unsatisfied",
+                        "capsule_limit_reached",
+                        "account_capsule_limit_reached",
+                        "automation_risk_high",
+                        "unsupported_contract",
+                        "invalid_proof",
+                        "invalid_ticket",
+                        "ticket_expired",
+                        "ticket_replayed",
+                        "release_unavailable",
+                        "temporarily_unavailable"
+                    ]
+                },
+                "retryable": { "type": "boolean" },
+                "correlation_id": { "$ref": "#/$defs/identifier" }
+            }
+        }
+    }
+}

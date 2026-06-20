@@ -1,7 +1,7 @@
 # CTX Authorization and Key Release
 
-Status: Draft
-Last updated: 2026-06-19
+Status: Accepted
+Last updated: 2026-06-20
 
 ## Purpose
 
@@ -11,7 +11,9 @@ Define the V1 authorization artifact and the boundary between CTX policy evaluat
 
 CTX issues a signed, short-lived, single-use authorization ticket after a Viewer satisfies the embedded creator policy. The ticket is a portable protocol artifact that a creator-selected key broker can verify; it is not an OAuth access token, content key, or proof that plaintext was rendered.
 
-V1 implements the final protocol shape with one statically configured Share Capsules CTX Provider and one Share Capsules key broker. Dynamic provider discovery, multiple simultaneous brokers, offline authorization, and alternative ticket encodings are deferred.
+V1 implements the final protocol shape with one statically accepted Share Capsules CTX Provider and one Share Capsules key broker. The provider-neutral discovery format and well-known derivation are defined now, while automatic trust of arbitrary discovered providers, multiple simultaneous brokers, offline authorization, and alternative ticket encodings are deferred.
+
+The exact discovery objects, JWT fields, proof types, HPKE context bytes, and error codes are defined by [CTX Protocol Contracts V1](../10_specifications/ctx/protocol-contracts-v1.md).
 
 ## Ticket format
 
@@ -32,6 +34,7 @@ The claims bind at least:
 - Capsule identifier and revision
 - Embedded-policy digest
 - Payload identifier
+- Opaque broker release handle
 - Permitted action, such as `render`
 - Cryptographic-suite identifier
 - Viewer Ed25519 proof-key thumbprint
@@ -51,10 +54,10 @@ The V1 Viewer and broker use a statically configured Share Capsules issuer and a
 
 1. The Viewer verifies the Capsule, embedded policy, content profile, and device compatibility.
 2. The viewer approves the required disclosure and view-event accounting.
-3. The extension sends an authenticated authorization request to the CTX Provider using its DPoP-bound OAuth token and a fresh Ed25519 device proof.
+3. The extension sends an authenticated authorization request to the CTX Provider using its DPoP-bound OAuth token and RFC 9449 proof.
 4. The CTX Provider validates the account, registered device-key set, policy, consent, revocation state, and preliminary Capsule-global and per-account lifetime limits.
 5. The CTX Provider records the pending single-use ticket and returns its signed JWT.
-6. The extension presents the ticket and a fresh device proof to the ticket's named key broker.
+6. The extension presents the ticket and a fresh `ctx-key-release-proof+jwt` device proof, bound to the exact ticket hash and broker endpoint, to the ticket's named key broker.
 7. The broker validates the JWS signature, token type, fixed algorithm, issuer, exact audience, time window, Capsule and payload bindings, and proof-key binding.
 8. The broker prepares the content key wrapped to the ticket's X25519 agreement key using the V1 HPKE suite but does not return it yet.
 9. The broker submits the ticket for online redemption. The issuer atomically revalidates ticket state and both creator-configured limits, marks the ticket consumed, and increments the Capsule-global and account-and-Capsule counters.

@@ -118,6 +118,9 @@ export function parseCapsuleManifest(value: unknown): CapsuleManifestV1 {
     const issues: ManifestValidationIssue[] = [];
     const payload = value.payloads[0];
 
+    validateSecureServiceUrl(value.ctx.issuer, '/ctx/issuer', issues);
+    validateSecureServiceUrl(payload.key_release.broker, '/payloads/0/key_release/broker', issues);
+
     try {
         validateCtxPolicyV1(value.policy);
     } catch (error) {
@@ -264,5 +267,29 @@ function validateEncodedLength(
         }
     } catch {
         issues.push({ path, message: 'must use canonical unpadded base64url encoding' });
+    }
+}
+
+function validateSecureServiceUrl(
+    value: string,
+    path: string,
+    issues: ManifestValidationIssue[],
+): void {
+    try {
+        const url = new URL(value);
+        if (
+            url.protocol !== 'https:' ||
+            url.username !== '' ||
+            url.password !== '' ||
+            url.search !== '' ||
+            url.hash !== ''
+        ) {
+            throw new Error('unsupported URL component');
+        }
+    } catch {
+        issues.push({
+            path,
+            message: 'must be an absolute HTTPS identity without credentials, query, or fragment',
+        });
     }
 }

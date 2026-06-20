@@ -54,7 +54,7 @@ The key broker encrypts the authorized content key to the registered Viewer devi
 - HKDF-SHA-256 key derivation
 - AES-256-GCM authenticated encryption
 
-V1 uses HPKE base mode because authorization, broker identity, and request integrity are established separately through TLS, signed authorization, and the registered device-key relationship. HPKE context information and authenticated additional data must bind the result to the Capsule, payload, Viewer agreement key, authorization, and protocol purpose so a wrapped key cannot be replayed in another context.
+V1 uses HPKE base mode because authorization, broker identity, and request integrity are established separately through TLS, signed authorization, and the registered device-key relationship. HPKE context information and authenticated additional data bind the result to the Capsule, payload, release handle, Viewer agreement key, exact signed authorization ticket, and protocol purpose so a wrapped key cannot be replayed in another context. The exact bytes are defined by [CTX Protocol Contracts V1](../10_specifications/ctx/protocol-contracts-v1.md).
 
 The Viewer X25519 agreement private key remains non-exportable where the browser platform permits. HPKE must use an established, reviewed implementation or correctly composed platform primitives; the project must not invent a custom public-key wrapping scheme.
 

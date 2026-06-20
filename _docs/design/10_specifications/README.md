@@ -18,3 +18,4 @@ An implementation MUST satisfy every applicable requirement and published fixtur
 - [Capsule Entry Commitments V1](capsule/entry-commitments-v1.md)
 - [Static Image Content Profile V1](capsule/static-image-profile-v1.md)
 - [CTX Embedded Policy V1](ctx/policy-v1.md)
+- [CTX Protocol Contracts V1](ctx/protocol-contracts-v1.md)
