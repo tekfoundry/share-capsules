@@ -1,7 +1,7 @@
 # Share Capsules Design Documentation
 
 Status: Living documentation
-Last updated: 2026-06-19
+Last updated: 2026-06-20
 
 ## Purpose
 
@@ -19,28 +19,29 @@ These documents are living design records. They describe current direction, rati
 4. [Terminology](01_foundations/terminology.md)
 5. [Open source and sponsorship](01_foundations/open-source-and-sponsorship.md)
 6. [V1 creator and viewer experience](02_product/v1-user-experience.md)
-7. [System overview](03_architecture/system-overview.md)
-8. [Accounts and identity](03_architecture/accounts-and-identity.md)
-9. [Key management](03_architecture/key-management.md)
-10. [End-to-end Capsule access and data flow](03_architecture/access-and-data-flow.md)
-11. [Compatible Host contract](03_architecture/compatible-host.md)
-12. [Share Capsules reference implementation](03_architecture/share-capsules-reference-implementation.md)
-13. [CTX trust model](05_ctx/trust-model.md)
-14. [V1 trust profile and retained state](05_ctx/trust-profile-v1.md)
-15. [CTX policy model](05_ctx/policy-model.md)
-16. [CTX authorization and key release](05_ctx/authorization-and-key-release.md)
-17. [V1 automation risk](05_ctx/automation-risk.md)
-18. [Reputation and signals](05_ctx/reputation-and-signals.md)
-19. [Human confidence](05_ctx/human-confidence.md)
-20. [Browser Viewer](06_viewer/browser-viewer.md)
-21. [Viewer content profiles](06_viewer/content-profiles.md)
-22. [Viewer fallback and assurance](06_viewer/fallback-and-assurance.md)
-23. [Privacy model](07_security-and-privacy/privacy-model.md)
-24. [Identity and device verification](07_security-and-privacy/identity-and-device-verification.md)
-25. [V1 threat model](07_security-and-privacy/threat-model-v1.md)
-26. [V1 cryptographic suite](07_security-and-privacy/cryptographic-suite-v1.md)
-27. [Open questions](09_planning/open-questions.md)
-28. [Capsule Manifest V1 specification](10_specifications/capsule/manifest-v1.md)
+7. [Visual design](02_product/visual-design.md)
+8. [System overview](03_architecture/system-overview.md)
+9. [Accounts and identity](03_architecture/accounts-and-identity.md)
+10. [Key management](03_architecture/key-management.md)
+11. [End-to-end Capsule access and data flow](03_architecture/access-and-data-flow.md)
+12. [Compatible Host contract](03_architecture/compatible-host.md)
+13. [Share Capsules reference implementation](03_architecture/share-capsules-reference-implementation.md)
+14. [CTX trust model](05_ctx/trust-model.md)
+15. [V1 trust profile and retained state](05_ctx/trust-profile-v1.md)
+16. [CTX policy model](05_ctx/policy-model.md)
+17. [CTX authorization and key release](05_ctx/authorization-and-key-release.md)
+18. [V1 automation risk](05_ctx/automation-risk.md)
+19. [Reputation and signals](05_ctx/reputation-and-signals.md)
+20. [Human confidence](05_ctx/human-confidence.md)
+21. [Browser Viewer](06_viewer/browser-viewer.md)
+22. [Viewer content profiles](06_viewer/content-profiles.md)
+23. [Viewer fallback and assurance](06_viewer/fallback-and-assurance.md)
+24. [Privacy model](07_security-and-privacy/privacy-model.md)
+25. [Identity and device verification](07_security-and-privacy/identity-and-device-verification.md)
+26. [V1 threat model](07_security-and-privacy/threat-model-v1.md)
+27. [V1 cryptographic suite](07_security-and-privacy/cryptographic-suite-v1.md)
+28. [Open questions](09_planning/open-questions.md)
+29. [Capsule Manifest V1 specification](10_specifications/capsule/manifest-v1.md)
 
 ## Documentation structure
 

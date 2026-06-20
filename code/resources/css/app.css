@@ -7,4 +7,38 @@
     --font-sans:
         'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
         'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+    --color-canvas: #f6f8fc;
+    --color-surface: #fbfcfe;
+    --color-ink: #101c35;
+    --color-muted: #5f6c82;
+    --color-line: #dbe2ec;
+    --color-brand: #1769c2;
+    --color-brand-strong: #0d4f99;
+    --color-artifact: #0b1730;
+    --color-artifact-line: #263758;
+
+    --shadow-card: 0 1px 2px rgb(15 23 42 / 0.03), 0 10px 28px rgb(15 23 42 / 0.05);
+}
+
+@layer base {
+    :focus-visible {
+        outline-color: var(--color-brand);
+    }
+
+    ::selection {
+        background: color-mix(in srgb, var(--color-brand) 22%, white);
+        color: var(--color-ink);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            scroll-behavior: auto !important;
+            transition-duration: 0.01ms !important;
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+        }
+    }
 }
