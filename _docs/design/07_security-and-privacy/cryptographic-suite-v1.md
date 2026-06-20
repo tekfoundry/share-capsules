@@ -1,13 +1,13 @@
 # V1 Cryptographic Suite
 
-Status: Draft
-Last updated: 2026-06-19
+Status: Accepted
+Last updated: 2026-06-20
 
 ## Purpose
 
 Define the selected cryptographic building blocks and downgrade boundaries for the V1 Capsule and Share Capsules reference implementation.
 
-This document captures design intent. Exact byte encodings, labels, test vectors, and conformance requirements belong in the future normative specifications.
+This document captures design intent. The exact suite identifier, primitive mapping, parameters, and downgrade behavior are defined by the [Capsule Cryptographic Suite V1 specification](../10_specifications/capsule/cryptographic-suite-v1.md). Operation-specific byte encodings, labels, and test vectors belong in their respective normative specifications.
 
 ## One named suite
 

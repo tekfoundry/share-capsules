@@ -74,6 +74,7 @@ A format `1.0` reader MUST reject any other `format_version`, unknown required f
 ## Related documents
 
 - [Capsule design intent](../../04_capsule/design-intent.md)
-- [V1 cryptographic suite](../../07_security-and-privacy/cryptographic-suite-v1.md)
+- [Capsule Cryptographic Suite V1](cryptographic-suite-v1.md)
+- [V1 cryptographic design intent](../../07_security-and-privacy/cryptographic-suite-v1.md)
 - [CTX policy model](../../05_ctx/policy-model.md)
 - [Viewer content profiles](../../06_viewer/content-profiles.md)

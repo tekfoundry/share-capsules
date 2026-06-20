@@ -75,7 +75,7 @@ Completion evidence recorded on 2026-06-20:
 Objective: implement the stable, provider-aware contracts before building product workflows around them.
 
 - ✅ Define the V1 Capsule manifest schema, restricted payload identifier rules, ZIP entry allowlist, and exact version fields.
-- ⬜️ Define the named V1 cryptographic suite identifiers and reject unknown or downgraded suites.
+- ✅ Define the named V1 cryptographic suite identifiers and reject unknown or downgraded suites.
 - ⬜️ Implement RFC 8785 JSON Canonicalization and detached Ed25519 manifest signing and verification.
 - ⬜️ Implement AES-256-GCM whole-payload encryption with the accepted nonce, tag, and associated-data bindings.
 - ⬜️ Implement SHA-256 entry commitments and strict actual-versus-declared validation.
@@ -293,3 +293,4 @@ The following do not block planning but may require implementation evidence or l
 - Containerized Vite must distinguish its internal bind address from the browser-facing origin and HMR port. Emitting `0.0.0.0:<container-port>` into Laravel pages produces an unstyled page even though Vite itself is healthy.
 - Health endpoints should be registered outside the web middleware group so orchestration probes do not create sessions, CSRF state, or cookies.
 - CI-oriented container commands should use non-interactive `docker compose exec -T`; inherited pseudo-terminals can keep an unattended aggregate check open after the child command finishes.
+- Workspace consumer tests resolve package exports from compiled `dist` output, so TypeScript compilation must complete before those tests run; launching build and consumer tests concurrently can exercise stale exports.

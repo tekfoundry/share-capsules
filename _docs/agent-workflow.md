@@ -293,6 +293,7 @@ Before archiving a plan, confirm all of the following:
 A task is done when:
 
 - The implementation matches the accepted design intent.
+- Automated tests lock down each implemented, testable design requirement and meaningful failure path.
 - Relevant verification has been run, or any gaps are explicitly documented.
 - The active plan document reflects the final state of the work.
 - Durable design knowledge has been promoted into `_docs/design` when the work is complete.

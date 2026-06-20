@@ -141,6 +141,8 @@ Dependency direction should point toward domain contracts. A domain rule must no
 
 ## Testing standards
 
+- Every accepted, testable design requirement implemented in code must have an automated test that would fail if the requirement were removed or weakened. Document the reason when a requirement cannot be tested automatically.
+- Name tests for the behavior or invariant they protect so the suite remains readable as an executable design contract.
 - Test observable behavior and invariants rather than private implementation details.
 - Add positive, boundary, malformed, unsupported, tampered, and downgrade cases for protocol and cryptographic code.
 - Use deterministic fixtures, clocks, randomness substitutes, and published test vectors where reproducibility matters.

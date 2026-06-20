@@ -12,3 +12,4 @@ An implementation MUST satisfy every applicable requirement and published fixtur
 ## Specifications
 
 - [Capsule Manifest V1](capsule/manifest-v1.md)
+- [Capsule Cryptographic Suite V1](capsule/cryptographic-suite-v1.md)

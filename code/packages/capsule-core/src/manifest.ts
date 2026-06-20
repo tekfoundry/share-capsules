@@ -1,11 +1,11 @@
 import Ajv2020, { type ErrorObject } from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 
+import { CAPSULE_SUITE_ID, MANIFEST_SIGNATURE_ALGORITHM_ID } from './cryptographic-suite.js';
 import manifestSchema from './schema/capsule-manifest-v1.schema.json' with { type: 'json' };
 
 export const CAPSULE_MANIFEST_TYPE = 'capsule-manifest' as const;
 export const CAPSULE_FORMAT_VERSION = '1.0' as const;
-export const CAPSULE_SUITE_ID = 'ctx-capsule-v1' as const;
 export const STATIC_IMAGE_PROFILE_ID = 'ctx.content.static-image' as const;
 export const STATIC_IMAGE_PROFILE_VERSION = '1.0' as const;
 
@@ -51,7 +51,7 @@ export interface CapsuleManifestV1 {
     creator: {
         signing_key: {
             id: string;
-            algorithm: 'Ed25519';
+            algorithm: typeof MANIFEST_SIGNATURE_ALGORITHM_ID;
             public_key: string;
         };
     };
