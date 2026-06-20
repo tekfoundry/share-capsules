@@ -230,6 +230,8 @@ The envelope contains no free-form detail, account identifier, score, threshold,
 
 The provider-neutral reference validators and HPKE context builders are exported by [`ctx-client`](../../../../code/packages/ctx-client/src/index.ts). Positive and negative contract tests are maintained in [`contracts-v1.test.ts`](../../../../code/packages/test-fixtures/src/ctx/contracts-v1.test.ts).
 
+Exact CTX ticket, context, and HPKE outputs are published in [Cryptographic and Canonicalization Vectors V1](../fixtures/cryptographic-vectors-v1.md).
+
 ## Standards references
 
 - [RFC 7519: JSON Web Token](https://www.rfc-editor.org/rfc/rfc7519)

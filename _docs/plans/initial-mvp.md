@@ -83,13 +83,21 @@ Objective: implement the stable, provider-aware contracts before building produc
 - ✅ Define structured embedded policy JSON with the single V1 `all` combiner and stable predicate identifiers.
 - ✅ Define CTX issuer discovery, broker discovery, ticket claims, DPoP proof, HPKE context, and error schemas.
 - ✅ Create cross-package positive and negative fixtures for valid, malformed, tampered, oversized, downgraded, and unsupported Capsules.
-- ⬜️ Publish deterministic cryptographic and canonicalization test vectors used by PHP and TypeScript tests.
+- ✅ Publish deterministic cryptographic and canonicalization test vectors used by PHP and TypeScript tests.
 
 Success goals:
 
 - Independent PHP and TypeScript tests agree on canonical bytes, signatures, hashes, policies, ticket claims, and failure cases.
 - Unknown versions, profiles, algorithms, entries, paths, and predicates fail closed.
 - No contract assumes that Share Capsules is the only possible CTX Provider or Key Broker.
+
+Completion evidence recorded on 2026-06-20:
+
+- The language-neutral fixture catalog covers valid, malformed, tampered, oversized, downgraded, and unsupported Capsule cases across manifest, archive, signature, and entry-commitment boundaries.
+- The shared vector set fixes canonical JSON, policy, manifest, SHA-256, Ed25519, AES-256-GCM, CTX ticket, HPKE context, and project-specific HPKE outputs.
+- TypeScript reproduces every published vector and exercises fail-closed HPKE behavior using the lockfile-pinned RFC 9180 implementation.
+- PHP consumes the same JSON and independently verifies canonical-byte hashes, entry commitments, Ed25519 signatures with Sodium, and AES-256-GCM with OpenSSL.
+- Independent PHP HPKE verification remains a Phase 4 broker implementation gate because PHP does not yet have a project HPKE adapter; the vector itself is stable now.
 
 ### Phase 3 — Accounts, authentication, devices, and lifecycle
 

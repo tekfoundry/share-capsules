@@ -71,6 +71,8 @@ Automated tests MUST lock down:
 
 The Share Capsules reference tests are in [`cryptographic-suite-v1.test.ts`](../../../../code/packages/test-fixtures/src/capsule/cryptographic-suite-v1.test.ts).
 
+Exact cross-language operation outputs are published in [Cryptographic and Canonicalization Vectors V1](../fixtures/cryptographic-vectors-v1.md).
+
 ## Related specifications
 
 - [Capsule Manifest V1](manifest-v1.md)

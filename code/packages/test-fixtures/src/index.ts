@@ -16,3 +16,5 @@ export type {
     CapsuleFixtureMutation,
     CapsuleFixtureValidationLayer,
 } from './capsule/fixture-catalog-v1.js';
+
+export { cryptographicVectorsV1 } from './vectors-v1.js';

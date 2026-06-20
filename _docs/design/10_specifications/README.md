@@ -20,3 +20,4 @@ An implementation MUST satisfy every applicable requirement and published fixtur
 - [CTX Embedded Policy V1](ctx/policy-v1.md)
 - [CTX Protocol Contracts V1](ctx/protocol-contracts-v1.md)
 - [Capsule Contract Fixtures V1](fixtures/capsule-contract-fixtures-v1.md)
+- [Cryptographic and Canonicalization Vectors V1](fixtures/cryptographic-vectors-v1.md)

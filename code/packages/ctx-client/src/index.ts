@@ -57,3 +57,20 @@ export {
 } from './hpke-context.js';
 
 export type { CtxHpkeContextV1 } from './hpke-context.js';
+
+export {
+    CTX_CONTENT_KEY_BYTES,
+    CTX_HPKE_ENCAPSULATED_KEY_BYTES,
+    CTX_HPKE_TAG_BYTES,
+    CTX_X25519_KEY_BYTES,
+    CtxHpkeError,
+    deriveCtxX25519KeyPairForTest,
+    importCtxX25519PrivateKey,
+    importCtxX25519PublicKey,
+    openCtxContentKeyV1,
+    sealCtxContentKeyV1,
+    serializeCtxX25519PrivateKey,
+    serializeCtxX25519PublicKey,
+} from './hpke.js';
+
+export type { CtxHpkeSealResultV1 } from './hpke.js';

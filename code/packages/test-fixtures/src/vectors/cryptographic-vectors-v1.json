@@ -1,0 +1,86 @@
+{
+    "vector_set": "ctx-capsule-cryptographic-vectors",
+    "version": 1,
+    "warning": "TEST-ONLY KEY MATERIAL. NEVER USE THESE KEYS OR NONCES IN PRODUCTION.",
+    "canonical_json": {
+        "input": {
+            "numbers": [333333333.3333333, 1e30, 4.5, 0.002, 1e-27, 0],
+            "text": "€\u000f\n\"\\/",
+            "z": [{ "y": 2, "x": 1 }, 3],
+            "a": true
+        },
+        "canonical_utf8": "{\"a\":true,\"numbers\":[333333333.3333333,1e+30,4.5,0.002,1e-27,0],\"text\":\"€\\u000f\\n\\\"\\\\/\",\"z\":[{\"x\":1,\"y\":2},3]}",
+        "sha256_base64url": "pf9H_SIW6t-DFBcgYKO5L1IH2-J5z-lsZgolcHTbOhk"
+    },
+    "policy": {
+        "manifest_fixture": "valid-baseline",
+        "canonical_utf8": "{\"combiner\":\"all\",\"requirements\":[{\"equals\":true,\"predicate\":\"ctx.account.email-verified\"},{\"equals\":true,\"predicate\":\"ctx.account.active\"},{\"equals\":true,\"predicate\":\"ctx.viewer.device-registered\"},{\"equals\":true,\"predicate\":\"ctx.consent.capsule-view-event\"}],\"type\":\"ctx-policy\",\"version\":1}",
+        "sha256_base64url": "ss8KdxBzjFlXvweTkGANHpk_5gghxBE4L3Oh1-mjYWw"
+    },
+    "manifest": {
+        "manifest_fixture": "valid-baseline",
+        "canonical_utf8": "{\"capsule\":{\"created_at\":\"2026-06-20T12:00:00Z\",\"id\":\"urn:uuid:018f4c3a-7b9d-4f2a-8c61-7a6e84e5a913\",\"revision\":1},\"content_profile\":{\"id\":\"ctx.content.static-image\",\"version\":\"1.0\"},\"creator\":{\"signing_key\":{\"algorithm\":\"Ed25519\",\"id\":\"creator-key-0001\",\"public_key\":\"11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo\"}},\"cryptographic_suite\":\"ctx-capsule-v1\",\"ctx\":{\"issuer\":\"https://sharecapsules.com\"},\"description\":{\"creator_display_name\":\"Reference Creator\",\"title\":\"Reference artwork\"},\"format_version\":\"1.0\",\"payloads\":[{\"ciphertext_sha256\":\"RdV7SebcGxc5QwpLazV2-Vvq46K9ZqcgVUqNEuJhXNQ\",\"ciphertext_size\":1040,\"encryption\":{\"nonce\":\"AAAAAAAAAAAAAAAA\",\"representation\":\"whole\"},\"id\":\"primary\",\"key_release\":{\"broker\":\"https://broker.sharecapsules.com\",\"handle\":\"release-handle-0001\"},\"media_type\":\"image/png\",\"path\":\"payloads/primary.enc\",\"plaintext_size\":1024,\"profile_metadata\":{\"height\":16,\"pixel_count\":256,\"width\":16}}],\"policy\":{\"combiner\":\"all\",\"requirements\":[{\"equals\":true,\"predicate\":\"ctx.account.email-verified\"},{\"equals\":true,\"predicate\":\"ctx.account.active\"},{\"equals\":true,\"predicate\":\"ctx.viewer.device-registered\"},{\"equals\":true,\"predicate\":\"ctx.consent.capsule-view-event\"}],\"type\":\"ctx-policy\",\"version\":1},\"type\":\"capsule-manifest\"}",
+        "sha256_base64url": "MmPo0uOFyUzoCV0vfdqim0-NEBcN2X3psILlX4gDj5E",
+        "ed25519": {
+            "private_seed_hex": "9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60",
+            "public_key_hex": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+            "signature_hex": "2a52492548c44143ee10dacaa3f2d9c8e32e2dbf382f5a8daa406b371456342b6e3c3890b4868dff2ed293887c86b515f7bc9e8abd1c6d599eb16743d5ef8c02"
+        }
+    },
+    "entry_commitment": {
+        "recipe": { "type": "byte-sequence", "length": 1040, "modulus": 251 },
+        "sha256_base64url": "RdV7SebcGxc5QwpLazV2-Vvq46K9ZqcgVUqNEuJhXNQ"
+    },
+    "payload_encryption": {
+        "plaintext_recipe": { "type": "byte-sequence", "length": 32, "modulus": 251 },
+        "content_key_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+        "nonce_hex": "202122232425262728292a2b",
+        "aad_utf8": "{\"capsule\":{\"id\":\"urn:uuid:018f4c3a-7b9d-4f2a-8c61-7a6e84e5a913\",\"revision\":1},\"content_profile\":{\"id\":\"ctx.content.static-image\",\"version\":\"1.0\"},\"cryptographic_suite\":\"ctx-capsule-v1\",\"payload\":{\"id\":\"primary\",\"media_type\":\"image/png\",\"path\":\"payloads/primary.enc\",\"plaintext_size\":32},\"type\":\"ctx-capsule-payload-aad\",\"version\":\"1.0\"}",
+        "ciphertext_hex": "d23ba473689d1c09127548c5cd15faf6c058fe8f939575f974ef7609559740164eb7ffa7750c098d9d20a457fd245994"
+    },
+    "ticket": {
+        "header": {
+            "typ": "ctx-key-release+jwt",
+            "alg": "EdDSA",
+            "kid": "provider-key-0001"
+        },
+        "claims": {
+            "iss": "https://sharecapsules.com",
+            "aud": "https://broker.sharecapsules.com",
+            "jti": "ticket-vector-0001",
+            "iat": 1750000000,
+            "nbf": 1750000000,
+            "exp": 1750000060,
+            "ctx": {
+                "version": 1,
+                "capsule_id": "urn:uuid:018f4c3a-7b9d-4f2a-8c61-7a6e84e5a913",
+                "capsule_revision": 1,
+                "policy_sha256": "ss8KdxBzjFlXvweTkGANHpk_5gghxBE4L3Oh1-mjYWw",
+                "payload_id": "primary",
+                "release_handle": "release-handle-0001",
+                "action": "render",
+                "cryptographic_suite": "ctx-capsule-v1",
+                "proof_jkt": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+                "agreement_jkt": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+            }
+        },
+        "signing_input_ascii": "eyJ0eXAiOiJjdHgta2V5LXJlbGVhc2Urand0IiwiYWxnIjoiRWREU0EiLCJraWQiOiJwcm92aWRlci1rZXktMDAwMSJ9.eyJpc3MiOiJodHRwczovL3NoYXJlY2Fwc3VsZXMuY29tIiwiYXVkIjoiaHR0cHM6Ly9icm9rZXIuc2hhcmVjYXBzdWxlcy5jb20iLCJqdGkiOiJ0aWNrZXQtdmVjdG9yLTAwMDEiLCJpYXQiOjE3NTAwMDAwMDAsIm5iZiI6MTc1MDAwMDAwMCwiZXhwIjoxNzUwMDAwMDYwLCJjdHgiOnsidmVyc2lvbiI6MSwiY2Fwc3VsZV9pZCI6InVybjp1dWlkOjAxOGY0YzNhLTdiOWQtNGYyYS04YzYxLTdhNmU4NGU1YTkxMyIsImNhcHN1bGVfcmV2aXNpb24iOjEsInBvbGljeV9zaGEyNTYiOiJzczhLZHhCempGbFh2d2VUa0dBTkhwa181Z2doeEJFNEwzT2gxLW1qWVd3IiwicGF5bG9hZF9pZCI6InByaW1hcnkiLCJyZWxlYXNlX2hhbmRsZSI6InJlbGVhc2UtaGFuZGxlLTAwMDEiLCJhY3Rpb24iOiJyZW5kZXIiLCJjcnlwdG9ncmFwaGljX3N1aXRlIjoiY3R4LWNhcHN1bGUtdjEiLCJwcm9vZl9qa3QiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBIiwiYWdyZWVtZW50X2prdCI6IkFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUEifX0",
+        "signature_hex": "9e24e475c4272856291b806e87954b751fdbd01ff31f92eda55340fb9d200a5d2e31d29dddf75cebd6cea93fcb86c4539aaad29ab39b98039bfe396472b8980d",
+        "compact": "eyJ0eXAiOiJjdHgta2V5LXJlbGVhc2Urand0IiwiYWxnIjoiRWREU0EiLCJraWQiOiJwcm92aWRlci1rZXktMDAwMSJ9.eyJpc3MiOiJodHRwczovL3NoYXJlY2Fwc3VsZXMuY29tIiwiYXVkIjoiaHR0cHM6Ly9icm9rZXIuc2hhcmVjYXBzdWxlcy5jb20iLCJqdGkiOiJ0aWNrZXQtdmVjdG9yLTAwMDEiLCJpYXQiOjE3NTAwMDAwMDAsIm5iZiI6MTc1MDAwMDAwMCwiZXhwIjoxNzUwMDAwMDYwLCJjdHgiOnsidmVyc2lvbiI6MSwiY2Fwc3VsZV9pZCI6InVybjp1dWlkOjAxOGY0YzNhLTdiOWQtNGYyYS04YzYxLTdhNmU4NGU1YTkxMyIsImNhcHN1bGVfcmV2aXNpb24iOjEsInBvbGljeV9zaGEyNTYiOiJzczhLZHhCempGbFh2d2VUa0dBTkhwa181Z2doeEJFNEwzT2gxLW1qWVd3IiwicGF5bG9hZF9pZCI6InByaW1hcnkiLCJyZWxlYXNlX2hhbmRsZSI6InJlbGVhc2UtaGFuZGxlLTAwMDEiLCJhY3Rpb24iOiJyZW5kZXIiLCJjcnlwdG9ncmFwaGljX3N1aXRlIjoiY3R4LWNhcHN1bGUtdjEiLCJwcm9vZl9qa3QiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBIiwiYWdyZWVtZW50X2prdCI6IkFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUEifX0.niTkdcQnKFYpG4Buh5VLdR_b0B_zH5LtpVNA-50gCl0uMdKd3fdc69bOqT_LhsRTmqrSmrObmAOb_jlkcriYDQ"
+    },
+    "hpke_key_release": {
+        "mode": 0,
+        "kem_id": 32,
+        "kdf_id": 1,
+        "aead_id": 2,
+        "recipient_ikm_hex": "404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f",
+        "recipient_private_key_hex": "5f661a2f70e4407ce264c6ec792b13faf122b0731108afe887d2a7994387d421",
+        "recipient_public_key_hex": "b259f6ee92dcba0111850b13b3f6dccc827726f9b08235ab62922b6b3f3f2a19",
+        "ephemeral_ikm_hex": "808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f",
+        "content_key_hex": "c0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedf",
+        "info_hex": "4354582d4b65792d52656c656173652d48504b452d7631007b22616374696f6e223a2272656e646572222c2261677265656d656e745f6a6b74223a2241414141414141414141414141414141414141414141414141414141414141414141414141414141414141222c2262726f6b6572223a2268747470733a2f2f62726f6b65722e736861726563617073756c65732e636f6d222c2263617073756c655f6964223a2275726e3a757569643a30313866346333612d376239642d346632612d386336312d376136653834653561393133222c2263617073756c655f7265766973696f6e223a312c2263727970746f677261706869635f7375697465223a226374782d63617073756c652d7631222c227061796c6f61645f6964223a227072696d617279222c2272656c656173655f68616e646c65223a2272656c656173652d68616e646c652d30303031222c227469636b65745f6a7469223a227469636b65742d766563746f722d30303031222c2274797065223a226374782d6b65792d72656c656173652d636f6e74657874222c2276657273696f6e223a317d",
+        "aad_hex": "4354582d4b65792d52656c656173652d4141442d7631007b227469636b65745f736861323536223a22575541385776724475577343475255316c59586837684969504e7231525870685136725442336651335f34227d",
+        "enc_hex": "7af03df159e2d75751c1a88eb5a9e87988f138dce7596ebda3ad7f0bb04a8734",
+        "ciphertext_hex": "7a69cad6ae966803018b5a170b63f86ab5794ce4244f0cd63aab2ae7db676d72a255b28b7710c730e75a0476ce08a954"
+    }
+}
