@@ -1,0 +1,230 @@
+{
+    "fixture_set": "ctx-capsule-contract-fixtures",
+    "version": 1,
+    "payload_recipe": {
+        "type": "byte-sequence",
+        "length": 1040,
+        "modulus": 251
+    },
+    "archive_entries": ["manifest.json", "manifest.sig", "payloads/primary.enc"],
+    "base_manifest": {
+        "type": "capsule-manifest",
+        "format_version": "1.0",
+        "capsule": {
+            "id": "urn:uuid:018f4c3a-7b9d-4f2a-8c61-7a6e84e5a913",
+            "revision": 1,
+            "created_at": "2026-06-20T12:00:00Z"
+        },
+        "cryptographic_suite": "ctx-capsule-v1",
+        "creator": {
+            "signing_key": {
+                "id": "creator-key-0001",
+                "algorithm": "Ed25519",
+                "public_key": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+        },
+        "content_profile": {
+            "id": "ctx.content.static-image",
+            "version": "1.0"
+        },
+        "description": {
+            "title": "Reference artwork",
+            "creator_display_name": "Reference Creator"
+        },
+        "policy": {
+            "type": "ctx-policy",
+            "version": 1,
+            "combiner": "all",
+            "requirements": [
+                { "predicate": "ctx.account.email-verified", "equals": true },
+                { "predicate": "ctx.account.active", "equals": true },
+                { "predicate": "ctx.viewer.device-registered", "equals": true },
+                { "predicate": "ctx.consent.capsule-view-event", "equals": true }
+            ]
+        },
+        "ctx": {
+            "issuer": "https://sharecapsules.com"
+        },
+        "payloads": [
+            {
+                "id": "primary",
+                "path": "payloads/primary.enc",
+                "media_type": "image/png",
+                "plaintext_size": 1024,
+                "ciphertext_size": 1040,
+                "ciphertext_sha256": "RdV7SebcGxc5QwpLazV2-Vvq46K9ZqcgVUqNEuJhXNQ",
+                "encryption": {
+                    "representation": "whole",
+                    "nonce": "AAAAAAAAAAAAAAAA"
+                },
+                "key_release": {
+                    "broker": "https://broker.sharecapsules.com",
+                    "handle": "release-handle-0001"
+                },
+                "profile_metadata": {
+                    "width": 16,
+                    "height": 16,
+                    "pixel_count": 256
+                }
+            }
+        ]
+    },
+    "cases": [
+        {
+            "id": "valid-baseline",
+            "classification": "valid",
+            "validation_layer": "complete-contract",
+            "expected": "accept",
+            "mutation": { "operation": "none" }
+        },
+        {
+            "id": "malformed-missing-mandatory-policy-requirement",
+            "classification": "malformed",
+            "validation_layer": "manifest",
+            "expected": "reject",
+            "mutation": { "operation": "remove", "path": "/policy/requirements/0" }
+        },
+        {
+            "id": "malformed-traversing-payload-path",
+            "classification": "malformed",
+            "validation_layer": "manifest",
+            "expected": "reject",
+            "mutation": {
+                "operation": "replace",
+                "path": "/payloads/0/path",
+                "value": "../primary.enc"
+            }
+        },
+        {
+            "id": "malformed-unknown-manifest-field",
+            "classification": "malformed",
+            "validation_layer": "manifest",
+            "expected": "reject",
+            "mutation": {
+                "operation": "add",
+                "path": "/allow_untrusted",
+                "value": true
+            }
+        },
+        {
+            "id": "malformed-duplicate-archive-entry",
+            "classification": "malformed",
+            "validation_layer": "archive",
+            "expected": "reject",
+            "mutation": {
+                "operation": "replace-archive-entries",
+                "value": [
+                    "manifest.json",
+                    "manifest.sig",
+                    "payloads/primary.enc",
+                    "payloads/primary.enc"
+                ]
+            }
+        },
+        {
+            "id": "tampered-signed-description",
+            "classification": "tampered",
+            "validation_layer": "manifest-signature",
+            "expected": "reject",
+            "mutation": {
+                "operation": "replace",
+                "path": "/description/title",
+                "value": "Tampered artwork"
+            }
+        },
+        {
+            "id": "tampered-encrypted-payload-byte",
+            "classification": "tampered",
+            "validation_layer": "entry-commitment",
+            "expected": "reject",
+            "mutation": { "operation": "xor-payload-byte", "offset": 1039, "mask": 1 }
+        },
+        {
+            "id": "oversized-encoded-payload",
+            "classification": "oversized",
+            "validation_layer": "manifest",
+            "expected": "reject",
+            "mutations": [
+                {
+                    "operation": "replace",
+                    "path": "/payloads/0/plaintext_size",
+                    "value": 26214401
+                },
+                {
+                    "operation": "replace",
+                    "path": "/payloads/0/ciphertext_size",
+                    "value": 26214417
+                }
+            ]
+        },
+        {
+            "id": "oversized-image-dimension",
+            "classification": "oversized",
+            "validation_layer": "manifest",
+            "expected": "reject",
+            "mutation": {
+                "operation": "replace",
+                "path": "/payloads/0/profile_metadata/width",
+                "value": 16385
+            }
+        },
+        {
+            "id": "downgraded-cryptographic-suite",
+            "classification": "downgraded",
+            "validation_layer": "manifest",
+            "expected": "reject",
+            "mutation": {
+                "operation": "replace",
+                "path": "/cryptographic_suite",
+                "value": "ctx-capsule-v0"
+            }
+        },
+        {
+            "id": "downgraded-signature-algorithm",
+            "classification": "downgraded",
+            "validation_layer": "manifest",
+            "expected": "reject",
+            "mutation": {
+                "operation": "replace",
+                "path": "/creator/signing_key/algorithm",
+                "value": "Ed25519ph"
+            }
+        },
+        {
+            "id": "unsupported-future-format",
+            "classification": "unsupported",
+            "validation_layer": "manifest",
+            "expected": "reject",
+            "mutation": { "operation": "replace", "path": "/format_version", "value": "2.0" }
+        },
+        {
+            "id": "unsupported-future-content-profile",
+            "classification": "unsupported",
+            "validation_layer": "manifest",
+            "expected": "reject",
+            "mutation": {
+                "operation": "replace",
+                "path": "/content_profile/version",
+                "value": "2.0"
+            }
+        },
+        {
+            "id": "unsupported-media-type",
+            "classification": "unsupported",
+            "validation_layer": "manifest",
+            "expected": "reject",
+            "mutation": {
+                "operation": "replace",
+                "path": "/payloads/0/media_type",
+                "value": "image/gif"
+            }
+        },
+        {
+            "id": "unsupported-future-policy",
+            "classification": "unsupported",
+            "validation_layer": "manifest",
+            "expected": "reject",
+            "mutation": { "operation": "replace", "path": "/policy/version", "value": 2 }
+        }
+    ]
+}

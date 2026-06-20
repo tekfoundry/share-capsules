@@ -2,8 +2,9 @@
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
         "outDir": "dist",
+        "resolveJsonModule": true,
         "rootDir": "src"
     },
-    "include": ["src/**/*.ts"],
+    "include": ["src/**/*.ts", "src/**/*.json"],
     "references": [{ "path": "../capsule-core" }, { "path": "../ctx-client" }]
 }
