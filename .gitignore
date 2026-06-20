@@ -1,0 +1,6 @@
+.DS_Store
+.idea/
+_infra/.env
+_infra/backups/
+_infra/data/*
+!_infra/data/.gitkeep

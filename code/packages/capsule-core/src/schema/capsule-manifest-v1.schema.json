@@ -1,0 +1,196 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://sharecapsules.com/specifications/capsule/manifest-v1.schema.json",
+    "title": "Capsule Manifest V1",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "type",
+        "format_version",
+        "capsule",
+        "cryptographic_suite",
+        "creator",
+        "content_profile",
+        "policy",
+        "ctx",
+        "payloads"
+    ],
+    "properties": {
+        "type": { "const": "capsule-manifest" },
+        "format_version": { "const": "1.0" },
+        "capsule": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "revision", "created_at"],
+            "properties": {
+                "id": { "$ref": "#/$defs/capsuleId" },
+                "revision": { "type": "integer", "minimum": 1, "maximum": 2147483647 },
+                "created_at": { "type": "string", "format": "date-time" },
+                "predecessor": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["id", "revision", "manifest_sha256"],
+                    "properties": {
+                        "id": { "$ref": "#/$defs/capsuleId" },
+                        "revision": { "type": "integer", "minimum": 1, "maximum": 2147483647 },
+                        "manifest_sha256": { "$ref": "#/$defs/sha256" }
+                    }
+                }
+            }
+        },
+        "cryptographic_suite": { "const": "ctx-capsule-v1" },
+        "creator": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["signing_key"],
+            "properties": {
+                "signing_key": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["id", "algorithm", "public_key"],
+                    "properties": {
+                        "id": { "$ref": "#/$defs/opaqueId" },
+                        "algorithm": { "const": "Ed25519" },
+                        "public_key": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9_-]{43}$"
+                        }
+                    }
+                }
+            }
+        },
+        "content_profile": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "version"],
+            "properties": {
+                "id": { "const": "ctx.content.static-image" },
+                "version": { "const": "1.0" }
+            }
+        },
+        "description": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+                "description": { "type": "string", "minLength": 1, "maxLength": 2000 },
+                "creator_display_name": { "type": "string", "minLength": 1, "maxLength": 200 },
+                "original_filename": { "type": "string", "minLength": 1, "maxLength": 255 }
+            },
+            "minProperties": 1
+        },
+        "policy": {
+            "type": "object",
+            "required": ["type", "version", "combiner", "requirements"],
+            "properties": {
+                "type": { "type": "string" },
+                "version": { "type": "integer" },
+                "combiner": { "type": "string" },
+                "requirements": { "type": "array" }
+            }
+        },
+        "ctx": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["issuer"],
+            "properties": {
+                "issuer": { "type": "string", "format": "uri", "maxLength": 2048 }
+            }
+        },
+        "payloads": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "id",
+                    "path",
+                    "media_type",
+                    "plaintext_size",
+                    "ciphertext_size",
+                    "ciphertext_sha256",
+                    "encryption",
+                    "key_release",
+                    "profile_metadata"
+                ],
+                "properties": {
+                    "id": { "$ref": "#/$defs/payloadId" },
+                    "path": {
+                        "type": "string",
+                        "pattern": "^payloads/[a-z][a-z0-9]*(?:-[a-z0-9]+)*\\.enc$",
+                        "maxLength": 77
+                    },
+                    "media_type": {
+                        "enum": ["image/jpeg", "image/png", "image/webp"]
+                    },
+                    "plaintext_size": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 26214400
+                    },
+                    "ciphertext_size": {
+                        "type": "integer",
+                        "minimum": 17,
+                        "maximum": 26214416
+                    },
+                    "ciphertext_sha256": { "$ref": "#/$defs/sha256" },
+                    "encryption": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": ["representation", "nonce"],
+                        "properties": {
+                            "representation": { "const": "whole" },
+                            "nonce": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9_-]{16}$"
+                            }
+                        }
+                    },
+                    "key_release": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": ["broker", "handle"],
+                        "properties": {
+                            "broker": { "type": "string", "format": "uri", "maxLength": 2048 },
+                            "handle": { "$ref": "#/$defs/opaqueId" }
+                        }
+                    },
+                    "profile_metadata": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": ["width", "height", "pixel_count"],
+                        "properties": {
+                            "width": { "type": "integer", "minimum": 1, "maximum": 16384 },
+                            "height": { "type": "integer", "minimum": 1, "maximum": 16384 },
+                            "pixel_count": { "type": "integer", "minimum": 1, "maximum": 40000000 }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "$defs": {
+        "capsuleId": {
+            "type": "string",
+            "pattern": "^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "opaqueId": {
+            "type": "string",
+            "minLength": 16,
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "payloadId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+        },
+        "sha256": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{43}$"
+        }
+    }
+}

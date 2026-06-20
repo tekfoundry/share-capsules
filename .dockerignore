@@ -1,0 +1,10 @@
+.git
+.DS_Store
+_infra/.env
+_infra/backups
+_infra/data
+code/.env
+code/node_modules
+code/public/build
+code/storage/logs
+code/vendor

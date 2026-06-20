@@ -1,0 +1,11 @@
+{
+    "name": "@sharecapsules/browser-extension",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "dependencies": {
+        "@sharecapsules/capsule-core": "*",
+        "@sharecapsules/ctx-client": "*",
+        "@sharecapsules/share-capsules-adapter": "*"
+    }
+}

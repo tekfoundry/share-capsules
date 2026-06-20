@@ -1,0 +1,212 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+script_dir="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+compose_file="$script_dir/compose.yml"
+env_file="$script_dir/.env"
+docker_bin="${DOCKER_BIN:-}"
+
+if [[ -z "$docker_bin" ]]; then
+    if command -v docker >/dev/null 2>&1; then
+        docker_bin="$(command -v docker)"
+    elif [[ -x /Applications/Docker.app/Contents/Resources/bin/docker ]]; then
+        export PATH="/Applications/Docker.app/Contents/Resources/bin:$PATH"
+        docker_bin=/Applications/Docker.app/Contents/Resources/bin/docker
+    else
+        docker_bin=docker
+    fi
+fi
+
+require_env_file() {
+    if [[ ! -f "$env_file" ]]; then
+        echo "Missing $env_file" >&2
+        echo "Copy .env.example to .env first." >&2
+        exit 1
+    fi
+}
+
+compose_cmd() {
+    "$docker_bin" compose --env-file "$env_file" -f "$compose_file" "$@"
+}
+
+load_infra_env() {
+    set -a
+    # shellcheck disable=SC1090
+    source "$env_file"
+    set +a
+}
+
+run_in_code() {
+    local quoted=()
+    local arg=""
+
+    for arg in "$@"; do
+        quoted+=("$(printf '%q' "$arg")")
+    done
+
+    compose_cmd exec app bash -lc "cd /workspace/code && ${quoted[*]}"
+}
+
+run_in_code_no_tty() {
+    local quoted=()
+    local arg=""
+
+    for arg in "$@"; do
+        quoted+=("$(printf '%q' "$arg")")
+    done
+
+    compose_cmd exec -T app bash -lc "cd /workspace/code && ${quoted[*]}"
+}
+
+validate_database_name() {
+    local database_name="$1"
+    local label="$2"
+
+    if [[ -z "$database_name" ]] || [[ ! "$database_name" =~ ^[A-Za-z0-9_]+$ ]]; then
+        echo "$label must use only letters, numbers, and underscores." >&2
+        exit 1
+    fi
+}
+
+doctor() {
+    local failures=0
+
+    echo "Share Capsules infrastructure doctor"
+    echo
+
+    for required_file in "$env_file" "$compose_file" "$script_dir/docker/app/Dockerfile" "$script_dir/../code/.env"; do
+        if [[ -f "$required_file" ]]; then
+            echo "[ok] ${required_file#$script_dir/../}"
+        else
+            echo "[fail] missing $required_file"
+            failures=1
+        fi
+    done
+
+    if [[ -x "$docker_bin" ]] || command -v "$docker_bin" >/dev/null 2>&1; then
+        echo "[ok] docker command available: $docker_bin"
+    else
+        echo "[fail] docker command not found"
+        failures=1
+    fi
+
+    if [[ -f "$env_file" ]] && compose_cmd config --quiet; then
+        echo "[ok] Docker Compose configuration renders"
+    else
+        echo "[fail] Docker Compose configuration did not render"
+        failures=1
+    fi
+
+    if "$docker_bin" info >/dev/null 2>&1; then
+        echo "[ok] Docker daemon reachable"
+    else
+        echo "[warn] Docker daemon not reachable"
+    fi
+
+    if [[ "$failures" -ne 0 ]]; then
+        exit 1
+    fi
+}
+
+test_command() {
+    require_env_file
+    load_infra_env
+
+    local dev_database="${MYSQL_DATABASE:-}"
+    local test_database="${MYSQL_TEST_DATABASE:-}"
+
+    validate_database_name "$dev_database" "MYSQL_DATABASE"
+    validate_database_name "$test_database" "MYSQL_TEST_DATABASE"
+
+    if [[ "$dev_database" == "$test_database" ]]; then
+        echo "Refusing to run tests: MYSQL_TEST_DATABASE matches MYSQL_DATABASE." >&2
+        exit 1
+    fi
+
+    compose_cmd up -d app >/dev/null
+    compose_cmd exec -T -e MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql \
+        mysql -h127.0.0.1 -uroot \
+        -e "DROP DATABASE IF EXISTS \`$test_database\`; CREATE DATABASE \`$test_database\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL PRIVILEGES ON \`$test_database\`.* TO '$MYSQL_USER'@'%'; FLUSH PRIVILEGES;"
+
+    compose_cmd exec -T \
+        -e APP_ENV=testing \
+        -e DB_CONNECTION=mysql \
+        -e DB_HOST=mysql \
+        -e DB_PORT=3306 \
+        -e DB_DATABASE="$test_database" \
+        -e DB_USERNAME="$MYSQL_USER" \
+        -e DB_PASSWORD="$MYSQL_PASSWORD" \
+        app php artisan test "$@"
+}
+
+check_command() {
+    require_env_file
+
+    compose_cmd up -d --wait --wait-timeout 180 app
+    run_in_code_no_tty composer validate --strict
+    run_in_code_no_tty composer lint
+    run_in_code_no_tty npm run typecheck
+    run_in_code_no_tty npm run lint
+    run_in_code_no_tty npm run test:ts
+    run_in_code_no_tty npm run format:check
+    run_in_code_no_tty npm run build
+    test_command
+    compose_cmd exec -T app curl --fail --silent --show-error http://127.0.0.1:3000/up
+    echo
+}
+
+service_lifecycle() {
+    local service_name="$1"
+    local action="${2:-}"
+
+    case "$action" in
+        up) compose_cmd --profile "$service_name" up -d --build "$service_name" ;;
+        down) compose_cmd stop "$service_name" ;;
+        logs) compose_cmd logs -f "$service_name" ;;
+        *) echo "Usage: ./kit $service_name <up|down|logs>" >&2; exit 1 ;;
+    esac
+}
+
+subcommand="${1:-help}"
+if [[ "$#" -gt 0 ]]; then shift; fi
+
+case "$subcommand" in
+    up) require_env_file; compose_cmd up -d --build --wait --wait-timeout 180 "$@" ;;
+    down) require_env_file; compose_cmd down "$@" ;;
+    restart) require_env_file; compose_cmd restart "$@" ;;
+    ps) require_env_file; compose_cmd ps "$@" ;;
+    logs) require_env_file; compose_cmd logs -f "$@" ;;
+    shell) require_env_file; compose_cmd exec "${1:-app}" bash ;;
+    artisan) require_env_file; run_in_code php artisan "$@" ;;
+    composer) require_env_file; run_in_code composer "$@" ;;
+    npm) require_env_file; run_in_code npm "$@" ;;
+    test) test_command "$@" ;;
+    check|ci) check_command ;;
+    workers) require_env_file; service_lifecycle workers "${1:-}" ;;
+    scheduler) require_env_file; service_lifecycle scheduler "${1:-}" ;;
+    doctor) doctor ;;
+    help|--help|-h)
+        cat <<'EOF'
+Usage: ./kit <command> [args]
+
+Commands:
+  up                  Build and start the app, MySQL, Redis, and Mailpit
+  down                Stop and remove the local stack
+  restart             Restart running services
+  ps                  Show container status
+  logs [service]      Follow logs
+  shell [service]     Open a container shell (default: app)
+  artisan ...         Run Laravel Artisan in the app container
+  composer ...        Run Composer in the app container
+  npm ...             Run npm in the app container
+  test ...            Recreate the dedicated MySQL test database and run tests
+  check               Run all non-browser quality gates in containers
+  ci                  Alias for check, used by continuous integration
+  workers <action>    Manage queue workers (up, down, logs)
+  scheduler <action>  Manage the Laravel scheduler (up, down, logs)
+  doctor              Validate local infrastructure prerequisites
+EOF
+        ;;
+    *) echo "Unknown command: $subcommand" >&2; exit 1 ;;
+esac

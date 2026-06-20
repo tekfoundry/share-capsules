@@ -1,0 +1,14 @@
+# Normative Specifications
+
+Status: Active experimental specifications
+Last updated: 2026-06-20
+
+This directory contains the versioned experimental contracts implemented by the Share Capsules reference implementation.
+
+The primary use case, trust model, authorization flow, privacy boundaries, and V1 threat model are now stable enough to define the first implementation contracts. These specifications use normative language for the named experimental version, while Capsule and CTX remain pre-release protocols until independent interoperability is demonstrated.
+
+An implementation MUST satisfy every applicable requirement and published fixture before claiming support for a named experimental version. A future compatibility or stabilization decision may revise these documents before declaring a public conformance program.
+
+## Specifications
+
+- [Capsule Manifest V1](capsule/manifest-v1.md)

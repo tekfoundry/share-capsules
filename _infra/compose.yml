@@ -1,0 +1,131 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: _infra/docker/app/Dockerfile
+    container_name: ${APP_NAME}-app-dev
+    restart: unless-stopped
+    working_dir: /workspace/code
+    command: bash /workspace/_infra/docker/app/start_code.sh app
+    tty: true
+    stdin_open: true
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment: &app_environment
+      COMPOSER_ALLOW_SUPERUSER: "1"
+      APP_URL: http://localhost:${LARAVEL_APP_PORT:-3003}
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${MYSQL_DATABASE}
+      DB_USERNAME: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
+      CACHE_STORE: redis
+      REDIS_CLIENT: phpredis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      VITE_DEV_SERVER_URL: http://localhost:${VITE_PORT:-5174}
+      VITE_HMR_HOST: localhost
+      VITE_HMR_CLIENT_PORT: ${VITE_PORT:-5174}
+      PHP_UPLOAD_MAX_FILESIZE: ${PHP_UPLOAD_MAX_FILESIZE:-32M}
+      PHP_POST_MAX_SIZE: ${PHP_POST_MAX_SIZE:-32M}
+      PHP_MEMORY_LIMIT: ${PHP_MEMORY_LIMIT:-512M}
+    volumes: &app_volumes
+      - ..:/workspace
+      - code_vendor:/workspace/code/vendor
+      - code_node_modules:/workspace/code/node_modules
+    ports:
+      - "${LARAVEL_APP_PORT:-3003}:3000"
+      - "${VITE_PORT:-5174}:5173"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:3000/up"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  workers:
+    build:
+      context: ..
+      dockerfile: _infra/docker/app/Dockerfile
+    container_name: ${APP_NAME}-workers-dev
+    restart: unless-stopped
+    working_dir: /workspace/code
+    command: bash /workspace/_infra/docker/app/start_code.sh workers
+    profiles: [workers]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment: *app_environment
+    volumes: *app_volumes
+
+  scheduler:
+    build:
+      context: ..
+      dockerfile: _infra/docker/app/Dockerfile
+    container_name: ${APP_NAME}-scheduler-dev
+    restart: unless-stopped
+    working_dir: /workspace/code
+    command: bash /workspace/_infra/docker/app/start_code.sh scheduler
+    profiles: [scheduler]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment: *app_environment
+    volumes: *app_volumes
+
+  mysql:
+    image: mysql:8.4
+    container_name: ${APP_NAME}-mysql-dev
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "${MYSQL_PORT:-3308}:3306"
+    volumes:
+      - ${MYSQL_DATA_DIR:-./data/mysql}:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: ${APP_NAME}-redis-dev
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "${REDIS_PORT:-6380}:6379"
+    volumes:
+      - ${REDIS_DATA_DIR:-./data/redis}:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  mailpit:
+    image: axllent/mailpit:v1.27
+    container_name: ${APP_NAME}-mailpit-dev
+    restart: unless-stopped
+    ports:
+      - "${MAILPIT_SMTP_PORT:-1026}:1025"
+      - "${MAILPIT_WEB_PORT:-8026}:8025"
+
+volumes:
+  code_vendor:
+  code_node_modules:

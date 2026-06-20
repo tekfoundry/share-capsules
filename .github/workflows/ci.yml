@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  non-browser-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Create CI environment files
+        run: |
+          cp _infra/.env.example _infra/.env
+          cp code/.env.example code/.env
+
+      - name: Run containerized checks
+        run: ./_infra/kit ci
+
+      - name: Stop containers
+        if: always()
+        run: ./_infra/kit down --volumes --remove-orphans

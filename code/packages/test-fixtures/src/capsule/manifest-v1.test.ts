@@ -1,0 +1,58 @@
+import {
+    ManifestValidationError,
+    expectedArchiveEntries,
+    isPayloadId,
+    parseCapsuleManifest,
+    validateArchiveEntryNames,
+} from '@sharecapsules/capsule-core';
+import { describe, expect, it } from 'vitest';
+
+import { validManifestV1 } from './manifest-v1.js';
+
+describe('Capsule Manifest V1', () => {
+    it('accepts the shared valid fixture and derives the exact archive allowlist', () => {
+        const manifest = parseCapsuleManifest(structuredClone(validManifestV1));
+
+        expect(expectedArchiveEntries(manifest)).toEqual([
+            'manifest.json',
+            'manifest.sig',
+            'payloads/primary.enc',
+        ]);
+    });
+
+    it.each(['../secret', '/absolute', 'Primary', 'primary.png', 'primary_name', 'a--b'])(
+        'rejects unsafe payload identifier %s',
+        (payloadId) => {
+            expect(isPayloadId(payloadId)).toBe(false);
+        },
+    );
+
+    it('rejects a payload path that is not derived from its identifier', () => {
+        const value = structuredClone(validManifestV1);
+        value.payloads[0].path = 'payloads/something-else.enc';
+
+        expect(() => parseCapsuleManifest(value)).toThrow(ManifestValidationError);
+    });
+
+    it('rejects unknown manifest fields', () => {
+        const value = {
+            ...structuredClone(validManifestV1),
+            unsigned_behavior: 'ignore-policy',
+        };
+
+        expect(() => parseCapsuleManifest(value)).toThrow(ManifestValidationError);
+    });
+
+    it('rejects duplicate, missing, and undeclared archive entries', () => {
+        const manifest = parseCapsuleManifest(structuredClone(validManifestV1));
+
+        expect(() =>
+            validateArchiveEntryNames(manifest, [
+                'manifest.json',
+                'manifest.sig',
+                'manifest.sig',
+                '../payloads/primary.enc',
+            ]),
+        ).toThrow(ManifestValidationError);
+    });
+});
