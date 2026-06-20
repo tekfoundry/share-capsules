@@ -66,7 +66,7 @@ Completion evidence recorded on 2026-06-20:
 - Docker reports the app, MySQL, Redis, and Mailpit healthy.
 - The stateless `/up` endpoint reports healthy deployment configuration, MySQL, and Redis without returning connection details or creating a session.
 - Composer validation, PHP formatting, TypeScript typecheck/lint/format, workspace linkage, and the Vite production build pass in the app container.
-- The Laravel integration suite passes 8 tests and 17 assertions against the dedicated MySQL test database and Redis.
+- The Laravel integration suite passes 6 tests and 15 assertions against the dedicated MySQL test database and Redis.
 - The checked-in CI workflow invokes the same lockfile-driven Docker topology and non-browser gates through `_infra/kit ci`.
 - The aggregate `./_infra/kit check` command passed in the developer environment.
 

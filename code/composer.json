@@ -1,13 +1,15 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "tekfoundry/share-capsules",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Share Capsules reference implementation for Capsule and CTX.",
     "keywords": [
+        "capsule",
+        "ctx",
         "laravel",
-        "framework"
+        "privacy"
     ],
-    "license": "MIT",
+    "license": "Apache-2.0",
     "require": {
         "php": "^8.3",
         "laravel/framework": "^13.8",
