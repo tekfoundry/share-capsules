@@ -59,8 +59,6 @@ export {
     CAPSULE_FORMAT_VERSION,
     CAPSULE_MANIFEST_TYPE,
     ManifestValidationError,
-    STATIC_IMAGE_PROFILE_ID,
-    STATIC_IMAGE_PROFILE_VERSION,
     expectedArchiveEntries,
     isPayloadId,
     parseCapsuleManifest,
@@ -90,3 +88,29 @@ export {
 } from './entry-commitment.js';
 
 export type { CapsuleArchiveEntryV1, DigestProvider } from './entry-commitment.js';
+
+export {
+    ContentProfileValidationError,
+    STATIC_IMAGE_MAX_DECODED_RGBA_BYTES,
+    STATIC_IMAGE_MAX_ENCODED_BYTES,
+    STATIC_IMAGE_MAX_HEIGHT,
+    STATIC_IMAGE_MAX_PIXEL_COUNT,
+    STATIC_IMAGE_MAX_WIDTH,
+    STATIC_IMAGE_MEDIA_TYPES,
+    STATIC_IMAGE_PROFILE_ID,
+    STATIC_IMAGE_PROFILE_V1,
+    STATIC_IMAGE_PROFILE_VERSION,
+    STATIC_IMAGE_RGBA_BYTES_PER_PIXEL,
+    StaticImageProfileV1,
+    UnsupportedContentProfileError,
+    isStaticImageMediaType,
+    resolveContentProfile,
+} from './content-profile.js';
+
+export type {
+    ContentProfile,
+    ContentProfileValidationIssue,
+    StaticImageMediaTypeV1,
+    StaticImageMetadataV1,
+    StaticImageProfileDeclarationV1,
+} from './content-profile.js';

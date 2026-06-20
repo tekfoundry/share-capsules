@@ -1,7 +1,7 @@
 # Viewer Content Profiles
 
-Status: Draft
-Last updated: 2026-06-19
+Status: Accepted
+Last updated: 2026-06-20
 
 ## Purpose
 
@@ -37,24 +37,21 @@ Generic Capsule code remains responsible for package parsing, manifest canonical
 
 Creator tooling should use the same versioned profile implementation, or shared profile validation library, as the Viewer so accepted creator input and Viewer behavior do not drift.
 
-## Conceptual interface
+## Shared contract
 
-The exact TypeScript API belongs in implementation design, but it should resemble this conceptual contract:
+Capsule Core defines the implemented declaration-validation boundary:
 
 ```ts
-interface ContentProfile {
-  readonly profileId: string;
-  readonly profileVersion: string;
+interface ContentProfile<TDeclaration, TMetadata> {
+  readonly id: string;
+  readonly version: string;
   readonly mediaTypes: readonly string[];
 
-  inspectForPackaging(source: Blob): Promise<ContentMetadata>;
-  validateForViewing(metadata: ContentMetadata, plaintext: Blob): Promise<void>;
-  render(metadata: ContentMetadata, plaintext: Blob, target: ViewerTarget): Promise<RenderedContent>;
-  dispose(rendered: RenderedContent): Promise<void>;
+  validateDeclaration(declaration: TDeclaration): TMetadata;
 }
 ```
 
-This example communicates separation of responsibilities; it is not yet a normative API.
+The V1 implementation returns immutable normalized signed metadata. Creator inspection, plaintext validation, rendering, and disposal remain profile responsibilities but will use browser-specific interfaces added with the Creator and Viewer implementations rather than coupling generic Capsule Core to `Blob`, DOM, or extension types.
 
 ## V1 image profile
 
@@ -68,7 +65,7 @@ The V1 image profile accepts only static:
 
 The profile validates the actual file signature and structure rather than trusting a filename extension or declared media type. SVG, GIF, APNG, animated WebP, and other animated or active image forms are unsupported in V1. A file that does not satisfy the static image profile fails closed rather than being passed to a generic browser renderer.
 
-The provisional V1 image-profile compatibility envelope is:
+The provisional V1 image-profile compatibility envelope, normatively defined by [Static Image Content Profile V1](../10_specifications/capsule/static-image-profile-v1.md), is:
 
 - Maximum encoded plaintext image size: 25 MiB (`25 * 1024 * 1024` bytes)
 - Maximum width: 16,384 pixels

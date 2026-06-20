@@ -2,13 +2,17 @@ import Ajv2020, { type ErrorObject } from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 
 import { decodeBase64Url } from './base64url.js';
+import {
+    ContentProfileValidationError,
+    STATIC_IMAGE_PROFILE_ID,
+    STATIC_IMAGE_PROFILE_V1,
+    STATIC_IMAGE_PROFILE_VERSION,
+} from './content-profile.js';
 import { CAPSULE_SUITE_ID, MANIFEST_SIGNATURE_ALGORITHM_ID } from './cryptographic-suite.js';
 import manifestSchema from './schema/capsule-manifest-v1.schema.json' with { type: 'json' };
 
 export const CAPSULE_MANIFEST_TYPE = 'capsule-manifest' as const;
 export const CAPSULE_FORMAT_VERSION = '1.0' as const;
-export const STATIC_IMAGE_PROFILE_ID = 'ctx.content.static-image' as const;
-export const STATIC_IMAGE_PROFILE_VERSION = '1.0' as const;
 
 const PAYLOAD_ID_PATTERN = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 const REQUIRED_ARCHIVE_ENTRIES = ['manifest.json', 'manifest.sig'] as const;
@@ -134,14 +138,19 @@ export function parseCapsuleManifest(value: unknown): CapsuleManifestV1 {
         });
     }
 
-    if (
-        payload.profile_metadata.pixel_count !==
-        payload.profile_metadata.width * payload.profile_metadata.height
-    ) {
-        issues.push({
-            path: '/payloads/0/profile_metadata/pixel_count',
-            message: 'must equal width multiplied by height',
+    try {
+        STATIC_IMAGE_PROFILE_V1.validateDeclaration({
+            contentProfile: value.content_profile,
+            payload,
         });
+    } catch (error) {
+        if (error instanceof ContentProfileValidationError) {
+            for (const issue of error.issues) {
+                issues.push({ path: issue.path, message: issue.message });
+            }
+        } else {
+            throw error;
+        }
     }
 
     const predecessor = value.capsule.predecessor;

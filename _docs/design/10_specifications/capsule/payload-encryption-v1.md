@@ -130,6 +130,7 @@ Reference tests are in [`payload-encryption-v1.test.ts`](../../../../code/packag
 - [Capsule Manifest V1](manifest-v1.md)
 - [Capsule Cryptographic Suite V1](cryptographic-suite-v1.md)
 - [Capsule Manifest Signature V1](manifest-signature-v1.md)
+- [Static Image Content Profile V1](static-image-profile-v1.md)
 
 ## Standards references
 

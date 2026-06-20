@@ -16,3 +16,4 @@ An implementation MUST satisfy every applicable requirement and published fixtur
 - [Capsule Manifest Signature V1](capsule/manifest-signature-v1.md)
 - [Capsule Payload Encryption V1](capsule/payload-encryption-v1.md)
 - [Capsule Entry Commitments V1](capsule/entry-commitments-v1.md)
+- [Static Image Content Profile V1](capsule/static-image-profile-v1.md)
