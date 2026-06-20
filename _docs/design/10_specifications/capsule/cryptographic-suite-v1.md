@@ -75,6 +75,7 @@ The Share Capsules reference tests are in [`cryptographic-suite-v1.test.ts`](../
 
 - [Capsule Manifest V1](manifest-v1.md)
 - [Capsule Manifest Signature V1](manifest-signature-v1.md)
+- [Capsule Payload Encryption V1](payload-encryption-v1.md)
 - [V1 cryptographic design intent](../../07_security-and-privacy/cryptographic-suite-v1.md)
 
 ## Standards references

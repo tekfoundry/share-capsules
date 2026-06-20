@@ -14,3 +14,4 @@ An implementation MUST satisfy every applicable requirement and published fixtur
 - [Capsule Manifest V1](capsule/manifest-v1.md)
 - [Capsule Cryptographic Suite V1](capsule/cryptographic-suite-v1.md)
 - [Capsule Manifest Signature V1](capsule/manifest-signature-v1.md)
+- [Capsule Payload Encryption V1](capsule/payload-encryption-v1.md)

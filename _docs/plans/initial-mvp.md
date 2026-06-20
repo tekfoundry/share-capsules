@@ -77,7 +77,7 @@ Objective: implement the stable, provider-aware contracts before building produc
 - ✅ Define the V1 Capsule manifest schema, restricted payload identifier rules, ZIP entry allowlist, and exact version fields.
 - ✅ Define the named V1 cryptographic suite identifiers and reject unknown or downgraded suites.
 - ✅ Implement RFC 8785 JSON Canonicalization and detached Ed25519 manifest signing and verification.
-- ⬜️ Implement AES-256-GCM whole-payload encryption with the accepted nonce, tag, and associated-data bindings.
+- ✅ Implement AES-256-GCM whole-payload encryption with the accepted nonce, tag, and associated-data bindings.
 - ⬜️ Implement SHA-256 entry commitments and strict actual-versus-declared validation.
 - ⬜️ Define the V1 static-image profile identifier, signed metadata, and accepted 25 MiB, 16,384-pixel-per-side, 40-megapixel, and 160 MB decoded envelope.
 - ⬜️ Define structured embedded policy JSON with the single V1 `all` combiner and stable predicate identifiers.

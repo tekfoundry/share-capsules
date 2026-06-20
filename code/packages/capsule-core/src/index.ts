@@ -34,6 +34,28 @@ export {
 export type { Ed25519CryptoProvider } from './manifest-signature.js';
 
 export {
+    PAYLOAD_AAD_TYPE,
+    PAYLOAD_AAD_VERSION,
+    PayloadEncryptionError,
+    WEB_CRYPTO_AES_GCM_ID,
+    canonicalizePayloadAssociatedData,
+    decryptAes256Gcm,
+    decryptPayloadV1,
+    encryptAes256Gcm,
+    encryptPayloadV1,
+    generatePayloadContentKey,
+    generatePayloadNonce,
+    payloadEncryptionContextFromManifest,
+} from './payload-encryption.js';
+
+export type {
+    PayloadCryptoProvider,
+    PayloadEncryptionContextV1,
+    PayloadEncryptionResultV1,
+    RandomByteFiller,
+} from './payload-encryption.js';
+
+export {
     CAPSULE_FORMAT_VERSION,
     CAPSULE_MANIFEST_TYPE,
     ManifestValidationError,

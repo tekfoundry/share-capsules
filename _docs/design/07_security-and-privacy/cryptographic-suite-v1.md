@@ -30,7 +30,7 @@ Future suites receive new identifiers and explicit compatibility rules. Supporti
 
 Every protected payload receives a new random 256-bit content key. V1 whole-payload encryption uses AES-256-GCM with a fresh 96-bit nonce and a 128-bit authentication tag.
 
-The nonce is generated randomly for the one encryption performed with that content key and stored as signed manifest metadata. Authenticated additional data must bind the ciphertext to its Capsule and payload context; the exact canonical encoding and domain-separation label will be specified and covered by test vectors.
+The nonce is generated randomly for the one encryption performed with that content key and stored as signed manifest metadata. Authenticated additional data binds the ciphertext to its Capsule, suite, profile, and payload context through the exact versioned object defined by [Capsule Payload Encryption V1](../10_specifications/capsule/payload-encryption-v1.md).
 
 A content-key and nonce combination must never be reused. Authentication failure causes the Viewer to stop without rendering partial plaintext.
 
