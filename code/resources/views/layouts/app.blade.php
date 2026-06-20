@@ -27,7 +27,7 @@
 
             <header class="border-b border-line/80 bg-white/80 backdrop-blur-xl">
                 <div class="mx-auto flex h-18 max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-10">
-                    <a href="/" class="group inline-flex items-center gap-3" aria-label="Share Capsules home">
+                    <a href="{{ route('home') }}" class="group inline-flex items-center gap-3" aria-label="Share Capsules home">
                         <span class="relative grid size-9 place-items-center rounded-xl bg-brand text-white shadow-sm shadow-brand/20 transition-transform group-hover:-translate-y-0.5">
                             <span class="h-4 w-2.5 rounded-[0.3rem] border-2 border-current border-r-0" aria-hidden="true"></span>
                         </span>
@@ -37,17 +37,29 @@
                     </a>
 
                     <nav class="hidden items-center gap-8 text-sm font-medium text-muted md:flex" aria-label="Primary navigation">
-                        <a class="transition-colors hover:text-ink" href="#approach">Approach</a>
-                        <a class="transition-colors hover:text-ink" href="#boundaries">Trust boundaries</a>
-                        <a class="transition-colors hover:text-ink" href="#project-status">Project status</a>
+                        <a class="transition-colors hover:text-ink" href="{{ route('home') }}#approach">Approach</a>
+                        <a class="transition-colors hover:text-ink" href="{{ route('home') }}#boundaries">Trust boundaries</a>
+                        <a class="transition-colors hover:text-ink" href="{{ route('home') }}#project-status">Project status</a>
                     </nav>
 
-                    <a
-                        href="#project-status"
-                        class="inline-flex min-h-10 items-center justify-center rounded-xl border border-line bg-white px-4 text-sm font-semibold text-ink shadow-sm transition hover:border-brand/30 hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-                    >
-                        Experimental V1
-                    </a>
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <a class="hidden text-xs font-semibold text-muted hover:text-ink sm:inline" href="{{ route('home') }}#project-status">Experimental V1</a>
+                        @auth
+                            <a
+                                href="{{ route('dashboard') }}"
+                                class="inline-flex min-h-10 items-center justify-center rounded-xl border border-line bg-white px-4 text-sm font-semibold text-ink shadow-sm transition hover:border-brand/30 hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                            >
+                                Account
+                            </a>
+                        @else
+                            <a
+                                href="{{ route('login') }}"
+                                class="inline-flex min-h-10 items-center justify-center rounded-xl border border-line bg-white px-4 text-sm font-semibold text-ink shadow-sm transition hover:border-brand/30 hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                            >
+                                Sign in
+                            </a>
+                        @endauth
+                    </div>
                 </div>
             </header>
 

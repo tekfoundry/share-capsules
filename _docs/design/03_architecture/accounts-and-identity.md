@@ -17,6 +17,8 @@ Creating an account requires:
 - Password
 - Acceptance of current account and privacy terms
 
+The service stores the acceptance timestamp and server-selected terms version; it does not trust a client to declare which version was accepted. V1 registration does not require a display name or public profile.
+
 The email address must be verified before the account can create Capsules, build shareable reputation, register trusted devices, or access protected content. Email verification proves control of the address; it does not prove identity, personhood, or trustworthiness.
 
 ## Account continuity, not unique personhood
@@ -44,6 +46,12 @@ Creator policy and user-facing language must describe limits as applying per Sha
 ## Authentication
 
 Passwords provide baseline authentication. V1 also supports passkeys and strongly encourages them, especially for creator accounts, but does not require one to create or view a Capsule. Passkeys are authenticators, not evidence of unique personhood or benign intent.
+
+The baseline password policy requires at least 12 characters containing uppercase and lowercase letters, a number, and a symbol. Share Capsules uses Laravel's password hashing, session authentication, password-reset tokens, signed email-verification links, notifications, CSRF protection, and rate-limiting primitives. Application code adds Share Capsules lifecycle boundaries around those primitives rather than implementing cryptography or session mechanics independently.
+
+Password-reset requests return the same public response whether or not an account exists for the submitted address. Registration, login, verification-email resend, and password-reset requests are rate limited. Successful login and registration regenerate the session identifier; logout invalidates the session and regenerates its CSRF token.
+
+Email verification gates the account dashboard and every future Capsule creation, device registration, reputation accumulation, and protected-viewing route. Authentication alone is not sufficient for these capabilities.
 
 The account model supports multiple authenticators from the beginning so a user can add more than one passkey without creating a second Share Capsules account. Mandatory passkeys, passwordless-only accounts, and policy gates based on authenticator strength are deferred until enrollment, device replacement, and recovery behavior are proven.
 

@@ -137,6 +137,10 @@ test_command() {
         -e DB_DATABASE="$test_database" \
         -e DB_USERNAME="$MYSQL_USER" \
         -e DB_PASSWORD="$MYSQL_PASSWORD" \
+        -e CACHE_STORE=array \
+        -e SESSION_DRIVER=array \
+        -e MAIL_MAILER=array \
+        -e QUEUE_CONNECTION=sync \
         app php artisan test "$@"
 }
 

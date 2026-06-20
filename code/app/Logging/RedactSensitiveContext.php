@@ -3,8 +3,9 @@
 namespace App\Logging;
 
 use Monolog\LogRecord;
+use Monolog\Processor\ProcessorInterface;
 
-final class RedactSensitiveContext
+final class RedactSensitiveContext implements ProcessorInterface
 {
     private const REDACTED = '[REDACTED]';
 

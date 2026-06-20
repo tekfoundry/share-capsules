@@ -103,15 +103,15 @@ Completion evidence recorded on 2026-06-20:
 
 Objective: provide the single Share Capsules account and device-continuity boundary required by both creator and viewer roles.
 
-- ⬜️ Implement account registration with email, password, terms acceptance, and secure password hashing.
-- ⬜️ Require email verification before Capsule creation, device registration, reputation accumulation, or protected viewing.
+- ✅ Implement account registration with email, password, terms acceptance, and secure password hashing.
+- ✅ Require email verification before Capsule creation, device registration, reputation accumulation, or protected viewing.
 - ⬜️ Implement login, logout, password reset, security notifications, session inspection, and session revocation.
 - ⬜️ Add optional passkey enrollment, multiple authenticators, inspection, and revocation without treating passkeys as personhood.
 - ⬜️ Implement OAuth Authorization Code with PKCE `S256` for the fixed extension client and exact callback.
 - ⬜️ Register one device record containing distinct Ed25519 proof and X25519 agreement public keys.
 - ⬜️ Issue short-lived, narrowly scoped, DPoP-bound access tokens and rotated refresh tokens where enabled.
 - ⬜️ Provide device inspection, naming, suspension, and revocation.
-- ⬜️ Implement signup and authentication abuse throttles without creating hidden behavioral tracking.
+- ✅ Implement signup and authentication abuse throttles without creating hidden behavioral tracking.
 - ⬜️ Implement account closure, immediate access suspension, the 30-day recovery period, Capsule inventory export, and secure restoration.
 - ⬜️ Implement permanent account deletion, removal of the detailed trust profile, and non-inheritance by replacement accounts.
 - ⬜️ Implement the restricted active-sanction tombstone and its accepted 90-day maximum; leave no tombstone for ordinary deletion.
