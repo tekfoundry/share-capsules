@@ -78,3 +78,15 @@ export {
 
 export type { JsonPrimitive, JsonValue } from './canonical-json.js';
 export { Base64UrlError, decodeBase64Url, encodeBase64Url } from './base64url.js';
+
+export {
+    EntryCommitmentError,
+    SHA256_BYTES,
+    canonicalManifestSha256,
+    sha256,
+    sha256Base64Url,
+    validateCapsuleEntryCommitments,
+    validatePayloadEntryCommitment,
+} from './entry-commitment.js';
+
+export type { CapsuleArchiveEntryV1, DigestProvider } from './entry-commitment.js';

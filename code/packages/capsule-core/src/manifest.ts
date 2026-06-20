@@ -1,6 +1,7 @@
 import Ajv2020, { type ErrorObject } from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 
+import { decodeBase64Url } from './base64url.js';
 import { CAPSULE_SUITE_ID, MANIFEST_SIGNATURE_ALGORITHM_ID } from './cryptographic-suite.js';
 import manifestSchema from './schema/capsule-manifest-v1.schema.json' with { type: 'json' };
 
@@ -110,6 +111,15 @@ export function parseCapsuleManifest(value: unknown): CapsuleManifestV1 {
     const issues: ManifestValidationIssue[] = [];
     const payload = value.payloads[0];
 
+    validateEncodedLength(
+        value.creator.signing_key.public_key,
+        32,
+        '/creator/signing_key/public_key',
+        issues,
+    );
+    validateEncodedLength(payload.ciphertext_sha256, 32, '/payloads/0/ciphertext_sha256', issues);
+    validateEncodedLength(payload.encryption.nonce, 12, '/payloads/0/encryption/nonce', issues);
+
     if (payload.path !== payloadPath(payload.id)) {
         issues.push({
             path: '/payloads/0/path',
@@ -136,6 +146,13 @@ export function parseCapsuleManifest(value: unknown): CapsuleManifestV1 {
 
     const predecessor = value.capsule.predecessor;
     if (predecessor !== undefined) {
+        validateEncodedLength(
+            predecessor.manifest_sha256,
+            32,
+            '/capsule/predecessor/manifest_sha256',
+            issues,
+        );
+
         if (predecessor.id === value.capsule.id) {
             issues.push({
                 path: '/capsule/predecessor/id',
@@ -209,4 +226,19 @@ function schemaIssues(errors: ErrorObject[] | null | undefined): ManifestValidat
         path: error.instancePath || '/',
         message: error.message ?? 'is invalid',
     }));
+}
+
+function validateEncodedLength(
+    encoded: string,
+    expectedBytes: number,
+    path: string,
+    issues: ManifestValidationIssue[],
+): void {
+    try {
+        if (decodeBase64Url(encoded).byteLength !== expectedBytes) {
+            issues.push({ path, message: `must encode exactly ${expectedBytes} bytes` });
+        }
+    } catch {
+        issues.push({ path, message: 'must use canonical unpadded base64url encoding' });
+    }
 }

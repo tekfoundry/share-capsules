@@ -42,7 +42,7 @@ The manifest identifies the signing key and suite. Verification must complete be
 
 ## Hashing
 
-SHA-256 commits the signed manifest to declared package entries and supports Capsule and payload identification according to the eventual identifier rules.
+SHA-256 commits the signed manifest to declared package entries and supports canonical predecessor-manifest commitments under [Capsule Entry Commitments V1](../10_specifications/capsule/entry-commitments-v1.md).
 
 Hashes detect package mismatch and support stable identification; they do not replace the creator signature or AES-GCM authentication.
 
