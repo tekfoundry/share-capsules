@@ -6,7 +6,7 @@
     <div class="mx-auto grid max-w-7xl gap-10 px-5 sm:px-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-center lg:px-10">
         <div>
             <a class="inline-block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand" href="https://tekfoundry.com" target="_blank" rel="noopener noreferrer">
-                <img class="h-9 w-auto sm:h-10" src="https://tekfoundry.com/imgs/tekfoundry/logo_horz_black.png" alt="TekFoundry" width="1000" height="242" loading="lazy" decoding="async">
+                <img class="h-9 w-auto sm:h-10" src="{{ asset('images/tekfoundry-logo-black.png') }}" alt="TekFoundry" width="1000" height="242" loading="lazy" decoding="async">
             </a>
             <p class="mt-5 max-w-md text-sm leading-6 text-muted">TekFoundry sponsors and currently develops the Share Capsules reference implementation.</p>
         </div>

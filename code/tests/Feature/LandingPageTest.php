@@ -56,7 +56,7 @@ final class LandingPageTest extends TestCase
             ->assertSee('not make TekFoundry the only possible provider or broker')
             ->assertSee('Built in public. Improved through scrutiny.')
             ->assertSee('href="mailto:info@tekfoundry.com?subject=Share%20Capsules%20feedback"', false)
-            ->assertSee('src="https://tekfoundry.com/imgs/tekfoundry/logo_horz_black.png"', false)
+            ->assertSee('images/tekfoundry-logo-black.png', false)
             ->assertSee('Sponsored by')
             ->assertSee('TekFoundry')
             ->assertSee('info@tekfoundry.com');
@@ -73,7 +73,7 @@ final class LandingPageTest extends TestCase
             ->assertSee('aria-label="Mobile primary navigation"', false)
             ->assertSee('aria-label="Footer navigation"', false)
             ->assertSee('id="main-content"', false)
-            ->assertSee('id="main-content" tabindex="-1"', false)
+            ->assertSee('tabindex="-1"', false)
             ->assertSee('id="problem"', false)
             ->assertSee('id="approach"', false)
             ->assertSee('id="workflow"', false)

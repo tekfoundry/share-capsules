@@ -50,7 +50,7 @@
             Skip to content
         </a>
 
-        <div class="relative isolate min-h-screen overflow-hidden">
+        <div class="relative isolate flex min-h-screen flex-col overflow-hidden">
             <div class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[34rem] bg-[radial-gradient(circle_at_75%_10%,rgba(37,99,235,0.10),transparent_35%),radial-gradient(circle_at_15%_5%,rgba(13,148,136,0.08),transparent_30%)]"></div>
 
             <header class="border-b border-line/80 bg-white/80 backdrop-blur-xl">
@@ -102,7 +102,7 @@
                 </div>
             </nav>
 
-            <main id="main-content" tabindex="-1">
+            <main id="main-content" class="flex-1" tabindex="-1">
                 @yield('content')
             </main>
 

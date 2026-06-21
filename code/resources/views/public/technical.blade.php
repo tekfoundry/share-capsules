@@ -122,7 +122,7 @@
                 <section id="design-sources" class="scroll-mt-8 border-t border-line py-20 lg:py-24">
                     <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">Design sources</p>
                     <h2 class="mt-3 text-3xl font-semibold tracking-[-0.035em]">The detailed intent remains in living Markdown.</h2>
-                    <p class="mt-5 max-w-3xl leading-7 text-muted">These are the authoritative design sources behind this overview. Repository links activate when the public source URL is configured.</p>
+                    <p class="mt-5 max-w-3xl leading-7 text-muted">These are the authoritative design sources behind this overview. Each link opens the corresponding Markdown source in the public project repository.</p>
                     <ul class="mt-7 divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">
                         @foreach ($sources as [$label, $path])
                             <li class="flex flex-col gap-2 p-5 sm:flex-row sm:items-center sm:justify-between">
