@@ -3,6 +3,11 @@
 namespace App\Account\Closure;
 
 use App\Account\Sessions\AccountSessionService;
+use App\Broker\Lifecycle\BrokerContentKeyLifecycle;
+use App\Ctx\Metrics\CtxMetricEvent;
+use App\Ctx\Metrics\CtxMetricEventType;
+use App\Ctx\Metrics\CtxMetricRecorder;
+use App\Ctx\Metrics\MetricEventIdentifierSource;
 use App\Models\User;
 use App\Models\ViewerDeviceChallenge;
 use App\Notifications\AccountClosureStarted;
@@ -11,10 +16,16 @@ use App\ViewerDevices\ViewerDeviceStatus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Laravel\Passport\Passport;
+use Throwable;
 
 final readonly class AccountClosureService
 {
-    public function __construct(private AccountSessionService $sessions) {}
+    public function __construct(
+        private AccountSessionService $sessions,
+        private BrokerContentKeyLifecycle $broker,
+        private CtxMetricRecorder $metrics,
+        private MetricEventIdentifierSource $metricIdentifiers,
+    ) {}
 
     public function close(User $user): void
     {
@@ -54,6 +65,16 @@ final readonly class AccountClosureService
         }
 
         $this->sessions->revokeAll($user);
+        try {
+            $this->broker->pauseCreator((int) $user->getKey());
+        } catch (Throwable $exception) {
+            report($exception);
+        }
+        try {
+            $this->recordReleasePause($user);
+        } catch (Throwable $exception) {
+            report($exception);
+        }
         $user->notify(new AccountClosureStarted($recoveryToken));
     }
 
@@ -93,6 +114,7 @@ final readonly class AccountClosureService
                 return false;
             }
 
+            $this->broker->resumeCreator((int) $lockedUser->getKey());
             $lockedUser->forceFill([
                 'closed_at' => null,
                 'deletion_due_at' => null,
@@ -109,6 +131,24 @@ final readonly class AccountClosureService
         }
 
         return $restored;
+    }
+
+    private function recordReleasePause(User $user): void
+    {
+        foreach ($user->brokerRegistrationGrants()
+            ->select(['capsule_id', 'capsule_revision'])
+            ->distinct()
+            ->get() as $grant) {
+            $this->metrics->record(new CtxMetricEvent(
+                eventId: $this->metricIdentifiers->identifier(),
+                type: CtxMetricEventType::ReleasePaused,
+                provider: (string) config('sharecapsules.ctx.issuer'),
+                broker: (string) config('sharecapsules.broker.base_url'),
+                capsuleId: $grant->capsule_id,
+                capsuleRevision: $grant->capsule_revision,
+                occurredAt: $user->closed_at->toImmutable(),
+            ));
+        }
     }
 
     private function revokeOAuthCredentials(User $user): void

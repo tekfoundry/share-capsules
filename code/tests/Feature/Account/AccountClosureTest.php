@@ -3,6 +3,10 @@
 namespace Tests\Feature\Account;
 
 use App\Account\Closure\AccountClosureService;
+use App\Broker\Lifecycle\BrokerContentKeyLifecycle;
+use App\Broker\Lifecycle\BrokerContentKeyLifecycleFailed;
+use App\Models\BrokerRegistrationGrant;
+use App\Models\CtxCapsuleMetricProjection;
 use App\Models\User;
 use App\Models\ViewerDevice;
 use App\Models\ViewerDeviceChallenge;
@@ -22,6 +26,7 @@ use Laravel\Passport\AuthCode;
 use Laravel\Passport\Passport;
 use Laravel\Passport\RefreshToken;
 use Laravel\Passport\Token;
+use Tests\Support\FakeBrokerContentKeyLifecycle;
 use Tests\TestCase;
 
 final class AccountClosureTest extends TestCase
@@ -47,11 +52,25 @@ final class AccountClosureTest extends TestCase
     {
         Notification::fake();
         $this->freezeTime();
+        $broker = $this->app->make(BrokerContentKeyLifecycle::class);
+        $this->assertInstanceOf(FakeBrokerContentKeyLifecycle::class, $broker);
         $user = User::factory()->create([
             'email_verified_at' => now(),
             'remember_token' => 'old-remember-token',
         ]);
         $activeDevice = $this->device($user, ViewerDeviceStatus::Active);
+        BrokerRegistrationGrant::query()->create([
+            'token_hash' => hash('sha256', 'closure-grant'),
+            'user_id' => $user->getKey(),
+            'viewer_device_id' => $activeDevice->getKey(),
+            'registration_id' => 'closure-registration',
+            'capsule_id' => 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703',
+            'capsule_revision' => 1,
+            'payload_id' => 'primary-image',
+            'policy_sha256' => str_repeat('p', 43),
+            'content_key_sha256' => str_repeat('k', 43),
+            'expires_at' => now()->addMinute(),
+        ]);
         $revokedDevice = $this->device($user, ViewerDeviceStatus::Revoked);
         [$accessToken, $refreshToken, $authCode] = $this->oauthCredentials($user, $activeDevice);
         $challenge = $this->challenge($user, $activeDevice);
@@ -80,6 +99,11 @@ final class AccountClosureTest extends TestCase
         $this->assertModelMissing($challenge);
         $this->assertDatabaseMissing('sessions', ['user_id' => $user->getKey()]);
         Notification::assertSentTo($user, AccountClosureStarted::class);
+        $this->assertContains([
+            'operation' => 'pause_creator',
+            'creator_id' => (int) $user->getKey(),
+        ], $broker->operations);
+        $this->assertSame(1, CtxCapsuleMetricProjection::query()->sole()->release_paused);
     }
 
     public function test_capsule_inventory_is_available_before_closure_and_during_recovery(): void
@@ -110,10 +134,28 @@ final class AccountClosureTest extends TestCase
             ->assertJsonPath('deletion_due_at', $user->fresh()->deletion_due_at->toIso8601String());
     }
 
+    public function test_broker_unavailability_cannot_leave_the_account_open_for_release(): void
+    {
+        Notification::fake();
+        $user = User::factory()->create(['email_verified_at' => now()]);
+        $this->mock(BrokerContentKeyLifecycle::class)
+            ->shouldReceive('pauseCreator')
+            ->once()
+            ->with((int) $user->getKey())
+            ->andThrow(new BrokerContentKeyLifecycleFailed('Broker unavailable.'));
+
+        app(AccountClosureService::class)->close($user);
+
+        $this->assertTrue($user->fresh()->isClosed());
+        Notification::assertSentTo($user, AccountClosureStarted::class);
+    }
+
     public function test_a_valid_email_link_restores_the_account_without_reviving_credentials(): void
     {
         Notification::fake();
         $user = User::factory()->create(['email_verified_at' => now()]);
+        $broker = $this->app->make(BrokerContentKeyLifecycle::class);
+        $this->assertInstanceOf(FakeBrokerContentKeyLifecycle::class, $broker);
         $device = $this->device($user, ViewerDeviceStatus::Active);
         [$accessToken, $refreshToken] = $this->oauthCredentials($user, $device);
         app(AccountClosureService::class)->close($user);
@@ -134,6 +176,10 @@ final class AccountClosureTest extends TestCase
         $this->assertTrue($accessToken->fresh()->revoked);
         $this->assertTrue($refreshToken->fresh()->revoked);
         Notification::assertSentTo($user, AccountRestored::class);
+        $this->assertContains([
+            'operation' => 'resume_creator',
+            'creator_id' => (int) $user->getKey(),
+        ], $broker->operations);
 
         $this->post($restoreUrl)->assertNotFound();
     }

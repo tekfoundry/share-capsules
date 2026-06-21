@@ -6,11 +6,30 @@ use App\Account\Closure\CapsuleInventoryRepository;
 use App\Account\Closure\EmptyCapsuleInventoryRepository;
 use App\Account\Deletion\AccountDeletionService;
 use App\Account\Deletion\AccountTrustProfileRepository;
+use App\Account\Deletion\BrokerContentKeyDeletionParticipant;
 use App\Account\Deletion\DeletionLedgerParticipant;
 use App\Account\Deletion\EmptyAccountTrustProfileRepository;
 use App\Account\Sanctions\SanctionTombstoneDeletionParticipant;
 use App\Account\Sessions\AccountSessionRepository;
 use App\Account\Sessions\DatabaseAccountSessionRepository;
+use App\Broker\Lifecycle\BrokerContentKeyLifecycle;
+use App\Broker\Lifecycle\HttpBrokerContentKeyLifecycle;
+use App\Broker\Registration\GrantSecretSource;
+use App\Broker\Registration\NativeGrantSecretSource;
+use App\Ctx\Metrics\MetricEventIdentifierSource;
+use App\Ctx\Metrics\NativeMetricEventIdentifierSource;
+use App\Ctx\Policy\AutomationRiskEvaluator;
+use App\Ctx\Policy\CommittedReleaseCounter;
+use App\Ctx\Policy\DatabaseCommittedReleaseCounter;
+use App\Ctx\Risk\AutomationRiskActivityIdentifierSource;
+use App\Ctx\Risk\NativeAutomationRiskActivityIdentifierSource;
+use App\Ctx\Risk\V1AutomationRiskEvaluator;
+use App\Ctx\SigningKeys\SodiumTicketSigningKeyGenerator;
+use App\Ctx\SigningKeys\TicketSigningKeyGenerator;
+use App\Ctx\Tickets\BrokerReleaseBindingVerifier;
+use App\Ctx\Tickets\NativeTicketIdentifierSource;
+use App\Ctx\Tickets\ReleaseBindingVerifier;
+use App\Ctx\Tickets\TicketIdentifierSource;
 use App\Models\User;
 use App\OAuth\Dpop\DpopAccessToken;
 use App\OAuth\Dpop\DpopAccessTokenRepository;
@@ -40,8 +59,24 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(AccountSessionRepository::class, DatabaseAccountSessionRepository::class);
         $this->app->bind(CapsuleInventoryRepository::class, EmptyCapsuleInventoryRepository::class);
         $this->app->bind(AccountTrustProfileRepository::class, EmptyAccountTrustProfileRepository::class);
+        $this->app->bind(TicketSigningKeyGenerator::class, SodiumTicketSigningKeyGenerator::class);
+        $this->app->bind(TicketIdentifierSource::class, NativeTicketIdentifierSource::class);
+        $this->app->bind(MetricEventIdentifierSource::class, NativeMetricEventIdentifierSource::class);
+        $this->app->bind(CommittedReleaseCounter::class, DatabaseCommittedReleaseCounter::class);
+        $this->app->bind(AutomationRiskEvaluator::class, V1AutomationRiskEvaluator::class);
+        $this->app->bind(
+            AutomationRiskActivityIdentifierSource::class,
+            NativeAutomationRiskActivityIdentifierSource::class,
+        );
+        $this->app->bind(ReleaseBindingVerifier::class, BrokerReleaseBindingVerifier::class);
+        $this->app->bind(GrantSecretSource::class, NativeGrantSecretSource::class);
+        $this->app->bind(BrokerContentKeyLifecycle::class, HttpBrokerContentKeyLifecycle::class);
         $this->app->tag(
-            [SanctionTombstoneDeletionParticipant::class, DeletionLedgerParticipant::class],
+            [
+                BrokerContentKeyDeletionParticipant::class,
+                SanctionTombstoneDeletionParticipant::class,
+                DeletionLedgerParticipant::class,
+            ],
             'account-deletion-participants',
         );
         $this->app->when(AccountDeletionService::class)
@@ -87,6 +122,15 @@ class AppServiceProvider extends ServiceProvider
             ->by($request->ip()));
 
         RateLimiter::for('device-registration', fn (Request $request): Limit => Limit::perMinute(10)
+            ->by(($request->user()?->getAuthIdentifier() ?? 'guest').'|'.$request->ip()));
+
+        RateLimiter::for('broker-registration-grants', fn (Request $request): Limit => Limit::perMinute(20)
+            ->by(($request->user()?->getAuthIdentifier() ?? 'guest').'|'.$request->ip()));
+
+        RateLimiter::for('broker-callback', fn (Request $request): Limit => Limit::perMinute(120)
+            ->by($request->ip()));
+
+        RateLimiter::for('ctx-authorize', fn (Request $request): Limit => Limit::perMinute(30)
             ->by(($request->user()?->getAuthIdentifier() ?? 'guest').'|'.$request->ip()));
 
         RateLimiter::for('account-closure', fn (Request $request): Limit => Limit::perHour(3)

@@ -38,6 +38,9 @@ services:
       PHP_UPLOAD_MAX_FILESIZE: ${PHP_UPLOAD_MAX_FILESIZE:-32M}
       PHP_POST_MAX_SIZE: ${PHP_POST_MAX_SIZE:-32M}
       PHP_MEMORY_LIMIT: ${PHP_MEMORY_LIMIT:-512M}
+      SHARECAPSULES_COMPONENT: control-plane
+      SHARECAPSULES_BROKER_CONTROL_PLANE_TOKEN: ${BROKER_CONTROL_PLANE_TOKEN}
+      SHARECAPSULES_BROKER_CALLBACK_TOKEN: ${BROKER_CALLBACK_TOKEN:-dev-broker-callback-token-0001-safe-change-me}
     volumes: &app_volumes
       - ..:/workspace
       - code_vendor:/workspace/code/vendor
@@ -85,6 +88,55 @@ services:
         condition: service_healthy
     environment: *app_environment
     volumes: *app_volumes
+
+  broker:
+    build:
+      context: ..
+      dockerfile: _infra/docker/app/Dockerfile
+    container_name: ${APP_NAME}-broker-dev
+    restart: unless-stopped
+    working_dir: /workspace/code
+    command: bash /workspace/_infra/docker/app/start_code.sh broker
+    profiles: [broker]
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      APP_ENV: local
+      APP_KEY: ${BROKER_APP_KEY}
+      APP_DEBUG: "false"
+      APP_URL: http://localhost:${BROKER_PORT:-3004}
+      LOG_CHANNEL: json_stderr
+      SHARECAPSULES_COMPONENT: broker
+      SHARECAPSULES_ENVIRONMENT: development
+      SHARECAPSULES_DEPLOYMENT_ID: local-broker
+      SHARECAPSULES_BROKER_URL: http://localhost:${BROKER_PORT:-3004}
+      SHARECAPSULES_BROKER_CONTROL_PLANE_TOKEN: ${BROKER_CONTROL_PLANE_TOKEN}
+      SHARECAPSULES_BROKER_CALLBACK_TOKEN: ${BROKER_CALLBACK_TOKEN:-dev-broker-callback-token-0001-safe-change-me}
+      SHARECAPSULES_CONTROL_PLANE_INTERNAL_URL: http://app:3000
+      SHARECAPSULES_CTX_ISSUER: http://localhost:${LARAVEL_APP_PORT:-3003}
+      SHARECAPSULES_CTX_INTERNAL_URL: http://app:3000
+      SHARECAPSULES_BROKER_AUDIT_CHANNEL: broker_audit
+      BROKER_KMS_DRIVER: local
+      BROKER_KMS_KEY_ID: local-development-key-0001
+      BROKER_LOCAL_KMS_KEY: ${BROKER_LOCAL_KMS_KEY}
+      DB_CONNECTION: broker
+      BROKER_DB_HOST: mysql
+      BROKER_DB_PORT: 3306
+      BROKER_DB_DATABASE: ${BROKER_MYSQL_DATABASE}
+      BROKER_DB_USERNAME: ${BROKER_MYSQL_USER}
+      BROKER_DB_PASSWORD: ${BROKER_MYSQL_PASSWORD}
+    volumes:
+      - ..:/workspace
+      - code_vendor:/workspace/code/vendor
+    ports:
+      - "${BROKER_PORT:-3004}:3000"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:3000/up"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
 
   mysql:
     image: mysql:8.4

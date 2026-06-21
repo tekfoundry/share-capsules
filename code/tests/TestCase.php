@@ -2,17 +2,40 @@
 
 namespace Tests;
 
+use App\Broker\Lifecycle\BrokerContentKeyLifecycle;
+use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\File;
 use Laravel\Passport\Passport;
 use RuntimeException;
+use Tests\Support\FakeBrokerContentKeyLifecycle;
+use Tests\Support\TestDatabaseGuard;
 
 abstract class TestCase extends BaseTestCase
 {
+    public function createApplication(): Application
+    {
+        /** @var Application $application */
+        $application = parent::createApplication();
+        $configuration = $application->make('config');
+        $connection = (string) $configuration->get('database.default');
+
+        TestDatabaseGuard::assertSafe(
+            environment: $application->environment(),
+            driver: (string) $configuration->get("database.connections.{$connection}.driver"),
+            database: (string) $configuration->get("database.connections.{$connection}.database"),
+            expectedTestDatabase: self::environmentValue('SHARECAPSULES_TEST_DATABASE_GUARD'),
+            developmentDatabase: self::environmentValue('SHARECAPSULES_DEVELOPMENT_DATABASE_GUARD'),
+        );
+
+        return $application;
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
 
+        $this->app->instance(BrokerContentKeyLifecycle::class, new FakeBrokerContentKeyLifecycle);
         $this->configureTestPassportKeys();
     }
 
@@ -44,5 +67,12 @@ abstract class TestCase extends BaseTestCase
         File::chmod($privatePath, 0600);
         File::chmod($publicPath, 0600);
         Passport::loadKeysFrom($directory);
+    }
+
+    private static function environmentValue(string $key): ?string
+    {
+        $value = getenv($key);
+
+        return is_string($value) ? $value : null;
     }
 }

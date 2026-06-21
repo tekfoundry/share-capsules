@@ -82,8 +82,17 @@ final class DeploymentConfiguration
 
     private function isHttpsUrl(string $value): bool
     {
+        $parts = parse_url($value);
+
         return filter_var($value, FILTER_VALIDATE_URL) !== false
-            && parse_url($value, PHP_URL_SCHEME) === 'https';
+            && is_array($parts)
+            && ($parts['scheme'] ?? null) === 'https'
+            && isset($parts['host'])
+            && ! isset($parts['user'])
+            && ! isset($parts['pass'])
+            && ! isset($parts['query'])
+            && ! isset($parts['fragment'])
+            && strlen($value) <= 2048;
     }
 
     private function isExactExtensionRedirect(string $extensionId, string $redirectUri): bool

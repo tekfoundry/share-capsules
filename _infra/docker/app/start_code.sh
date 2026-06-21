@@ -38,6 +38,11 @@ case "$mode" in
     scheduler)
         exec php artisan schedule:work
         ;;
+    broker)
+        php artisan migrate --database=broker --path=database/migrations/broker --force
+        cd public
+        exec php -S 0.0.0.0:3000 ../vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php
+        ;;
     *)
         echo "Unknown start mode: $mode" >&2
         exit 1

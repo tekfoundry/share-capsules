@@ -38,11 +38,14 @@ final class DpopAccessTokenRepository extends PassportAccessTokenRepository
             ->exists()) {
             throw OAuthServerException::invalidGrant('The account is unavailable.');
         }
-        $requiresDevice = in_array(ExtensionOAuthScope::CtxAuthorize->value, $identifiers, true);
+        $requiresDevice = array_intersect($identifiers, [
+            ExtensionOAuthScope::CtxAuthorize->value,
+            ExtensionOAuthScope::CapsuleCreate->value,
+        ]) !== [];
 
         if ($requiresDevice && in_array(ExtensionOAuthScope::Connect->value, $identifiers, true)) {
             throw OAuthServerException::invalidScope(
-                ExtensionOAuthScope::Connect->value.' '.ExtensionOAuthScope::CtxAuthorize->value,
+                ExtensionOAuthScope::Connect->value.' '.implode(' ', $identifiers),
             );
         }
 

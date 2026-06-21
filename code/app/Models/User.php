@@ -28,6 +28,12 @@ class User extends Authenticatable implements MustVerifyEmail, OAuthenticatable,
         return $this->hasMany(ViewerDevice::class);
     }
 
+    /** @return HasMany<BrokerRegistrationGrant, $this> */
+    public function brokerRegistrationGrants(): HasMany
+    {
+        return $this->hasMany(BrokerRegistrationGrant::class);
+    }
+
     /** @return HasMany<AccountSanction, $this> */
     public function sanctions(): HasMany
     {

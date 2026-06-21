@@ -46,6 +46,16 @@ final class DeploymentConfigurationTest extends TestCase
         );
     }
 
+    public function test_production_service_identities_reject_user_information_queries_and_fragments(): void
+    {
+        config()->set('sharecapsules.deployment.environment', 'production');
+        config()->set('sharecapsules.ctx.issuer', 'https://user@sharecapsules.com');
+        config()->set('sharecapsules.broker.base_url', 'https://broker.sharecapsules.com?tenant=one');
+
+        $this->assertContains('ctx_issuer_not_https', app(DeploymentConfiguration::class)->issues());
+        $this->assertContains('broker_url_not_https', app(DeploymentConfiguration::class)->issues());
+    }
+
     public function test_extension_callback_must_exactly_match_the_configured_extension_identity(): void
     {
         config()->set('sharecapsules.extension.id', 'abcdefghijklmnop');

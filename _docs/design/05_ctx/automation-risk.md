@@ -66,6 +66,22 @@ The V1 policy gate rejects only a current `high` result from the enforced rulese
 
 Ruleset changes that materially alter evidence, collection, or policy meaning require a new version and documentation. A newly observed signal becomes an enforcement gate only after calibration, false-positive analysis, privacy review, viewer explanation, and an accepted design decision.
 
+### Share Capsules reference ruleset
+
+The reference implementation begins with the named ruleset `ctx-automation-risk-v1.0`. It evaluates only account-linked CTX authorization and key-release metadata already required for the protocol. It returns `high` when any one of these deterministic boundaries is reached:
+
+- 300 authorization attempts within five minutes;
+- 120 committed key releases within five minutes;
+- committed releases across 50 distinct Capsule identifiers within five minutes;
+- 50 replayed or expired known-ticket presentations within five minutes; or
+- 50 simultaneously pending, unexpired authorization tickets.
+
+The boundaries are deliberately conservative initial enforcement values intended to catch obvious sustained automation rather than classify ordinary atypical behavior. Authorization attempts are counted whether later approved or denied, but ordinary denial reasons are not copied into automation-risk history. The protocol-misuse rule counts only replayed or expired tickets already attributable to the account; creator-limit, consent, account-state, and existing automation-risk denials do not feed that rule.
+
+Evaluation order is authorization velocity, committed-release velocity, distinct-Capsule spread, ticket misuse, then pending-ticket concurrency. The first matching internal category is retained for restricted review and correction; creators and Hosts receive none of the counts, categories, or account linkage. The current assessment expires after 60 seconds and is recomputed at authorization and, for a gated ticket, again during atomic redemption.
+
+Account-linked activity and expired assessment state are removed after 30 days and cascade on account deletion. The retained activity schema contains no IP address, user agent, Host origin, pointer or interaction data, surrounding-page activity, raw policy, raw ticket, proof, or trust evidence. Production calibration and false-positive review remain part of the deployment value gate. Any material threshold or evidence change receives a new ruleset identifier rather than silently changing `v1.0` semantics.
+
 ## Policy behavior
 
 The automation-risk requirement is optional per Capsule. When selected, it is combined with the other V1 requirements using the V1 `all` policy profile.

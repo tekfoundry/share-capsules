@@ -3,11 +3,13 @@
 namespace Tests\Feature\Account;
 
 use App\Account\Deletion\AccountDeletionService;
+use App\Broker\Lifecycle\BrokerContentKeyLifecycle;
 use App\Models\AccountDeletionLedgerEntry;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Tests\Support\FakeBrokerContentKeyLifecycle;
 use Tests\TestCase;
 
 final class DeletionLedgerTest extends TestCase
@@ -33,6 +35,8 @@ final class DeletionLedgerTest extends TestCase
     public function test_replay_idempotently_erases_an_account_resurrected_from_backup(): void
     {
         $original = $this->closedUser();
+        $broker = $this->app->make(BrokerContentKeyLifecycle::class);
+        $this->assertInstanceOf(FakeBrokerContentKeyLifecycle::class, $broker);
         $accountId = $original->getKey();
         app(AccountDeletionService::class)->deleteAccount($accountId);
         $this->restoreUser($accountId, $original->email);
@@ -47,6 +51,14 @@ final class DeletionLedgerTest extends TestCase
 
         $this->assertDatabaseMissing('users', ['id' => $accountId]);
         $this->assertDatabaseHas('deletion_restore_checkpoints', ['restore_id' => $restoreId]);
+        $destroyOperations = array_values(array_filter(
+            $broker->operations,
+            fn (array $operation): bool => $operation === [
+                'operation' => 'destroy_creator',
+                'creator_id' => (int) $accountId,
+            ],
+        ));
+        $this->assertCount(3, $destroyOperations);
     }
 
     public function test_a_restored_deployment_fails_closed_until_replay_completes(): void

@@ -1,7 +1,7 @@
 # Initial Share Capsules MVP
 
 Status: In progress
-Last updated: 2026-06-20
+Last updated: 2026-06-21
 
 ## Context
 
@@ -37,6 +37,12 @@ The MVP is complete when this end-to-end path works:
 9. Failure, revocation, account deletion, retention, and no-extension behavior match the documented privacy and security boundaries.
 
 Foundational formats and interfaces must remain provider-aware and versioned even though V1 configures only Share Capsules. Replaceable deployment and UI details may remain simple when they preserve those boundaries.
+
+## Deployment Posture
+
+A production Share Capsules environment already exists. MVP development does not deploy each completed phase to that environment. Production deployment is intentionally deferred until there is a coherent, user-visible capability worth operating and an explicit deployment review confirms that its security, migration, rollback, and observability requirements are ready. The complete creator-to-viewer vertical slice is the current candidate for that first value gate; completing an isolated internal component alone does not require a production release.
+
+Production configuration and operational changes are tracked in the version-controlled [production change ledger](../operations/production-change-ledger.md). The ledger records environment-variable names, migrations, infrastructure or identity changes, deployment actions, verification, and rollback considerations, but never secret values. Environment templates remain the authoritative inventory of required variable names and safe examples.
 
 ## Implementation Phases
 
@@ -150,20 +156,20 @@ Success goals:
 
 Objective: authorize exact Capsule releases without exposing raw content keys to the normal Laravel application.
 
-- ⬜️ Implement provider discovery metadata, version negotiation, public signing keys, and controlled key rotation.
-- ⬜️ Implement the broker as a separately deployable component with dedicated credentials, storage, API, and audit access.
-- ⬜️ Define a KMS/HSM adapter and a local development implementation that preserves the production trust boundary.
-- ⬜️ Register creator-provided content keys through an authenticated extension-to-broker flow and return opaque high-entropy release handles.
-- ⬜️ Ensure normal Laravel application processes cannot retrieve raw broker wrapping keys or unwrapped content keys.
-- ⬜️ Implement preliminary policy evaluation for verified email, active account, registered device, disclosure consent, limits, and optional automation risk.
-- ⬜️ Issue 60-second, single-use, Ed25519-signed CTX JWT tickets with the exact type, audience, Capsule, revision, policy, payload, action, suite, and device-key bindings.
-- ⬜️ Implement strict broker ticket validation, fresh device proof, and HPKE wrapping to the registered X25519 agreement key.
-- ⬜️ Implement online ticket redemption with atomic replay prevention and global/per-account committed-release counter increments.
-- ⬜️ Ensure an unredeemed ticket never counts and a committed release counts even if the final response is lost.
-- ⬜️ Implement a versioned, provider-aware metrics event and idempotent projection model for authorization attempts, privacy-safe denials, and authoritative broker-committed releases without copying viewer identity or raw trust evidence into creator analytics.
-- ⬜️ Implement Capsule and account revocation, paused creator releases during account closure, and broker-key destruction after permanent deletion.
-- ⬜️ Implement V1 deterministic automation-risk rules using only CTX authorization and committed-release metadata.
-- ⬜️ Expose privacy-safe denial categories to the Viewer while withholding global identity and raw history from creators and Hosts.
+- ✅ Implement provider discovery metadata, version negotiation, public signing keys, and controlled key rotation.
+- ✅ Implement the broker as a separately deployable component with dedicated credentials, storage, API, and audit access.
+- ✅ Define a KMS/HSM adapter and a local development implementation that preserves the production trust boundary.
+- ✅ Register creator-provided content keys through an authenticated extension-to-broker flow and return opaque high-entropy release handles.
+- ✅ Ensure normal Laravel application processes cannot retrieve raw broker wrapping keys or unwrapped content keys.
+- ✅ Implement preliminary policy evaluation for verified email, active account, registered device, disclosure consent, limits, and optional automation risk.
+- ✅ Issue 60-second, single-use, Ed25519-signed CTX JWT tickets with the exact type, audience, Capsule, revision, policy, payload, action, suite, and device-key bindings.
+- ✅ Implement strict broker ticket validation, fresh device proof, and HPKE wrapping to the registered X25519 agreement key.
+- ✅ Implement online ticket redemption with atomic replay prevention and global/per-account committed-release counter increments.
+- ✅ Ensure an unredeemed ticket never counts and a committed release counts even if the final response is lost.
+- ✅ Implement a versioned, provider-aware metrics event and idempotent projection model for authorization attempts, privacy-safe denials, and authoritative broker-committed releases without copying viewer identity or raw trust evidence into creator analytics.
+- ✅ Implement Capsule and account revocation, paused creator releases during account closure, and broker-key destruction after permanent deletion.
+- ✅ Implement V1 deterministic automation-risk rules using only CTX authorization and committed-release metadata.
+- ✅ Expose privacy-safe denial categories to the Viewer while withholding global identity and raw history from creators and Hosts.
 
 Success goals:
 
@@ -171,6 +177,109 @@ Success goals:
 - Replayed, expired, mis-audienced, mis-bound, downgraded, or revoked tickets fail closed.
 - The Laravel control plane cannot independently cause arbitrary content-key disclosure through ordinary credentials.
 - Creators receive only allowed predicates and Capsule aggregates; Hosts receive no trust-profile data.
+
+Phase 5 discovery and signing-key evidence recorded on 2026-06-21:
+
+- The stateless RFC 8414-style discovery endpoint publishes the exact closed-world CTX V1 provider capabilities and derives every endpoint from the configured issuer.
+- The JWKS endpoint publishes only purpose-bound Ed25519 public keys and fails closed when no key is available.
+- Ticket-signing keys have an explicit published, active, retiring, retired, and emergency-revoked lifecycle. Rotation publishes a replacement before activation and retains the previous public key for the exact 60-second ticket lifetime plus five seconds of accepted clock skew.
+- Dedicated commands stage, activate, revoke, and retire keys; private key material is encrypted at rest and excluded from JSON serialization and discovery responses.
+- Automated tests cover discovery-path insertion, exact metadata, unsafe identities, public-key shape, encrypted private storage, overlap, expiry, emergency revocation, invalid transitions, and the 16-key protocol limit.
+
+Phase 5 broker-isolation evidence recorded on 2026-06-21:
+
+- The same locked application artifact can boot as a distinct `broker` runtime with a deliberately restricted public and authenticated-internal route surface; it omits account, session, Fortify, Passport, passkey, storage-serving, and control-plane routes and providers.
+- The local broker runs in its own container and uses an idempotently provisioned database and database user that are unavailable to the normal application container.
+- A dedicated, minimum-entropy service credential protects the broker's internal API. Failed authentication uses constant-time comparison and emits a sanitized event through an explicit broker audit boundary without recording the presented credential.
+- Public broker discovery publishes the exact CTX V1 broker identity, release endpoint, ticket type, and cryptographic suite. The release endpoint fails closed until key-release behavior is implemented.
+- Broker health checks only broker configuration and isolated storage. Runtime smoke checks verified broker discovery, healthy storage, authenticated and unauthenticated internal access, the restricted broker route surface, and no control-plane home route.
+
+Phase 5 key-custody evidence recorded on 2026-06-21:
+
+- Broker content-key protection depends on a small `KeyProtectionService` boundary whose contract can be implemented by a managed KMS or HSM without exposing the provider key to callers.
+- The local-only implementation uses a dedicated 256-bit master key, AES-256-GCM, a fresh 96-bit nonce, a 128-bit tag, canonical base64url storage, a stable key identifier, and authenticated binding to the opaque broker record identifier.
+- Wrong context, tampered ciphertext, noncanonical encoding, wrong key identifiers, invalid content-key length, and invalid local custody configuration fail closed.
+- The local custody key is delivered only to the broker container. Production configuration rejects the local driver and reserves an explicit managed-custody key identifier for the later infrastructure selection.
+
+Phase 5 content-key registration and isolation evidence recorded on 2026-06-21:
+
+- A device-bound `capsule:create` OAuth grant authorizes a 60-second registration capability bound to the creator, registration identifier, Capsule, payload, and SHA-256 content-key digest; the control plane receives only the digest and stores only a token hash.
+- The extension sends the raw 256-bit content key directly to the broker. The broker authenticates the capability over a dedicated callback credential, protects the key through the custody adapter, stores only authenticated ciphertext, and returns a random 256-bit opaque release handle.
+- Exact retries are idempotent and return the same handle; identifier reuse, expired or mismatched grants, malformed keys, unknown fields, and failed callbacks fail closed.
+- The ordinary Laravel runtime has neither the broker provider, custody binding, local custody key, broker credentials, registration endpoint, release endpoint, nor broker database identity. Automated isolation tests lock down those boundaries.
+- A recreated broker container applied only the isolated broker migration and a runtime request exercised the callback boundary, returning `registration_not_authorized` for a fabricated grant without persisting a key.
+
+Phase 5 preliminary-policy evidence recorded on 2026-06-21:
+
+- The PHP policy parser independently enforces the exact closed-world V1 type, version, `all` combiner, mandatory predicates, canonical ordering, optional creator gates, safe-integer limits, HTTPS assertion issuer, and unknown-field rejection already locked by the TypeScript contract.
+- The evaluator checks current verified email, active account, active same-account Viewer device, explicit view-event consent, preliminary committed-release capacity, and the optional issuer-specific automation-risk decision in deterministic order.
+- Decisions expose only the stable CTX categories. Exact usage, risk history, thresholds, account identity, and raw evidence never enter the result; missing optional risk evidence fails closed as `policy_unsatisfied`.
+- Release counts and automation risk remain explicit provider interfaces so authoritative concurrent counters and the deterministic V1 risk implementation can be attached in their dedicated Phase 5 tasks without weakening policy semantics.
+
+Phase 5 ticket-issuance evidence recorded on 2026-06-21:
+
+- The discovered `/ctx/authorize` endpoint requires a fresh DPoP proof and the `ctx:authorize` scope, re-parses the exact policy, independently reproduces its RFC 8785 digest, applies preliminary policy, and emits only the reviewed CTX response or privacy-safe error envelope.
+- Before issuance, the control plane authenticates to the isolated broker and verifies that the creator-registered active key record binds the exact Capsule, revision, policy digest, payload, and opaque release handle. An unsigned Viewer restatement cannot weaken the registered policy.
+- The dedicated issuer locks exactly one active purpose-bound Ed25519 key and signs the closed-world `ctx-key-release+jwt` header and claims with exact issuer, broker audience, random 256-bit `jti`, 60-second lifetime, action, suite, and both Viewer-key thumbprints.
+- The public ticket contains no subject or account identifier. A private pending record maps the `jti` to current account, device, creator limits, assertion issuer, and exact release bindings for later atomic redemption.
+- Automated signature, claim-shape, lifetime, DPoP, broker-binding, RFC 8785 vector, missing-key, and identity-isolation tests pass. The isolated broker migration was also applied in a recreated healthy runtime.
+
+Phase 5 broker-validation and HPKE evidence recorded on 2026-06-21:
+
+- Broker validation pins the configured issuer and exact broker audience, `ctx-key-release+jwt`, EdDSA, known purpose-bound `kid`, exact claims, 60-second lifetime, clock skew, registered active release binding, action, suite, and every Capsule, policy, payload, and device-key field.
+- The fresh `ctx-key-release-proof+jwt` parser accepts only the exact Ed25519 public JWK and claims, verifies signature, endpoint, ticket hash, 60-second freshness, both device thumbprints, and a database-backed unique proof identifier. Exact proof replay fails closed.
+- The broker recovers protected content-key material only after ticket and proof validation, then prepares RFC 9180 base-mode X25519/HKDF-SHA-256/AES-256-GCM output bound to the canonical V1 info and AAD contexts.
+- PHP reproduces the independently generated V1 HPKE `enc` and ciphertext vector exactly. Integration tests also validate a newly signed ticket and proof, prepare a correctly sized wrapped key, and reject replay.
+- Preparation is intentionally not exposed by `/releases` yet: no wrapped key leaves the broker until the following atomic online-redemption task commits the release.
+
+Phase 5 redemption evidence recorded on 2026-06-21:
+
+- `/releases` now validates and prepares first, calls the authenticated online redemption boundary, and returns the prepared HPKE response only after the control plane reports a committed transaction.
+- Redemption locks the pending ticket, account, device, Capsule counter, and account-and-Capsule counter; rechecks expiry, account/device bindings, creator limits, and optional risk; then consumes the ticket and increments both counters in one retryable database transaction.
+- Missing, mismatched, expired, denied, or abandoned tickets never increment. Exact replay returns `ticket_replayed`; two pending tickets against a maximum of one produce one commit and one denial with a final count of one.
+- A control-plane commit is authoritative even if its HTTP response is lost. In that case the broker withholds the wrapped key, while the committed counters and consumed ticket remain durable, preventing a client-controlled acknowledgement bypass.
+- The full automated gate at that checkpoint passed with 244 TypeScript tests and 180 PHP tests / 920 assertions. The isolated device-proof replay migration was applied in a recreated healthy broker runtime.
+
+Phase 5 metrics evidence recorded on 2026-06-21:
+
+- A closed version-1 event envelope records the provider, optional broker, Capsule and revision, event type, occurrence time, and only reviewed creator-safe denial categories. Optional dimensions are deliberately empty, and account, device, ticket, proof, and raw trust evidence are absent.
+- Every projection key includes a canonical provider hash, preventing records from different CTX providers from being combined while avoiding database index-length ambiguity.
+- Event receipt and aggregate projection occur in one transaction. A unique event identifier makes repeated delivery idempotent; automated tests prove that duplicate committed-release and ticket-rejection delivery increments each aggregate exactly once.
+- Authoritative `redemption_committed` recording participates in the same control-plane transaction that consumes the ticket and increments release counters. Authorization attempts, approvals, reviewed denials, and deterministic ticket rejections feed totals, hourly buckets, and safe denial-category aggregates.
+- Raw event records are pruned after 30 days by the existing daily scheduler. Durable projections contain no viewer or account identity columns.
+- The application test harness now refuses any persistent database unless it exactly matches the explicit test database and differs from the development database. The full gate passes with 244 TypeScript tests and 193 PHP tests / 973 assertions.
+
+Phase 5 revocation and deletion evidence recorded on 2026-06-21:
+
+- The control plane uses one explicit authenticated broker lifecycle boundary for creator-wide pause, creator-wide resume, Capsule-revision revocation, and creator-wide destruction. Commands have closed request shapes, are idempotent, and affect only records whose broker-owned creator binding matches.
+- Account closure remains fail-closed even if the broker is temporarily unavailable: the committed closed-account state immediately prevents authorization and redemption, while a successful broker call also moves active creator keys to `paused`. Restoration requires broker resume before the local account transaction can commit and never revives an explicitly revoked key.
+- Capsule revocation is irreversible, prevents binding validation and key recovery, and emits one idempotent provider-aware revocation metric. A final active-record check after control-plane redemption ensures a lifecycle change applied during release processing withholds the wrapped key.
+- Permanent account deletion invokes broker destruction before erasing personal data. Destruction nulls the protected content-key material, custody metadata, and account link while retaining a minimal destroyed release record; broker failure aborts local erasure so the scheduled deletion can retry safely.
+- Deletion-ledger replay reapplies broker destruction for every retained account identifier even when only broker storage was restored, and it does not mark the restore checkpoint complete until those operations succeed.
+- The isolated local broker applied the lifecycle migration and reports healthy. The full gate passes with 244 TypeScript tests and 202 PHP tests / 1,037 assertions.
+
+Phase 5 automation-risk evidence recorded on 2026-06-21:
+
+- The named `ctx-automation-risk-v1.0` ruleset deterministically checks conservative, exact rolling boundaries for authorization velocity, committed-release velocity, distinct-Capsule spread, replayed or expired ticket misuse, and live pending-ticket concurrency. It produces only `not-high`, `high`, or unavailable at the policy boundary.
+- The accepted issuer must exactly match the configured V1 provider. Each internal assessment records its issuer, ruleset, evaluation and expiration times, decision, and restricted reason category; it expires after 60 seconds and is recomputed rather than treated as durable entitlement.
+- Authorization records only the minimal account, registered device, Capsule binding, event type, and timestamp needed by the enforced rules. Ordinary denial reasons, IP addresses, user agents, Host origins, interaction telemetry, raw tickets, proofs, policies, and trust evidence are absent.
+- Redemption rechecks the current ruleset while the account is locked, preventing a burst of concurrently issued tickets from bypassing the gate. Only known replayed and expired tickets contribute to misuse; limit, consent, account-state, and risk denials do not recursively worsen the assessment.
+- Automated tests lock every exact threshold, rolling-window boundary, account isolation, issuer rejection, rule order, assessment freshness, authorization recording, redemption recheck, privacy schema, 30-day pruning, and account-deletion cascade.
+- The local control-plane migrations applied without resetting development data. The full gate passes with 244 TypeScript tests and 210 PHP tests / 1,079 assertions.
+
+Phase 5 privacy-safe denial evidence recorded on 2026-06-21:
+
+- One closed PHP `CtxErrorCode` enum and the provider-neutral TypeScript CTX contract lock the exact 17 V1 public codes. Authorization and broker release responses contain only the versioned code, retry hint, and optional opaque correlation identifier permitted by the protocol—never free-form server detail, identity, score, threshold, history, credential, proof, key, or exception.
+- The authenticated broker-to-control-plane redemption client validates the exact internal response shape, code, and status. It preserves reviewed account, device, limit, policy, risk, expiry, and replay outcomes for the trusted Viewer; unknown, malformed, or status-mismatched responses collapse to retryable temporary unavailability.
+- Ticket validation and Viewer device-proof validation now have separate typed failures, allowing `invalid_ticket` and `invalid_proof` to remain actionable without exposing cryptographic detail. A replayed or expired valid ticket is likewise distinguished so the Viewer can start a fresh authorization rather than replaying the same material.
+- The browser-extension library maps every closed-world code to reviewed Viewer-only categories, explanations, and actions. Automation-risk language states that no human-identity judgment is made and discloses no count, threshold, history, global identifier, or raw reason.
+- A separate Host projection reduces all Viewer denials to only `locked`, `unavailable`, or `unsupported`; automated tests prove that no protocol code, title, explanation, action, or Viewer detail crosses that boundary.
+- Creator analytics continue to receive only the seven coarse aggregate categories (`eligibility`, `consent`, `limit`, `risk`, `policy`, `ticket`, and `availability`). Exhaustive tests map every V1 code without copying a raw code or viewer identity into the creator projection.
+- The full gate passes with 249 TypeScript tests and 241 PHP tests / 1,143 assertions. Every Phase 5 implementation task is complete; the deferred unpacked-extension integration exercise remains a later end-to-end acceptance gate after the Viewer shell exists, not unfinished Phase 5 implementation.
+
+Deferred extension integration gate:
+
+- After the Viewer extension shell exists, complete `_docs/operations/viewer-key-release-integration-test.md` using the actual unpacked extension identity and local control-plane/broker runtimes. This is a later end-to-end acceptance test, not a Phase 5 completion gate. Phase 5 remains independently verifiable through automated protocol, broker, concurrency, and runtime tests.
 
 ### Phase 6 — Creator Studio and local Capsule creation
 
@@ -272,7 +381,10 @@ Success goals:
 
 Objective: operate the complete system with controlled identities, monitoring, documentation, and rollback paths.
 
+- ⬜️ Confirm that the release candidate provides a coherent user-visible capability and explicitly approve production deployment; phase completion alone does not trigger a deployment.
+- ⬜️ Reconcile the existing production environment against the production configuration template and record the sanitized baseline in the production change ledger.
 - ⬜️ Deploy Laravel, MySQL, Redis, queues, scheduler, and the isolated broker with separate production identities and least privilege.
+- ⬜️ Record every production environment-variable name, migration, infrastructure or identity change, deployment action, verification result, and rollback consideration without committing secret values.
 - ⬜️ Configure TLS, security headers, secret management, KMS/HSM-backed broker protection, backups, deletion-ledger restoration, and alerting.
 - ⬜️ Publish stable provider and broker discovery metadata and controlled signing-key rotation procedures.
 - ⬜️ Build the extension without remotely hosted code, publish source/build hashes, and submit the fixed production identity to the Chrome Web Store.

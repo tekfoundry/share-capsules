@@ -3,6 +3,8 @@
 use App\OAuth\ExtensionOAuthScope;
 
 return [
+    'component' => env('SHARECAPSULES_COMPONENT', 'control-plane'),
+
     'public' => [
         'repository_url' => env('SHARECAPSULES_PUBLIC_REPOSITORY_URL') ?: 'https://github.com/tekfoundry/share-capsules',
     ],
@@ -30,9 +32,13 @@ return [
         'extension_scopes' => [
             ExtensionOAuthScope::Connect->value => 'Connect the Viewer extension to this account.',
             ExtensionOAuthScope::CtxAuthorize->value => 'Request access to protected Capsules using this Viewer device.',
+            ExtensionOAuthScope::CapsuleCreate->value => 'Create protected Capsules and register their content keys.',
         ],
         'bootstrap_scopes' => [ExtensionOAuthScope::Connect->value],
-        'device_scopes' => [ExtensionOAuthScope::CtxAuthorize->value],
+        'device_scopes' => [
+            ExtensionOAuthScope::CtxAuthorize->value,
+            ExtensionOAuthScope::CapsuleCreate->value,
+        ],
         'access_token_ttl_minutes' => 10,
         'refresh_token_ttl_days' => 30,
         'refresh_lock_seconds' => 15,
@@ -41,9 +47,22 @@ return [
 
     'ctx' => [
         'issuer' => env('SHARECAPSULES_CTX_ISSUER', 'http://localhost:3003'),
+        'internal_url' => env('SHARECAPSULES_CTX_INTERNAL_URL'),
     ],
 
     'broker' => [
-        'base_url' => env('SHARECAPSULES_BROKER_URL', 'http://localhost:3003'),
+        'base_url' => env('SHARECAPSULES_BROKER_URL', 'http://localhost:3004'),
+        'control_plane_token' => env('SHARECAPSULES_BROKER_CONTROL_PLANE_TOKEN', ''),
+        'callback_token' => env('SHARECAPSULES_BROKER_CALLBACK_TOKEN', ''),
+        'control_plane_internal_url' => env(
+            'SHARECAPSULES_CONTROL_PLANE_INTERNAL_URL',
+            'http://app:3000',
+        ),
+        'audit_channel' => env('SHARECAPSULES_BROKER_AUDIT_CHANNEL', 'broker_audit'),
+        'kms' => [
+            'driver' => env('BROKER_KMS_DRIVER', 'local'),
+            'key_id' => env('BROKER_KMS_KEY_ID', 'local-development-key-0001'),
+            'local_master_key' => env('BROKER_LOCAL_KMS_KEY'),
+        ],
     ],
 ];

@@ -15,7 +15,7 @@ const configuration: ExtensionOAuthConfiguration = {
     clientId: '01977ac8-793e-72d4-a234-bd581e773e7d',
     redirectUri: 'https://abcdefghijklmnop.chromiumapp.org/oauth/callback',
     scopes: ['extension:connect'],
-    deviceScopes: ['ctx:authorize'],
+    deviceScopes: ['ctx:authorize', 'capsule:create'],
 };
 
 class RecordingTransport implements OAuthTokenTransport {
@@ -131,7 +131,7 @@ describe('extension OAuth Authorization Code with PKCE', () => {
             token_type: 'DPoP',
             expires_in: 600,
             refresh_token: 'rotating-refresh-token',
-            scope: 'ctx:authorize',
+            scope: 'ctx:authorize capsule:create',
         });
         const device = await viewerDeviceKeys();
         const tokens = await new ExtensionOAuthClient(
@@ -140,7 +140,9 @@ describe('extension OAuth Authorization Code with PKCE', () => {
             transport,
         ).authorizeDevice(device);
 
-        expect(identity.authorizationUrl?.searchParams.get('scope')).toBe('ctx:authorize');
+        expect(identity.authorizationUrl?.searchParams.get('scope')).toBe(
+            'ctx:authorize capsule:create',
+        );
         expect(transport.calls[0]?.parameters.get('device_id')).toBe(device.deviceId);
         expect(transport.calls[0]?.parameters.has('client_secret')).toBe(false);
         expectDpopProof(transport.calls[0]?.headers.DPoP, configuration.tokenEndpoint);
@@ -149,7 +151,7 @@ describe('extension OAuth Authorization Code with PKCE', () => {
             tokenType: 'DPoP',
             expiresIn: 600,
             refreshToken: 'rotating-refresh-token',
-            scopes: ['ctx:authorize'],
+            scopes: ['ctx:authorize', 'capsule:create'],
         });
     });
 
@@ -159,7 +161,7 @@ describe('extension OAuth Authorization Code with PKCE', () => {
             token_type: 'DPoP',
             expires_in: 600,
             refresh_token: 'new-refresh-token',
-            scope: 'ctx:authorize',
+            scope: 'ctx:authorize capsule:create',
         });
         const device = await viewerDeviceKeys();
         const client = new ExtensionOAuthClient(configuration, new CallbackIdentity(), transport);

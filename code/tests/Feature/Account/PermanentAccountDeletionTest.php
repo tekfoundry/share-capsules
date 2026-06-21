@@ -5,6 +5,8 @@ namespace Tests\Feature\Account;
 use App\Account\Deletion\AccountDeletionParticipant;
 use App\Account\Deletion\AccountDeletionService;
 use App\Account\Deletion\AccountTrustProfileRepository;
+use App\Broker\Lifecycle\BrokerContentKeyLifecycle;
+use App\Broker\Lifecycle\BrokerContentKeyLifecycleFailed;
 use App\Models\User;
 use App\Models\ViewerDevice;
 use App\OAuth\ExtensionOAuthClientConfiguration;
@@ -17,6 +19,7 @@ use Laravel\Passport\AuthCode;
 use Laravel\Passport\RefreshToken;
 use Laravel\Passport\Token;
 use RuntimeException;
+use Tests\Support\FakeBrokerContentKeyLifecycle;
 use Tests\TestCase;
 
 final class PermanentAccountDeletionTest extends TestCase
@@ -26,6 +29,8 @@ final class PermanentAccountDeletionTest extends TestCase
     public function test_the_scheduled_command_permanently_removes_an_expired_account_and_linked_state(): void
     {
         $this->freezeTime();
+        $broker = $this->app->make(BrokerContentKeyLifecycle::class);
+        $this->assertInstanceOf(FakeBrokerContentKeyLifecycle::class, $broker);
         $profiles = new RecordingTrustProfileRepository;
         $this->app->instance(AccountTrustProfileRepository::class, $profiles);
         $user = $this->closedUser(now()->subSecond());
@@ -65,6 +70,10 @@ final class PermanentAccountDeletionTest extends TestCase
         $this->assertDatabaseMissing('password_reset_tokens', ['email' => $user->email]);
         $this->assertDatabaseMissing('passkeys', ['user_id' => $user->getKey()]);
         $this->assertArrayNotHasKey($user->getKey(), $profiles->profiles);
+        $this->assertContains([
+            'operation' => 'destroy_creator',
+            'creator_id' => (int) $user->getKey(),
+        ], $broker->operations);
     }
 
     public function test_active_and_recoverable_accounts_are_never_deleted(): void
@@ -127,6 +136,24 @@ final class PermanentAccountDeletionTest extends TestCase
             ->expectsOutputToContain('1 account deletion(s) failed and will be retried.')
             ->assertFailed();
 
+        $this->assertModelExists($user);
+        $this->assertModelExists($device);
+    }
+
+    public function test_broker_destruction_must_succeed_before_personal_data_is_erased(): void
+    {
+        $user = $this->closedUser(now()->subDay());
+        $device = $this->device($user);
+        $this->mock(BrokerContentKeyLifecycle::class)
+            ->shouldReceive('destroyCreator')
+            ->once()
+            ->with((int) $user->getKey())
+            ->andThrow(new BrokerContentKeyLifecycleFailed('Broker unavailable.'));
+
+        $result = app(AccountDeletionService::class)->deleteDue(100);
+
+        $this->assertSame(0, $result->deleted);
+        $this->assertSame([(int) $user->getKey()], $result->failedAccountIds);
         $this->assertModelExists($user);
         $this->assertModelExists($device);
     }

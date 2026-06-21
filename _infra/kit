@@ -69,6 +69,31 @@ validate_database_name() {
     fi
 }
 
+validate_database_username() {
+    local username="$1"
+
+    if [[ -z "$username" ]] || [[ ! "$username" =~ ^[A-Za-z0-9_]+$ ]]; then
+        echo "Broker database username must use only letters, numbers, and underscores." >&2
+        exit 1
+    fi
+}
+
+provision_broker_database() {
+    load_infra_env
+    validate_database_name "$BROKER_MYSQL_DATABASE" "BROKER_MYSQL_DATABASE"
+    validate_database_username "$BROKER_MYSQL_USER"
+
+    if [[ -z "$BROKER_MYSQL_PASSWORD" ]] || [[ "$BROKER_MYSQL_PASSWORD" == *"'"* ]] || [[ "$BROKER_MYSQL_PASSWORD" == *"\\"* ]]; then
+        echo "Broker database password must be non-empty and cannot contain quotes or backslashes in local development." >&2
+        exit 1
+    fi
+
+    compose_cmd up -d --wait --wait-timeout 180 mysql
+    compose_cmd exec -T -e MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql \
+        mysql -h127.0.0.1 -uroot -e \
+        "CREATE DATABASE IF NOT EXISTS \`$BROKER_MYSQL_DATABASE\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; CREATE USER IF NOT EXISTS '$BROKER_MYSQL_USER'@'%' IDENTIFIED BY '$BROKER_MYSQL_PASSWORD'; ALTER USER '$BROKER_MYSQL_USER'@'%' IDENTIFIED BY '$BROKER_MYSQL_PASSWORD'; GRANT ALL PRIVILEGES ON \`$BROKER_MYSQL_DATABASE\`.* TO '$BROKER_MYSQL_USER'@'%'; FLUSH PRIVILEGES;"
+}
+
 doctor() {
     local failures=0
 
@@ -137,6 +162,9 @@ test_command() {
         -e DB_DATABASE="$test_database" \
         -e DB_USERNAME="$MYSQL_USER" \
         -e DB_PASSWORD="$MYSQL_PASSWORD" \
+        -e DB_URL= \
+        -e SHARECAPSULES_TEST_DATABASE_GUARD="$test_database" \
+        -e SHARECAPSULES_DEVELOPMENT_DATABASE_GUARD="$dev_database" \
         -e CACHE_STORE=array \
         -e SESSION_DRIVER=array \
         -e MAIL_MAILER=array \
@@ -209,6 +237,20 @@ service_lifecycle() {
     esac
 }
 
+broker_lifecycle() {
+    local action="${1:-}"
+
+    case "$action" in
+        up)
+            provision_broker_database
+            compose_cmd --profile broker up -d --build --wait --wait-timeout 180 broker
+            ;;
+        down) compose_cmd stop broker ;;
+        logs) compose_cmd logs -f broker ;;
+        *) echo "Usage: ./kit broker <up|down|logs>" >&2; exit 1 ;;
+    esac
+}
+
 subcommand="${1:-help}"
 if [[ "$#" -gt 0 ]]; then shift; fi
 
@@ -227,6 +269,7 @@ case "$subcommand" in
     browser-check) browser_check_command ;;
     workers) require_env_file; service_lifecycle workers "${1:-}" ;;
     scheduler) require_env_file; service_lifecycle scheduler "${1:-}" ;;
+    broker) require_env_file; broker_lifecycle "${1:-}" ;;
     doctor) doctor ;;
     help|--help|-h)
         cat <<'EOF'
@@ -248,6 +291,7 @@ Commands:
   browser-check       Install Chromium and run browser accessibility/layout tests
   workers <action>    Manage queue workers (up, down, logs)
   scheduler <action>  Manage the Laravel scheduler (up, down, logs)
+  broker <action>     Manage the isolated key broker (up, down, logs)
   doctor              Validate local infrastructure prerequisites
 EOF
         ;;

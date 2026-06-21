@@ -125,6 +125,24 @@ return [
             ],
         ],
 
+        'broker_audit' => [
+            'driver' => 'monolog',
+            'level' => env('BROKER_AUDIT_LOG_LEVEL', 'notice'),
+            'handler' => StreamHandler::class,
+            'handler_with' => [
+                'stream' => 'php://stderr',
+            ],
+            'formatter' => JsonFormatter::class,
+            'formatter_with' => [
+                'batchMode' => JsonFormatter::BATCH_MODE_JSON,
+                'appendNewline' => true,
+            ],
+            'processors' => [
+                RedactSensitiveContext::class,
+                PsrLogMessageProcessor::class,
+            ],
+        ],
+
         'syslog' => [
             'driver' => 'syslog',
             'level' => env('LOG_LEVEL', 'debug'),
