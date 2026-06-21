@@ -21,7 +21,7 @@ final class AuthenticationTest extends TestCase
     {
         $user = User::factory()->create(['password' => 'Correct-Horse-42!']);
 
-        $response = $this->post(route('login'), [
+        $response = $this->post(route('login.store'), [
             'email' => strtoupper($user->email),
             'password' => 'Correct-Horse-42!',
         ]);
@@ -34,7 +34,7 @@ final class AuthenticationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->post(route('login'), [
+        $this->post(route('login.store'), [
             'email' => $user->email,
             'password' => 'not-the-password',
         ])->assertSessionHasErrors('email');
@@ -47,13 +47,13 @@ final class AuthenticationTest extends TestCase
         $user = User::factory()->create();
 
         foreach (range(1, 5) as $attempt) {
-            $this->post(route('login'), [
+            $this->post(route('login.store'), [
                 'email' => $user->email,
                 'password' => 'not-the-password',
             ])->assertSessionHasErrors('email');
         }
 
-        $response = $this->post(route('login'), [
+        $response = $this->post(route('login.store'), [
             'email' => $user->email,
             'password' => 'not-the-password',
         ]);

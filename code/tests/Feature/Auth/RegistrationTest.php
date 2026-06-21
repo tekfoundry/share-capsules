@@ -26,7 +26,7 @@ final class RegistrationTest extends TestCase
     {
         Notification::fake();
 
-        $response = $this->post(route('register'), [
+        $response = $this->post(route('register.store'), [
             'email' => '  Creator@Example.COM ',
             'password' => 'Correct-Horse-42!',
             'password_confirmation' => 'Correct-Horse-42!',
@@ -47,7 +47,7 @@ final class RegistrationTest extends TestCase
 
     public function test_registration_requires_current_terms_acceptance(): void
     {
-        $this->post(route('register'), [
+        $this->post(route('register.store'), [
             'email' => 'viewer@example.com',
             'password' => 'Correct-Horse-42!',
             'password_confirmation' => 'Correct-Horse-42!',
@@ -59,7 +59,7 @@ final class RegistrationTest extends TestCase
 
     public function test_registration_enforces_the_password_policy(): void
     {
-        $this->post(route('register'), [
+        $this->post(route('register.store'), [
             'email' => 'viewer@example.com',
             'password' => 'too-short',
             'password_confirmation' => 'too-short',
@@ -73,7 +73,7 @@ final class RegistrationTest extends TestCase
     {
         User::factory()->create(['email' => 'viewer@example.com']);
 
-        $this->post(route('register'), [
+        $this->post(route('register.store'), [
             'email' => 'VIEWER@example.com',
             'password' => 'Correct-Horse-42!',
             'password_confirmation' => 'Correct-Horse-42!',
@@ -86,12 +86,12 @@ final class RegistrationTest extends TestCase
     public function test_repeated_registration_attempts_are_rate_limited(): void
     {
         foreach (range(1, 5) as $attempt) {
-            $this->post(route('register'), [
+            $this->post(route('register.store'), [
                 'email' => "invalid-{$attempt}",
             ])->assertRedirect();
         }
 
-        $this->post(route('register'), [
+        $this->post(route('register.store'), [
             'email' => 'another-invalid-address',
         ])->assertTooManyRequests();
     }

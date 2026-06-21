@@ -38,7 +38,7 @@ Creators export completed encrypted Capsules and publish them through a Host the
 Laravel provides:
 
 - Share Capsules account registration and verified email
-- Password authentication and optional multi-passkey enrollment
+- Laravel Fortify password authentication and optional multi-passkey enrollment using the official Laravel passkey integration
 - Account recovery workflows
 - Viewer device registration and revocation
 - Consent and reputation records
@@ -218,7 +218,6 @@ The broker interface, Capsule metadata, and release protocol must not prevent mi
 
 ## Open questions
 
-- Which Laravel authentication packages and passkey integration will be used?
 - What benchmark devices and acceptance thresholds define the V1 image-profile compatibility envelope?
 
 ## Related documents

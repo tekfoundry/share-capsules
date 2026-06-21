@@ -1,14 +1,10 @@
 <?php
 
+use App\Http\Controllers\Account\AccountPasskeyController;
 use App\Http\Controllers\Account\AccountSecurityController;
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\EmailVerificationNotificationController;
-use App\Http\Controllers\Auth\EmailVerificationPromptController;
-use App\Http\Controllers\Auth\NewPasswordController;
-use App\Http\Controllers\Auth\PasswordResetLinkController;
-use App\Http\Controllers\Auth\RegisteredUserController;
-use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
+use Laravel\Fortify\Http\Controllers\PasswordResetLinkController;
+use Laravel\Fortify\Http\Controllers\RegisteredUserController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -18,37 +14,15 @@ Route::view('/terms', 'legal.terms')->name('terms');
 Route::view('/privacy', 'legal.privacy')->name('privacy');
 
 Route::middleware('guest')->group(function (): void {
-    Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
     Route::post('/register', [RegisteredUserController::class, 'store'])
-        ->middleware('throttle:5,1');
-
-    Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
-    Route::post('/login', [AuthenticatedSessionController::class, 'store']);
-
-    Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])
-        ->name('password.request');
+        ->middleware('throttle:registration')
+        ->name('register.store');
     Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
-        ->middleware('throttle:6,1')
+        ->middleware('throttle:password-reset')
         ->name('password.email');
-    Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])
-        ->name('password.reset');
-    Route::post('/reset-password', [NewPasswordController::class, 'store'])
-        ->name('password.store');
 });
 
 Route::middleware('auth')->group(function (): void {
-    Route::get('/verify-email', EmailVerificationPromptController::class)
-        ->name('verification.notice');
-    Route::get('/verify-email/{id}/{hash}', VerifyEmailController::class)
-        ->middleware(['signed', 'throttle:6,1'])
-        ->name('verification.verify');
-    Route::post('/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
-        ->middleware('throttle:6,1')
-        ->name('verification.send');
-
-    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
-        ->name('logout');
-
     Route::view('/dashboard', 'dashboard')
         ->middleware('verified')
         ->name('dashboard');
@@ -56,6 +30,9 @@ Route::middleware('auth')->group(function (): void {
     Route::middleware('verified')->prefix('account')->name('account.')->group(function (): void {
         Route::get('/security', [AccountSecurityController::class, 'show'])
             ->name('security');
+        Route::get('/passkeys', [AccountPasskeyController::class, 'show'])
+            ->middleware('password.confirm')
+            ->name('passkeys');
         Route::delete('/security/sessions', [AccountSecurityController::class, 'destroyOthers'])
             ->middleware('throttle:6,1')
             ->name('sessions.destroy-others');

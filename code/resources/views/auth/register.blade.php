@@ -8,7 +8,7 @@
     <h1 class="mt-3 text-3xl font-semibold tracking-[-0.035em]">Create your account</h1>
     <p class="mt-3 text-sm leading-6 text-muted">Use the same account to create Capsules and open protected work.</p>
 
-    <form class="mt-8 space-y-5" method="POST" action="{{ route('register') }}">
+    <form class="mt-8 space-y-5" method="POST" action="{{ route('register.store') }}">
         @csrf
 
         <x-forms.input label="Email address" name="email" type="email" autocomplete="email" required autofocus />

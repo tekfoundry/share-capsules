@@ -13,6 +13,14 @@
             <p class="mt-3 max-w-2xl leading-7 text-muted">Review where your account is signed in. Revoking a session also invalidates existing persistent-login cookies so it cannot silently return.</p>
         </div>
 
+        <div class="mt-8 rounded-2xl border border-line bg-white p-5 shadow-card sm:flex sm:items-center sm:justify-between sm:gap-6">
+            <div>
+                <h2 class="font-bold text-ink">Passkeys</h2>
+                <p class="mt-1 text-sm leading-6 text-muted">Enroll multiple phishing-resistant authenticators and revoke ones you no longer use.</p>
+            </div>
+            <a class="mt-4 inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-line bg-white px-4 text-sm font-semibold text-brand shadow-sm hover:border-brand/30 sm:mt-0" href="{{ route('account.passkeys') }}">Manage passkeys</a>
+        </div>
+
         @if (session('status'))
             <div role="status" class="mt-8 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm text-teal-900">{{ session('status') }}</div>
         @endif

@@ -16,10 +16,23 @@ export default defineConfig(
         languageOptions: { parser: tseslint.parser },
     },
     {
-        files: ['resources/js/**/*.js', 'vite.config.js'],
+        files: ['resources/js/**/*.js'],
         languageOptions: {
             globals: {
                 console: 'readonly',
+                document: 'readonly',
+                HTMLButtonElement: 'readonly',
+                HTMLFormElement: 'readonly',
+                HTMLElement: 'readonly',
+                HTMLInputElement: 'readonly',
+                window: 'readonly',
+            },
+        },
+    },
+    {
+        files: ['vite.config.js'],
+        languageOptions: {
+            globals: {
                 process: 'readonly',
             },
         },

@@ -31,5 +31,8 @@
         "typescript-eslint": "^8.61.1",
         "vite": "^8.0.0",
         "vitest": "^4.1.9"
+    },
+    "dependencies": {
+        "@laravel/passkeys": "^0.2.0"
     }
 }

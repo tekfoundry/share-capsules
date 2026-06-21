@@ -47,7 +47,9 @@ Creator policy and user-facing language must describe limits as applying per Sha
 
 Passwords provide baseline authentication. V1 also supports passkeys and strongly encourages them, especially for creator accounts, but does not require one to create or view a Capsule. Passkeys are authenticators, not evidence of unique personhood or benign intent.
 
-The baseline password policy requires at least 12 characters containing uppercase and lowercase letters, a number, and a symbol. Share Capsules uses Laravel's password hashing, session authentication, password-reset tokens, signed email-verification links, notifications, CSRF protection, and rate-limiting primitives. Application code adds Share Capsules lifecycle boundaries around those primitives rather than implementing cryptography or session mechanics independently.
+The baseline password policy requires at least 12 characters containing uppercase and lowercase letters, a number, and a symbol. Share Capsules uses Laravel Fortify as the authentication backend for registration, login, logout, password confirmation and reset, email verification, and passkey ceremonies. Application routes use Fortify handlers rather than parallel custom authentication controllers. Share Capsules supplies its own Fortify actions and responses only where product rules require them, including terms capture, the centralized password policy, session revocation after password reset, security notifications, and account-enumeration-resistant reset responses.
+
+The official Laravel passkey packages provide WebAuthn registration, authentication, confirmation, and revocation. Passkey ceremonies execute in the browser against Fortify's same-origin endpoints; private key material remains with the platform authenticator, password manager, or security key.
 
 Password-reset requests return the same public response whether or not an account exists for the submitted address. Registration, login, verification-email resend, and password-reset requests are rate limited. Successful login and registration regenerate the session identifier; logout invalidates the session and regenerates its CSRF token.
 
@@ -63,7 +65,7 @@ The current session is identified and cannot be revoked through the remote-sessi
 
 A successful password reset rotates the persistent-login token, revokes every existing browser session, and sends a security notification to the verified account email. The reset response remains successful only for the person possessing a valid reset token; the public reset-request endpoint continues to conceal whether the email is registered.
 
-The account model supports multiple authenticators from the beginning so a user can add more than one passkey without creating a second Share Capsules account. Mandatory passkeys, passwordless-only accounts, and policy gates based on authenticator strength are deferred until enrollment, device replacement, and recovery behavior are proven.
+The account model supports multiple named passkeys from the beginning so a user can add more than one authenticator without creating a second Share Capsules account. The security UI records enrollment and last-use timestamps and permits individual revocation. Passkey enrollment, inspection, and revocation require a recently confirmed password or existing passkey. Password authentication and reset remain available in V1 to avoid accidental lockout. Mandatory passkeys, passwordless-only accounts, and policy gates based on authenticator strength are deferred until enrollment, device replacement, and recovery behavior are proven.
 
 Authentication credentials are distinct from creator signing keys, Capsule content keys, and Viewer device keys. A password must never directly encrypt Capsule content or derive a long-lived creator key.
 
