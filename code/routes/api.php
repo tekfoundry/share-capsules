@@ -1,0 +1,17 @@
+<?php
+
+use App\Http\Controllers\Api\ViewerDeviceRegistrationController;
+use Illuminate\Support\Facades\Route;
+use Laravel\Passport\Http\Middleware\CheckToken;
+
+Route::middleware(['auth:api', 'verified', CheckToken::class.':extension:connect'])
+    ->prefix('viewer-devices')
+    ->name('api.viewer-devices.')
+    ->group(function (): void {
+        Route::post('/challenges', [ViewerDeviceRegistrationController::class, 'challenge'])
+            ->middleware('throttle:device-registration')
+            ->name('challenges.store');
+        Route::post('/', [ViewerDeviceRegistrationController::class, 'store'])
+            ->middleware('throttle:device-registration')
+            ->name('store');
+    });

@@ -21,6 +21,14 @@
             <a class="mt-4 inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-line bg-white px-4 text-sm font-semibold text-brand shadow-sm hover:border-brand/30 sm:mt-0" href="{{ route('account.passkeys') }}">Manage passkeys</a>
         </div>
 
+        <div class="mt-4 rounded-2xl border border-line bg-white p-5 shadow-card sm:flex sm:items-center sm:justify-between sm:gap-6">
+            <div>
+                <h2 class="font-bold text-ink">Viewer devices</h2>
+                <p class="mt-1 text-sm leading-6 text-muted">Inspect, rename, suspend, or permanently revoke browser-extension installations.</p>
+            </div>
+            <a class="mt-4 inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-line bg-white px-4 text-sm font-semibold text-brand shadow-sm hover:border-brand/30 sm:mt-0" href="{{ route('account.devices.index') }}">Manage devices</a>
+        </div>
+
         @if (session('status'))
             <div role="status" class="mt-8 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm text-teal-900">{{ session('status') }}</div>
         @endif

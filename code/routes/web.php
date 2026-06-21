@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Account\AccountPasskeyController;
 use App\Http\Controllers\Account\AccountSecurityController;
+use App\Http\Controllers\Account\AccountViewerDeviceController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\PasswordResetLinkController;
 use Laravel\Fortify\Http\Controllers\RegisteredUserController;
@@ -36,6 +37,18 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/passkeys', [AccountPasskeyController::class, 'show'])
             ->middleware('password.confirm')
             ->name('passkeys');
+        Route::get('/devices', [AccountViewerDeviceController::class, 'index'])
+            ->name('devices.index');
+        Route::patch('/devices/{device}', [AccountViewerDeviceController::class, 'update'])
+            ->name('devices.update');
+        Route::middleware('password.confirm')->group(function (): void {
+            Route::post('/devices/{device}/suspend', [AccountViewerDeviceController::class, 'suspend'])
+                ->name('devices.suspend');
+            Route::post('/devices/{device}/activate', [AccountViewerDeviceController::class, 'activate'])
+                ->name('devices.activate');
+            Route::delete('/devices/{device}', [AccountViewerDeviceController::class, 'destroy'])
+                ->name('devices.destroy');
+        });
         Route::delete('/security/sessions', [AccountSecurityController::class, 'destroyOthers'])
             ->middleware('throttle:6,1')
             ->name('sessions.destroy-others');

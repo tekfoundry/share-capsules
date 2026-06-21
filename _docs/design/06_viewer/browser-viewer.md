@@ -62,6 +62,8 @@ The V1 extension uses OAuth Authorization Code with PKCE (`S256`) through Chrome
 
 The OAuth client has no embedded secret. Redirect URIs are registered exactly. Access tokens are short-lived, narrowly scoped, and sender-constrained through the registered Ed25519 Viewer proof key. The separate X25519 agreement key receives HPKE-wrapped content keys. Refresh tokens, if issued, are rotated and revoked with the device. Device Authorization may be added later for platforms where the redirect flow is unsuitable.
 
+After the first OAuth approval, the extension creates separate non-exportable Ed25519 proof and X25519 agreement private keys and stores their `CryptoKey` objects in extension-owned IndexedDB. Registration succeeds only after a server challenge verifies an Ed25519 signature and an independent X25519-derived confirmation over the same versioned message. Public JWK thumbprints identify the key set; private key material never enters Laravel or the Host page.
+
 ## Permissions
 
 V1 declares these required named permissions:

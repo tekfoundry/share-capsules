@@ -39,5 +39,8 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('oauth-token', fn (Request $request): Limit => Limit::perMinute(30)
             ->by($request->ip()));
+
+        RateLimiter::for('device-registration', fn (Request $request): Limit => Limit::perMinute(10)
+            ->by(($request->user()?->getAuthIdentifier() ?? 'guest').'|'.$request->ip()));
     }
 }

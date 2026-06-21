@@ -87,6 +87,12 @@ This implementation checkpoint issues a ten-minute bearer access token and delib
 
 Each installed trusted Viewer creates a device-key set containing an Ed25519 proof key pair and a separate X25519 agreement key pair. The Share Capsules service associates both public keys and one device record with the account after authenticated approval.
 
+The extension generates both key pairs with Web Cryptography and marks each private key non-exportable. It chooses the device UUID and persists that identifier and the resulting `CryptoKey` objects in extension-owned IndexedDB before beginning registration rather than serializing private key bytes. The challenge and final server record are bound to that same device UUID, so a lost HTTP response does not leave an unidentifiable server-side device. The service accepts exact public OKP JWKs containing only `kty`, `crv`, and `x`, requires canonical 32-byte unpadded base64url key values, rejects private or additional JWK members, and derives RFC 7638 SHA-256 thumbprints itself.
+
+Registration uses a five-minute, single-use challenge bound to the verified account and both public-key thumbprints. The extension signs the versioned registration message with Ed25519. It separately derives a secret from its X25519 private key and a server ephemeral X25519 public key, derives a confirmation key with HKDF-SHA-256, and authenticates the same registration message with HMAC-SHA-256. The server stores only the expected short-lived confirmation value and erases its ephemeral private key and derived secrets after challenge creation. A device becomes active only after both possession proofs succeed atomically.
+
+Expired challenges are retained for no more than 24 additional hours for replay and failure handling, then removed by the scheduled pruning process.
+
 A device record may include:
 
 - Device identifier, Ed25519 proof public key, and X25519 agreement public key
@@ -97,7 +103,11 @@ A device record may include:
 
 The account holder must be able to inspect and revoke registered devices.
 
+The account security UI exposes device name, status, enrollment and last-use times, and shortened public-key thumbprints. Naming does not change key identity. Suspension is reversible and prevents future CTX use once token binding is active. Revocation is permanent: the record and key thumbprints remain reserved so the same installation keys cannot be silently registered again. Suspension, activation, and revocation require recent account authentication; cross-account changes are forbidden.
+
 The proof key demonstrates control of a registered Viewer installation; the agreement key receives HPKE-wrapped content keys. Neither proves legal identity or unique personhood. Revoking the device revokes both keys.
+
+At this checkpoint the registration access token remains an interim bearer credential accepted only by the two registration endpoints. CTX routes remain closed. The following DPoP task binds newly issued OAuth tokens to the active device proof thumbprint and makes suspension or revocation invalidate continuing extension access.
 
 ## Account identifiers
 

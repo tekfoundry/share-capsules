@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\Contracts\PasskeyUser;
@@ -20,6 +21,12 @@ class User extends Authenticatable implements MustVerifyEmail, OAuthenticatable,
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable, PasskeyAuthenticatable;
+
+    /** @return HasMany<ViewerDevice, $this> */
+    public function viewerDevices(): HasMany
+    {
+        return $this->hasMany(ViewerDevice::class);
+    }
 
     /**
      * Get the attributes that should be cast.
