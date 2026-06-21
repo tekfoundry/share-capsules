@@ -20,6 +20,8 @@ jobs:
         run: |
           cp _infra/.env.example _infra/.env
           cp code/.env.example code/.env
+          app_key="base64:$(openssl rand -base64 32)"
+          sed -i "s|^APP_KEY=.*$|APP_KEY=${app_key}|" code/.env
 
       - name: Run containerized checks
         run: ./_infra/kit ci
