@@ -5,6 +5,9 @@ use App\Http\Controllers\Account\AccountSecurityController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\PasswordResetLinkController;
 use Laravel\Fortify\Http\Controllers\RegisteredUserController;
+use Laravel\Passport\Http\Controllers\ApproveAuthorizationController;
+use Laravel\Passport\Http\Controllers\AuthorizationController;
+use Laravel\Passport\Http\Controllers\DenyAuthorizationController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -41,4 +44,13 @@ Route::middleware('auth')->group(function (): void {
             ->middleware('throttle:12,1')
             ->name('sessions.destroy');
     });
+});
+
+Route::middleware(['auth', 'verified'])->group(function (): void {
+    Route::get('/oauth/authorize', [AuthorizationController::class, 'authorize'])
+        ->name('passport.authorizations.authorize');
+    Route::post('/oauth/authorize', [ApproveAuthorizationController::class, 'approve'])
+        ->name('passport.authorizations.approve');
+    Route::delete('/oauth/authorize', [DenyAuthorizationController::class, 'deny'])
+        ->name('passport.authorizations.deny');
 });

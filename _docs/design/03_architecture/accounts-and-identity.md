@@ -79,6 +79,10 @@ The V1 extension connects to a Share Capsules account through OAuth Authorizatio
 
 The extension is a public client with an exactly registered extension callback. Access tokens are short-lived, narrowly scoped, and sender-constrained to the registered Viewer device proof key. Device revocation invalidates the extension's continuing access. Device Authorization is not part of the V1 desktop flow.
 
+The Share Capsules implementation uses Laravel Passport for this OAuth server boundary. Each environment provisions one fixed, public Viewer-extension client with a UUID, no secret, only the Authorization Code grant, and one exact `https://<extension-id>.chromiumapp.org/oauth/callback` redirect. The extension pins the configured CTX issuer and requires both OAuth endpoints to share that issuer origin. It requests the `extension:connect` scope and explicit consent, creates a fresh random state, verifier, and `S256` challenge for every attempt, retains the verifier only for that in-progress ceremony, validates the returned state and exact callback before exchanging the code, and sends no account password, session cookie, or client secret.
+
+This implementation checkpoint issues a ten-minute bearer access token and deliberately does not enable refresh tokens for the client. The token is not yet accepted by CTX protected-resource routes. Device registration and RFC 9449 DPoP sender constraint are the next Phase 3 boundary; CTX access must remain closed until they bind the token to the registered Ed25519 Viewer proof key. Refresh tokens may be enabled only with the accepted rotation, replay-response, secure-storage, and device-revocation behavior.
+
 ## Device registration
 
 Each installed trusted Viewer creates a device-key set containing an Ed25519 proof key pair and a separate X25519 agreement key pair. The Share Capsules service associates both public keys and one device record with the account after authenticated approval.

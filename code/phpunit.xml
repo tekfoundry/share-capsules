@@ -33,7 +33,8 @@
         <env name="SHARECAPSULES_DEPLOYMENT_ID" value="automated-test"/>
         <env name="SHARECAPSULES_EXTENSION_CHANNEL" value="test"/>
         <env name="SHARECAPSULES_EXTENSION_ID" value="test-extension"/>
-        <env name="SHARECAPSULES_OAUTH_EXTENSION_CLIENT_ID" value="test-oauth-client"/>
+        <env name="SHARECAPSULES_OAUTH_EXTENSION_CLIENT_ID" value="01977ac8-793e-72d4-a234-bd581e773e7d"/>
+        <env name="SHARECAPSULES_OAUTH_EXTENSION_REDIRECT_URI" value="https://test-extension.chromiumapp.org/oauth/callback"/>
         <env name="SHARECAPSULES_CTX_ISSUER" value="http://localhost"/>
         <env name="SHARECAPSULES_BROKER_URL" value="http://localhost"/>
         <env name="PULSE_ENABLED" value="false"/>

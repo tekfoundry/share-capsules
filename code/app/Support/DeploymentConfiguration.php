@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use Illuminate\Support\Str;
+
 final class DeploymentConfiguration
 {
     /** @return list<string> */
@@ -13,6 +15,7 @@ final class DeploymentConfiguration
         $extensionChannel = (string) config('sharecapsules.extension.channel');
         $extensionId = (string) config('sharecapsules.extension.id');
         $oauthClientId = (string) config('sharecapsules.oauth.extension_client_id');
+        $oauthRedirectUri = (string) config('sharecapsules.oauth.extension_redirect_uri');
         $ctxIssuer = (string) config('sharecapsules.ctx.issuer');
         $brokerUrl = (string) config('sharecapsules.broker.base_url');
 
@@ -32,8 +35,16 @@ final class DeploymentConfiguration
             $issues[] = 'account_session_driver_not_database';
         }
 
-        if ($extensionId === '' || $oauthClientId === '') {
+        if ($extensionId === '' || $oauthClientId === '' || $oauthRedirectUri === '') {
             $issues[] = 'extension_identity_missing';
+        }
+
+        if (! $this->isExactExtensionRedirect($extensionId, $oauthRedirectUri)) {
+            $issues[] = 'extension_oauth_redirect_mismatch';
+        }
+
+        if (! Str::isUuid($oauthClientId)) {
+            $issues[] = 'extension_oauth_client_id_invalid';
         }
 
         if ($environment === 'production') {
@@ -57,6 +68,14 @@ final class DeploymentConfiguration
     {
         return filter_var($value, FILTER_VALIDATE_URL) !== false
             && parse_url($value, PHP_URL_SCHEME) === 'https';
+    }
+
+    private function isExactExtensionRedirect(string $extensionId, string $redirectUri): bool
+    {
+        return hash_equals(
+            "https://{$extensionId}.chromiumapp.org/oauth/callback",
+            $redirectUri,
+        );
     }
 
     private function isPlaceholder(string $value): bool

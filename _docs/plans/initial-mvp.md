@@ -107,7 +107,7 @@ Objective: provide the single Share Capsules account and device-continuity bound
 - ✅ Require email verification before Capsule creation, device registration, reputation accumulation, or protected viewing.
 - ✅ Implement login, logout, password reset, security notifications, session inspection, and session revocation.
 - ✅ Adopt Laravel Fortify handlers for the existing authentication flows and add optional passkey enrollment, multiple authenticators, inspection, and revocation without treating passkeys as personhood.
-- ⬜️ Implement OAuth Authorization Code with PKCE `S256` for the fixed extension client and exact callback.
+- ✅ Implement OAuth Authorization Code with PKCE `S256` for the fixed public extension client, verified-account consent, one exact callback, and single-use authorization codes; keep interim bearer tokens away from CTX routes until device binding and DPoP are complete.
 - ⬜️ Register one device record containing distinct Ed25519 proof and X25519 agreement public keys.
 - ⬜️ Issue short-lived, narrowly scoped, DPoP-bound access tokens and rotated refresh tokens where enabled.
 - ⬜️ Provide device inspection, naming, suspension, and revocation.

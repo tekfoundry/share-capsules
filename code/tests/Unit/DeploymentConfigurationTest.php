@@ -19,6 +19,7 @@ final class DeploymentConfigurationTest extends TestCase
         config()->set('sharecapsules.extension.channel', 'production');
         config()->set('sharecapsules.extension.id', 'replace-with-production-extension-id');
         config()->set('sharecapsules.oauth.extension_client_id', 'replace-with-production-client-id');
+        config()->set('sharecapsules.oauth.extension_redirect_uri', 'https://wrong.chromiumapp.org/oauth/callback');
         config()->set('sharecapsules.ctx.issuer', 'http://sharecapsules.com');
         config()->set('sharecapsules.broker.base_url', 'http://broker.sharecapsules.com');
         config()->set('session.driver', 'database');
@@ -27,7 +28,20 @@ final class DeploymentConfigurationTest extends TestCase
             'ctx_issuer_not_https',
             'broker_url_not_https',
             'production_identity_placeholder',
+            'extension_oauth_redirect_mismatch',
+            'extension_oauth_client_id_invalid',
         ], app(DeploymentConfiguration::class)->issues());
+    }
+
+    public function test_extension_callback_must_exactly_match_the_configured_extension_identity(): void
+    {
+        config()->set('sharecapsules.extension.id', 'abcdefghijklmnop');
+        config()->set('sharecapsules.oauth.extension_redirect_uri', 'https://attacker.example/callback');
+
+        $this->assertContains(
+            'extension_oauth_redirect_mismatch',
+            app(DeploymentConfiguration::class)->issues(),
+        );
     }
 
     public function test_non_test_deployments_require_database_backed_account_sessions(): void

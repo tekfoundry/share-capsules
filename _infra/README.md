@@ -27,6 +27,8 @@ Then run from the repository root:
 ./_infra/kit doctor
 ./_infra/kit up
 ./_infra/kit artisan migrate
+./_infra/kit artisan passport:keys
+./_infra/kit artisan ctx:provision-extension-client
 ./_infra/kit test
 ./_infra/kit check
 ```
@@ -54,6 +56,8 @@ All ports and development credentials are configurable in `_infra/.env`.
 ./_infra/kit logs app
 ./_infra/kit shell
 ./_infra/kit artisan migrate
+./_infra/kit artisan passport:keys
+./_infra/kit artisan ctx:provision-extension-client
 ./_infra/kit composer install
 ./_infra/kit npm install
 ./_infra/kit test
@@ -69,6 +73,8 @@ All ports and development credentials are configurable in `_infra/.env`.
 ## Environment boundaries
 
 Development, automated test, and production use distinct deployment names, extension channels, extension identifiers, and OAuth client identifiers. Local values live in ignored environment files. Automated test values are fixed in `code/phpunit.xml`. Production operators begin with `code/.env.production.example` and must replace every placeholder; production health fails when HTTP service URLs or placeholder identities remain.
+
+The extension OAuth client is a public client: it has no client secret. Configure its UUID, fixed Chrome/Chromium extension ID, and exact `https://<extension-id>.chromiumapp.org/oauth/callback` redirect before running `ctx:provision-extension-client`. The command is idempotent and reconciles only that configured client. Passport signing keys are deployment secrets; generate or inject them outside source control and never copy production keys between environments.
 
 The development topology is:
 

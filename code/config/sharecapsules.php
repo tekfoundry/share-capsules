@@ -14,8 +14,17 @@ return [
     'oauth' => [
         'extension_client_id' => env(
             'SHARECAPSULES_OAUTH_EXTENSION_CLIENT_ID',
-            'development-not-configured',
+            '01977ac8-793e-72d4-a234-bd581e773e7e',
         ),
+        'extension_redirect_uri' => env(
+            'SHARECAPSULES_OAUTH_EXTENSION_REDIRECT_URI',
+            'https://development-not-configured.chromiumapp.org/oauth/callback',
+        ),
+        'extension_client_name' => 'Share Capsules Viewer Extension',
+        'extension_scopes' => [
+            'extension:connect' => 'Connect the Viewer extension to this account.',
+        ],
+        'access_token_ttl_minutes' => 10,
     ],
 
     'ctx' => [
