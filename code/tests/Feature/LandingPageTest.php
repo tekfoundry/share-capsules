@@ -13,11 +13,14 @@ final class LandingPageTest extends TestCase
         $response
             ->assertOk()
             ->assertSee('Share Capsules')
-            ->assertSee('Protect the work.')
-            ->assertSee('Share with intention.')
-            ->assertSee('Creator-controlled access')
+            ->assertSee('Share your work with people.')
+            ->assertSee('Not with every machine that asks.')
+            ->assertSee('The web asks creators to choose between reach and control.')
+            ->assertSee('Encrypted content with creator-defined access.')
+            ->assertSee('no technology can prevent an authorized viewer from copying what they can see')
             ->assertSee('Security without mystery.')
             ->assertSee('Active experimental development')
+            ->assertSee('the complete creator-to-viewer protection flow does not exist yet')
             ->assertSee('Sponsored by')
             ->assertSee('TekFoundry')
             ->assertSee('info@tekfoundry.com');
@@ -32,6 +35,7 @@ final class LandingPageTest extends TestCase
             ->assertSee('Skip to content')
             ->assertSee('aria-label="Primary navigation"', false)
             ->assertSee('id="main-content"', false)
+            ->assertSee('id="problem"', false)
             ->assertSee('id="approach"', false)
             ->assertSee('id="boundaries"', false)
             ->assertSee('id="project-status"', false);

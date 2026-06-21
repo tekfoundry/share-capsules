@@ -1,23 +1,23 @@
 @extends('layouts.app')
 
-@section('title', 'Share Capsules — Protect the work. Share with intention.')
-@section('description', 'Share Capsules is an experimental creator-controlled system for distributing encrypted content under explicit trust policies.')
+@section('title', 'Share Capsules — Share your work with people, not harvesters')
+@section('description', 'Share Capsules is an open, experimental approach to sharing encrypted creative work under creator-defined access conditions.')
 
 @section('content')
     <section class="mx-auto grid max-w-7xl gap-14 px-5 pt-16 pb-20 sm:px-8 sm:pt-24 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:px-10 lg:pt-28 lg:pb-28">
         <div>
             <div class="inline-flex items-center gap-2 rounded-full border border-teal-700/15 bg-teal-50 px-3 py-1.5 text-xs font-bold tracking-[0.12em] text-teal-800 uppercase">
                 <span class="size-1.5 rounded-full bg-teal-500" aria-hidden="true"></span>
-                Creator-controlled access
+                For creators who still want to share
             </div>
 
             <h1 class="mt-7 max-w-3xl text-5xl leading-[1.02] font-semibold tracking-[-0.045em] text-balance sm:text-6xl lg:text-7xl">
-                Protect the work.<br>
-                <span class="text-brand">Share with intention.</span>
+                Share your work with people.<br>
+                <span class="text-brand">Not with every machine that asks.</span>
             </h1>
 
             <p class="mt-7 max-w-2xl text-lg leading-8 text-muted sm:text-xl">
-                Package creative work as an encrypted Capsule, publish it anywhere, and let your signed access policy travel with it.
+                Publishing online should not automatically grant scrapers, bulk collectors, and AI training pipelines unrestricted access to your work. Share Capsules is exploring a more intentional way to publish.
             </p>
 
             <div class="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -25,18 +25,22 @@
                     href="#approach"
                     class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-brand px-5 text-sm font-bold text-white shadow-lg shadow-brand/15 transition hover:-translate-y-0.5 hover:bg-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                 >
-                    Explore the approach
+                    See how it could work
                     <span aria-hidden="true">→</span>
                 </a>
                 <a
                     href="#project-status"
                     class="inline-flex min-h-12 items-center justify-center rounded-xl border border-line bg-white px-5 text-sm font-bold text-ink shadow-sm transition hover:-translate-y-0.5 hover:border-brand/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                 >
-                    See development status
+                    Follow the project
                 </a>
             </div>
 
-            <dl class="mt-11 grid max-w-xl grid-cols-3 gap-5 border-t border-line pt-6">
+            <p class="mt-7 max-w-2xl border-l-2 border-amber-400 pl-4 text-sm leading-6 text-muted">
+                <strong class="text-ink">An honest boundary:</strong> no technology can prevent an authorized viewer from copying what they can see. The goal is to make effortless, anonymous, large-scale access harder—not to promise impossible DRM.
+            </p>
+
+            <dl class="mt-8 grid max-w-xl grid-cols-3 gap-5 border-t border-line pt-6">
                 <div>
                     <dt class="text-xs font-semibold tracking-wide text-muted uppercase">Content</dt>
                     <dd class="mt-1 text-sm font-bold text-ink">Encrypted locally</dd>
@@ -112,19 +116,42 @@
         </div>
     </section>
 
-    <section id="approach" class="border-y border-line bg-white py-20 sm:py-24">
+    <section id="problem" class="border-y border-artifact-line bg-artifact py-20 text-white sm:py-24">
+        <div class="mx-auto grid max-w-7xl gap-12 px-5 sm:px-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-start lg:px-10">
+            <div>
+                <p class="text-xs font-bold tracking-[0.16em] text-violet-300 uppercase">The problem</p>
+                <h2 class="mt-4 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">The web asks creators to choose between reach and control.</h2>
+                <p class="mt-5 text-base leading-7 text-slate-300">Public work is easy for people to discover—and just as easy for automated systems to scrape, aggregate, archive, republish, and train on without meaningful permission.</p>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-3">
+                @foreach ([
+                    ['Publish', 'Creators want their work to be seen, discussed, and enjoyed by real audiences.'],
+                    ['Lose control', 'A public URL usually gives human visitors and industrial harvesters the same access.'],
+                    ['Accept lock-in', 'Private platforms add gates, but often require the creator to surrender hosting and audience relationships.'],
+                ] as [$heading, $copy])
+                    <article class="rounded-2xl border border-white/10 bg-white/[0.045] p-5">
+                        <h3 class="font-bold text-white">{{ $heading }}</h3>
+                        <p class="mt-3 text-sm leading-6 text-slate-300">{{ $copy }}</p>
+                    </article>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <section id="approach" class="border-b border-line bg-white py-20 sm:py-24">
         <div class="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
             <div class="max-w-2xl">
-                <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">A portable protection model</p>
-                <h2 class="mt-4 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">Ownership stays visible in the architecture.</h2>
-                <p class="mt-5 text-lg leading-8 text-muted">Capsule and CTX separate content hosting, trust evaluation, and key release so no ordinary website needs to become the viewer’s identity provider.</p>
+                <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">What we are building</p>
+                <h2 class="mt-4 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">Encrypted content with creator-defined access.</h2>
+                <p class="mt-5 text-lg leading-8 text-muted">A Capsule carries encrypted content and a signed access policy. CTX separates hosting, trust evaluation, and key release so creators can choose where they publish without asking an ordinary website to become an identity provider.</p>
             </div>
 
             <div class="mt-12 grid gap-5 md:grid-cols-3">
                 @foreach ([
-                    ['01', 'Create locally', 'Trusted creator tooling encrypts the source, signs its manifest, and exports a portable Capsule.'],
-                    ['02', 'Publish anywhere', 'The encrypted Capsule can live on an ordinary compatible static host selected by its creator.'],
-                    ['03', 'Open intentionally', 'A trusted Viewer evaluates the signed policy before a device-bound content key is released.'],
+                    ['01', 'Create a Capsule', 'Creator-controlled tooling encrypts the source, signs its manifest, and packages the access policy.'],
+                    ['02', 'Host it independently', 'The encrypted file can live on an ordinary compatible static host chosen by the creator.'],
+                    ['03', 'Authorize each release', 'A trusted Viewer uses CTX to satisfy the policy before decrypting and rendering locally.'],
                 ] as [$number, $heading, $copy])
                     <article class="rounded-2xl border border-line bg-surface p-6 shadow-card">
                         <span class="text-xs font-bold tracking-[0.16em] text-brand uppercase">{{ $number }}</span>
@@ -168,7 +195,7 @@
                         <span class="size-2 rounded-full bg-amber-500" aria-hidden="true"></span>
                         Active experimental development
                     </div>
-                    <p class="mt-3 text-sm leading-6 text-amber-950/75">Share Capsules is not yet ready to protect sensitive or irreplaceable content. The implementation is being built in public with automated protocol and security tests.</p>
+                <p class="mt-3 text-sm leading-6 text-amber-950/75">The account and protocol foundations are being implemented and tested, but the complete creator-to-viewer protection flow does not exist yet. Share Capsules is not ready to protect sensitive or irreplaceable content.</p>
                 </div>
                 <a class="shrink-0 text-sm font-bold text-amber-900 underline decoration-amber-400 underline-offset-4 hover:text-amber-700" href="mailto:info@tekfoundry.com">Questions or feedback</a>
             </div>
