@@ -17,8 +17,9 @@ final class TechnicalOverviewPageTest extends TestCase
             ->assertSee('Conditions and predicates—not a universal reputation currency.')
             ->assertSee('Protocol before monopoly.')
             ->assertSee('A focused proof, not universal content control.')
-            ->assertSee('Foundations exist; the complete protection flow does not.')
-            ->assertSee('Designed, not operational end to end');
+            ->assertSee('What exists today—and what does not.')
+            ->assertSee('Active development')
+            ->assertSee('Deferred beyond V1');
     }
 
     public function test_design_sources_become_links_when_the_public_repository_is_configured(): void

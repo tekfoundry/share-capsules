@@ -116,22 +116,7 @@
                     </ul>
                 </section>
 
-                <section id="status" class="scroll-mt-8 border-t border-line py-20 lg:py-24">
-                    <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">Implementation status</p>
-                    <h2 class="mt-3 text-3xl font-semibold tracking-[-0.035em]">Foundations exist; the complete protection flow does not.</h2>
-                    <div class="mt-7 overflow-hidden rounded-2xl border border-line">
-                        @foreach ([
-                            ['Implemented and tested', 'Versioned contracts and vectors; account authentication and passkeys; verified email; registered Viewer device keys; OAuth PKCE and DPoP; account closure, deletion, sanction retention, and backup-deletion replay.'],
-                            ['Designed, not operational end to end', 'Isolated Key Broker, CTX policy/ticket/redemption control plane, Creator Studio, production Viewer extension, trusted rendering, metrics projections, and static reference Host.'],
-                            ['Release gates remain', 'Fuzzing, compatibility benchmarks, independent security review, production topology, extension-store review, operational exercises, and complete threat-model evidence.'],
-                        ] as $index => [$label, $copy])
-                            <div class="grid gap-2 border-b border-line p-5 last:border-b-0 sm:grid-cols-[13rem_1fr] sm:p-6">
-                                <p class="font-bold {{ $index === 0 ? 'text-teal-700' : ($index === 1 ? 'text-amber-700' : 'text-muted') }}">{{ $label }}</p>
-                                <p class="text-sm leading-6 text-muted">{{ $copy }}</p>
-                            </div>
-                        @endforeach
-                    </div>
-                </section>
+                <x-public.project-status id="status" class="scroll-mt-8 border-x-0 border-b-0 px-0 py-20 lg:py-24 [&>div]:px-0" />
 
                 <section id="design-sources" class="scroll-mt-8 border-t border-line py-20 lg:py-24">
                     <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">Design sources</p>

@@ -133,7 +133,7 @@ Objective: publish an honest, compelling explanation of the problem and proposed
 - ✅ Create a polished, accessible visual workflow showing creation, encrypted static hosting, CTX policy evaluation, broker key release, and local Viewer decryption.
 - ✅ Create a dedicated “How it works” page that explains the creator, Host, provider, broker, and Viewer boundaries in approachable language.
 - ✅ Create a living technical-overview page covering Capsule and CTX terminology, architecture, cryptographic boundaries, trust and privacy, provider independence, V1 limitations, and links to the detailed design documents.
-- ⬜️ Clearly distinguish the long-term vision, implemented capabilities, active development, and deferred work on every page where readers could otherwise infer production readiness.
+- ✅ Clearly distinguish the long-term vision, implemented capabilities, active development, and deferred work on every page where readers could otherwise infer production readiness.
 - ⬜️ Add visible TekFoundry sponsorship, `info@tekfoundry.com`, open-source participation, GitHub, and feedback calls to action without presenting TekFoundry as the only possible future CTX Provider.
 - ⬜️ Add page titles, descriptions, canonical URLs, social-sharing metadata and image, semantic landmarks, keyboard support, reduced-motion behavior, and responsive layouts.
 - ⬜️ Add automated page, content, metadata, link, accessibility-smoke, and responsive-layout tests that lock down important public claims without making ordinary copy edits brittle.

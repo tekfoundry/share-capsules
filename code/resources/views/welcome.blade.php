@@ -227,18 +227,5 @@
         </div>
     </section>
 
-    <section id="project-status" class="border-t border-line bg-white py-16">
-        <div class="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
-            <div class="flex flex-col gap-6 rounded-2xl border border-amber-300/45 bg-amber-50/70 p-6 sm:p-8 md:flex-row md:items-center md:justify-between">
-                <div class="max-w-3xl">
-                    <div class="flex items-center gap-2 text-sm font-bold text-amber-900">
-                        <span class="size-2 rounded-full bg-amber-500" aria-hidden="true"></span>
-                        Active experimental development
-                    </div>
-                <p class="mt-3 text-sm leading-6 text-amber-950/75">The account and protocol foundations are being implemented and tested, but the complete creator-to-viewer protection flow does not exist yet. Share Capsules is not ready to protect sensitive or irreplaceable content.</p>
-                </div>
-                <a class="shrink-0 text-sm font-bold text-amber-900 underline decoration-amber-400 underline-offset-4 hover:text-amber-700" href="mailto:info@tekfoundry.com">Questions or feedback</a>
-            </div>
-        </div>
-    </section>
+    <x-public.project-status />
 @endsection

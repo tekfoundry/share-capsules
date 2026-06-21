@@ -41,8 +41,8 @@ final class LandingPageTest extends TestCase
             ->assertSee('The creator receives the policy result')
             ->assertSee('not the Viewer’s email, identity, complete history, or raw evidence')
             ->assertSee('Security without mystery.')
-            ->assertSee('Active experimental development')
-            ->assertSee('the complete creator-to-viewer protection flow does not exist yet')
+            ->assertSee('What exists today—and what does not.')
+            ->assertSee('Share Capsules is public experimental work, not a production content-protection service.')
             ->assertSee('Sponsored by')
             ->assertSee('TekFoundry')
             ->assertSee('info@tekfoundry.com');

@@ -74,6 +74,8 @@
         </div>
     </section>
 
+    <x-public.project-status />
+
     <section class="border-t border-line bg-white py-16">
         <div class="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
             <div class="grid gap-6 rounded-2xl border border-amber-300/45 bg-amber-50/70 p-6 sm:p-8 lg:grid-cols-[1fr_auto] lg:items-center">
