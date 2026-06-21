@@ -6,6 +6,7 @@
         { "path": "./packages/ctx-client" },
         { "path": "./packages/share-capsules-adapter" },
         { "path": "./packages/test-fixtures" },
-        { "path": "./apps/browser-extension" }
+        { "path": "./apps/browser-extension" },
+        { "path": "./tsconfig.browser.json" }
     ]
 }

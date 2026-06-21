@@ -136,7 +136,7 @@ Objective: publish an honest, compelling explanation of the problem and proposed
 - ✅ Clearly distinguish the long-term vision, implemented capabilities, active development, and deferred work on every page where readers could otherwise infer production readiness.
 - ✅ Add visible TekFoundry sponsorship, `info@tekfoundry.com`, open-source participation, GitHub, and feedback calls to action without presenting TekFoundry as the only possible future CTX Provider.
 - ✅ Add page titles, descriptions, canonical URLs, social-sharing metadata and image, semantic landmarks, keyboard support, reduced-motion behavior, and responsive layouts.
-- ⬜️ Add automated page, content, metadata, link, accessibility-smoke, and responsive-layout tests that lock down important public claims without making ordinary copy edits brittle.
+- ✅ Add automated page, content, metadata, link, accessibility-smoke, and responsive-layout tests that lock down important public claims without making ordinary copy edits brittle.
 - ⬜️ Perform a manual review on representative desktop and mobile sizes for clarity, accessibility, visual hierarchy, broken links, and accidental security or readiness overclaims.
 
 Success goals:

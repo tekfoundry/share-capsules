@@ -160,6 +160,42 @@ check_command() {
     echo
 }
 
+browser_check_command() {
+    require_env_file
+
+    compose_cmd up -d --wait --wait-timeout 180 app
+    run_in_code_no_tty npx playwright install --with-deps chromium
+
+    # The browser runs inside the app container, where Vite listens on 5173.
+    # Local browsers use the Docker-published port recorded in public/hot instead.
+    compose_cmd exec -T app bash -lc '
+        set -euo pipefail
+        cd /workspace/code
+
+        hot_file=public/hot
+        original_hot="$(mktemp)"
+        had_hot=false
+
+        if [[ -f "$hot_file" ]]; then
+            cp "$hot_file" "$original_hot"
+            had_hot=true
+        fi
+
+        restore_hot() {
+            if [[ "$had_hot" == true ]]; then
+                cp "$original_hot" "$hot_file"
+            else
+                rm -f "$hot_file"
+            fi
+            rm -f "$original_hot"
+        }
+
+        trap restore_hot EXIT
+        printf "%s\n" "http://127.0.0.1:5173" > "$hot_file"
+        npm run test:browser
+    '
+}
+
 service_lifecycle() {
     local service_name="$1"
     local action="${2:-}"
@@ -187,6 +223,7 @@ case "$subcommand" in
     npm) require_env_file; run_in_code npm "$@" ;;
     test) test_command "$@" ;;
     check|ci) check_command ;;
+    browser-check) browser_check_command ;;
     workers) require_env_file; service_lifecycle workers "${1:-}" ;;
     scheduler) require_env_file; service_lifecycle scheduler "${1:-}" ;;
     doctor) doctor ;;
@@ -207,6 +244,7 @@ Commands:
   test ...            Recreate the dedicated MySQL test database and run tests
   check               Run all non-browser quality gates in containers
   ci                  Alias for check, used by continuous integration
+  browser-check       Install Chromium and run browser accessibility/layout tests
   workers <action>    Manage queue workers (up, down, logs)
   scheduler <action>  Manage the Laravel scheduler (up, down, logs)
   doctor              Validate local infrastructure prerequisites

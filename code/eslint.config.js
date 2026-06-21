@@ -9,11 +9,29 @@ export default defineConfig(
     eslint.configs.recommended,
     ...tseslint.configs.recommended.map((config) => ({
         ...config,
-        files: ['apps/**/*.ts', 'packages/**/*.ts'],
+        files: [
+            'apps/**/*.ts',
+            'packages/**/*.ts',
+            'tests/Browser/**/*.ts',
+            'playwright.config.ts',
+        ],
     })),
     {
-        files: ['apps/**/*.ts', 'packages/**/*.ts'],
+        files: [
+            'apps/**/*.ts',
+            'packages/**/*.ts',
+            'tests/Browser/**/*.ts',
+            'playwright.config.ts',
+        ],
         languageOptions: { parser: tseslint.parser },
+    },
+    {
+        files: ['playwright.config.ts'],
+        languageOptions: {
+            globals: {
+                process: 'readonly',
+            },
+        },
     },
     {
         files: ['resources/js/**/*.js'],
