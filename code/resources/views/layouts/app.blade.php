@@ -77,10 +77,10 @@
                     <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
                         <a class="font-semibold text-brand hover:text-brand-strong" href="{{ route('how-it-works') }}">How it works</a>
                         <a class="font-semibold text-brand hover:text-brand-strong" href="{{ route('technical') }}">Technical overview</a>
-                        <a class="font-semibold text-brand hover:text-brand-strong" href="{{ config('sharecapsules.public.repository_url') ?: 'https://github.com/tekfoundry' }}" rel="noreferrer">GitHub</a>
+                        <a class="font-semibold text-brand hover:text-brand-strong" href="{{ config('sharecapsules.public.repository_url') }}" target="_blank" rel="noopener noreferrer">GitHub</a>
                         <span>
                             Sponsored by
-                            <a class="font-semibold text-brand hover:text-brand-strong" href="https://tekfoundry.com" rel="noreferrer">TekFoundry</a>
+                            <a class="font-semibold text-brand hover:text-brand-strong" href="https://tekfoundry.com" target="_blank" rel="noopener noreferrer">TekFoundry</a>
                         </span>
                         <a class="font-semibold text-brand hover:text-brand-strong" href="mailto:info@tekfoundry.com">info@tekfoundry.com</a>
                     </div>

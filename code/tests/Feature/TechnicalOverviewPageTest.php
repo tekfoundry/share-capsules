@@ -30,7 +30,7 @@ final class TechnicalOverviewPageTest extends TestCase
             ->assertOk()
             ->assertSee('id="design-sources"', false)
             ->assertSee(
-                'href="https://github.com/tekfoundry/share-capsules/blob/main/_docs/design/03_architecture/system-overview.md"',
+                'href="https://github.com/tekfoundry/share-capsules/blob/master/_docs/design/03_architecture/system-overview.md"',
                 false,
             )
             ->assertSee('_docs/design/07_security-and-privacy/threat-model-v1.md');

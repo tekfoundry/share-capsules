@@ -4,7 +4,7 @@ use App\OAuth\ExtensionOAuthScope;
 
 return [
     'public' => [
-        'repository_url' => env('SHARECAPSULES_PUBLIC_REPOSITORY_URL'),
+        'repository_url' => env('SHARECAPSULES_PUBLIC_REPOSITORY_URL') ?: 'https://github.com/tekfoundry/share-capsules',
     ],
 
     'deployment' => [

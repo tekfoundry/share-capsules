@@ -127,7 +127,7 @@
                             <li class="flex flex-col gap-2 p-5 sm:flex-row sm:items-center sm:justify-between">
                                 <span class="font-bold text-ink">{{ $label }}</span>
                                 @if ($repositoryUrl !== '')
-                                    <a class="break-all font-mono text-xs text-brand hover:text-brand-strong" href="{{ $repositoryUrl }}/blob/main/{{ $path }}">{{ $path }}</a>
+                                    <a class="break-all font-mono text-xs text-brand hover:text-brand-strong" href="{{ $repositoryUrl }}/blob/master/{{ $path }}" target="_blank" rel="noopener noreferrer">{{ $path }}</a>
                                 @else
                                     <code class="break-all text-xs text-muted">{{ $path }}</code>
                                 @endif
