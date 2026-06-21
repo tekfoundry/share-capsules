@@ -118,6 +118,14 @@ For V1, Share Capsules necessarily learns that the account and registered device
 
 V1 may derive a short-lived automation-risk assertion from authorization and committed-release metadata across Share Capsules. The creator receives only the selected policy result, not raw ecosystem usage. Adding pointer, interaction, surrounding-page, or other passive telemetry requires a new explicit consent and versioned policy decision; it is not silently included in the V1 risk gate.
 
+## Creator Capsule metrics
+
+V1 exposes an operational Capsule dashboard using privacy-safe aggregates derived from authorization and committed key-release events. The authoritative view metric is broker-committed key release, not proof of rendering, attention, or human understanding.
+
+Creators may see Capsule totals, bounded time buckets, global limit status, safe denial-category aggregates, and thresholded per-account limit-pressure indicators. They do not receive viewer identifiers, individual histories, exact access timestamps, IP addresses, user agents, hardware identifiers, raw trust evidence, or raw denial reasons. Sparse breakdowns are suppressed when they could reveal one viewer's activity or trust state.
+
+Country, device class, browser family, operating-system family, and Viewer-version analytics are deferred beyond V1. A future implementation requires separate explicit analytics consent, a defined purpose and retention period, coarse values, minimum cohort protection, and a new privacy review. Optional analytics fields are not collected in advance merely because the event schema can carry them. Declining optional analytics does not authorize hidden collection or retroactive derivation.
+
 ## Transparency and control
 
 Viewers should be able to inspect:
@@ -163,6 +171,7 @@ The V1 data classes, disclosure boundaries, and accepted retention schedule are 
 - Can score calculation happen locally without making it trivial to forge?
 - What history remains when tracking is disabled?
 - Which disclosures must creators see versus only the policy evaluator?
+- What minimum cohorts and time-bucket sizes provide useful creator metrics without exposing sparse viewer activity?
 
 ## Related documents
 
@@ -173,3 +182,4 @@ The V1 data classes, disclosure boundaries, and accepted retention schedule are 
 - [Open questions](../09_planning/open-questions.md)
 - [V1 automation risk](../05_ctx/automation-risk.md)
 - [V1 trust profile and retained state](../05_ctx/trust-profile-v1.md)
+- [Capsule metrics dashboard](../02_product/capsule-metrics-dashboard.md)

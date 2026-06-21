@@ -138,6 +138,7 @@ Objective: authorize exact Capsule releases without exposing raw content keys to
 - ⬜️ Implement strict broker ticket validation, fresh device proof, and HPKE wrapping to the registered X25519 agreement key.
 - ⬜️ Implement online ticket redemption with atomic replay prevention and global/per-account committed-release counter increments.
 - ⬜️ Ensure an unredeemed ticket never counts and a committed release counts even if the final response is lost.
+- ⬜️ Implement a versioned, provider-aware metrics event and idempotent projection model for authorization attempts, privacy-safe denials, and authoritative broker-committed releases without copying viewer identity or raw trust evidence into creator analytics.
 - ⬜️ Implement Capsule and account revocation, paused creator releases during account closure, and broker-key destruction after permanent deletion.
 - ⬜️ Implement V1 deterministic automation-risk rules using only CTX authorization and committed-release metadata.
 - ⬜️ Expose privacy-safe denial categories to the Viewer while withholding global identity and raw history from creators and Hosts.
@@ -165,6 +166,8 @@ Objective: let a creator produce a valid Capsule without sending plaintext or cr
 - ⬜️ Immediately re-open and verify the produced Capsule with the same strict reader before download.
 - ⬜️ Present copyable `<capsule-viewer>` integration instructions, compatible Host requirements, and public fallback guidance.
 - ⬜️ Provide a Capsule inventory with status, identifiers, policy summary, release counts, revocation, and account-deletion impact.
+- ⬜️ Build the per-Capsule operational metrics dashboard for committed-release totals and time buckets, authorization and safe denial aggregates, global limit status, and thresholded per-account limit pressure with visible freshness, retention, and suppression explanations.
+- ⬜️ Keep country, device class, browser/OS family, and Viewer-version analytics outside V1 while preserving a versioned optional-dimensions boundary that collects nothing without later consent and privacy approval.
 
 Success goals:
 
@@ -226,6 +229,7 @@ Objective: satisfy the documented threat model and prove that privacy promises a
 - ⬜️ Test path traversal, duplicate entries, ZIP bombs, decompression limits, integer boundaries, malformed images, animation, and decoder failures.
 - ⬜️ Test OAuth mix-up, callback mismatch, token theft, replay, device revocation, recovery abuse, and concurrent redemption.
 - ⬜️ Verify logs and error responses contain no plaintext, secret keys, recovery codes, content keys, reusable credentials, or raw trust histories.
+- ⬜️ Test Capsule metric idempotency, committed-release semantics, low-volume suppression, creator ownership checks, aggregate retention, and the absence of viewer identifiers or deferred audience dimensions from creator projections.
 - ⬜️ Implement automated retention jobs for 24-hour replay artifacts, 30-day CTX/risk detail, 90-day security audits, 90-day maximum sanction tombstones, and 30-day backup expiration.
 - ⬜️ Test account closure, permanent deletion, broker-key destruction, counter disposal, backup restoration, and deletion-ledger replay.
 - ⬜️ Produce privacy controls for consent inspection, revocation, data export, correction, and appeal.

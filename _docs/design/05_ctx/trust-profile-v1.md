@@ -55,6 +55,14 @@ Counters represent committed key releases, not proof that a human saw or attende
 
 Capsule-global and per-account Capsule counters persist only while needed to enforce an active Capsule policy. When a Capsule is permanently revoked or its broker release material is destroyed, its enforcement counters are deleted through the normal data-lifecycle process. Deleting a viewer account removes its per-account counters; it does not decrement the Capsule-global count while that Capsule remains active.
 
+### Creator metrics projections
+
+Share Capsules may derive a creator-facing operational projection from authorization and broker-redemption events. The projection contains Capsule-level totals, bounded time buckets, safe denial-category aggregates, limit status, and thresholded per-account limit-pressure indicators. It does not contain viewer identifiers, individual access histories, exact per-viewer timestamps, raw trust evidence, raw denial context, IP addresses, user agents, or device identifiers.
+
+Low-volume breakdowns are suppressed when they could reveal one viewer's activity or trust state. Suppression does not alter authoritative enforcement counters. The event and projection schemas are versioned and provider-aware, but extensibility does not authorize collection of a new data category.
+
+Country, device class, browser family, operating-system family, and Viewer version analytics are not part of the V1 retained profile. Adding them later requires explicit analytics consent, purpose and retention definitions, coarse values, cohort suppression, and an accepted privacy review.
+
 ### Automation-risk state
 
 - Current V1 result, such as `high` or `not_high`
@@ -95,6 +103,7 @@ Identifiable CTX access-event detail and the rolling data used by V1 automation-
 | Consent records | Required internally | Visible and revocable | Approved policy result only | Automatic-opening state may affect local rendering but is not disclosed as profile data |
 | Capsule-global count | Required | Relevant limit status | Creator-owned Capsule aggregate may be available | Never |
 | Per-account Capsule count | Required | Relevant limit status | Requirement satisfied or denied; no global identity | Never |
+| Capsule metrics projection | Aggregate source events only as retained | Relevant activity controls where defined | Privacy-safe aggregate for creator-owned Capsules | Never |
 | Automation-risk state | Required | Current status and useful explanation | Accepted predicate only | Never |
 | Raw ecosystem activity | Minimized internal use | Activity/account controls as defined | Never | Never |
 | Ticket and replay state | Required temporarily | Recent access event where useful | Never | Never |
@@ -139,6 +148,7 @@ Account deletion is not a one-human-one-account control. A user can abandon an e
 | Active-sanction deletion tombstone | Until reversal, sanction expiry, or 90 days from deletion, whichever occurs first |
 | Deleted data in disaster-recovery backups | No more than 30 additional days |
 | Capsule enforcement counters | Only while required by an active Capsule policy |
+| Creator metrics aggregates | Only while the Capsule remains active or the creator retains the Capsule record; source detail remains subject to the shorter CTX event limits |
 
 Implementation may not treat “useful later” as a retention purpose. A legally required preservation exception must be documented, access-restricted, scoped to the affected records, and removed when the obligation ends.
 
@@ -151,3 +161,4 @@ Implementation may not treat “useful later” as a retention purpose. A legall
 - [Authorization and key release](authorization-and-key-release.md)
 - [Privacy model](../07_security-and-privacy/privacy-model.md)
 - [V1 threat model](../07_security-and-privacy/threat-model-v1.md)
+- [Capsule metrics dashboard](../02_product/capsule-metrics-dashboard.md)
