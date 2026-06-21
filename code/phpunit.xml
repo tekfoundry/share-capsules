@@ -29,6 +29,7 @@
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
+        <env name="ACCOUNT_SANCTION_HMAC_KEY" value="test-only-sanction-hmac-key-0000"/>
         <env name="SHARECAPSULES_ENVIRONMENT" value="test"/>
         <env name="SHARECAPSULES_DEPLOYMENT_ID" value="automated-test"/>
         <env name="SHARECAPSULES_EXTENSION_CHANNEL" value="test"/>

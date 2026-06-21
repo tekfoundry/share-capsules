@@ -1,7 +1,7 @@
 # Accounts and Identity
 
 Status: Draft
-Last updated: 2026-06-20
+Last updated: 2026-06-21
 
 ## Purpose
 
@@ -38,6 +38,10 @@ A replacement account starts without the deleted account's reputation, continuit
 Ordinary account deletion leaves no account-level abuse tombstone. If the account is subject to an active security or abuse sanction when deletion completes, V1 may retain a restricted sanction tombstone for no more than 90 days from deletion. It contains only a keyed HMAC of the normalized verified email address, the sanction category, imposed and expiry timestamps, and an appeal reference. It contains no raw email address, viewing history, per-account counters, device fingerprint, credential, or trust profile.
 
 The tombstone exists only to enforce the still-active sanction and support correction or appeal. It is deleted immediately if the sanction is reversed and no later than its 90-day maximum. Access is limited to the signup-abuse check and authorized security or appeal personnel; it must not support advertising, general reputation, creator disclosure, or account reconstruction. A different email may evade this modest V1 control, and the product must not present it as duplicate-person detection.
+
+V1 recognizes only the coarse `automation_abuse`, `account_abuse`, and `security_abuse` sanction categories. The categories are intentionally not free-form narratives. The email comparison uses a dedicated, deployment-specific 32-byte HMAC-SHA-256 key over the trimmed, lowercase verified address and stores only the binary digest. Production deployment validation rejects missing, placeholder, or incorrectly sized keys. The key must remain stable for the tombstone's bounded lifetime and must not be reused as a general application-encryption secret.
+
+At permanent deletion, an account-level transaction creates a tombstone only for sanctions that are unreversed and unexpired. `retain_until` is the earlier of sanction expiry and 90 days after deletion. Reversal by appeal reference deletes the tombstone immediately; an hourly pruning job removes records at their retention boundary. Registration checks only active tombstones for the normalized candidate email. It creates no link between old and replacement accounts, and registration with another email remains possible.
 
 Deleted account data may remain in encrypted disaster-recovery backups for no more than 30 additional days after permanent deletion. Backups are not searchable, available to normal application paths, or used for analytics, policy evaluation, sanction enforcement, or account reconstruction. A durable deletion ledger records the minimum identifiers needed to reapply deletions before any restored backup is returned to service. The ledger itself must not preserve deleted profile or activity data.
 
@@ -125,7 +129,7 @@ A scheduled, single-provider worker processes bounded batches of accounts only a
 
 Permanent deletion removes password-reset state, sessions, passkeys, Viewer devices and challenges, OAuth authorization codes, access tokens, refresh tokens, the account row, and all account-linked trust-profile state. V1 has not begun persisting a detailed trust profile, so the current repository is intentionally empty; the deletion dependency remains explicit and must be replaced when profile storage is introduced. Capsule-global counters are not account-linked state and are not deleted through this path.
 
-Deletion participants run before the account row is removed while it remains locked. A participant failure aborts and reports that account without preventing other eligible accounts from being attempted; the failed deletion remains eligible for the next run. The sanction-tombstone and durable deletion-ledger implementations attach at this boundary so their required records are committed before personal account state disappears.
+Deletion participants run before the account row is removed while it remains locked. A participant failure aborts and reports that account without preventing other eligible accounts from being attempted; the failed deletion remains eligible for the next run. The active-sanction participant is attached at this boundary, and the durable deletion-ledger implementation will attach there as well, so required records commit before personal account state disappears.
 
 Ordinary deletion retains no account mapping. The verified email becomes available for a new registration, but the replacement receives a new account identifier and has no inherited devices, credentials, counters, trust profile, reputation, or continuity. Reusing the same email address does not restore the deleted account.
 

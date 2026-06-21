@@ -28,6 +28,12 @@ class User extends Authenticatable implements MustVerifyEmail, OAuthenticatable,
         return $this->hasMany(ViewerDevice::class);
     }
 
+    /** @return HasMany<AccountSanction, $this> */
+    public function sanctions(): HasMany
+    {
+        return $this->hasMany(AccountSanction::class);
+    }
+
     public function isClosed(): bool
     {
         return $this->closed_at !== null;

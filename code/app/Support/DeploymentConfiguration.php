@@ -18,6 +18,7 @@ final class DeploymentConfiguration
         $oauthRedirectUri = (string) config('sharecapsules.oauth.extension_redirect_uri');
         $ctxIssuer = (string) config('sharecapsules.ctx.issuer');
         $brokerUrl = (string) config('sharecapsules.broker.base_url');
+        $sanctionHmacKey = (string) config('accounts.sanctions.email_hmac_key');
 
         if (! in_array($environment, ['development', 'test', 'production'], true)) {
             $issues[] = 'deployment_environment_invalid';
@@ -59,6 +60,10 @@ final class DeploymentConfiguration
             if ($this->isPlaceholder($extensionId) || $this->isPlaceholder($oauthClientId)) {
                 $issues[] = 'production_identity_placeholder';
             }
+
+            if (! $this->isValidProductionSecret($sanctionHmacKey)) {
+                $issues[] = 'sanction_hmac_key_invalid';
+            }
         }
 
         return $issues;
@@ -81,5 +86,20 @@ final class DeploymentConfiguration
     private function isPlaceholder(string $value): bool
     {
         return preg_match('/replace|placeholder|development|test|local|not-configured/i', $value) === 1;
+    }
+
+    private function isValidProductionSecret(string $value): bool
+    {
+        if ($value === '' || $this->isPlaceholder($value)) {
+            return false;
+        }
+
+        if (str_starts_with($value, 'base64:')) {
+            $decoded = base64_decode(substr($value, 7), true);
+
+            return is_string($decoded) && strlen($decoded) === 32;
+        }
+
+        return strlen($value) === 32;
     }
 }

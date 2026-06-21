@@ -30,7 +30,19 @@ final class DeploymentConfigurationTest extends TestCase
             'production_identity_placeholder',
             'extension_oauth_redirect_mismatch',
             'extension_oauth_client_id_invalid',
+            'sanction_hmac_key_invalid',
         ], app(DeploymentConfiguration::class)->issues());
+    }
+
+    public function test_production_accepts_a_dedicated_32_byte_sanction_hmac_key(): void
+    {
+        config()->set('sharecapsules.deployment.environment', 'production');
+        config()->set('accounts.sanctions.email_hmac_key', 'base64:'.base64_encode(random_bytes(32)));
+
+        $this->assertNotContains(
+            'sanction_hmac_key_invalid',
+            app(DeploymentConfiguration::class)->issues(),
+        );
     }
 
     public function test_extension_callback_must_exactly_match_the_configured_extension_identity(): void
