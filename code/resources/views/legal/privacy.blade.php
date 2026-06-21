@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('title', 'Privacy notice — Share Capsules')
+@section('description', 'How the experimental Share Capsules reference implementation handles account, session, and trust-related information.')
+@section('robots', 'index, follow')
 
 @section('content')
     <article class="mx-auto max-w-3xl px-5 py-16 sm:px-8">

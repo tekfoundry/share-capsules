@@ -1,12 +1,40 @@
+@php
+    $pageTitle = trim($__env->yieldContent('title', config('app.name', 'Share Capsules')));
+    $pageDescription = trim($__env->yieldContent('description', 'Creator-controlled encrypted content with explicit trust policies.'));
+    $canonicalUrl = trim($__env->yieldContent('canonical', url()->current()));
+    $socialImageUrl = trim($__env->yieldContent('social_image', asset('images/share-capsules-social.png')));
+    $socialImageAlt = trim($__env->yieldContent('social_image_alt', 'Share Capsules — creator-controlled encrypted content sharing with Capsule and CTX.'));
+    $robots = trim($__env->yieldContent('robots', 'noindex, nofollow'));
+@endphp
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="description" content="@yield('description', 'Creator-controlled encrypted content with explicit trust policies.')">
+        <meta name="description" content="{{ $pageDescription }}">
+        <meta name="robots" content="{{ $robots }}">
         <meta name="theme-color" content="#f6f8fc">
 
-        <title>@yield('title', config('app.name', 'Share Capsules'))</title>
+        <title>{{ $pageTitle }}</title>
+        <link rel="canonical" href="{{ $canonicalUrl }}">
+
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="Share Capsules">
+        <meta property="og:title" content="{{ $pageTitle }}">
+        <meta property="og:description" content="{{ $pageDescription }}">
+        <meta property="og:url" content="{{ $canonicalUrl }}">
+        <meta property="og:image" content="{{ $socialImageUrl }}">
+        <meta property="og:image:type" content="image/png">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:image:alt" content="{{ $socialImageAlt }}">
+
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{{ $pageTitle }}">
+        <meta name="twitter:description" content="{{ $pageDescription }}">
+        <meta name="twitter:image" content="{{ $socialImageUrl }}">
+        <meta name="twitter:image:alt" content="{{ $socialImageAlt }}">
 
         @fonts
 
@@ -64,7 +92,17 @@
                 </div>
             </header>
 
-            <main id="main-content">
+            <nav class="border-b border-line/80 bg-white/80 lg:hidden" aria-label="Mobile primary navigation">
+                <div class="mx-auto grid max-w-2xl grid-cols-3 gap-x-4 gap-y-2 px-5 py-3 text-center text-xs font-semibold text-muted sm:grid-cols-5 sm:px-8 sm:text-sm">
+                    <a class="hover:text-ink" href="{{ route('home') }}#problem">The problem</a>
+                    <a class="hover:text-ink" href="{{ route('how-it-works') }}">How it works</a>
+                    <a class="hover:text-ink" href="{{ route('home') }}#trust">Trust</a>
+                    <a class="hover:text-ink" href="{{ route('technical') }}">Technical</a>
+                    <a class="hover:text-ink" href="{{ route('home') }}#project-status">Status</a>
+                </div>
+            </nav>
+
+            <main id="main-content" tabindex="-1">
                 @yield('content')
             </main>
 
@@ -74,7 +112,7 @@
                         <p class="font-semibold text-ink">Share Capsules</p>
                         <p class="mt-1">An open experimental implementation of Capsule and CTX.</p>
                     </div>
-                    <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+                    <nav class="flex flex-wrap items-center gap-x-6 gap-y-2" aria-label="Footer navigation">
                         <a class="font-semibold text-brand hover:text-brand-strong" href="{{ route('how-it-works') }}">How it works</a>
                         <a class="font-semibold text-brand hover:text-brand-strong" href="{{ route('technical') }}">Technical overview</a>
                         <a class="font-semibold text-brand hover:text-brand-strong" href="{{ config('sharecapsules.public.repository_url') }}" target="_blank" rel="noopener noreferrer">GitHub</a>
@@ -83,7 +121,7 @@
                             <a class="font-semibold text-brand hover:text-brand-strong" href="https://tekfoundry.com" target="_blank" rel="noopener noreferrer">TekFoundry</a>
                         </span>
                         <a class="font-semibold text-brand hover:text-brand-strong" href="mailto:info@tekfoundry.com">info@tekfoundry.com</a>
-                    </div>
+                    </nav>
                 </div>
             </footer>
         </div>

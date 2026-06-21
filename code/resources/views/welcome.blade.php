@@ -2,6 +2,7 @@
 
 @section('title', 'Share Capsules — Share your work with people, not harvesters')
 @section('description', 'Share Capsules is an open, experimental approach to sharing encrypted creative work under creator-defined access conditions.')
+@section('robots', 'index, follow')
 
 @section('content')
     <section class="mx-auto grid max-w-7xl gap-14 px-5 pt-16 pb-20 sm:px-8 sm:pt-24 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:px-10 lg:pt-28 lg:pb-28">

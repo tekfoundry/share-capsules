@@ -2,6 +2,7 @@
 
 @section('title', 'How Share Capsules works — Capsules, CTX, and trusted viewing')
 @section('description', 'Follow protected content from local Capsule creation through independent hosting, CTX policy evaluation, broker key release, and local Viewer decryption.')
+@section('robots', 'index, follow')
 
 @section('content')
     <section class="mx-auto max-w-7xl px-5 pt-16 pb-20 sm:px-8 sm:pt-24 lg:px-10 lg:pt-28">

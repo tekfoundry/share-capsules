@@ -2,6 +2,7 @@
 
 @section('title', 'Technical overview — Capsule and CTX architecture')
 @section('description', 'A living technical overview of Capsule, CTX, cryptographic boundaries, privacy, provider independence, V1 scope, and implementation status.')
+@section('robots', 'index, follow')
 
 @php
     $repositoryUrl = rtrim((string) config('sharecapsules.public.repository_url'), '/');

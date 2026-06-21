@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('title', 'Account terms — Share Capsules')
+@section('description', 'Working account terms for the experimental Share Capsules reference implementation.')
+@section('robots', 'index, follow')
 
 @section('content')
     <article class="mx-auto max-w-3xl px-5 py-16 sm:px-8">
