@@ -16,7 +16,7 @@ use Laravel\Passport\Contracts\OAuthenticatable;
 use Laravel\Passport\HasApiTokens;
 
 #[Fillable(['email', 'password', 'terms_accepted_at', 'terms_version'])]
-#[Hidden(['password', 'remember_token'])]
+#[Hidden(['password', 'remember_token', 'closure_recovery_token_hash'])]
 class User extends Authenticatable implements MustVerifyEmail, OAuthenticatable, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
@@ -26,6 +26,18 @@ class User extends Authenticatable implements MustVerifyEmail, OAuthenticatable,
     public function viewerDevices(): HasMany
     {
         return $this->hasMany(ViewerDevice::class);
+    }
+
+    public function isClosed(): bool
+    {
+        return $this->closed_at !== null;
+    }
+
+    public function isRecoverable(): bool
+    {
+        return $this->isClosed()
+            && $this->deletion_due_at !== null
+            && $this->deletion_due_at->isFuture();
     }
 
     /**
@@ -39,6 +51,9 @@ class User extends Authenticatable implements MustVerifyEmail, OAuthenticatable,
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'terms_accepted_at' => 'immutable_datetime',
+            'closed_at' => 'immutable_datetime',
+            'deletion_due_at' => 'immutable_datetime',
+            'last_restored_at' => 'immutable_datetime',
         ];
     }
 }

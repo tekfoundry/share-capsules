@@ -81,5 +81,11 @@
                 <button class="inline-flex min-h-11 items-center justify-center rounded-xl bg-red-700 px-4 text-sm font-bold text-white shadow-sm hover:bg-red-800" type="submit">Revoke other sessions</button>
             </form>
         </div>
+
+        <div class="mt-10 rounded-2xl border border-red-200 bg-white p-6 shadow-card">
+            <h2 class="text-lg font-bold text-red-800">Close account</h2>
+            <p class="mt-2 text-sm leading-6 text-muted">Immediately stop account access and begin the 30-day recovery period that precedes permanent deletion.</p>
+            <a class="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl border border-red-200 bg-white px-4 text-sm font-bold text-red-700 shadow-sm hover:bg-red-50" href="{{ route('account.closure.show') }}">Review account closure</a>
+        </div>
     </section>
 @endsection

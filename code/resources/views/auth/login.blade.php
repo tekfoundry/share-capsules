@@ -41,4 +41,5 @@
     </div>
 
     <p class="mt-6 text-center text-sm text-muted">New to Share Capsules? <a class="font-semibold text-brand hover:text-brand-strong" href="{{ route('register') }}">Create an account</a></p>
+    <p class="mt-2 text-center text-sm text-muted">Closed your account? <a class="font-semibold text-brand hover:text-brand-strong" href="{{ route('account.restore.notice') }}">Request restoration</a></p>
 @endsection

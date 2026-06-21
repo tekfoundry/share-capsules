@@ -109,6 +109,16 @@ The proof key demonstrates control of a registered Viewer installation; the agre
 
 The registration access token remains a bootstrap credential accepted only by the two registration endpoints. CTX credentials are issued separately after device registration. Every refresh proves the same device key and rotates the refresh token; rotated-token reuse revokes the device token family. Suspending or revoking the device immediately invalidates its continuing extension access, while reactivation requires fresh authorization rather than restoring old credentials.
 
+## Account closure and restoration
+
+Account closure requires recent authentication and an explicit acknowledgment of the consequences. Closure records a fixed 30-day deletion deadline, terminates every browser session, rotates persistent-login state, revokes pending authorization codes and all OAuth access and refresh tokens, removes pending device-registration challenges, and suspends active Viewer devices. Already revoked devices remain revoked. No closed account may authenticate, register a device, obtain or refresh an OAuth token, create a Capsule, or request CTX authorization.
+
+Before closure, the account holder can download a versioned Capsule inventory. The same inventory remains available through the authenticated recovery flow during the recovery period. The inventory contract is implemented behind a repository interface so Capsule records can be added without changing the closure boundary; before Capsule persistence exists, the valid inventory contains an empty `capsules` collection rather than inventing placeholder records.
+
+Closure sends a high-entropy, one-time recovery token to the verified email address inside a temporary signed URL that expires at the deletion deadline. A public recovery-link request returns the same response for unknown, active, expired, and recoverable accounts, and rotates the token only for a recoverable account. Following the email link presents the consequences before a signed, short-lived `POST` completes restoration; link scanners cannot restore an account with a `GET`.
+
+Restoration clears the pending deletion state and invalidates the recovery token. It does not restore browser sessions, authorization codes, access tokens, refresh tokens, or device activity. Viewer devices remain suspended until the account holder signs in, reviews them, and deliberately reactivates them. This prevents restoration from silently reviving credentials that may have been exposed before closure.
+
 ## Account identifiers
 
 The global Share Capsules account identifier is private to the account and service components that require it. It must not be exposed to Hosts or used as a universal cross-site identifier.

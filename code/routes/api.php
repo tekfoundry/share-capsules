@@ -4,7 +4,7 @@ use App\Http\Controllers\Api\ViewerDeviceRegistrationController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Passport\Http\Middleware\CheckToken;
 
-Route::middleware(['auth:api', 'verified', CheckToken::class.':extension:connect'])
+Route::middleware(['auth:api', 'account.active', 'verified', CheckToken::class.':extension:connect'])
     ->prefix('viewer-devices')
     ->name('api.viewer-devices.')
     ->group(function (): void {

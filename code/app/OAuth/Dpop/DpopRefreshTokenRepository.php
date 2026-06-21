@@ -21,16 +21,19 @@ final class DpopRefreshTokenRepository extends PassportRefreshTokenRepository
     {
         $binding = DB::table('oauth_refresh_tokens as refresh')
             ->join('oauth_access_tokens as access', 'access.id', '=', 'refresh.access_token_id')
+            ->join('users', 'users.id', '=', 'access.user_id')
             ->where('refresh.id', $tokenId)
             ->select([
                 'refresh.revoked',
                 'access.viewer_device_id',
                 'access.proof_jkt',
                 'access.user_id',
+                'users.closed_at',
             ])
             ->first();
 
-        if ($binding === null || $binding->viewer_device_id === null || $binding->proof_jkt === null) {
+        if ($binding === null || $binding->viewer_device_id === null || $binding->proof_jkt === null
+            || $binding->closed_at !== null) {
             return true;
         }
 

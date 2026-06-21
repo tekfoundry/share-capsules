@@ -2,6 +2,7 @@
 
 namespace App\OAuth\Dpop;
 
+use App\Models\User;
 use App\Models\ViewerDevice;
 use App\OAuth\ExtensionOAuthScope;
 use App\ViewerDevices\ViewerDeviceStatus;
@@ -30,6 +31,13 @@ final class DpopAccessTokenRepository extends PassportAccessTokenRepository
             static fn ($scope): string => $scope->getIdentifier(),
             $scopes,
         );
+
+        if ($userIdentifier !== null && ! User::query()
+            ->whereKey($userIdentifier)
+            ->whereNull('closed_at')
+            ->exists()) {
+            throw OAuthServerException::invalidGrant('The account is unavailable.');
+        }
         $requiresDevice = in_array(ExtensionOAuthScope::CtxAuthorize->value, $identifiers, true);
 
         if ($requiresDevice && in_array(ExtensionOAuthScope::Connect->value, $identifiers, true)) {

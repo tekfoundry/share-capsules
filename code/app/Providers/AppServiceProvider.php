@@ -2,17 +2,24 @@
 
 namespace App\Providers;
 
+use App\Account\Closure\CapsuleInventoryRepository;
+use App\Account\Closure\EmptyCapsuleInventoryRepository;
 use App\Account\Sessions\AccountSessionRepository;
 use App\Account\Sessions\DatabaseAccountSessionRepository;
+use App\Models\User;
 use App\OAuth\Dpop\DpopAccessToken;
 use App\OAuth\Dpop\DpopAccessTokenRepository;
 use App\OAuth\Dpop\DpopRefreshTokenRepository;
 use App\OAuth\Dpop\DpopTokenResponse;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
 use Laravel\Passport\Bridge\AccessTokenRepository;
 use Laravel\Passport\Bridge\RefreshTokenRepository;
 use Laravel\Passport\Passport;
@@ -26,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Passport::ignoreRoutes();
         $this->app->bind(AccountSessionRepository::class, DatabaseAccountSessionRepository::class);
+        $this->app->bind(CapsuleInventoryRepository::class, EmptyCapsuleInventoryRepository::class);
         $this->app->singleton(AccessTokenRepository::class, DpopAccessTokenRepository::class);
         $this->app->singleton(RefreshTokenRepository::class, DpopRefreshTokenRepository::class);
     }
@@ -38,6 +46,18 @@ class AppServiceProvider extends ServiceProvider
         Password::defaults(
             fn (): Password => Password::min(12)->mixedCase()->numbers()->symbols(),
         );
+
+        Event::listen(Login::class, function (Login $event): void {
+            if (! $event->user instanceof User || ! $event->user->isClosed()) {
+                return;
+            }
+
+            Auth::guard($event->guard)->logout();
+
+            throw ValidationException::withMessages([
+                'email' => trans('auth.failed'),
+            ]);
+        });
 
         Passport::authorizationView('auth.oauth.authorize');
         Passport::useAccessTokenEntity(DpopAccessToken::class);
@@ -55,5 +75,20 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('device-registration', fn (Request $request): Limit => Limit::perMinute(10)
             ->by(($request->user()?->getAuthIdentifier() ?? 'guest').'|'.$request->ip()));
+
+        RateLimiter::for('account-closure', fn (Request $request): Limit => Limit::perHour(3)
+            ->by(($request->user()?->getAuthIdentifier() ?? 'guest').'|'.$request->ip()));
+
+        RateLimiter::for('account-recovery', fn (Request $request): Limit => Limit::perMinute(5)
+            ->by(mb_strtolower($request->string('email')->trim()->toString()).'|'.$request->ip()));
+
+        RateLimiter::for('account-recovery-complete', function (Request $request): Limit {
+            $user = $request->route('user');
+            $identifier = $user instanceof User
+                ? $user->getAuthIdentifier()
+                : (string) $user;
+
+            return Limit::perMinute(10)->by($identifier.'|'.$request->ip());
+        });
     }
 }
