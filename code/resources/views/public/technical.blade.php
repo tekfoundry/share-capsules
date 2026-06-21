@@ -47,7 +47,7 @@
             </aside>
 
             <div class="min-w-0">
-                <section id="terms" class="scroll-mt-8">
+                <section id="terms" class="scroll-mt-8 pb-20 lg:pb-24">
                     <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">Core terms</p>
                     <h2 class="mt-3 text-3xl font-semibold tracking-[-0.035em]">Three technologies, six bounded roles.</h2>
                     <dl class="mt-8 grid gap-4 md:grid-cols-3">
@@ -65,14 +65,14 @@
                     <p class="mt-6 text-sm leading-6 text-muted">The operational roles are Creator tool, compatible Host, trusted Viewer, CTX Provider, Key Broker, and the creator who selects the policy and recognized services.</p>
                 </section>
 
-                <section id="architecture" class="mt-20 scroll-mt-8 lg:mt-24">
+                <section id="architecture" class="scroll-mt-8 border-t border-line py-20 lg:py-24">
                     <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">Architecture</p>
                     <h2 class="mt-3 text-3xl font-semibold tracking-[-0.035em]">Distribution is separate from authorization.</h2>
                     <p class="mt-5 max-w-3xl leading-7 text-muted">A Host serves an opaque `.capsule` file and public fallback content. The Viewer verifies the signed package before disclosure, obtains a narrow CTX authorization, redeems it with the selected broker, and decrypts only inside an isolated Viewer surface.</p>
                     <a class="mt-5 inline-flex text-sm font-bold text-brand hover:text-brand-strong" href="{{ route('how-it-works') }}">Walk through the complete flow <span class="ml-2" aria-hidden="true">→</span></a>
                 </section>
 
-                <section id="cryptography" class="mt-20 scroll-mt-8 lg:mt-24">
+                <section id="cryptography" class="scroll-mt-8 border-t border-line py-20 lg:py-24">
                     <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">Cryptographic boundaries</p>
                     <h2 class="mt-3 text-3xl font-semibold tracking-[-0.035em]">Keys have separate purposes and owners.</h2>
                     <ul class="mt-7 grid gap-px overflow-hidden rounded-2xl border border-artifact-line bg-artifact-line text-sm text-slate-300 md:grid-cols-2">
@@ -88,7 +88,7 @@
                     <p class="mt-5 border-l-2 border-amber-400 pl-4 text-sm leading-6 text-muted">Share Capsules V1 operates both Provider and Broker services, so it is not cryptographic “zero access.” Process isolation and dedicated credentials reduce ordinary application access; future independent or split-key brokers may reduce operator trust further.</p>
                 </section>
 
-                <section id="trust-privacy" class="mt-20 scroll-mt-8 lg:mt-24">
+                <section id="trust-privacy" class="scroll-mt-8 border-t border-line py-20 lg:py-24">
                     <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">Trust and privacy</p>
                     <h2 class="mt-3 text-3xl font-semibold tracking-[-0.035em]">Conditions and predicates—not a universal reputation currency.</h2>
                     <div class="mt-7 grid gap-5 md:grid-cols-2">
@@ -99,13 +99,13 @@
                     </div>
                 </section>
 
-                <section id="independence" class="mt-20 scroll-mt-8 lg:mt-24">
+                <section id="independence" class="scroll-mt-8 border-t border-line py-20 lg:py-24">
                     <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">Provider independence</p>
                     <h2 class="mt-3 text-3xl font-semibold tracking-[-0.035em]">Protocol before monopoly.</h2>
                     <p class="mt-5 max-w-3xl leading-7 text-muted">Capsules name provider and broker discovery identities rather than assuming one permanent Share Capsules endpoint. Versioned contracts, portable files, public signing keys, scoped authorization, and broker audiences are intended to support compatible implementations without exposing complexity to ordinary creators and viewers.</p>
                 </section>
 
-                <section id="scope" class="mt-20 scroll-mt-8 lg:mt-24">
+                <section id="scope" class="scroll-mt-8 border-t border-line py-20 lg:py-24">
                     <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">V1 scope and limits</p>
                     <h2 class="mt-3 text-3xl font-semibold tracking-[-0.035em]">A focused proof, not universal content control.</h2>
                     <ul class="mt-6 space-y-3 text-sm leading-6 text-muted">
@@ -116,7 +116,7 @@
                     </ul>
                 </section>
 
-                <section id="status" class="mt-20 scroll-mt-8 lg:mt-24">
+                <section id="status" class="scroll-mt-8 border-t border-line py-20 lg:py-24">
                     <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">Implementation status</p>
                     <h2 class="mt-3 text-3xl font-semibold tracking-[-0.035em]">Foundations exist; the complete protection flow does not.</h2>
                     <div class="mt-7 overflow-hidden rounded-2xl border border-line">
@@ -133,7 +133,7 @@
                     </div>
                 </section>
 
-                <section id="design-sources" class="mt-20 scroll-mt-8 lg:mt-24">
+                <section id="design-sources" class="scroll-mt-8 border-t border-line py-20 lg:py-24">
                     <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">Design sources</p>
                     <h2 class="mt-3 text-3xl font-semibold tracking-[-0.035em]">The detailed intent remains in living Markdown.</h2>
                     <p class="mt-5 max-w-3xl leading-7 text-muted">These are the authoritative design sources behind this overview. Repository links activate when the public source URL is configured.</p>
