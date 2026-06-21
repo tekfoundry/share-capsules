@@ -36,9 +36,9 @@
                         </span>
                     </a>
 
-                    <nav class="hidden items-center gap-8 text-sm font-medium text-muted md:flex" aria-label="Primary navigation">
+                    <nav class="hidden items-center gap-8 text-sm font-medium text-muted lg:flex" aria-label="Primary navigation">
                         <a class="transition-colors hover:text-ink" href="{{ route('home') }}#problem">The problem</a>
-                        <a class="transition-colors hover:text-ink" href="{{ route('home') }}#workflow">How it works</a>
+                        <a class="transition-colors hover:text-ink" href="{{ route('how-it-works') }}">How it works</a>
                         <a class="transition-colors hover:text-ink" href="{{ route('home') }}#trust">How trust works</a>
                         <a class="transition-colors hover:text-ink" href="{{ route('home') }}#boundaries">Trust boundaries</a>
                     </nav>
@@ -75,6 +75,7 @@
                         <p class="mt-1">An open experimental implementation of Capsule and CTX.</p>
                     </div>
                     <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+                        <a class="font-semibold text-brand hover:text-brand-strong" href="{{ route('how-it-works') }}">How it works</a>
                         <span>
                             Sponsored by
                             <a class="font-semibold text-brand hover:text-brand-strong" href="https://tekfoundry.com" rel="noreferrer">TekFoundry</a>
