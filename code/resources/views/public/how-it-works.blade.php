@@ -5,21 +5,17 @@
 
 @section('content')
     <section class="mx-auto max-w-7xl px-5 pt-16 pb-20 sm:px-8 sm:pt-24 lg:px-10 lg:pt-28">
-        <div class="grid gap-12 lg:grid-cols-[0.82fr_1.18fr] lg:items-end">
-            <div>
-                <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">How it works</p>
-                <h1 class="mt-5 text-4xl leading-[1.05] font-semibold tracking-[-0.045em] text-balance sm:text-6xl">From original work to an authorized Viewer.</h1>
-            </div>
-            <div class="lg:pb-1">
-                <p class="max-w-2xl text-lg leading-8 text-muted">Share Capsules separates content distribution from the decision to release a decryption key. Each participant has one bounded job, so an ordinary Host never needs the creator’s plaintext or the Viewer’s identity.</p>
-                <p class="mt-5 inline-flex items-center gap-2 rounded-full border border-amber-300/50 bg-amber-50 px-3 py-1.5 text-xs font-bold tracking-wide text-amber-900 uppercase">
-                    <span class="size-1.5 rounded-full bg-amber-500" aria-hidden="true"></span>
-                    Proposed complete flow — under active development
-                </p>
-            </div>
+        <div>
+            <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">How it works</p>
+            <h1 class="mt-5 max-w-6xl text-4xl leading-[1.05] font-semibold tracking-[-0.045em] text-balance sm:text-6xl">From original work to an authorized Viewer.</h1>
+            <p class="mt-7 max-w-4xl text-lg leading-8 text-muted">Share Capsules separates content distribution from the decision to release a decryption key. Each participant has one bounded job, so an ordinary Host never needs the creator’s plaintext or the Viewer’s identity.</p>
+            <p class="mt-5 inline-flex items-center gap-2 rounded-full border border-amber-300/50 bg-amber-50 px-3 py-1.5 text-xs font-bold tracking-wide text-amber-900 uppercase">
+                <span class="size-1.5 rounded-full bg-amber-500" aria-hidden="true"></span>
+                Proposed complete flow — under active development
+            </p>
         </div>
 
-        <x-public.access-workflow class="mt-14" />
+        <x-public.access-workflow class="mt-12" />
     </section>
 
     <section class="border-y border-line bg-white py-20 sm:py-24">
