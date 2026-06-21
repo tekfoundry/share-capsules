@@ -6,11 +6,9 @@ use App\Models\User;
 use App\OAuth\ExtensionOAuthClientConfiguration;
 use App\OAuth\ExtensionOAuthClientProvisioner;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use InvalidArgumentException;
 use Laravel\Passport\Client;
-use Laravel\Passport\Passport;
 use Laravel\Passport\Token;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -27,7 +25,6 @@ final class ExtensionAuthorizationTest extends TestCase
     {
         parent::setUp();
 
-        $this->configureTestKeys();
         $this->configuration = ExtensionOAuthClientConfiguration::fromConfig();
         $this->client = app(ExtensionOAuthClientProvisioner::class)->provision($this->configuration);
     }
@@ -245,31 +242,5 @@ final class ExtensionAuthorizationTest extends TestCase
         parse_str((string) parse_url($location, PHP_URL_QUERY), $query);
 
         return array_filter($query, 'is_string');
-    }
-
-    private function configureTestKeys(): void
-    {
-        $directory = storage_path('framework/testing/passport');
-        $privatePath = $directory.'/oauth-private.key';
-        $publicPath = $directory.'/oauth-public.key';
-
-        if (! File::exists($privatePath) || ! File::exists($publicPath)) {
-            File::ensureDirectoryExists($directory);
-            $key = openssl_pkey_new([
-                'private_key_bits' => 2048,
-                'private_key_type' => OPENSSL_KEYTYPE_RSA,
-            ]);
-            $this->assertNotFalse($key);
-            $this->assertTrue(openssl_pkey_export($key, $privateKey));
-            $details = openssl_pkey_get_details($key);
-            $this->assertIsArray($details);
-            File::put($privatePath, $privateKey);
-            File::put($publicPath, $details['key']);
-        }
-
-        File::chmod($privatePath, 0600);
-        File::chmod($publicPath, 0600);
-
-        Passport::loadKeysFrom($directory);
     }
 }

@@ -9,11 +9,9 @@ use App\OAuth\ExtensionOAuthClientConfiguration;
 use App\OAuth\ExtensionOAuthClientProvisioner;
 use App\ViewerDevices\ViewerDeviceStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Laravel\Passport\Http\Middleware\CheckToken;
-use Laravel\Passport\Passport;
 use Laravel\Passport\RefreshToken;
 use Laravel\Passport\Token;
 use PHPUnit\Framework\Attributes\Test;
@@ -33,7 +31,6 @@ final class DpopTokenTest extends TestCase
     {
         parent::setUp();
 
-        $this->configureTestKeys();
         $this->configuration = ExtensionOAuthClientConfiguration::fromConfig();
         app(ExtensionOAuthClientProvisioner::class)->provision($this->configuration);
         $keypair = sodium_crypto_sign_seed_keypair(str_repeat("\x11", SODIUM_CRYPTO_SIGN_SEEDBYTES));
@@ -324,30 +321,5 @@ final class DpopTokenTest extends TestCase
     private function decodeBase64Url(string $value): string
     {
         return base64_decode(strtr($value, '-_', '+/'), true);
-    }
-
-    private function configureTestKeys(): void
-    {
-        $directory = storage_path('framework/testing/passport');
-        $privatePath = $directory.'/oauth-private.key';
-        $publicPath = $directory.'/oauth-public.key';
-
-        if (! File::exists($privatePath) || ! File::exists($publicPath)) {
-            File::ensureDirectoryExists($directory);
-            $key = openssl_pkey_new([
-                'private_key_bits' => 2048,
-                'private_key_type' => OPENSSL_KEYTYPE_RSA,
-            ]);
-            $this->assertNotFalse($key);
-            $this->assertTrue(openssl_pkey_export($key, $privateKey));
-            $details = openssl_pkey_get_details($key);
-            $this->assertIsArray($details);
-            File::put($privatePath, $privateKey);
-            File::put($publicPath, $details['key']);
-        }
-
-        File::chmod($privatePath, 0600);
-        File::chmod($publicPath, 0600);
-        Passport::loadKeysFrom($directory);
     }
 }
