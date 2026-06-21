@@ -3,8 +3,10 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
+use App\Notifications\PasswordChanged;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
@@ -45,6 +47,14 @@ final class PasswordResetTest extends TestCase
     {
         Notification::fake();
         $user = User::factory()->create();
+        DB::table('sessions')->insert([
+            'id' => 'existing-session',
+            'user_id' => $user->getKey(),
+            'ip_address' => '192.0.2.10',
+            'user_agent' => 'Mozilla/5.0',
+            'payload' => '',
+            'last_activity' => now()->timestamp,
+        ]);
 
         $this->post(route('password.email'), ['email' => $user->email]);
 
@@ -62,5 +72,7 @@ final class PasswordResetTest extends TestCase
         });
 
         $this->assertTrue(Hash::check('New-Correct-Horse-84!', $user->fresh()->password));
+        $this->assertDatabaseMissing('sessions', ['id' => 'existing-session']);
+        Notification::assertSentTo($user, PasswordChanged::class);
     }
 }

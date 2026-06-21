@@ -21,11 +21,24 @@ final class DeploymentConfigurationTest extends TestCase
         config()->set('sharecapsules.oauth.extension_client_id', 'replace-with-production-client-id');
         config()->set('sharecapsules.ctx.issuer', 'http://sharecapsules.com');
         config()->set('sharecapsules.broker.base_url', 'http://broker.sharecapsules.com');
+        config()->set('session.driver', 'database');
 
         $this->assertEqualsCanonicalizing([
             'ctx_issuer_not_https',
             'broker_url_not_https',
             'production_identity_placeholder',
         ], app(DeploymentConfiguration::class)->issues());
+    }
+
+    public function test_non_test_deployments_require_database_backed_account_sessions(): void
+    {
+        config()->set('sharecapsules.deployment.environment', 'development');
+        config()->set('sharecapsules.extension.channel', 'development');
+        config()->set('session.driver', 'redis');
+
+        $this->assertContains(
+            'account_session_driver_not_database',
+            app(DeploymentConfiguration::class)->issues(),
+        );
     }
 }

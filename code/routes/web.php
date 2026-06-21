@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Account\AccountSecurityController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
@@ -51,4 +52,16 @@ Route::middleware('auth')->group(function (): void {
     Route::view('/dashboard', 'dashboard')
         ->middleware('verified')
         ->name('dashboard');
+
+    Route::middleware('verified')->prefix('account')->name('account.')->group(function (): void {
+        Route::get('/security', [AccountSecurityController::class, 'show'])
+            ->name('security');
+        Route::delete('/security/sessions', [AccountSecurityController::class, 'destroyOthers'])
+            ->middleware('throttle:6,1')
+            ->name('sessions.destroy-others');
+        Route::delete('/security/sessions/{sessionId}', [AccountSecurityController::class, 'destroy'])
+            ->where('sessionId', '[A-Za-z0-9]+')
+            ->middleware('throttle:12,1')
+            ->name('sessions.destroy');
+    });
 });

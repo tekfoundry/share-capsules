@@ -1,7 +1,7 @@
 # Privacy Model
 
 Status: Draft
-Last updated: 2026-06-18
+Last updated: 2026-06-20
 
 ## Purpose
 
@@ -144,6 +144,8 @@ Every data class should eventually define:
 - Deletion behavior
 - Effect of disabling telemetry
 - Effect on active and historical reputation
+
+Account browser sessions retain the account identifier, session identifier, IP address, user agent, and last-activity timestamp for authentication, account inspection, and revocation. These fields are visible only to the account holder and authorized security operations; they are not trust evidence disclosed to creators or Hosts. User agents are reduced to best-effort browser and platform labels in the account UI and are not treated as device fingerprints. Expired session records are removed according to the configured session lifetime and garbage-collection process.
 
 The account-deletion boundary is defined: closure immediately disables access and pauses creator key releases; a 30-day recovery period permits secure restoration and provides a downloadable Capsule inventory; then personal data and the detailed trust profile are deleted, remaining release handles are revoked, and their broker-held key material is destroyed. Replacement accounts inherit no reputation, and Capsule-global counters remain. V1 does not transfer Capsules between accounts; a recipient of an offline source creates an independent Capsule under their own authority.
 

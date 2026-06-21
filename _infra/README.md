@@ -37,6 +37,8 @@ The default endpoints are:
 - Vite: `http://localhost:5174`
 - MySQL: `127.0.0.1:3308`
 - Redis: `127.0.0.1:6380`
+
+Laravel web sessions use MySQL so account holders can inspect and revoke individual sessions reliably. Redis remains the local queue, cache, and rate-limit store.
 - Mailpit SMTP: `127.0.0.1:1026`
 - Mailpit UI: `http://localhost:8026`
 

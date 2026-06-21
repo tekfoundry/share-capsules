@@ -105,7 +105,7 @@ Objective: provide the single Share Capsules account and device-continuity bound
 
 - ✅ Implement account registration with email, password, terms acceptance, and secure password hashing.
 - ✅ Require email verification before Capsule creation, device registration, reputation accumulation, or protected viewing.
-- ⬜️ Implement login, logout, password reset, security notifications, session inspection, and session revocation.
+- ✅ Implement login, logout, password reset, security notifications, session inspection, and session revocation.
 - ⬜️ Add optional passkey enrollment, multiple authenticators, inspection, and revocation without treating passkeys as personhood.
 - ⬜️ Implement OAuth Authorization Code with PKCE `S256` for the fixed extension client and exact callback.
 - ⬜️ Register one device record containing distinct Ed25519 proof and X25519 agreement public keys.

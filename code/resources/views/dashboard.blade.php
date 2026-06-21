@@ -18,10 +18,13 @@
                 <p class="mt-1 text-sm leading-6 text-teal-900/75">This account can proceed to future device registration and Capsule workflows.</p>
             </div>
 
-            <form class="mt-8" method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button class="inline-flex min-h-11 items-center justify-center rounded-xl border border-line bg-white px-4 text-sm font-semibold text-ink shadow-sm hover:border-brand/30 hover:text-brand" type="submit">Sign out</button>
-            </form>
+            <div class="mt-8 flex flex-wrap gap-3">
+                <a class="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand px-4 text-sm font-semibold text-white shadow-sm hover:bg-brand-strong" href="{{ route('account.security') }}">Account security</a>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button class="inline-flex min-h-11 items-center justify-center rounded-xl border border-line bg-white px-4 text-sm font-semibold text-ink shadow-sm hover:border-brand/30 hover:text-brand" type="submit">Sign out</button>
+                </form>
+            </div>
         </div>
     </section>
 @endsection

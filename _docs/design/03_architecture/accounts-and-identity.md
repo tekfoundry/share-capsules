@@ -53,6 +53,16 @@ Password-reset requests return the same public response whether or not an accoun
 
 Email verification gates the account dashboard and every future Capsule creation, device registration, reputation accumulation, and protected-viewing route. Authentication alone is not sufficient for these capabilities.
 
+### Browser session management
+
+V1 web sessions use Laravel's database session store behind a Share Capsules account-session repository interface. The database implementation makes ownership checks, inspection, and targeted revocation explicit while allowing a different storage implementation later without changing account controllers or views.
+
+An account holder can inspect active browser sessions using the recorded browser family, platform family, IP address, and last-activity time. User-agent parsing is intentionally descriptive and best-effort; it is not device fingerprinting or identity evidence.
+
+The current session is identified and cannot be revoked through the remote-session action. Revoking a selected session is scoped by account ownership. Revoking all other sessions requires the current password. Either revocation action rotates the account's persistent-login token, preventing a revoked browser from silently recreating its session with an older remember cookie. Existing non-revoked browser sessions remain valid.
+
+A successful password reset rotates the persistent-login token, revokes every existing browser session, and sends a security notification to the verified account email. The reset response remains successful only for the person possessing a valid reset token; the public reset-request endpoint continues to conceal whether the email is registered.
+
 The account model supports multiple authenticators from the beginning so a user can add more than one passkey without creating a second Share Capsules account. Mandatory passkeys, passwordless-only accounts, and policy gates based on authenticator strength are deferred until enrollment, device replacement, and recovery behavior are proven.
 
 Authentication credentials are distinct from creator signing keys, Capsule content keys, and Viewer device keys. A password must never directly encrypt Capsule content or derive a long-lived creator key.

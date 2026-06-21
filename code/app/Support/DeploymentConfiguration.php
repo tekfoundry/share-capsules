@@ -28,6 +28,10 @@ final class DeploymentConfiguration
             $issues[] = 'extension_channel_mismatch';
         }
 
+        if ($environment !== 'test' && config('session.driver') !== 'database') {
+            $issues[] = 'account_session_driver_not_database';
+        }
+
         if ($extensionId === '' || $oauthClientId === '') {
             $issues[] = 'extension_identity_missing';
         }
