@@ -144,7 +144,7 @@
             <div class="max-w-2xl">
                 <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">What we are building</p>
                 <h2 class="mt-4 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">Encrypted content with creator-defined access.</h2>
-                <p class="mt-5 text-lg leading-8 text-muted">A Capsule carries encrypted content and a signed access policy. CTX separates hosting, trust evaluation, and key release so creators can choose where they publish without asking an ordinary website to become an identity provider.</p>
+                <p class="mt-5 text-lg leading-8 text-muted">A Capsule carries encrypted content and a signed access policy. <strong class="font-semibold text-ink">Capsule Trust Exchange (CTX)</strong> is the open protocol a Viewer uses to ask a creator-recognized provider whether those access conditions are satisfied—without exposing the Viewer’s raw account history to the creator or Host. This separates hosting, trust evaluation, and key release so creators can choose where they publish.</p>
             </div>
 
             <div class="mt-12 grid gap-5 md:grid-cols-3">

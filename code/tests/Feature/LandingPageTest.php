@@ -17,6 +17,12 @@ final class LandingPageTest extends TestCase
             ->assertSee('Not with every machine that asks.')
             ->assertSee('The web asks creators to choose between reach and control.')
             ->assertSee('Encrypted content with creator-defined access.')
+            ->assertSee('Capsule Trust Exchange (CTX)')
+            ->assertSee('without exposing the Viewer’s raw account history to the creator or Host')
+            ->assertSeeInOrder([
+                'Capsule Trust Exchange (CTX)',
+                'A trusted Viewer uses CTX',
+            ])
             ->assertSee('no technology can prevent an authorized viewer from copying what they can see')
             ->assertSee('Security without mystery.')
             ->assertSee('Active experimental development')
