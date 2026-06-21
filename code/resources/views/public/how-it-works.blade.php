@@ -34,12 +34,12 @@
                     ['CTX Provider', 'Evaluates', 'The signed policy and only the account evidence needed for that request.', 'Returns an authorization result; it does not send raw account history to the creator or Host.'],
                     ['Key Broker', 'Releases', 'Protected content-key material, release state, and exact short-lived authorization.', 'Wraps the content key to the authorized Viewer device; it does not render the work.'],
                 ] as [$term, $verb, $description, $boundary])
-                    <div class="bg-white p-6">
+                    <div class="flex h-full flex-col bg-white p-6">
                         <dt class="text-lg font-bold text-ink">{{ $term }}</dt>
-                        <dd class="mt-5">
+                        <dd class="mt-5 flex flex-1 flex-col">
                             <span class="text-xs font-bold tracking-[0.14em] text-brand uppercase">{{ $verb }}</span>
-                            <p class="mt-2 text-sm leading-6 text-muted">{{ $description }}</p>
-                            <p class="mt-4 border-t border-line pt-4 text-xs leading-5 text-muted">{{ $boundary }}</p>
+                            <p class="mt-2 pb-6 text-sm leading-6 text-muted">{{ $description }}</p>
+                            <p class="mt-auto min-h-24 border-t border-line pt-4 text-xs leading-5 text-muted">{{ $boundary }}</p>
                         </dd>
                     </div>
                 @endforeach
