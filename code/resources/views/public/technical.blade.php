@@ -77,7 +77,7 @@
                     <h2 class="mt-3 text-3xl font-semibold tracking-[-0.035em]">Keys have separate purposes and owners.</h2>
                     <ul class="mt-7 grid gap-px overflow-hidden rounded-2xl border border-artifact-line bg-artifact-line text-sm text-slate-300 md:grid-cols-2">
                         @foreach ([
-                            ['Creator signing key', 'Ed25519 signs the manifest locally and never enters the normal Laravel application.'],
+                            ['Creator signing key', 'Ed25519 signs the manifest locally; the private key remains under the creator’s control.'],
                             ['Capsule content key', 'A fresh AES-256-GCM key encrypts each payload and is registered with the selected broker.'],
                             ['Viewer proof key', 'A registered Ed25519 device key binds OAuth/CTX requests and proves possession.'],
                             ['Viewer agreement key', 'A distinct X25519 key receives an HPKE-wrapped content key for local decryption.'],
