@@ -21,7 +21,7 @@
             <li class="group relative border-b border-artifact-line p-5 md:border-r md:[&:nth-child(3n)]:border-r-0 xl:border-b-0 xl:[&:nth-child(3n)]:border-r xl:last:border-r-0 sm:p-6">
                 <div class="flex items-center justify-between gap-3">
                     <span class="text-xs font-bold tracking-[0.14em] text-violet-300 uppercase">{{ $step[0] }}</span>
-                    <span class="rounded-full border border-white/10 bg-white/[0.05] px-2 py-1 text-[0.62rem] font-semibold tracking-wide text-slate-300 uppercase">{{ $step[4] }}</span>
+                    <span class="inline-flex h-12 items-center rounded-full border border-white/10 bg-white/[0.05] px-3 text-center text-[0.62rem] leading-4 font-semibold tracking-wide text-slate-300 uppercase">{{ $step[4] }}</span>
                 </div>
                 <p class="mt-6 text-xs font-bold tracking-[0.12em] text-amber-300 uppercase">{{ $step[1] }}</p>
                 <h4 class="mt-2 text-base font-bold text-white">{{ $step[2] }}</h4>
