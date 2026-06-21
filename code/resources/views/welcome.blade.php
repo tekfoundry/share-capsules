@@ -56,64 +56,7 @@
             </dl>
         </div>
 
-        <div class="relative mx-auto w-full max-w-xl lg:mx-0 lg:justify-self-end">
-            <div class="absolute -inset-6 -z-10 rounded-[2.5rem] bg-brand/5 blur-2xl" aria-hidden="true"></div>
-            <div class="overflow-hidden rounded-[1.75rem] border border-artifact-line bg-artifact text-white shadow-2xl shadow-slate-950/20">
-                <div class="flex items-center justify-between border-b border-artifact-line px-5 py-4 sm:px-6">
-                    <div class="flex items-center gap-3">
-                        <span class="grid size-8 place-items-center rounded-lg border border-amber-400/40 bg-amber-400/10 text-amber-300">
-                            <span class="h-3.5 w-2 rounded-[0.25rem] border-2 border-current border-r-0" aria-hidden="true"></span>
-                        </span>
-                        <div>
-                            <p class="text-[0.68rem] font-bold tracking-[0.16em] text-violet-300 uppercase">Protected Capsule</p>
-                            <p class="mt-0.5 text-sm font-semibold">Quiet Geometry</p>
-                        </div>
-                    </div>
-                    <span class="inline-flex items-center gap-1.5 rounded-full border border-teal-300/20 bg-teal-300/10 px-2.5 py-1 text-xs font-semibold text-teal-200">
-                        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
-                        Ready
-                    </span>
-                </div>
-
-                <div class="grid gap-6 p-5 sm:grid-cols-[0.82fr_1.18fr] sm:p-6">
-                    <div class="relative aspect-[4/5] overflow-hidden rounded-xl border border-amber-300/20 bg-[#111f38] shadow-[0_0_28px_rgba(245,158,11,0.12)]">
-                        <div class="absolute -top-[18%] -left-[28%] size-[95%] rounded-full bg-[#e8dfcd]"></div>
-                        <div class="absolute top-[34%] left-0 h-[34%] w-[58%] bg-[#b94f2c]"></div>
-                        <div class="absolute right-0 bottom-0 h-[70%] w-[44%] bg-[#172945]"></div>
-                        <div class="absolute inset-0 opacity-25 mix-blend-soft-light [background-image:url('data:image/svg+xml,%3Csvg_viewBox=%220_0_180_220%22_xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter_id=%22n%22%3E%3CfeTurbulence_type=%22fractalNoise%22_baseFrequency=%22.8%22_numOctaves=%223%22_stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect_width=%22100%25%22_height=%22100%25%22_filter=%22url(%23n)%22_opacity=%22.45%22/%3E%3C/svg%3E')]" aria-hidden="true"></div>
-                        <span class="absolute right-3 bottom-3 rounded-md bg-slate-950/70 px-2 py-1 text-[0.62rem] font-bold tracking-wider text-white uppercase backdrop-blur">Encrypted</span>
-                    </div>
-
-                    <div class="flex flex-col">
-                        <p class="text-xs font-bold tracking-[0.14em] text-violet-300 uppercase">Access policy</p>
-                        <p class="mt-3 text-lg font-semibold">A clear boundary around every release.</p>
-                        <p class="mt-2 text-sm leading-6 text-slate-300">
-                            The content stays opaque until the Viewer validates its signed policy and receives a device-bound key release.
-                        </p>
-
-                        <div class="mt-5 space-y-2.5 text-xs font-semibold text-slate-200">
-                            <div class="flex items-center justify-between rounded-lg border border-white/8 bg-white/[0.035] px-3 py-2.5">
-                                <span>Verified account</span>
-                                <span class="text-teal-300">Required</span>
-                            </div>
-                            <div class="flex items-center justify-between rounded-lg border border-white/8 bg-white/[0.035] px-3 py-2.5">
-                                <span>Registered device</span>
-                                <span class="text-teal-300">Required</span>
-                            </div>
-                            <div class="flex items-center justify-between rounded-lg border border-white/8 bg-white/[0.035] px-3 py-2.5">
-                                <span>Release accounting</span>
-                                <span class="text-amber-300">Consent</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-3 border-t border-artifact-line bg-[#091429] px-5 py-4 text-xs text-slate-400 sm:px-6">
-                    <span class="text-amber-300" aria-hidden="true">◆</span>
-                    Plaintext remains inside trusted Viewer memory.
-                </div>
-            </div>
-        </div>
+        <x-public.access-architecture />
     </section>
 
     <section id="problem" class="border-y border-artifact-line bg-artifact py-20 text-white sm:py-24">
