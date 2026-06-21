@@ -119,6 +119,16 @@ Closure sends a high-entropy, one-time recovery token to the verified email addr
 
 Restoration clears the pending deletion state and invalidates the recovery token. It does not restore browser sessions, authorization codes, access tokens, refresh tokens, or device activity. Viewer devices remain suspended until the account holder signs in, reviews them, and deliberately reactivates them. This prevents restoration from silently reviving credentials that may have been exposed before closure.
 
+## Permanent deletion
+
+A scheduled, single-provider worker processes bounded batches of accounts only after their complete recovery deadline has elapsed. It locks and rechecks each account inside the deletion transaction, so an account restored before the lock is acquired cannot be deleted from a stale candidate list. The exact deadline is the irreversible boundary: restoration requires a future deadline, while deletion accepts a deadline equal to or earlier than the current time.
+
+Permanent deletion removes password-reset state, sessions, passkeys, Viewer devices and challenges, OAuth authorization codes, access tokens, refresh tokens, the account row, and all account-linked trust-profile state. V1 has not begun persisting a detailed trust profile, so the current repository is intentionally empty; the deletion dependency remains explicit and must be replaced when profile storage is introduced. Capsule-global counters are not account-linked state and are not deleted through this path.
+
+Deletion participants run before the account row is removed while it remains locked. A participant failure aborts and reports that account without preventing other eligible accounts from being attempted; the failed deletion remains eligible for the next run. The sanction-tombstone and durable deletion-ledger implementations attach at this boundary so their required records are committed before personal account state disappears.
+
+Ordinary deletion retains no account mapping. The verified email becomes available for a new registration, but the replacement receives a new account identifier and has no inherited devices, credentials, counters, trust profile, reputation, or continuity. Reusing the same email address does not restore the deleted account.
+
 ## Account identifiers
 
 The global Share Capsules account identifier is private to the account and service components that require it. It must not be exposed to Hosts or used as a universal cross-site identifier.

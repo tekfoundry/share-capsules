@@ -113,7 +113,7 @@ Objective: provide the single Share Capsules account and device-continuity bound
 - ✅ Provide device inspection, naming, recently authenticated suspension and activation, and permanent revocation; complete token invalidation as part of the DPoP-bound token task.
 - ✅ Implement signup and authentication abuse throttles without creating hidden behavioral tracking.
 - ✅ Implement account closure, immediate access suspension, the 30-day recovery period, Capsule inventory export, and secure restoration.
-- ⬜️ Implement permanent account deletion, removal of the detailed trust profile, and non-inheritance by replacement accounts.
+- ✅ Implement permanent account deletion, removal of the detailed trust profile, and non-inheritance by replacement accounts.
 - ⬜️ Implement the restricted active-sanction tombstone and its accepted 90-day maximum; leave no tombstone for ordinary deletion.
 - ⬜️ Implement the deletion ledger and verify deletion is reapplied before a restored backup serves traffic.
 
