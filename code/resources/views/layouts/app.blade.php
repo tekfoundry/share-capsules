@@ -40,7 +40,7 @@
                         <a class="transition-colors hover:text-ink" href="{{ route('home') }}#problem">The problem</a>
                         <a class="transition-colors hover:text-ink" href="{{ route('how-it-works') }}">How it works</a>
                         <a class="transition-colors hover:text-ink" href="{{ route('home') }}#trust">How trust works</a>
-                        <a class="transition-colors hover:text-ink" href="{{ route('home') }}#boundaries">Trust boundaries</a>
+                        <a class="transition-colors hover:text-ink" href="{{ route('technical') }}">Technical overview</a>
                     </nav>
 
                     <div class="flex items-center gap-2 sm:gap-3">
@@ -76,6 +76,7 @@
                     </div>
                     <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
                         <a class="font-semibold text-brand hover:text-brand-strong" href="{{ route('how-it-works') }}">How it works</a>
+                        <a class="font-semibold text-brand hover:text-brand-strong" href="{{ route('technical') }}">Technical overview</a>
                         <span>
                             Sponsored by
                             <a class="font-semibold text-brand hover:text-brand-strong" href="https://tekfoundry.com" rel="noreferrer">TekFoundry</a>

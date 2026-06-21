@@ -17,6 +17,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::view('/how-it-works', 'public.how-it-works')->name('how-it-works');
+Route::view('/technical', 'public.technical')->name('technical');
 
 Route::view('/terms', 'legal.terms')->name('terms');
 Route::view('/privacy', 'legal.privacy')->name('privacy');

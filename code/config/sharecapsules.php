@@ -3,6 +3,10 @@
 use App\OAuth\ExtensionOAuthScope;
 
 return [
+    'public' => [
+        'repository_url' => env('SHARECAPSULES_PUBLIC_REPOSITORY_URL'),
+    ],
+
     'deployment' => [
         'environment' => env('SHARECAPSULES_ENVIRONMENT', 'development'),
         'id' => env('SHARECAPSULES_DEPLOYMENT_ID', 'local'),
