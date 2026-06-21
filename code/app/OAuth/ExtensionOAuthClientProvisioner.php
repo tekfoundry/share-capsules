@@ -17,7 +17,7 @@ final class ExtensionOAuthClientProvisioner
                 'secret' => null,
                 'provider' => 'users',
                 'redirect_uris' => [$configuration->redirectUri],
-                'grant_types' => ['authorization_code'],
+                'grant_types' => ['authorization_code', 'refresh_token'],
                 'revoked' => false,
             ],
         );

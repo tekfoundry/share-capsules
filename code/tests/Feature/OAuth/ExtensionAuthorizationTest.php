@@ -37,7 +37,7 @@ final class ExtensionAuthorizationTest extends TestCase
     {
         $this->assertNull($this->client->secret);
         $this->assertSame([$this->configuration->redirectUri], $this->client->redirect_uris);
-        $this->assertSame(['authorization_code'], $this->client->grant_types);
+        $this->assertSame(['authorization_code', 'refresh_token'], $this->client->grant_types);
         $this->assertFalse($this->client->revoked);
 
         app(ExtensionOAuthClientProvisioner::class)->provision($this->configuration);
@@ -145,6 +145,8 @@ final class ExtensionAuthorizationTest extends TestCase
             ->assertJsonPath('token_type', 'Bearer')
             ->assertJsonPath('expires_in', 600)
             ->assertJsonMissingPath('refresh_token');
+
+        $this->assertDatabaseHas('oauth_refresh_tokens', ['revoked' => true]);
 
         $storedToken = Token::query()->sole();
         $this->assertSame(['extension:connect'], $storedToken->scopes);

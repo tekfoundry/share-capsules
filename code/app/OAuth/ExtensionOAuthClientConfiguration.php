@@ -21,7 +21,8 @@ final readonly class ExtensionOAuthClientConfiguration
         $name = (string) config('sharecapsules.oauth.extension_client_name');
         $redirectUri = (string) config('sharecapsules.oauth.extension_redirect_uri');
         $extensionId = (string) config('sharecapsules.extension.id');
-        $scopes = config('sharecapsules.oauth.extension_scopes');
+        $scopeDescriptions = config('sharecapsules.oauth.extension_scopes');
+        $scopes = config('sharecapsules.oauth.bootstrap_scopes');
 
         if (! Str::isUuid($id)) {
             throw new InvalidArgumentException('The extension OAuth client ID must be a UUID.');
@@ -40,12 +41,15 @@ final readonly class ExtensionOAuthClientConfiguration
             throw new InvalidArgumentException('The extension OAuth redirect URI must exactly match the extension ID.');
         }
 
-        if (! is_array($scopes) || $scopes === []
-            || array_filter(array_keys($scopes), 'is_string') !== array_keys($scopes)
-            || array_filter(array_values($scopes), 'is_string') !== array_values($scopes)) {
-            throw new InvalidArgumentException('The extension OAuth scopes must be a non-empty description map.');
+        if (! is_array($scopeDescriptions) || $scopeDescriptions === []
+            || array_filter(array_keys($scopeDescriptions), 'is_string') !== array_keys($scopeDescriptions)
+            || array_filter(array_values($scopeDescriptions), 'is_string') !== array_values($scopeDescriptions)
+            || ! is_array($scopes) || $scopes === []
+            || array_filter($scopes, 'is_string') !== $scopes
+            || array_diff($scopes, array_keys($scopeDescriptions)) !== []) {
+            throw new InvalidArgumentException('The extension OAuth scopes must be configured and described.');
         }
 
-        return new self($id, $name, $redirectUri, array_keys($scopes));
+        return new self($id, $name, $redirectUri, array_values($scopes));
     }
 }

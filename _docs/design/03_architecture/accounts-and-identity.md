@@ -81,7 +81,7 @@ The extension is a public client with an exactly registered extension callback. 
 
 The Share Capsules implementation uses Laravel Passport for this OAuth server boundary. Each environment provisions one fixed, public Viewer-extension client with a UUID, no secret, only the Authorization Code grant, and one exact `https://<extension-id>.chromiumapp.org/oauth/callback` redirect. The extension pins the configured CTX issuer and requires both OAuth endpoints to share that issuer origin. It requests the `extension:connect` scope and explicit consent, creates a fresh random state, verifier, and `S256` challenge for every attempt, retains the verifier only for that in-progress ceremony, validates the returned state and exact callback before exchanging the code, and sends no account password, session cookie, or client secret.
 
-This implementation checkpoint issues a ten-minute bearer access token and deliberately does not enable refresh tokens for the client. The token is not yet accepted by CTX protected-resource routes. Device registration and RFC 9449 DPoP sender constraint are the next Phase 3 boundary; CTX access must remain closed until they bind the token to the registered Ed25519 Viewer proof key. Refresh tokens may be enabled only with the accepted rotation, replay-response, secure-storage, and device-revocation behavior.
+The first OAuth approval issues a ten-minute `extension:connect` bearer access token and no usable refresh token. It is accepted only by device-registration endpoints and never by CTX protected-resource routes. After registration, a second PKCE approval for the mutually exclusive `ctx:authorize` scope requires a fresh RFC 9449 token-endpoint proof from the active Ed25519 Viewer proof key. The resulting access token is sender-constrained through `cnf.jkt`, uses the `DPoP` scheme, and has a rotating 30-day refresh token bound to the same device.
 
 ## Device registration
 
@@ -107,7 +107,7 @@ The account security UI exposes device name, status, enrollment and last-use tim
 
 The proof key demonstrates control of a registered Viewer installation; the agreement key receives HPKE-wrapped content keys. Neither proves legal identity or unique personhood. Revoking the device revokes both keys.
 
-At this checkpoint the registration access token remains an interim bearer credential accepted only by the two registration endpoints. CTX routes remain closed. The following DPoP task binds newly issued OAuth tokens to the active device proof thumbprint and makes suspension or revocation invalidate continuing extension access.
+The registration access token remains a bootstrap credential accepted only by the two registration endpoints. CTX credentials are issued separately after device registration. Every refresh proves the same device key and rotates the refresh token; rotated-token reuse revokes the device token family. Suspending or revoking the device immediately invalidates its continuing extension access, while reactivation requires fresh authorization rather than restoring old credentials.
 
 ## Account identifiers
 

@@ -1,5 +1,7 @@
 <?php
 
+use App\OAuth\ExtensionOAuthScope;
+
 return [
     'deployment' => [
         'environment' => env('SHARECAPSULES_ENVIRONMENT', 'development'),
@@ -22,9 +24,15 @@ return [
         ),
         'extension_client_name' => 'Share Capsules Viewer Extension',
         'extension_scopes' => [
-            'extension:connect' => 'Connect the Viewer extension to this account.',
+            ExtensionOAuthScope::Connect->value => 'Connect the Viewer extension to this account.',
+            ExtensionOAuthScope::CtxAuthorize->value => 'Request access to protected Capsules using this Viewer device.',
         ],
+        'bootstrap_scopes' => [ExtensionOAuthScope::Connect->value],
+        'device_scopes' => [ExtensionOAuthScope::CtxAuthorize->value],
         'access_token_ttl_minutes' => 10,
+        'refresh_token_ttl_days' => 30,
+        'refresh_lock_seconds' => 15,
+        'refresh_lock_wait_seconds' => 5,
     ],
 
     'ctx' => [

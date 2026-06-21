@@ -1,3 +1,6 @@
+import { DpopProofFactory } from './dpop.js';
+import type { StoredViewerDeviceKeys } from './viewer-device.js';
+
 export interface ExtensionOAuthConfiguration {
     readonly issuer: string;
     readonly authorizationEndpoint: string;
@@ -5,6 +8,7 @@ export interface ExtensionOAuthConfiguration {
     readonly clientId: string;
     readonly redirectUri: string;
     readonly scopes: readonly string[];
+    readonly deviceScopes: readonly string[];
 }
 
 export interface ExtensionIdentityFlow {
@@ -12,14 +16,19 @@ export interface ExtensionIdentityFlow {
 }
 
 export interface OAuthTokenTransport {
-    exchange(tokenEndpoint: string, parameters: URLSearchParams): Promise<unknown>;
+    exchange(
+        tokenEndpoint: string,
+        parameters: URLSearchParams,
+        headers?: Readonly<Record<string, string>>,
+    ): Promise<unknown>;
 }
 
 export interface OAuthTokenSet {
     readonly accessToken: string;
-    readonly tokenType: 'Bearer';
+    readonly tokenType: 'Bearer' | 'DPoP';
     readonly expiresIn: number;
     readonly scopes: readonly string[];
+    readonly refreshToken?: string;
 }
 
 export class ExtensionOAuthError extends Error {
@@ -39,11 +48,15 @@ export class ExtensionOAuthError extends Error {
 }
 
 export class FetchOAuthTokenTransport implements OAuthTokenTransport {
-    public async exchange(tokenEndpoint: string, parameters: URLSearchParams): Promise<unknown> {
+    public async exchange(
+        tokenEndpoint: string,
+        parameters: URLSearchParams,
+        headers: Readonly<Record<string, string>> = {},
+    ): Promise<unknown> {
         try {
             const response = await fetch(tokenEndpoint, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', ...headers },
                 body: parameters,
             });
             const payload: unknown = await response.json();
@@ -64,15 +77,58 @@ export class ExtensionOAuthClient {
         private readonly identity: ExtensionIdentityFlow,
         private readonly transport: OAuthTokenTransport,
         private readonly cryptography: Pick<Crypto, 'getRandomValues' | 'subtle'> = crypto,
+        private readonly dpop = new DpopProofFactory(),
     ) {
         validateConfiguration(configuration);
     }
 
     public async connect(): Promise<OAuthTokenSet> {
-        const session = await AuthorizationSession.create(this.configuration, this.cryptography);
+        const session = await AuthorizationSession.create(
+            this.configuration,
+            this.configuration.scopes,
+            this.cryptography,
+        );
         const callback = await this.identity.launchWebAuthFlow(session.authorizationUrl);
 
         return session.exchange(callback, this.transport);
+    }
+
+    public async authorizeDevice(device: StoredViewerDeviceKeys): Promise<OAuthTokenSet> {
+        const session = await AuthorizationSession.create(
+            this.configuration,
+            this.configuration.deviceScopes,
+            this.cryptography,
+        );
+        const callback = await this.identity.launchWebAuthFlow(session.authorizationUrl);
+        const proof = await this.dpop.createTokenEndpointProof(
+            this.configuration.tokenEndpoint,
+            device.proofPrivateKey,
+            device.proofPublicKey,
+        );
+
+        return session.exchange(callback, this.transport, device.deviceId, proof);
+    }
+
+    public async refresh(
+        refreshToken: string,
+        device: StoredViewerDeviceKeys,
+    ): Promise<OAuthTokenSet> {
+        const proof = await this.dpop.createTokenEndpointProof(
+            this.configuration.tokenEndpoint,
+            device.proofPrivateKey,
+            device.proofPublicKey,
+        );
+        const payload = await this.transport.exchange(
+            this.configuration.tokenEndpoint,
+            new URLSearchParams({
+                grant_type: 'refresh_token',
+                client_id: this.configuration.clientId,
+                refresh_token: refreshToken,
+            }),
+            { DPoP: proof },
+        );
+
+        return parseTokenSet(payload, 'DPoP');
     }
 }
 
@@ -88,6 +144,7 @@ class AuthorizationSession {
 
     public static async create(
         configuration: ExtensionOAuthConfiguration,
+        scopes: readonly string[],
         cryptography: Pick<Crypto, 'getRandomValues' | 'subtle'>,
     ): Promise<AuthorizationSession> {
         const state = randomBase64Url(32, cryptography);
@@ -102,7 +159,7 @@ class AuthorizationSession {
             client_id: configuration.clientId,
             redirect_uri: configuration.redirectUri,
             response_type: 'code',
-            scope: configuration.scopes.join(' '),
+            scope: scopes.join(' '),
             state,
             code_challenge: challenge,
             code_challenge_method: 'S256',
@@ -115,6 +172,8 @@ class AuthorizationSession {
     public async exchange(
         callbackValue: string,
         transport: OAuthTokenTransport,
+        deviceId?: string,
+        dpopProof?: string,
     ): Promise<OAuthTokenSet> {
         if (this.used) throw new ExtensionOAuthError('session_already_used');
         this.used = true;
@@ -143,18 +202,21 @@ class AuthorizationSession {
         const code = callback.searchParams.get('code');
         if (!code) throw new ExtensionOAuthError('invalid_callback');
 
+        const parameters = new URLSearchParams({
+            grant_type: 'authorization_code',
+            client_id: this.configuration.clientId,
+            redirect_uri: this.configuration.redirectUri,
+            code,
+            code_verifier: this.verifier,
+        });
+        if (deviceId !== undefined) parameters.set('device_id', deviceId);
         const payload = await transport.exchange(
             this.configuration.tokenEndpoint,
-            new URLSearchParams({
-                grant_type: 'authorization_code',
-                client_id: this.configuration.clientId,
-                redirect_uri: this.configuration.redirectUri,
-                code,
-                code_verifier: this.verifier,
-            }),
+            parameters,
+            dpopProof === undefined ? {} : { DPoP: dpopProof },
         );
 
-        return parseTokenSet(payload);
+        return parseTokenSet(payload, dpopProof === undefined ? 'Bearer' : 'DPoP');
     }
 }
 
@@ -177,7 +239,8 @@ function validateConfiguration(configuration: ExtensionOAuthConfiguration): void
             redirectUri.search !== '' ||
             redirectUri.hash !== '' ||
             configuration.clientId.length === 0 ||
-            configuration.scopes.length === 0
+            configuration.scopes.length === 0 ||
+            configuration.deviceScopes.length === 0
         ) {
             throw new ExtensionOAuthError('invalid_configuration');
         }
@@ -202,31 +265,36 @@ function parseCallback(value: string): URL {
     }
 }
 
-function parseTokenSet(value: unknown): OAuthTokenSet {
+function parseTokenSet(value: unknown, expectedTokenType: 'Bearer' | 'DPoP'): OAuthTokenSet {
     if (!isRecord(value)) throw new ExtensionOAuthError('invalid_token_response');
 
     const accessToken = value.access_token;
     const tokenType = value.token_type;
     const expiresIn = value.expires_in;
     const scope = value.scope;
+    const refreshToken = value.refresh_token;
 
     if (
         typeof accessToken !== 'string' ||
         accessToken.length === 0 ||
-        tokenType !== 'Bearer' ||
+        tokenType !== expectedTokenType ||
         typeof expiresIn !== 'number' ||
         !Number.isFinite(expiresIn) ||
         expiresIn <= 0 ||
-        (scope !== undefined && typeof scope !== 'string')
+        (scope !== undefined && typeof scope !== 'string') ||
+        (refreshToken !== undefined &&
+            (typeof refreshToken !== 'string' || refreshToken.length === 0)) ||
+        (expectedTokenType === 'DPoP' && typeof refreshToken !== 'string')
     ) {
         throw new ExtensionOAuthError('invalid_token_response');
     }
 
     return {
         accessToken,
-        tokenType,
+        tokenType: expectedTokenType,
         expiresIn,
         scopes: typeof scope === 'string' && scope !== '' ? scope.split(' ') : [],
+        ...(typeof refreshToken === 'string' ? { refreshToken } : {}),
     };
 }
 

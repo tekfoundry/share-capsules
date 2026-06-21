@@ -138,6 +138,10 @@ The public JWK has no private or unrelated fields. Its RFC 7638 thumbprint match
 
 The claims contain exactly `jti`, `htm`, `htu`, `iat`, `ath`, and an optional server-provided `nonce`. V1 CTX protected operations use `POST`. `htu` exactly identifies the HTTPS target without query or fragment. `ath` is the unpadded base64url SHA-256 hash of the ASCII access-token value. The proof is accepted for at most 60 seconds with at most five seconds of clock skew, is unique per HTTP request, and is subject to replay detection. When a server provides `DPoP-Nonce`, the retried proof contains that exact nonce.
 
+The same header profile is used when obtaining or refreshing a device-bound token at the OAuth token endpoint. A token-endpoint proof contains exactly `jti`, `htm`, `htu`, `iat`, and an optional server-provided `nonce`; it omits `ath` because no access token authenticates that request. Authorization-code exchange additionally carries the registered `device_id`. The provider accepts the proof only when its thumbprint belongs to that active account device. A refresh proof must match the `cnf.jkt` of the access token associated with the refresh token. Token-endpoint proofs have the same freshness, clock-skew, exact-target, and replay rules as protected-call proofs.
+
+The V1 access-token JWT uses `typ: at+jwt`, the exact configured OAuth issuer, and validation rules distinct from CTX authorization tickets. It contains the registered proof thumbprint in `cnf.jkt` and is accepted only with the `DPoP` authorization scheme. Refresh tokens rotate on every successful use. Refresh processing for one token is serialized across provider instances so concurrent reuse cannot create two surviving successors. Reuse of a revoked rotated refresh token with the matching device proof revokes the remaining token family. Suspension or revocation of the device invalidates all access and refresh tokens bound to it.
+
 DPoP proves possession and sender-constrains the OAuth token; it is not account authentication or authorization by itself.
 
 ## Broker ticket proof

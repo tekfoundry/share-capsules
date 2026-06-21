@@ -15,15 +15,24 @@ const configuration: ExtensionOAuthConfiguration = {
     clientId: '01977ac8-793e-72d4-a234-bd581e773e7d',
     redirectUri: 'https://abcdefghijklmnop.chromiumapp.org/oauth/callback',
     scopes: ['extension:connect'],
+    deviceScopes: ['ctx:authorize'],
 };
 
 class RecordingTransport implements OAuthTokenTransport {
-    public calls: Array<{ endpoint: string; parameters: URLSearchParams }> = [];
+    public calls: Array<{
+        endpoint: string;
+        parameters: URLSearchParams;
+        headers: Readonly<Record<string, string>>;
+    }> = [];
 
     public constructor(private readonly response: unknown = validTokenResponse()) {}
 
-    public async exchange(endpoint: string, parameters: URLSearchParams): Promise<unknown> {
-        this.calls.push({ endpoint, parameters });
+    public async exchange(
+        endpoint: string,
+        parameters: URLSearchParams,
+        headers: Readonly<Record<string, string>> = {},
+    ): Promise<unknown> {
+        this.calls.push({ endpoint, parameters, headers });
         return this.response;
     }
 }
@@ -115,6 +124,55 @@ describe('extension OAuth Authorization Code with PKCE', () => {
         await expect(client.connect()).rejects.toMatchObject({ code: 'invalid_token_response' });
     });
 
+    it('authorizes a registered device with a fresh DPoP proof and no client secret', async () => {
+        const identity = new CallbackIdentity();
+        const transport = new RecordingTransport({
+            access_token: 'device-access-token',
+            token_type: 'DPoP',
+            expires_in: 600,
+            refresh_token: 'rotating-refresh-token',
+            scope: 'ctx:authorize',
+        });
+        const device = await viewerDeviceKeys();
+        const tokens = await new ExtensionOAuthClient(
+            configuration,
+            identity,
+            transport,
+        ).authorizeDevice(device);
+
+        expect(identity.authorizationUrl?.searchParams.get('scope')).toBe('ctx:authorize');
+        expect(transport.calls[0]?.parameters.get('device_id')).toBe(device.deviceId);
+        expect(transport.calls[0]?.parameters.has('client_secret')).toBe(false);
+        expectDpopProof(transport.calls[0]?.headers.DPoP, configuration.tokenEndpoint);
+        expect(tokens).toEqual({
+            accessToken: 'device-access-token',
+            tokenType: 'DPoP',
+            expiresIn: 600,
+            refreshToken: 'rotating-refresh-token',
+            scopes: ['ctx:authorize'],
+        });
+    });
+
+    it('rotates a bound refresh token with a new proof', async () => {
+        const transport = new RecordingTransport({
+            access_token: 'rotated-access-token',
+            token_type: 'DPoP',
+            expires_in: 600,
+            refresh_token: 'new-refresh-token',
+            scope: 'ctx:authorize',
+        });
+        const device = await viewerDeviceKeys();
+        const client = new ExtensionOAuthClient(configuration, new CallbackIdentity(), transport);
+
+        await expect(client.refresh('old-refresh-token', device)).resolves.toMatchObject({
+            accessToken: 'rotated-access-token',
+            refreshToken: 'new-refresh-token',
+        });
+        expect(transport.calls[0]?.parameters.get('grant_type')).toBe('refresh_token');
+        expect(transport.calls[0]?.parameters.get('refresh_token')).toBe('old-refresh-token');
+        expectDpopProof(transport.calls[0]?.headers.DPoP, configuration.tokenEndpoint);
+    });
+
     it('fails closed when an endpoint is not HTTPS', () => {
         expect(
             () =>
@@ -169,4 +227,46 @@ function validTokenResponse(): unknown {
         expires_in: 600,
         scope: 'extension:connect',
     };
+}
+
+async function viewerDeviceKeys() {
+    const proof = await crypto.subtle.generateKey({ name: 'Ed25519' }, false, ['sign', 'verify']);
+    const agreement = await crypto.subtle.generateKey({ name: 'X25519' }, false, ['deriveBits']);
+    if (!('privateKey' in proof) || !('privateKey' in agreement)) throw new Error('key_generation');
+
+    return {
+        deviceId: crypto.randomUUID(),
+        proofPrivateKey: proof.privateKey,
+        proofPublicKey: (await crypto.subtle.exportKey('jwk', proof.publicKey)) as {
+            kty: 'OKP';
+            crv: 'Ed25519';
+            x: string;
+        },
+        agreementPrivateKey: agreement.privateKey,
+        agreementPublicKey: (await crypto.subtle.exportKey('jwk', agreement.publicKey)) as {
+            kty: 'OKP';
+            crv: 'X25519';
+            x: string;
+        },
+    };
+}
+
+function expectDpopProof(proof: string | undefined, expectedTarget: string): void {
+    expect(proof).toBeTypeOf('string');
+    const parts = proof?.split('.') ?? [];
+    expect(parts).toHaveLength(3);
+    const header = JSON.parse(decodeBase64Url(parts[0] ?? '')) as Record<string, unknown>;
+    const payload = JSON.parse(decodeBase64Url(parts[1] ?? '')) as Record<string, unknown>;
+    expect(header).toMatchObject({ typ: 'dpop+jwt', alg: 'EdDSA' });
+    expect(payload).toMatchObject({ htm: 'POST', htu: expectedTarget });
+    expect(payload.jti).toBeTypeOf('string');
+    expect(payload.iat).toBeTypeOf('number');
+}
+
+function decodeBase64Url(value: string): string {
+    return new TextDecoder().decode(
+        Uint8Array.from(atob(value.replaceAll('-', '+').replaceAll('_', '/')), (character) =>
+            character.charCodeAt(0),
+        ),
+    );
 }

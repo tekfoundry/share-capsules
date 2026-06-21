@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Account\UpdateViewerDeviceRequest;
 use App\Models\User;
 use App\Models\ViewerDevice;
+use App\ViewerDevices\ViewerDeviceLifecycleService;
 use App\ViewerDevices\ViewerDeviceStatus;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -35,41 +36,38 @@ final class AccountViewerDeviceController extends Controller
         return back()->with('status', 'Device name updated.');
     }
 
-    public function suspend(Request $request, ViewerDevice $device): RedirectResponse
-    {
+    public function suspend(
+        Request $request,
+        ViewerDevice $device,
+        ViewerDeviceLifecycleService $lifecycle,
+    ): RedirectResponse {
         $this->authorizeOwnership($request, $device);
         $this->rejectRevoked($device);
-        $device->update([
-            'status' => ViewerDeviceStatus::Suspended,
-            'suspended_at' => now(),
-        ]);
+        $lifecycle->suspend($device);
 
         return back()->with('status', 'Viewer device suspended.');
     }
 
-    public function activate(Request $request, ViewerDevice $device): RedirectResponse
-    {
+    public function activate(
+        Request $request,
+        ViewerDevice $device,
+        ViewerDeviceLifecycleService $lifecycle,
+    ): RedirectResponse {
         $this->authorizeOwnership($request, $device);
         $this->rejectRevoked($device);
-        $device->update([
-            'status' => ViewerDeviceStatus::Active,
-            'suspended_at' => null,
-        ]);
+        $lifecycle->activate($device);
 
         return back()->with('status', 'Viewer device activated.');
     }
 
-    public function destroy(Request $request, ViewerDevice $device): RedirectResponse
-    {
+    public function destroy(
+        Request $request,
+        ViewerDevice $device,
+        ViewerDeviceLifecycleService $lifecycle,
+    ): RedirectResponse {
         $this->authorizeOwnership($request, $device);
 
-        if ($device->status !== ViewerDeviceStatus::Revoked) {
-            $device->update([
-                'status' => ViewerDeviceStatus::Revoked,
-                'suspended_at' => null,
-                'revoked_at' => now(),
-            ]);
-        }
+        $lifecycle->revoke($device);
 
         return back()->with('status', 'Viewer device permanently revoked.');
     }
