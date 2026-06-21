@@ -130,7 +130,7 @@ Objective: publish an honest, compelling explanation of the problem and proposed
 
 - ✅ Rewrite the public front page around a clear creator problem statement, followed by concise `why`, `what`, and `how` sections.
 - ✅ Explain that Share Capsules is intended to reduce effortless, anonymous, large-scale harvesting without promising copy prevention, perfect human detection, or protection from an authorized viewer.
-- ⬜️ Create a polished, accessible visual workflow showing creation, encrypted static hosting, CTX policy evaluation, broker key release, and local Viewer decryption.
+- ✅ Create a polished, accessible visual workflow showing creation, encrypted static hosting, CTX policy evaluation, broker key release, and local Viewer decryption.
 - ⬜️ Create a dedicated “How it works” page that explains the creator, Host, provider, broker, and Viewer boundaries in approachable language.
 - ⬜️ Create a living technical-overview page covering Capsule and CTX terminology, architecture, cryptographic boundaries, trust and privacy, provider independence, V1 limitations, and links to the detailed design documents.
 - ⬜️ Clearly distinguish the long-term vision, implemented capabilities, active development, and deferred work on every page where readers could otherwise infer production readiness.

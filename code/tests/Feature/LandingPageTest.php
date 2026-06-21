@@ -24,6 +24,17 @@ final class LandingPageTest extends TestCase
                 'A trusted Viewer uses CTX',
             ])
             ->assertSee('no technology can prevent an authorized viewer from copying what they can see')
+            ->assertSee('Protected content moves. Control stays visible.')
+            ->assertSeeInOrder([
+                'Encrypt + sign',
+                'Serve ciphertext',
+                'Fetch + verify',
+                'Evaluate policy',
+                'Release to device',
+                'Decrypt + render',
+            ])
+            ->assertSee('The Host distributes an encrypted file.')
+            ->assertSee('The Viewer decrypts locally.')
             ->assertSee('Trust, without a universal trust score.')
             ->assertSee('Each creator defines the conditions required for their Capsule.')
             ->assertSee('Viewer-consented evidence')
@@ -48,6 +59,8 @@ final class LandingPageTest extends TestCase
             ->assertSee('id="main-content"', false)
             ->assertSee('id="problem"', false)
             ->assertSee('id="approach"', false)
+            ->assertSee('id="workflow"', false)
+            ->assertSee('aria-label="Share Capsules access workflow"', false)
             ->assertSee('id="trust"', false)
             ->assertSee('id="boundaries"', false)
             ->assertSee('id="project-status"', false);
