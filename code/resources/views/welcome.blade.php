@@ -171,4 +171,6 @@
     </section>
 
     <x-public.project-status />
+
+    <x-public.project-participation />
 @endsection

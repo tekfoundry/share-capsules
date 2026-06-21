@@ -52,6 +52,11 @@ final class LandingPageTest extends TestCase
             ->assertSee('Security without mystery.')
             ->assertSee('What exists today—and what does not.')
             ->assertSee('Share Capsules is public experimental work, not a production content-protection service.')
+            ->assertSee('TekFoundry sponsors and currently develops the Share Capsules reference implementation.')
+            ->assertSee('not make TekFoundry the only possible provider or broker')
+            ->assertSee('Built in public. Improved through scrutiny.')
+            ->assertSee('href="mailto:info@tekfoundry.com?subject=Share%20Capsules%20feedback"', false)
+            ->assertSee('src="https://tekfoundry.com/imgs/tekfoundry/logo_horz_black.png"', false)
             ->assertSee('Sponsored by')
             ->assertSee('TekFoundry')
             ->assertSee('info@tekfoundry.com');
