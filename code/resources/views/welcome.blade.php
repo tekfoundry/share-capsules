@@ -163,6 +163,44 @@
         </div>
     </section>
 
+    <section id="trust" class="border-b border-line bg-canvas py-20 sm:py-24">
+        <div class="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+            <div class="grid gap-12 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
+                <div>
+                    <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">How trust works</p>
+                    <h2 class="mt-4 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">Trust, without a universal trust score.</h2>
+                    <p class="mt-5 text-base leading-7 text-muted">CTX does not decide whether someone is a “good” or “trustworthy” person. Each creator defines the conditions required for their Capsule. A recognized provider evaluates only the relevant, Viewer-consented evidence and returns whether those conditions are satisfied.</p>
+                </div>
+
+                <div class="overflow-hidden rounded-2xl border border-line bg-white shadow-card">
+                    <ol class="grid divide-y divide-line sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+                        @foreach ([
+                            ['01', 'Creator chooses', 'The Capsule carries the creator’s signed access conditions.'],
+                            ['02', 'Viewer consents', 'The Viewer decides whether to disclose the evidence needed for this request.'],
+                            ['03', 'Provider evaluates', 'The provider returns a limited policy result rather than a raw account history.'],
+                        ] as [$number, $heading, $copy])
+                            <li class="p-5 sm:p-6">
+                                <span class="text-xs font-bold tracking-[0.14em] text-brand uppercase">{{ $number }}</span>
+                                <h3 class="mt-3 font-bold text-ink">{{ $heading }}</h3>
+                                <p class="mt-2 text-sm leading-6 text-muted">{{ $copy }}</p>
+                            </li>
+                        @endforeach
+                    </ol>
+
+                    <div class="border-t border-line bg-surface p-5 sm:p-6">
+                        <p class="text-xs font-bold tracking-[0.14em] text-muted uppercase">A policy may ask for</p>
+                        <ul class="mt-4 flex flex-wrap gap-2 text-sm font-semibold text-ink" aria-label="Example trust conditions">
+                            @foreach (['Verified active account', 'Registered Viewer device', 'Account continuity', 'Per-Capsule limits', 'Low automation risk', 'Optional community standing'] as $condition)
+                                <li class="rounded-full border border-line bg-white px-3 py-1.5">{{ $condition }}</li>
+                            @endforeach
+                        </ul>
+                        <p class="mt-5 border-l-2 border-teal-500 pl-4 text-sm leading-6 text-muted"><strong class="text-ink">The creator receives the policy result</strong>—not the Viewer’s email, identity, complete history, or raw evidence.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section id="boundaries" class="mx-auto max-w-7xl px-5 py-20 sm:px-8 sm:py-24 lg:px-10">
         <div class="grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:items-start">
             <div>

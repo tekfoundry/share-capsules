@@ -39,6 +39,7 @@
                     <nav class="hidden items-center gap-8 text-sm font-medium text-muted md:flex" aria-label="Primary navigation">
                         <a class="transition-colors hover:text-ink" href="{{ route('home') }}#problem">The problem</a>
                         <a class="transition-colors hover:text-ink" href="{{ route('home') }}#approach">How it works</a>
+                        <a class="transition-colors hover:text-ink" href="{{ route('home') }}#trust">How trust works</a>
                         <a class="transition-colors hover:text-ink" href="{{ route('home') }}#boundaries">Trust boundaries</a>
                     </nav>
 

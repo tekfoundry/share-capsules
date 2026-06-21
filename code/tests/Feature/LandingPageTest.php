@@ -24,6 +24,11 @@ final class LandingPageTest extends TestCase
                 'A trusted Viewer uses CTX',
             ])
             ->assertSee('no technology can prevent an authorized viewer from copying what they can see')
+            ->assertSee('Trust, without a universal trust score.')
+            ->assertSee('Each creator defines the conditions required for their Capsule.')
+            ->assertSee('Viewer-consented evidence')
+            ->assertSee('The creator receives the policy result')
+            ->assertSee('not the Viewer’s email, identity, complete history, or raw evidence')
             ->assertSee('Security without mystery.')
             ->assertSee('Active experimental development')
             ->assertSee('the complete creator-to-viewer protection flow does not exist yet')
@@ -43,6 +48,7 @@ final class LandingPageTest extends TestCase
             ->assertSee('id="main-content"', false)
             ->assertSee('id="problem"', false)
             ->assertSee('id="approach"', false)
+            ->assertSee('id="trust"', false)
             ->assertSee('id="boundaries"', false)
             ->assertSee('id="project-status"', false);
     }
