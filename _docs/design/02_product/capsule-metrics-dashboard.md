@@ -34,7 +34,7 @@ Low-volume breakdowns that could reveal one viewer's behavior or trust state are
 
 ## Metrics foundation
 
-Phase 4 establishes a versioned, provider-aware event and projection model before the creator dashboard is built. The foundation distinguishes at least:
+Phase 5 establishes a versioned, provider-aware event and projection model before the creator dashboard is built. The foundation distinguishes at least:
 
 - authorization attempt;
 - authorization approved and ticket issued;

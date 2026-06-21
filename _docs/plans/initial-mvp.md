@@ -97,7 +97,7 @@ Completion evidence recorded on 2026-06-20:
 - The shared vector set fixes canonical JSON, policy, manifest, SHA-256, Ed25519, AES-256-GCM, CTX ticket, HPKE context, and project-specific HPKE outputs.
 - TypeScript reproduces every published vector and exercises fail-closed HPKE behavior using the lockfile-pinned RFC 9180 implementation.
 - PHP consumes the same JSON and independently verifies canonical-byte hashes, entry commitments, Ed25519 signatures with Sodium, and AES-256-GCM with OpenSSL.
-- Independent PHP HPKE verification remains a Phase 4 broker implementation gate because PHP does not yet have a project HPKE adapter; the vector itself is stable now.
+- Independent PHP HPKE verification remains a Phase 5 broker implementation gate because PHP does not yet have a project HPKE adapter; the vector itself is stable now.
 
 ### Phase 3 — Accounts, authentication, devices, and lifecycle
 
@@ -124,7 +124,29 @@ Success goals:
 - Closure immediately prevents creation and viewing; restoration works only within 30 days; permanent deletion is irreversible.
 - Account behavior makes no one-human-one-account claim.
 
-### Phase 4 — Isolated broker and CTX authorization control plane
+### Phase 4 — Public project launch and feedback
+
+Objective: publish an honest, compelling explanation of the problem and proposed solution so creators, implementers, and security reviewers can understand the project and provide useful feedback while development continues.
+
+- ⬜️ Rewrite the public front page around a clear creator problem statement, followed by concise `why`, `what`, and `how` sections.
+- ⬜️ Explain that Share Capsules is intended to reduce effortless, anonymous, large-scale harvesting without promising copy prevention, perfect human detection, or protection from an authorized viewer.
+- ⬜️ Create a polished, accessible visual workflow showing creation, encrypted static hosting, CTX policy evaluation, broker key release, and local Viewer decryption.
+- ⬜️ Create a dedicated “How it works” page that explains the creator, Host, provider, broker, and Viewer boundaries in approachable language.
+- ⬜️ Create a living technical-overview page covering Capsule and CTX terminology, architecture, cryptographic boundaries, trust and privacy, provider independence, V1 limitations, and links to the detailed design documents.
+- ⬜️ Clearly distinguish the long-term vision, implemented capabilities, active development, and deferred work on every page where readers could otherwise infer production readiness.
+- ⬜️ Add visible TekFoundry sponsorship, `info@tekfoundry.com`, open-source participation, GitHub, and feedback calls to action without presenting TekFoundry as the only possible future CTX Provider.
+- ⬜️ Add page titles, descriptions, canonical URLs, social-sharing metadata and image, semantic landmarks, keyboard support, reduced-motion behavior, and responsive layouts.
+- ⬜️ Add automated page, content, metadata, link, accessibility-smoke, and responsive-layout tests that lock down important public claims without making ordinary copy edits brittle.
+- ⬜️ Perform a manual review on representative desktop and mobile sizes for clarity, accessibility, visual hierarchy, broken links, and accidental security or readiness overclaims.
+
+Success goals:
+
+- A creator unfamiliar with the project can identify the problem, proposed approach, current status, and next action from the front page.
+- The workflow makes clear that Hosts serve encrypted files, CTX evaluates access, and protected content is decrypted only inside the trusted Viewer boundary.
+- Technical readers can reach the architecture, privacy model, threat model, specifications, source, and feedback channel without searching the repository.
+- Public language invites scrutiny and participation while accurately describing the MVP as software under active development.
+
+### Phase 5 — Isolated broker and CTX authorization control plane
 
 Objective: authorize exact Capsule releases without exposing raw content keys to the normal Laravel application.
 
@@ -150,7 +172,7 @@ Success goals:
 - The Laravel control plane cannot independently cause arbitrary content-key disclosure through ordinary credentials.
 - Creators receive only allowed predicates and Capsule aggregates; Hosts receive no trust-profile data.
 
-### Phase 5 — Creator Studio and local Capsule creation
+### Phase 6 — Creator Studio and local Capsule creation
 
 Objective: let a creator produce a valid Capsule without sending plaintext or creator signing keys to Laravel.
 
@@ -175,7 +197,7 @@ Success goals:
 - Produced Capsules pass shared fixtures and fail if any signed byte or encrypted entry changes.
 - A creator can download a Capsule and obtain complete static-host integration instructions.
 
-### Phase 6 — Viewer extension and `<capsule-viewer>` integration
+### Phase 7 — Viewer extension and `<capsule-viewer>` integration
 
 Objective: securely discover, authorize, decrypt, validate, and render protected images on approved Hosts.
 
@@ -202,7 +224,7 @@ Success goals:
 - Successful opens render only after complete verification and atomic broker redemption.
 - Unsupported browsers and absent extensions retain public fallback content without server-side decryption.
 
-### Phase 7 — Static reference Host and end-to-end scenario
+### Phase 8 — Static reference Host and end-to-end scenario
 
 Objective: prove separation of concerns using an ordinary static website rather than a Share Capsules hosting feature.
 
@@ -220,7 +242,7 @@ Success goals:
 - Replacing Share Capsules with protocol-compatible discovery identities remains structurally possible.
 - The reference page demonstrates the complete creator-to-viewer flow without Share Capsules storing content.
 
-### Phase 8 — Security, privacy, and compatibility hardening
+### Phase 9 — Security, privacy, and compatibility hardening
 
 Objective: satisfy the documented threat model and prove that privacy promises are implemented rather than aspirational.
 
@@ -246,7 +268,7 @@ Success goals:
 - The finalized image profile is stable on the published minimum desktop configuration.
 - No unresolved critical or high-severity security finding remains at release.
 
-### Phase 9 — Deployment, distribution, and MVP release
+### Phase 10 — Deployment, distribution, and MVP release
 
 Objective: operate the complete system with controlled identities, monitoring, documentation, and rollback paths.
 
@@ -274,7 +296,7 @@ Success goals:
 
 The operational MVP may be released only when:
 
-- All Phase 1–9 success goals are met and required tasks are marked complete.
+- All Phase 1–10 success goals are met and required tasks are marked complete.
 - One creator can produce, independently host, revoke, and inspect a valid static-image Capsule.
 - Multiple Capsules on one static page can be opened under individual or site-scoped standing consent.
 - Embedded policy, global/per-account limits, optional automation risk, ticket replay prevention, and atomic redemption behave correctly under concurrency.
