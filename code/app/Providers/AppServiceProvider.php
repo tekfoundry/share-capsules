@@ -6,6 +6,7 @@ use App\Account\Closure\CapsuleInventoryRepository;
 use App\Account\Closure\EmptyCapsuleInventoryRepository;
 use App\Account\Deletion\AccountDeletionService;
 use App\Account\Deletion\AccountTrustProfileRepository;
+use App\Account\Deletion\DeletionLedgerParticipant;
 use App\Account\Deletion\EmptyAccountTrustProfileRepository;
 use App\Account\Sanctions\SanctionTombstoneDeletionParticipant;
 use App\Account\Sessions\AccountSessionRepository;
@@ -40,7 +41,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(CapsuleInventoryRepository::class, EmptyCapsuleInventoryRepository::class);
         $this->app->bind(AccountTrustProfileRepository::class, EmptyAccountTrustProfileRepository::class);
         $this->app->tag(
-            [SanctionTombstoneDeletionParticipant::class],
+            [SanctionTombstoneDeletionParticipant::class, DeletionLedgerParticipant::class],
             'account-deletion-participants',
         );
         $this->app->when(AccountDeletionService::class)

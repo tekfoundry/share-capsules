@@ -64,6 +64,26 @@ return [
             ]) : [],
         ],
 
+        'deletion_ledger' => [
+            'driver' => 'mysql',
+            'url' => env('DELETION_LEDGER_DB_URL'),
+            'host' => env('DELETION_LEDGER_DB_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('DELETION_LEDGER_DB_PORT', env('DB_PORT', '3306')),
+            'database' => env('DELETION_LEDGER_DB_DATABASE', env('DB_DATABASE', 'laravel')),
+            'username' => env('DELETION_LEDGER_DB_USERNAME', env('DB_USERNAME', 'root')),
+            'password' => env('DELETION_LEDGER_DB_PASSWORD', env('DB_PASSWORD', '')),
+            'unix_socket' => env('DELETION_LEDGER_DB_SOCKET', env('DB_SOCKET', '')),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                Mysql::ATTR_SSL_CA => env('DELETION_LEDGER_MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),

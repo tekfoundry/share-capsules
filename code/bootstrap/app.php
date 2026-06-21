@@ -4,6 +4,7 @@ use App\Http\Controllers\HealthController;
 use App\Http\Middleware\AssignCorrelationId;
 use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\RejectDeviceBoundBearerToken;
+use App\Http\Middleware\RequireDeletionLedgerReplay;
 use App\Http\Middleware\ValidateTokenEndpointDpop;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -27,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias(['account.active' => EnsureAccountIsActive::class]);
         $middleware->append(AssignCorrelationId::class);
+        $middleware->append(RequireDeletionLedgerReplay::class);
         $middleware->append(RejectDeviceBoundBearerToken::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -21,6 +21,7 @@ final class HealthEndpointTest extends TestCase
                 ],
                 'services' => [
                     'configuration' => ['status' => 'healthy'],
+                    'deletion_replay' => ['status' => 'healthy'],
                     'mysql' => ['status' => 'healthy'],
                     'redis' => ['status' => 'healthy'],
                 ],

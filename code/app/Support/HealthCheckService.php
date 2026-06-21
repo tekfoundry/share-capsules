@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Account\Deletion\DeletionRestoreReadiness;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
@@ -11,6 +12,7 @@ final class HealthCheckService
 {
     public function __construct(
         private readonly DeploymentConfiguration $deploymentConfiguration,
+        private readonly DeletionRestoreReadiness $deletionRestoreReadiness,
     ) {}
 
     /** @return array{status: string, deployment: array{environment: string, id: string}, services: array<string, array{status: string}>} */
@@ -18,6 +20,9 @@ final class HealthCheckService
     {
         $services = [
             'configuration' => $this->checkConfiguration(),
+            'deletion_replay' => [
+                'status' => $this->deletionRestoreReadiness->isReady() ? 'healthy' : 'unhealthy',
+            ],
             'mysql' => $this->checkService('mysql', fn () => DB::select('SELECT 1')),
             'redis' => $this->checkService('redis', fn () => Redis::connection()->command('ping')),
         ];

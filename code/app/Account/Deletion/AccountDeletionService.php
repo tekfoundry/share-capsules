@@ -2,19 +2,16 @@
 
 namespace App\Account\Deletion;
 
-use App\Account\Sessions\AccountSessionRepository;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Laravel\Passport\Passport;
 use Throwable;
 
 final readonly class AccountDeletionService
 {
     /** @param iterable<AccountDeletionParticipant> $participants */
     public function __construct(
-        private AccountSessionRepository $sessions,
-        private AccountTrustProfileRepository $trustProfiles,
+        private AccountDataEraser $eraser,
         private iterable $participants,
     ) {}
 
@@ -60,31 +57,10 @@ final readonly class AccountDeletionService
                 $participant->beforeAccountDeletion($user);
             }
 
-            $this->trustProfiles->deleteForAccount($accountId);
-            $this->deleteCredentialsAndAccountState($user);
-            $user->delete();
+            $this->eraser->erase($user);
 
             return true;
         });
-    }
-
-    private function deleteCredentialsAndAccountState(User $user): void
-    {
-        $accessTokenIds = Passport::token()->newQuery()
-            ->where('user_id', $user->getKey())
-            ->pluck('id');
-
-        Passport::refreshToken()->newQuery()
-            ->whereIn('access_token_id', $accessTokenIds)
-            ->delete();
-        Passport::token()->newQuery()
-            ->whereIn('id', $accessTokenIds)
-            ->delete();
-        Passport::authCode()->newQuery()
-            ->where('user_id', $user->getKey())
-            ->delete();
-        $this->sessions->revokeAll($user);
-        DB::table('password_reset_tokens')->where('email', $user->email)->delete();
     }
 
     /** @return Collection<int, int> */

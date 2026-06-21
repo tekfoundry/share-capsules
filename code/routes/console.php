@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\AccountDeletionLedgerEntry;
 use App\Models\SanctionTombstone;
 use App\Models\ViewerDeviceChallenge;
 use Illuminate\Support\Facades\Schedule;
@@ -10,6 +11,10 @@ Schedule::command('model:prune', [
 
 Schedule::command('model:prune', [
     '--model' => SanctionTombstone::class,
+])->hourly()->onOneServer()->withoutOverlapping();
+
+Schedule::command('model:prune', [
+    '--model' => AccountDeletionLedgerEntry::class,
 ])->hourly()->onOneServer()->withoutOverlapping();
 
 Schedule::command('accounts:delete-expired')

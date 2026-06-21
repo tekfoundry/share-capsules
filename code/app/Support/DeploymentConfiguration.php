@@ -19,6 +19,9 @@ final class DeploymentConfiguration
         $ctxIssuer = (string) config('sharecapsules.ctx.issuer');
         $brokerUrl = (string) config('sharecapsules.broker.base_url');
         $sanctionHmacKey = (string) config('accounts.sanctions.email_hmac_key');
+        $ledgerConnection = (string) config('accounts.deletion_ledger.connection');
+        $replayRequired = (bool) config('accounts.deletion_ledger.replay_required');
+        $restoreId = (string) config('accounts.deletion_ledger.restore_id');
 
         if (! in_array($environment, ['development', 'test', 'production'], true)) {
             $issues[] = 'deployment_environment_invalid';
@@ -64,6 +67,14 @@ final class DeploymentConfiguration
             if (! $this->isValidProductionSecret($sanctionHmacKey)) {
                 $issues[] = 'sanction_hmac_key_invalid';
             }
+
+            if ($ledgerConnection === '' || $ledgerConnection === config('database.default')) {
+                $issues[] = 'deletion_ledger_not_isolated';
+            }
+        }
+
+        if ($replayRequired && ! Str::isUuid($restoreId)) {
+            $issues[] = 'deletion_restore_id_invalid';
         }
 
         return $issues;

@@ -17,4 +17,11 @@ return [
         ),
         'tombstone_max_days' => 90,
     ],
+
+    'deletion_ledger' => [
+        'connection' => env('ACCOUNT_DELETION_LEDGER_CONNECTION', env('DB_CONNECTION', 'sqlite')),
+        'replay_required' => env('ACCOUNT_DELETION_REPLAY_REQUIRED', false),
+        'restore_id' => env('ACCOUNT_DELETION_RESTORE_ID'),
+        'retention_days' => 30,
+    ],
 ];

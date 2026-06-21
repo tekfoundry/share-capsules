@@ -31,6 +31,7 @@ final class DeploymentConfigurationTest extends TestCase
             'extension_oauth_redirect_mismatch',
             'extension_oauth_client_id_invalid',
             'sanction_hmac_key_invalid',
+            'deletion_ledger_not_isolated',
         ], app(DeploymentConfiguration::class)->issues());
     }
 
@@ -64,6 +65,28 @@ final class DeploymentConfigurationTest extends TestCase
 
         $this->assertContains(
             'account_session_driver_not_database',
+            app(DeploymentConfiguration::class)->issues(),
+        );
+    }
+
+    public function test_production_requires_an_isolated_deletion_ledger_connection(): void
+    {
+        config()->set('sharecapsules.deployment.environment', 'production');
+        config()->set('accounts.deletion_ledger.connection', config('database.default'));
+
+        $this->assertContains(
+            'deletion_ledger_not_isolated',
+            app(DeploymentConfiguration::class)->issues(),
+        );
+    }
+
+    public function test_restore_mode_requires_a_unique_restore_identifier(): void
+    {
+        config()->set('accounts.deletion_ledger.replay_required', true);
+        config()->set('accounts.deletion_ledger.restore_id', 'reused-name');
+
+        $this->assertContains(
+            'deletion_restore_id_invalid',
             app(DeploymentConfiguration::class)->issues(),
         );
     }
