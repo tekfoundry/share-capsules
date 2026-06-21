@@ -164,6 +164,7 @@ browser_check_command() {
     require_env_file
 
     compose_cmd up -d --wait --wait-timeout 180 app
+    run_in_code_no_tty php artisan migrate --force
     run_in_code_no_tty npx playwright install --with-deps chromium
 
     # The browser runs inside the app container, where Vite listens on 5173.
