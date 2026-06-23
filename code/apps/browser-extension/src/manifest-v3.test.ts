@@ -15,12 +15,10 @@ describe('development Manifest V3 shell', () => {
         expect(manifest.host_permissions).toEqual([
             'http://localhost:3003/*',
             'http://localhost:3004/*',
-        ]);
-        expect(manifest.optional_host_permissions).toEqual([
-            'https://*/*',
             'http://localhost/*',
             'http://127.0.0.1/*',
         ]);
+        expect(manifest.optional_host_permissions).toEqual(['https://*/*']);
         expect(manifest.background).toEqual({
             service_worker: 'service-worker.js',
             type: 'module',
@@ -30,6 +28,12 @@ describe('development Manifest V3 shell', () => {
                 matches: ['http://localhost:3003/studio/capsules/create'],
                 js: ['creator-handoff.js'],
                 run_at: 'document_start',
+            },
+        ]);
+        expect(manifest.web_accessible_resources).toEqual([
+            {
+                resources: ['viewer-frame.html', 'viewer-frame.css', 'viewer-frame.js'],
+                matches: ['https://*/*', 'http://localhost/*', 'http://127.0.0.1/*'],
             },
         ]);
     });
@@ -46,8 +50,7 @@ describe('development Manifest V3 shell', () => {
             ]),
         );
         expect(manifest.content_security_policy).toEqual({
-            extension_pages:
-                "script-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'",
+            extension_pages: "script-src 'self'; object-src 'none'; base-uri 'none'",
         });
     });
 });
@@ -60,6 +63,7 @@ interface ExtensionManifest {
     readonly optional_host_permissions: readonly string[];
     readonly background: unknown;
     readonly content_scripts: unknown;
+    readonly web_accessible_resources: unknown;
     readonly content_security_policy: unknown;
 }
 

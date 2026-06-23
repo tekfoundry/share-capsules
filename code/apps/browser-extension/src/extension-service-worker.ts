@@ -3,6 +3,15 @@ import {
     parseCreatorDraftMessage,
     parseCreatorHandoffMessage,
 } from './extension-messages.js';
+import {
+    VIEWER_DISCOVERY_SCRIPT_ID,
+    viewerDiscoveryMatchesFromGrantedOrigins,
+} from './viewer-content-script-registration.js';
+import {
+    parseViewerOpenSlotMessage,
+    VIEWER_OPEN_SLOT_ACQUIRE,
+    ViewerOpenSlotQueue,
+} from './viewer-open-queue.js';
 
 interface MessageSender {
     readonly url?: string;
@@ -52,6 +61,16 @@ declare const chrome: {
                 readonly persistAcrossSessions: boolean;
             }[],
         ): Promise<void>;
+        unregisterContentScripts(filter?: { readonly ids?: readonly string[] }): Promise<void>;
+    };
+    readonly permissions: {
+        getAll(): Promise<{ readonly origins?: readonly string[] }>;
+        readonly onAdded: {
+            addListener(listener: () => void): void;
+        };
+        readonly onRemoved: {
+            addListener(listener: () => void): void;
+        };
     };
     readonly storage: {
         readonly session: {
@@ -66,19 +85,30 @@ declare const chrome: {
 };
 
 const VIEWER_DISCOVERY_SCRIPT = Object.freeze({
-    id: 'share-capsules-viewer-discovery',
-    matches: ['https://*/*', 'http://localhost/*', 'http://127.0.0.1/*'],
+    id: VIEWER_DISCOVERY_SCRIPT_ID,
     js: ['viewer-discovery.js'],
     runAt: 'document_idle' as const,
     allFrames: false,
     persistAcrossSessions: true,
 });
+const viewerOpenSlots = new ViewerOpenSlotQueue();
 
 void ensureViewerDiscoveryContentScript();
 chrome.runtime.onInstalled.addListener(() => void ensureViewerDiscoveryContentScript());
 chrome.runtime.onStartup.addListener(() => void ensureViewerDiscoveryContentScript());
+chrome.permissions.onAdded.addListener(() => void ensureViewerDiscoveryContentScript());
+chrome.permissions.onRemoved.addListener(() => void ensureViewerDiscoveryContentScript());
 
 chrome.runtime.onMessage.addListener((message, sender, respond) => {
+    const viewerOpenSlot = parseViewerOpenSlotMessage(message);
+    if (viewerOpenSlot !== undefined) {
+        if (viewerOpenSlot.type === VIEWER_OPEN_SLOT_ACQUIRE) {
+            viewerOpenSlots.acquire(viewerOpenSlot.requestId, () => respond({ granted: true }));
+            return true;
+        }
+        respond({ released: viewerOpenSlots.release(viewerOpenSlot.requestId) });
+        return false;
+    }
     if (isCreatorPage(sender.url)) {
         void acceptHandoff(message)
             .then(respond)
@@ -95,14 +125,26 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
 
 async function ensureViewerDiscoveryContentScript(): Promise<void> {
     try {
+        const granted = await chrome.permissions.getAll();
+        const matches = viewerDiscoveryMatchesFromGrantedOrigins(granted.origins ?? []);
         const registered = await chrome.scripting.getRegisteredContentScripts({
             ids: [VIEWER_DISCOVERY_SCRIPT.id],
         });
-        if (registered.length === 0) {
-            await chrome.scripting.registerContentScripts([VIEWER_DISCOVERY_SCRIPT]);
+        if (matches.length === 0) {
+            if (registered.length > 0) {
+                await chrome.scripting.unregisterContentScripts({
+                    ids: [VIEWER_DISCOVERY_SCRIPT.id],
+                });
+            }
             return;
         }
-        await chrome.scripting.updateContentScripts([VIEWER_DISCOVERY_SCRIPT]);
+        if (registered.length === 0) {
+            await chrome.scripting.registerContentScripts([
+                { ...VIEWER_DISCOVERY_SCRIPT, matches },
+            ]);
+            return;
+        }
+        await chrome.scripting.updateContentScripts([{ ...VIEWER_DISCOVERY_SCRIPT, matches }]);
     } catch {
         // Discovery is best-effort until the viewer grants a compatible Host permission.
         // The creator flow and installed extension must continue to work without it.

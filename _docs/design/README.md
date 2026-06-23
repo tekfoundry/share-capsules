@@ -35,14 +35,15 @@ These documents are living design records. They describe current direction, rati
 20. [Reputation and signals](05_ctx/reputation-and-signals.md)
 21. [Human confidence](05_ctx/human-confidence.md)
 22. [Browser Viewer](06_viewer/browser-viewer.md)
-23. [Viewer content profiles](06_viewer/content-profiles.md)
-24. [Viewer fallback and assurance](06_viewer/fallback-and-assurance.md)
-25. [Privacy model](07_security-and-privacy/privacy-model.md)
-26. [Identity and device verification](07_security-and-privacy/identity-and-device-verification.md)
-27. [V1 threat model](07_security-and-privacy/threat-model-v1.md)
-28. [V1 cryptographic suite](07_security-and-privacy/cryptographic-suite-v1.md)
-29. [Open questions](09_planning/open-questions.md)
-30. [Capsule Manifest V1 specification](10_specifications/capsule/manifest-v1.md)
+23. [Viewer Host Markup](06_viewer/host-markup.md)
+24. [Viewer content profiles](06_viewer/content-profiles.md)
+25. [Viewer fallback and assurance](06_viewer/fallback-and-assurance.md)
+26. [Privacy model](07_security-and-privacy/privacy-model.md)
+27. [Identity and device verification](07_security-and-privacy/identity-and-device-verification.md)
+28. [V1 threat model](07_security-and-privacy/threat-model-v1.md)
+29. [V1 cryptographic suite](07_security-and-privacy/cryptographic-suite-v1.md)
+30. [Open questions](09_planning/open-questions.md)
+31. [Capsule Manifest V1 specification](10_specifications/capsule/manifest-v1.md)
 
 ## Documentation structure
 

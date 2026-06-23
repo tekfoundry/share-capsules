@@ -145,20 +145,25 @@ reference-host/
     └── artwork-03.capsule
 ```
 
-The page presents each Capsule through declarative custom-element markup with accessible fallback content. For example:
+The page presents each Capsule through declarative custom-element markup. Host-owned layout stays in the page, while the approved extension replaces only the protected `<content>` placeholder with an extension-origin rendering frame. For example:
 
 ```html
 <capsule-viewer src="./capsules/artwork-01.capsule">
-  <img src="./previews/artwork-01.jpg" alt="Public artwork preview" />
-  <a
-    href="https://sharecapsules.com/open?capsule=https%3A%2F%2Fcreator.example%2Fcapsules%2Fartwork-01.capsule"
-  >
-    View protected artwork
-  </a>
+  <fallback>
+    <img src="./previews/artwork-01.jpg" alt="Public artwork preview" />
+    <p>Install or enable the Share Capsules Viewer to open this Capsule.</p>
+  </fallback>
+
+  <template>
+    <figure class="artwork-card">
+      <content class="artwork-frame object-contain"></content>
+      <figcaption>{{ title }}</figcaption>
+    </figure>
+  </template>
 </capsule-viewer>
 ```
 
-Without the extension or site permission, the nested preview and link remain ordinary fallback content. On an approved site, the extension discovers the element and inserts an extension-origin inline Viewer frame. The tag itself does not receive account state, trust results, keys, or plaintext.
+Without the extension or site permission, the fallback remains ordinary public content. On an approved site, the extension discovers the element, verifies public Capsule metadata, activates the template, and inserts an extension-origin inline Viewer frame at `<content>`. The tag itself does not receive account state, trust results, keys, object URLs, or plaintext. See [Viewer Host Markup](../06_viewer/host-markup.md).
 
 The reference Host requires only HTTPS, ordinary HTML, and static-file delivery. It does not load a Share Capsules JavaScript SDK. Capsule responses use unauthenticated `GET`, preferably support `HEAD`, provide a usable length or bounded stream, allow public CORS, use an accepted V1 media type, and keep each revision URL immutable. Range requests are not required in V1. See [Compatible Host contract](compatible-host.md).
 

@@ -78,18 +78,28 @@ Range requests may become required by a future adaptive-rendition or chunked-str
 
 ## Declarative page integration
 
-The Host page identifies a Capsule and supplies accessible fallback content:
+The Host page identifies a Capsule and supplies ordinary page markup for fallback, opened, and error states. The target V1 authoring contract is:
 
 ```html
 <capsule-viewer src="/capsules/artwork-01.capsule">
-  <img src="/previews/artwork-01.jpg" alt="Protected artwork preview">
-  <a href="https://sharecapsules.com/open?capsule=...">
-    Open protected artwork
-  </a>
+  <fallback>
+    <p>Protected artwork. Install or enable the Share Capsules Viewer to open it.</p>
+  </fallback>
+
+  <template>
+    <figure class="artwork-card">
+      <content class="artwork-frame object-contain"></content>
+      <figcaption>{{ title }}</figcaption>
+    </figure>
+  </template>
+
+  <error>
+    <p>{{ error_message }}</p>
+  </error>
 </capsule-viewer>
 ```
 
-The page does not need a Share Capsules JavaScript SDK. The approved extension discovers the element in an isolated content script and inserts the trusted rendering frame.
+The page does not need a Share Capsules JavaScript SDK. The approved extension discovers the element in an isolated content script and replaces only the `<content>` placeholder with a trusted extension-origin rendering frame. Surrounding Host markup remains ordinary HTML styled by the Host page. The Host still cannot read the iframe DOM, keys, plaintext, account state, authorization tickets, or detailed trust results. See [Viewer Host Markup](../06_viewer/host-markup.md).
 
 ## Viewer validation
 
@@ -108,4 +118,5 @@ HTTP success does not establish Capsule validity. Before policy evaluation or ke
 - [Share Capsules reference implementation](share-capsules-reference-implementation.md)
 - [Capsule design intent](../04_capsule/design-intent.md)
 - [Browser Viewer](../06_viewer/browser-viewer.md)
+- [Viewer Host Markup](../06_viewer/host-markup.md)
 - [Adaptive renditions and device capability](../04_capsule/adaptive-renditions.md)

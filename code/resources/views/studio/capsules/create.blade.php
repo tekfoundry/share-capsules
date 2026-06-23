@@ -159,6 +159,10 @@
             </ul>
 
             <p class="mt-5 text-sm leading-6 text-muted">A static website, storage service, CDN, or personal server can qualify. It does not need a database, user accounts, Share Capsules plugin, cookies, or custom server-side code.</p>
+            <p class="mt-4 text-sm leading-6 text-muted">
+                Need markup examples?
+                <a class="font-semibold text-brand hover:text-brand-strong" href="{{ route('instructions') }}#capsule-hosting">View the Capsule hosting instructions</a>.
+            </p>
         </section>
     </section>
 @endsection

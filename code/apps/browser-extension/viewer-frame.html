@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Share Capsules Viewer</title>
+        <link rel="stylesheet" href="./viewer-frame.css" />
+    </head>
+    <body>
+        <main class="viewer-shell">
+            <p class="eyebrow" data-viewer-brand>Share Capsules Viewer</p>
+            <h1 data-viewer-heading>Capsule locked</h1>
+            <p data-viewer-status>
+                This protected Capsule was detected. Verification and opening are coming next.
+            </p>
+            <p class="capsule-url" data-viewer-capsule-url></p>
+            <div class="viewer-render" data-viewer-render></div>
+            <div class="viewer-actions" data-viewer-actions></div>
+        </main>
+        <script type="module" src="./viewer-frame.js"></script>
+    </body>
+</html>

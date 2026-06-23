@@ -13,6 +13,7 @@ use App\Broker\Registration\RegistrationGrantPrincipal;
 use App\Broker\Release\InvalidDeviceProof;
 use App\Broker\Release\PrepareKeyRelease;
 use App\Broker\Release\TicketPublicKeyResolver;
+use App\Broker\Release\TicketPublicKeyUnavailable;
 use App\Ctx\Contracts\CanonicalJson;
 use App\Models\BrokerContentKey;
 use Illuminate\Database\Schema\Blueprint;
@@ -257,6 +258,46 @@ final class ContentKeyRegistrationTest extends BrokerTestCase
 
         $this->expectException(InvalidDeviceProof::class);
         app(PrepareKeyRelease::class)->prepare($ticket, $proof, $agreementX);
+    }
+
+    public function test_release_requests_report_ticket_key_lookup_failures_as_retryable_availability_errors(): void
+    {
+        config()->set('sharecapsules.ctx.issuer', 'https://provider.example.test');
+        $this->app->instance(TicketPublicKeyResolver::class, new class implements TicketPublicKeyResolver
+        {
+            public function resolve(string $issuer, string $kid): string
+            {
+                throw new TicketPublicKeyUnavailable('Provider JWKS unavailable.');
+            }
+        });
+        $now = now()->timestamp;
+        $ticketKeys = sodium_crypto_sign_keypair();
+        $ticket = $this->compact(
+            ['typ' => 'ctx-key-release+jwt', 'alg' => 'EdDSA', 'kid' => 'provider-key-0001'],
+            [
+                'iss' => 'https://provider.example.test',
+                'aud' => 'https://broker.example.test',
+                'jti' => 'ticket-provider-unavailable',
+                'iat' => $now,
+                'nbf' => $now,
+                'exp' => $now + 60,
+                'ctx' => [],
+            ],
+            sodium_crypto_sign_secretkey($ticketKeys),
+        );
+
+        $this->postJson('/releases', [
+            'ticket' => $ticket,
+            'proof' => 'proof-is-not-validated-before-ticket-key-resolution',
+            'agreement_public_key' => str_repeat('a', 43),
+        ])
+            ->assertStatus(503)
+            ->assertExactJson([
+                'type' => 'ctx-error',
+                'version' => 1,
+                'code' => 'temporarily_unavailable',
+                'retryable' => true,
+            ]);
     }
 
     /** @param array<string, mixed> $header @param array<string, mixed> $claims */

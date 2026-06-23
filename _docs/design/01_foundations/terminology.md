@@ -43,7 +43,7 @@ Trusted software that opens Capsules, verifies signatures, obtains authorization
 
 ### Capsule Viewer element
 
-The declarative `<capsule-viewer src="...">` Host element used by V1 to identify a Capsule location and provide accessible fallback content. The element is not itself trusted with accounts, policy decisions, keys, or plaintext. An approved browser extension inserts an extension-origin rendering frame for it.
+The declarative `<capsule-viewer src="...">` Host element used by V1 to identify a Capsule location and provide Host-owned fallback, opened, and error layout. The target authoring syntax uses `<fallback>`, `<template>`, optional `<error>`, and a nested `<content>` placeholder. The element is not itself trusted with accounts, policy decisions, keys, or plaintext. An approved browser extension inserts an extension-origin rendering frame at the protected content placeholder.
 
 ### Host
 

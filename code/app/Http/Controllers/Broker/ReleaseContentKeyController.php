@@ -6,6 +6,7 @@ use App\Broker\Release\FinalContentKeyReleaseCheck;
 use App\Broker\Release\InvalidDeviceProof;
 use App\Broker\Release\InvalidKeyRelease;
 use App\Broker\Release\PrepareKeyRelease;
+use App\Broker\Release\TicketPublicKeyUnavailable;
 use App\Broker\Release\TicketRedemptionClient;
 use App\Ctx\Contracts\CtxErrorCode;
 use App\Http\Controllers\Controller;
@@ -48,6 +49,8 @@ final class ReleaseContentKeyController extends Controller
             }
         } catch (InvalidDeviceProof) {
             return $this->error(CtxErrorCode::InvalidProof);
+        } catch (TicketPublicKeyUnavailable) {
+            return $this->error(CtxErrorCode::TemporarilyUnavailable, true, 503);
         } catch (InvalidKeyRelease) {
             return $this->error(CtxErrorCode::InvalidTicket);
         } catch (Throwable) {

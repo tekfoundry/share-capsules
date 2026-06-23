@@ -3,24 +3,23 @@
 namespace App\Broker\Release;
 
 use App\Ctx\Contracts\ServiceIdentity;
+use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\Client\Factory;
 use Throwable;
 
 final readonly class ProviderJwksTicketPublicKeyResolver implements TicketPublicKeyResolver
 {
-    public function __construct(private Factory $http) {}
+    public function __construct(
+        private Factory $http,
+        private CacheRepository $cache,
+    ) {}
 
     public function resolve(string $issuer, string $kid): string
     {
         try {
             ServiceIdentity::fromString($issuer);
             $internal = (string) (config('sharecapsules.ctx.internal_url') ?: $issuer);
-            $url = rtrim($internal, '/').'/ctx/jwks.json';
-            $response = $this->http->acceptJson()->timeout(5)->retry(1, 100, throw: false)->get($url);
-            $keys = $response->successful() ? $response->json('keys') : null;
-            if (! is_array($keys) || ! array_is_list($keys) || count($keys) > 16) {
-                throw new InvalidKeyRelease;
-            }
+            $keys = $this->keys($issuer, $internal);
             foreach ($keys as $key) {
                 if (! is_array($key) || ($key['kid'] ?? null) !== $kid) {
                     continue;
@@ -40,10 +39,34 @@ final readonly class ProviderJwksTicketPublicKeyResolver implements TicketPublic
                 return $decoded;
             }
             throw new InvalidKeyRelease;
+        } catch (TicketPublicKeyUnavailable $exception) {
+            throw $exception;
         } catch (InvalidKeyRelease $exception) {
             throw $exception;
         } catch (Throwable $exception) {
-            throw new InvalidKeyRelease('The provider signing key is unavailable.', 0, $exception);
+            throw new TicketPublicKeyUnavailable('The provider signing keys are temporarily unavailable.', 0, $exception);
         }
+    }
+
+    /** @return list<array<string, mixed>> */
+    private function keys(string $issuer, string $internal): array
+    {
+        return $this->cache->remember(
+            'sharecapsules:ctx:jwks:'.hash('sha256', $issuer.'|'.$internal),
+            now()->addSeconds(30),
+            function () use ($internal): array {
+                $url = rtrim($internal, '/').'/ctx/jwks.json';
+                $response = $this->http->acceptJson()->timeout(5)->retry(1, 100, throw: false)->get($url);
+                if (! $response->successful()) {
+                    throw new TicketPublicKeyUnavailable('The provider signing keys could not be fetched.');
+                }
+                $keys = $response->json('keys');
+                if (! is_array($keys) || ! array_is_list($keys) || count($keys) > 16) {
+                    throw new TicketPublicKeyUnavailable('The provider signing key set is malformed.');
+                }
+
+                return $keys;
+            },
+        );
     }
 }

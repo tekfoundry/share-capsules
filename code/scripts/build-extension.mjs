@@ -14,17 +14,21 @@ await bundle('src/creator-runtime.ts', 'studio.js', 'es');
 await bundle('src/extension-service-worker.ts', 'service-worker.js', 'es');
 await bundle('src/creator-handoff-content.ts', 'creator-handoff.js', 'iife');
 await bundle('src/viewer-discovery-content.ts', 'viewer-discovery.js', 'iife');
+await bundle('src/viewer-frame.ts', 'viewer-frame.js', 'es');
 await assertNoRuntimeCodeGeneration([
     'studio.js',
     'service-worker.js',
     'creator-handoff.js',
     'viewer-discovery.js',
+    'viewer-frame.js',
 ]);
 
 await Promise.all([
     cp(resolve(source, 'manifest.json'), resolve(output, 'manifest.json')),
     cp(resolve(source, 'creator-studio.html'), resolve(output, 'creator-studio.html')),
     cp(resolve(source, 'creator-studio.css'), resolve(output, 'creator-studio.css')),
+    cp(resolve(source, 'viewer-frame.html'), resolve(output, 'viewer-frame.html')),
+    cp(resolve(source, 'viewer-frame.css'), resolve(output, 'viewer-frame.css')),
 ]);
 
 async function bundle(entry, filename, format) {

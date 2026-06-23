@@ -4,7 +4,7 @@ This directory shows the minimum host-side shape for publishing Capsules on an o
 
 ## Contents
 
-- `index.html` — a static page containing two `<capsule-viewer>` elements.
+- `index.html` — a static page containing two `<capsule-viewer>` elements using the target host markup syntax, plus additional syntax examples.
 - `capsules/tekfoundry-logo.capsule` — encrypted Capsule file.
 - `capsules/eclipse-photo.capsule` — encrypted Capsule file.
 
@@ -18,3 +18,14 @@ The Creator workspace recovery files are intentionally not included:
 - no source images
 
 The example Capsules were created against local development services, so their manifests reference `localhost:3003` and `localhost:3004`. They are intended for local static-host testing, not production viewing.
+
+## Syntax note
+
+The page shows the intended Host authoring contract:
+
+- `<fallback>` for public no-extension content.
+- `<template>` for Host-owned opened layout.
+- `<content>` where the extension will place the secure Viewer iframe.
+- optional `<error>` for safe failure copy.
+
+The current Phase 7 runtime still supports transitional `fit` and `viewer-height` attributes while full structured-template activation is being implemented.

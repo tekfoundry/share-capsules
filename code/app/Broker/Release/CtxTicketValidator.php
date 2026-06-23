@@ -75,6 +75,8 @@ final readonly class CtxTicketValidator
                 $ctx,
                 $record,
             );
+        } catch (TicketPublicKeyUnavailable $exception) {
+            throw $exception;
         } catch (InvalidKeyRelease $exception) {
             throw $exception;
         } catch (Throwable $exception) {

@@ -28,7 +28,7 @@ final readonly class BrokerReleaseBindingVerifier implements ReleaseBindingVerif
 
         try {
             $response = $this->http
-                ->baseUrl(rtrim((string) config('sharecapsules.broker.base_url'), '/'))
+                ->baseUrl(rtrim((string) config('sharecapsules.broker.internal_url'), '/'))
                 ->acceptJson()
                 ->asJson()
                 ->withToken((string) config('sharecapsules.broker.control_plane_token'))

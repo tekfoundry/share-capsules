@@ -32,11 +32,11 @@ V1 Laravel services evaluate policy and coordinate authorization; they do not de
 
 ## No-extension viewer experience
 
-Every `<capsule-viewer>` contains ordinary accessible fallback content, normally a public preview, explanation, and link to a Share Capsules opening page.
+Every structured `<capsule-viewer>` may contain ordinary accessible `<fallback>` content, normally a public preview, explanation, and link to a Share Capsules opening page. Legacy unstructured child content is treated only as public fallback during migration.
 
 When the extension is missing:
 
-1. The Host displays the nested fallback content.
+1. The Host displays the fallback content.
 2. The viewer follows the fallback link to `sharecapsules.com`.
 3. Share Capsules explains the protected-content model and why the trusted extension is required.
 4. A supported Chromium user receives a link to the official Chrome Web Store listing.

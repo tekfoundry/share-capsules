@@ -443,14 +443,14 @@ Objective: securely discover, authorize, decrypt, validate, and render protected
 - ✅ Use separate production and development extension identities and OAuth registrations.
 - ✅ Discover explicit `<capsule-viewer>` elements only on user-approved top-level origins.
 - ✅ Preserve Host-provided child content as public fallback and never treat it as signed Capsule metadata.
-- ⬜️ Insert an extension-origin iframe or full-page extension Viewer so Host scripts cannot read Viewer DOM, keys, or plaintext.
-- ⬜️ Fetch Capsules anonymously under the compatible Host contract with bounded redirects, lengths, reads, and timeouts.
-- ⬜️ Parse ZIP and manifest data with no filesystem extraction and verify the signature, schema, policy, suite, hashes, profile, and provider identities before disclosure or authorization.
-- ⬜️ Implement account connection, device registration, disclosure consent, and site-scoped standing consent.
+- ✅ Insert an extension-origin iframe or full-page extension Viewer so Host scripts cannot read Viewer DOM, keys, or plaintext.
+- ✅ Fetch Capsules anonymously under the compatible Host contract with bounded redirects, lengths, reads, and timeouts.
+- ✅ Parse ZIP and manifest data with no filesystem extraction and verify the signature, schema, policy, suite, hashes, profile, and provider identities before disclosure or authorization.
+- ✅ Implement account connection, device registration, disclosure consent, and site-scoped standing consent.
 - ⬜️ Support locked, individual-open, deliberate open-all, and lazy automatic opening near the viewport after standing consent.
 - ⬜️ Prevent hidden elements and unusual bulk pages from silently consuming releases.
-- ⬜️ Request CTX authorization, present the ticket and device proof to the broker, and unwrap the content key through V1 HPKE.
-- ⬜️ Decrypt only in extension-controlled memory, validate actual image bytes and limits, render through the trusted image profile, and dispose of plaintext/key references on close.
+- ✅ Request CTX authorization, present the ticket and device proof to the broker, and unwrap the content key through V1 HPKE.
+- ✅ Decrypt only in extension-controlled memory, validate actual image bytes and limits, render through the trusted image profile, and dispose of plaintext/key references on close.
 - ⬜️ Require fresh online authorization on reload or reopen; persist no plaintext or content key in ordinary storage or cache.
 - ⬜️ Implement accessible loading, consent, denial, revocation, device-limit, unsupported-profile, network, and security-failure states.
 - ⬜️ Implement the no-extension install/onboarding link with safe return state and no credentials or tokens in URLs.
@@ -469,8 +469,59 @@ Phase 7 Creator-runtime implementation evidence recorded on 2026-06-22:
 Phase 7 Viewer-discovery evidence recorded on 2026-06-23:
 
 - The extension now packages a Viewer discovery content script without adding an install-time all-sites static content script. The service worker dynamically registers the script for HTTPS Host origins and localhost development origins; Chrome host grants still determine where it can run.
-- The discovery script runs only in the top-level document, finds explicit `<capsule-viewer>` elements, resolves and validates each `src`, rejects public HTTP and credential-bearing Capsule URLs, preserves Host fallback children, and appends only a generic detected status. It does not fetch Capsules, request authorization, expose account/device data, or treat fallback content as signed metadata.
+- The discovery script runs only in the top-level document, finds explicit `<capsule-viewer>` elements, resolves and validates each `src`, rejects public HTTP and credential-bearing Capsule URLs, preserves Host fallback children, and hands valid discoveries to the extension-frame boundary. It does not fetch Capsules, request authorization, expose account/device data, or treat fallback content as signed metadata.
 - Automated tests lock the URL boundary and Manifest V3 permission shape, including required `scripting`, reviewed localhost development exceptions, and the absence of a broad static `https://*/*` content script.
+
+Phase 7 Viewer-frame evidence recorded on 2026-06-23:
+
+- Detected Host elements now receive a packaged extension-origin Viewer iframe instead of a Host-readable status box. The iframe receives only the resolved Capsule URL and starts from a locked placeholder state before later Viewer steps run.
+- The Host fallback children remain ordinary public page content. Host scripts can observe iframe placement and the public Capsule URL already declared in the element, but they cannot read future Viewer DOM, keys, plaintext, account state, tickets, or authorization results from the extension-origin frame.
+- The manifest exposes only `viewer-frame.html`, `viewer-frame.css`, and `viewer-frame.js` as web-accessible Viewer assets. Creator Studio remains non-web-accessible, and automated tests lock the frame URL and web-accessible-resource boundary.
+
+Phase 7 Viewer-fetch evidence recorded on 2026-06-23:
+
+- The extension frame now performs the first anonymous Capsule fetch with `credentials: omit`, `cache: no-store`, `referrerPolicy: no-referrer`, and manual redirect handling. No account tokens, CTX credentials, tickets, device proofs, or Host fallback content are sent to the Capsule URL.
+- Fetch policy revalidates the initial URL and every redirect target, rejects URL userinfo, rejects public HTTP, permits localhost HTTP only for the development example Host, and rejects common loopback, link-local, private-network, and local-name targets on HTTPS.
+- Fetching is bounded by explicit redirect, response-length, streamed-read, and timeout limits. The frame only reports coarse locked/fetched/failure state; ZIP parsing, manifest validation, authorization, key release, decryption, and rendering remain separate Phase 7 tasks.
+
+Phase 7 Viewer-verification evidence recorded on 2026-06-23:
+
+- Fetched Capsule bytes are now passed directly from extension memory into the strict V1 ZIP verifier with no filesystem extraction. The verifier accepts only the expected stored archive shape, canonical `manifest.json`, raw `manifest.sig`, and declared encrypted payload entry.
+- Verification now covers the manifest schema, canonical JSON, creator Ed25519 signature, CTX policy shape, supported cryptographic suite, static-image content profile declaration, encrypted-payload length, and SHA-256 payload commitment before any account connection, disclosure, CTX authorization, key release, decryption, or rendering.
+- The Viewer-facing wrapper returns only a minimal signed summary and encrypted payload bytes on success. It fails closed on invalid archives, invalid manifests, invalid signatures, size excess, and optional exact-match CTX issuer or broker trust-list failures.
+
+Phase 7 Viewer-account and consent evidence recorded on 2026-06-23:
+
+- The extension frame now receives the Host site origin along with the public Capsule URL, so standing consent can be scoped to the embedding site rather than inferred from the Capsule file location.
+- Viewer account connection uses the existing OAuth Authorization Code with PKCE and device-registration machinery, but stores a separate Viewer credential under Viewer-specific storage keys. Viewer sessions require `ctx:authorize` and reject `capsule:create`, preserving the Creator/Viewer permission split.
+- If no active Viewer session exists, the verified frame presents a Connect account action that registers or reauthorizes the local Viewer device without exposing tokens, device private keys, account identifiers, tickets, or privileged results to the Host page.
+- After account connection, the frame presents disclosure consent for view-event accounting and policy evaluation before authorization. Optional standing consent is stored only for the normalized Host site origin, exact CTX issuer identity, and exact signed policy digest. One-time approval is held only in the current frame state.
+- This step still stops before CTX authorization, ticket issuance, broker redemption, HPKE content-key release, decryption, or rendering; no committed opening is consumed by connection or consent alone.
+
+Phase 7 Viewer-authorization evidence recorded on 2026-06-23:
+
+- After verification, account connection, and consent, the extension frame now requests a CTX authorization ticket using the Viewer DPoP session and registered device proof key. The request body is constructed from the verified signed Capsule data: broker, Capsule identifier and revision, embedded policy, policy digest, payload identifier, release handle, render action, cryptographic suite, and view-event consent.
+- Viewer authorization rejects non-DPoP sessions and sessions that include `capsule:create`, preserving role separation. Requests send the access token only to the CTX endpoint with a fresh DPoP proof; authorization tickets and denial details remain inside the extension frame and are never sent to Host page scripts.
+- The frame stops after ticket issuance and reports that broker redemption comes next. This substep still does not redeem the ticket, unwrap a content key, decrypt payload bytes, render plaintext, or persist a ticket/content key across reloads.
+
+Phase 7 Viewer-redemption evidence recorded on 2026-06-23:
+
+- After ticket issuance, the extension frame now sends the exact ticket, a fresh `ctx-key-release-proof+jwt` signed by the registered Viewer proof key, and the registered X25519 agreement public key directly to the signed broker `/releases` endpoint. No OAuth token, browser cookie, Host data, or plaintext is sent to the broker.
+- The Viewer validates that the ticket claims exactly match the verified Capsule, signed policy digest, issuer, broker, payload, release handle, action, suite, and current Viewer proof/agreement keys before any broker request. Local development loopback identities are accepted only for this development path; production HTTPS identities remain the expected deployment shape.
+- The broker response is accepted only as the strict V1 key-release envelope for the same ticket and suite. The extension unwraps the returned content key in memory with a browser-native HPKE open implementation for the fixed V1 suite, covered by focused browser-key tests without bundling runtime code generation into the Manifest V3 extension.
+
+Phase 7 Viewer-decryption and render evidence recorded on 2026-06-23:
+
+- After broker key release, the extension frame decrypts the signed encrypted payload in extension-controlled memory using the verified manifest-derived AES-GCM associated data and nonce. The released content key is zeroed after use and is not placed in ordinary extension storage, page storage, Host DOM, or URLs.
+- The decrypted plaintext is revalidated through the trusted static-image profile implementation before display. The Viewer compares actual decoded file structure, media type, encoded size, dimensions, and pixel count against the signed manifest declaration, then fails closed if those facts diverge.
+- Successful opens render a local object URL inside the extension-origin frame, update the state to `Capsule opened`, and revoke the object URL on replacement or frame close. Focused tests cover successful decrypt/render, authentication failure, profile rejection, plaintext/key zeroing, and object URL disposal.
+- The opened Viewer state now favors protected content over protocol chrome. Routine Viewer branding, status text, and Capsule URLs are hidden from the visible opened result, while accessible status remains present for assistive technology. `<capsule-viewer debug>` enables safe console diagnostics for troubleshooting without logging tokens, tickets, proofs, keys, plaintext, recovery data, or account identifiers.
+- Broker redemption failures now preserve reviewed public CTX denial codes inside the extension frame and map them to safe user-facing messages for stale/invalid tickets, invalid device proof, unavailable release, Capsule/account opening limits, policy failures, automation protection, temporary service failures, and HTTP rate limiting. Unknown denial codes still fail closed as invalid responses.
+- Viewer account connection is now shared across same-page Viewer frames. A frame waiting at Connect observes the shared Viewer credential update in extension storage and resumes its own verified authorization flow when another Capsule completes connection, avoiding a per-Capsule Connect click while keeping authorization and key release Capsule-specific.
+- Broker provider-signing-key lookup now caches successful CTX JWKS responses briefly and reports fetch or malformed-provider responses as retryable temporary unavailability. Actual ticket/key mismatches still fail closed as invalid tickets, but local multi-Capsule refresh timing no longer collapses transient verifier dependency failures into misleading ticket errors.
+- Same-page Viewer frames now enter a shared extension queue before online authorization, broker key release, decryption, and rendering. Shared connection can still wake every frame, but only one Capsule opening pipeline runs at a time, preventing localhost single-worker deadlocks and creating the future control point for open-all and lazy automatic opening limits.
+- Opened Viewer presentation is content-first and borderless inside the extension frame. The accepted Host authoring direction is `<capsule-viewer>` with optional `<fallback>`, `<template>`, and `<error>` top-level children. The Host uses ordinary page markup and CSS in `<template>`, while a nested `<content>` placeholder is replaced by the extension-origin iframe. Classes and inline styles on the placeholder style only the iframe shell; decrypted content remains inside the cross-origin extension frame. The current implementation's `fit="contain|cover|fill|full-height|scale-down"` and `viewer-height` attributes remain compatible presentation controls while the structured markup contract matures.
+- The structured Host markup contract now has its first runtime path. Viewer frames start hidden while routine loading, verification, authorization, broker release, and decryption are underway. The Host fallback remains visible until user action, safe error presentation, or opened content is ready. On success, the content script activates the Host `<template>`, substitutes verified public metadata as text, and moves the extension-origin iframe into the first `<content>` placeholder so surrounding Host CSS can style the page while decrypted content remains isolated.
 
 Success goals:
 

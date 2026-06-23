@@ -17,6 +17,7 @@ final class BrokerReleaseBindingVerifierTest extends TestCase
 
     public function test_only_an_exact_active_registry_binding_is_checked_with_the_broker(): void
     {
+        config()->set('sharecapsules.broker.internal_url', 'https://broker-internal.example.test');
         Http::fake(['*/internal/release-bindings/validate' => Http::response(['valid' => true])]);
         $bindings = $this->bindings();
         $capsule = $this->capsule($bindings, CapsuleLifecycleStatus::Pending);
@@ -28,6 +29,10 @@ final class BrokerReleaseBindingVerifierTest extends TestCase
         $capsule->forceFill(['status' => CapsuleLifecycleStatus::Active])->save();
         $this->assertTrue($verifier->valid($bindings));
         Http::assertSentCount(1);
+        Http::assertSent(fn ($request): bool => str_starts_with(
+            $request->url(),
+            'https://broker-internal.example.test/internal/release-bindings/validate',
+        ));
 
         $capsule->forceFill(['status' => CapsuleLifecycleStatus::Revoked])->save();
         $this->assertFalse($verifier->valid($bindings));
