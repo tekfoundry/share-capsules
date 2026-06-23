@@ -134,6 +134,40 @@ doctor() {
     fi
 }
 
+example_host_command() {
+    local port="${1:-8088}"
+    local docroot="$script_dir/../_examples/static-host"
+    local python_bin=""
+
+    if [[ ! "$port" =~ ^[0-9]+$ ]] || (( port < 1 || port > 65535 )); then
+        echo "Port must be a number between 1 and 65535." >&2
+        exit 1
+    fi
+
+    if [[ ! -d "$docroot" ]]; then
+        echo "Missing example static host directory: $docroot" >&2
+        exit 1
+    fi
+
+    if command -v python3 >/dev/null 2>&1; then
+        python_bin="$(command -v python3)"
+    elif command -v python >/dev/null 2>&1; then
+        python_bin="$(command -v python)"
+    else
+        echo "Python is required to serve the static host example." >&2
+        exit 1
+    fi
+
+    echo "Serving Share Capsules static host example:"
+    echo "  http://127.0.0.1:$port/"
+    echo
+    echo "Press Ctrl+C to stop."
+    echo
+
+    cd "$docroot"
+    exec "$python_bin" -m http.server "$port" --bind 127.0.0.1
+}
+
 test_command() {
     require_env_file
     load_infra_env
@@ -271,6 +305,7 @@ case "$subcommand" in
     test) test_command "$@" ;;
     check|ci) check_command ;;
     browser-check) browser_check_command ;;
+    example-host) example_host_command "${1:-8088}" ;;
     workers) require_env_file; service_lifecycle workers "${1:-}" ;;
     scheduler) require_env_file; service_lifecycle scheduler "${1:-}" ;;
     broker) require_env_file; broker_lifecycle "${1:-}" ;;
@@ -293,6 +328,7 @@ Commands:
   check               Run all non-browser quality gates in containers
   ci                  Alias for check, used by continuous integration
   browser-check       Install Chromium and run browser accessibility/layout tests
+  example-host [port] Serve _examples/static-host locally (default: 8088)
   workers <action>    Manage queue workers (up, down, logs)
   scheduler <action>  Manage the Laravel scheduler (up, down, logs)
   broker <action>     Manage the isolated key broker (up, down, logs)

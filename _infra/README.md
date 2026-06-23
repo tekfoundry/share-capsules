@@ -68,11 +68,14 @@ All ports and development credentials are configurable in `_infra/.env`.
 ./_infra/kit workers up
 ./_infra/kit scheduler up
 ./_infra/kit broker up
+./_infra/kit example-host
 ```
 
 `./_infra/kit test` drops and recreates only `MYSQL_TEST_DATABASE`. It refuses to run when the test and development database names match. The Laravel test bootstrap independently enforces the same boundary before migration traits run: persistent tests must name the expected test database and the distinct development database, while in-memory SQLite remains allowed for isolated tests.
 
 `./_infra/kit check` is the local equivalent of CI. It installs from lockfiles through container bootstrap, validates Composer, checks PHP and TypeScript formatting and static analysis, runs TypeScript and Laravel tests, produces the frontend build, and verifies the service-aware health endpoint.
+
+`./_infra/kit example-host [port]` serves `_examples/static-host` on `127.0.0.1`, defaulting to `http://127.0.0.1:8088/`. It runs in the foreground and stops with `Ctrl+C`.
 
 ## Environment boundaries
 
