@@ -11,12 +11,16 @@ describe('development Manifest V3 shell', () => {
 
         expect(manifest.manifest_version).toBe(3);
         expect(extensionId(manifest.key)).toBe(DEVELOPMENT_EXTENSION_ID);
-        expect(manifest.permissions).toEqual(['identity', 'storage']);
+        expect(manifest.permissions).toEqual(['identity', 'scripting', 'storage']);
         expect(manifest.host_permissions).toEqual([
             'http://localhost:3003/*',
             'http://localhost:3004/*',
         ]);
-        expect(manifest.optional_host_permissions).toEqual(['https://*/*']);
+        expect(manifest.optional_host_permissions).toEqual([
+            'https://*/*',
+            'http://localhost/*',
+            'http://127.0.0.1/*',
+        ]);
         expect(manifest.background).toEqual({
             service_worker: 'service-worker.js',
             type: 'module',
@@ -34,6 +38,13 @@ describe('development Manifest V3 shell', () => {
         const manifest = await readManifest();
         expect(JSON.stringify(manifest)).not.toMatch(/https?:\/\/[^"*]*\.js/u);
         expect(manifest.host_permissions).not.toContain('https://*/*');
+        expect(manifest.content_scripts).not.toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    matches: expect.arrayContaining(['https://*/*']),
+                }),
+            ]),
+        );
         expect(manifest.content_security_policy).toEqual({
             extension_pages:
                 "script-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'",

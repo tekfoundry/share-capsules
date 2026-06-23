@@ -441,8 +441,8 @@ Objective: securely discover, authorize, decrypt, validate, and render protected
 - ⬜️ Connect the hardened Creator Studio components through the Manifest V3 runtime into one authenticated select, validate, recover, encrypt, register, finalize, strictly verify, download, and integration-guidance flow; complete the deferred real-Capsule signing-key recovery exercise before treating Creator creation as user-viable.
 - ✅ Create the Chrome Manifest V3 extension with only the accepted required permissions and runtime HTTPS-origin grants.
 - ✅ Use separate production and development extension identities and OAuth registrations.
-- ⬜️ Discover explicit `<capsule-viewer>` elements only on user-approved top-level origins.
-- ⬜️ Preserve Host-provided child content as public fallback and never treat it as signed Capsule metadata.
+- ✅ Discover explicit `<capsule-viewer>` elements only on user-approved top-level origins.
+- ✅ Preserve Host-provided child content as public fallback and never treat it as signed Capsule metadata.
 - ⬜️ Insert an extension-origin iframe or full-page extension Viewer so Host scripts cannot read Viewer DOM, keys, or plaintext.
 - ⬜️ Fetch Capsules anonymously under the compatible Host contract with bounded redirects, lengths, reads, and timeouts.
 - ⬜️ Parse ZIP and manifest data with no filesystem extraction and verify the signature, schema, policy, suite, hashes, profile, and provider identities before disclosure or authorization.
@@ -465,6 +465,12 @@ Phase 7 Creator-runtime implementation evidence recorded on 2026-06-22:
 - The extension page now connects through OAuth Authorization Code with PKCE, registers non-exportable device keys, obtains a DPoP `capsule:create` session, validates the selected file through the trusted content-profile registry, requires a confirmed or restored creator signing key, builds and strictly reopens the exact archive, finalizes the broker registration, and downloads only that verified result. Build or download failure attempts cancellation so pending or newly active key material does not become an abandoned usable registration.
 - The fixed development manifest public key produces extension ID `dhconceamghcnndjodjhjikknblhkmej`; local OAuth configuration was provisioned for its exact Chromium callback. Production configuration retains a distinct placeholder identity and callback. Automated tests lock the development ID, packaged-code CSP, exact automatic localhost origins, optional HTTPS grants, and reviewed permissions.
 - The full non-browser gate passes with 378 TypeScript tests and 273 PHP tests / 1,339 assertions. `npm run build` now also produces the loadable extension bundle. The first Phase 7 task remains open until `_docs/operations/phase7-creator-runtime-manual-test.md` proves a real build, recovery restore, matching signing identity, and negative recovery-code behavior in the unpacked browser runtime.
+
+Phase 7 Viewer-discovery evidence recorded on 2026-06-23:
+
+- The extension now packages a Viewer discovery content script without adding an install-time all-sites static content script. The service worker dynamically registers the script for HTTPS Host origins and localhost development origins; Chrome host grants still determine where it can run.
+- The discovery script runs only in the top-level document, finds explicit `<capsule-viewer>` elements, resolves and validates each `src`, rejects public HTTP and credential-bearing Capsule URLs, preserves Host fallback children, and appends only a generic detected status. It does not fetch Capsules, request authorization, expose account/device data, or treat fallback content as signed metadata.
+- Automated tests lock the URL boundary and Manifest V3 permission shape, including required `scripting`, reviewed localhost development exceptions, and the absence of a broad static `https://*/*` content script.
 
 Success goals:
 

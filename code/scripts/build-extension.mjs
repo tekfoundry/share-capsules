@@ -13,7 +13,13 @@ await mkdir(output, { recursive: true });
 await bundle('src/creator-runtime.ts', 'studio.js', 'es');
 await bundle('src/extension-service-worker.ts', 'service-worker.js', 'es');
 await bundle('src/creator-handoff-content.ts', 'creator-handoff.js', 'iife');
-await assertNoRuntimeCodeGeneration(['studio.js', 'service-worker.js', 'creator-handoff.js']);
+await bundle('src/viewer-discovery-content.ts', 'viewer-discovery.js', 'iife');
+await assertNoRuntimeCodeGeneration([
+    'studio.js',
+    'service-worker.js',
+    'creator-handoff.js',
+    'viewer-discovery.js',
+]);
 
 await Promise.all([
     cp(resolve(source, 'manifest.json'), resolve(output, 'manifest.json')),

@@ -264,9 +264,9 @@ The Host receives no detailed failure message. Any future Host-visible state mus
 
 ## V1 browser permissions implied by this flow
 
-V1 requires `identity`, `storage`, and `scripting`, plus required access to `https://sharecapsules.com` and optional runtime HTTPS Host access. Site permission is needed both to discover inline elements and to fetch Capsule files; a separately hosted Capsule may require a second origin grant.
+V1 requires `identity`, `storage`, and `scripting`, plus required access to `https://sharecapsules.com` and optional runtime HTTPS Host access. The development build may additionally allow localhost HTTP origins for local static-host examples. Site permission is needed both to discover inline elements and to fetch Capsule files; a separately hosted Capsule may require a second origin grant.
 
-V1 does not require Chrome profile identity, general history, cookies, downloads, `webRequest`, native messaging, or access to HTTP Hosts. Dynamically registered content scripts run in an isolated world only on approved top-level origins.
+V1 does not require Chrome profile identity, general history, cookies, downloads, `webRequest`, native messaging, or public HTTP Host access. Dynamically registered content scripts run in an isolated world only on approved top-level origins.
 
 ## Related documents
 

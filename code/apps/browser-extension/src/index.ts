@@ -14,5 +14,6 @@ export * from './creator-capsule-builder.js';
 export * from './creator-capsule-workflow.js';
 export * from './creator-account-connection.js';
 export * from './creator-host-integration.js';
+export * from './viewer-capsule-discovery.js';
 export * from './oauth.js';
 export * from './viewer-device.js';

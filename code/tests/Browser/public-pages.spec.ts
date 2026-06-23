@@ -1,7 +1,15 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 
-const publicPages = ['/', '/how-it-works', '/technical', '/terms', '/privacy'] as const;
+const publicPages = [
+    '/',
+    '/how-it-works',
+    '/instructions',
+    '/technical',
+    '/terms',
+    '/privacy',
+] as const;
+const mobilePrimaryNavigationLinkCount = 6;
 
 const viewports = [
     { name: 'mobile', width: 390, height: 844 },
@@ -45,7 +53,9 @@ for (const viewport of viewports) {
                 if (viewport.name === 'mobile') {
                     await expect(mobileNavigation).toBeVisible();
                     await expect(desktopNavigation).toBeHidden();
-                    await expect(mobileNavigation.getByRole('link')).toHaveCount(5);
+                    await expect(mobileNavigation.getByRole('link')).toHaveCount(
+                        mobilePrimaryNavigationLinkCount,
+                    );
                 } else {
                     await expect(mobileNavigation).toBeHidden();
                     await expect(desktopNavigation).toBeVisible();

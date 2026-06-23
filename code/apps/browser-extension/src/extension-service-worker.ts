@@ -12,6 +12,12 @@ interface MessageSender {
 declare const chrome: {
     readonly runtime: {
         getURL(path: string): string;
+        readonly onInstalled: {
+            addListener(listener: () => void): void;
+        };
+        readonly onStartup: {
+            addListener(listener: () => void): void;
+        };
         readonly onMessage: {
             addListener(
                 listener: (
@@ -21,6 +27,31 @@ declare const chrome: {
                 ) => boolean | void,
             ): void;
         };
+    };
+    readonly scripting: {
+        getRegisteredContentScripts(filter?: {
+            readonly ids?: readonly string[];
+        }): Promise<readonly { readonly id: string }[]>;
+        registerContentScripts(
+            scripts: readonly {
+                readonly id: string;
+                readonly matches: readonly string[];
+                readonly js: readonly string[];
+                readonly runAt: 'document_idle';
+                readonly allFrames: boolean;
+                readonly persistAcrossSessions: boolean;
+            }[],
+        ): Promise<void>;
+        updateContentScripts(
+            scripts: readonly {
+                readonly id: string;
+                readonly matches: readonly string[];
+                readonly js: readonly string[];
+                readonly runAt: 'document_idle';
+                readonly allFrames: boolean;
+                readonly persistAcrossSessions: boolean;
+            }[],
+        ): Promise<void>;
     };
     readonly storage: {
         readonly session: {
@@ -33,6 +64,19 @@ declare const chrome: {
         create(properties: { readonly url: string }): Promise<unknown>;
     };
 };
+
+const VIEWER_DISCOVERY_SCRIPT = Object.freeze({
+    id: 'share-capsules-viewer-discovery',
+    matches: ['https://*/*', 'http://localhost/*', 'http://127.0.0.1/*'],
+    js: ['viewer-discovery.js'],
+    runAt: 'document_idle' as const,
+    allFrames: false,
+    persistAcrossSessions: true,
+});
+
+void ensureViewerDiscoveryContentScript();
+chrome.runtime.onInstalled.addListener(() => void ensureViewerDiscoveryContentScript());
+chrome.runtime.onStartup.addListener(() => void ensureViewerDiscoveryContentScript());
 
 chrome.runtime.onMessage.addListener((message, sender, respond) => {
     if (isCreatorPage(sender.url)) {
@@ -48,6 +92,22 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
         return true;
     }
 });
+
+async function ensureViewerDiscoveryContentScript(): Promise<void> {
+    try {
+        const registered = await chrome.scripting.getRegisteredContentScripts({
+            ids: [VIEWER_DISCOVERY_SCRIPT.id],
+        });
+        if (registered.length === 0) {
+            await chrome.scripting.registerContentScripts([VIEWER_DISCOVERY_SCRIPT]);
+            return;
+        }
+        await chrome.scripting.updateContentScripts([VIEWER_DISCOVERY_SCRIPT]);
+    } catch {
+        // Discovery is best-effort until the viewer grants a compatible Host permission.
+        // The creator flow and installed extension must continue to work without it.
+    }
+}
 
 async function acceptHandoff(value: unknown): Promise<{ readonly accepted: true }> {
     const message = parseCreatorHandoffMessage(value);

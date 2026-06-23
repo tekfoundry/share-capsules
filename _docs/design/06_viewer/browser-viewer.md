@@ -74,9 +74,9 @@ V1 declares these required named permissions:
 - `storage` for non-plaintext extension settings and consent state
 - `scripting` to register the isolated Capsule element bridge on approved sites
 
-It has required Host access only to `https://sharecapsules.com` and declares optional `https://*/*` Host access so the viewer can grant one HTTPS origin at runtime. Chrome Host grants apply to an origin rather than one Capsule path. A page origin and separately hosted Capsule origin may each require approval.
+It has required Host access only to `https://sharecapsules.com` and declares optional `https://*/*` Host access so the viewer can grant one HTTPS origin at runtime. The development build also declares optional localhost HTTP origins for the bundled static-host example. Chrome Host grants apply to an origin rather than one Capsule path. A page origin and separately hosted Capsule origin may each require approval.
 
-V1 does not request Chrome profile identity, general `tabs`, history, cookies, downloads, `webRequest`, native messaging, or HTTP Host access. It does not register an install-time all-sites content script. Dynamically registered content scripts run only in the isolated world on approved top-level origins.
+V1 does not request Chrome profile identity, general `tabs`, history, cookies, downloads, `webRequest`, native messaging, or public HTTP Host access. It does not register an install-time all-sites content script. Dynamically registered content scripts run only in the isolated world on approved top-level origins.
 
 ## Code trust
 
