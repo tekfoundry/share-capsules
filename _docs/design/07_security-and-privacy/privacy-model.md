@@ -1,7 +1,7 @@
 # Privacy Model
 
 Status: Draft
-Last updated: 2026-06-20
+Last updated: 2026-06-22
 
 ## Purpose
 
@@ -123,6 +123,8 @@ V1 may derive a short-lived automation-risk assertion from authorization and com
 V1 exposes an operational Capsule dashboard using privacy-safe aggregates derived from authorization and committed key-release events. The authoritative view metric is broker-committed key release, not proof of rendering, attention, or human understanding.
 
 Creators may see Capsule totals, bounded time buckets, global limit status, safe denial-category aggregates, and thresholded per-account limit-pressure indicators. They do not receive viewer identifiers, individual histories, exact access timestamps, IP addresses, user agents, hardware identifiers, raw trust evidence, or raw denial reasons. Sparse breakdowns are suppressed when they could reveal one viewer's activity or trust state.
+
+The durable creator-owned Capsule registry, not metrics, supplies ownership, lifecycle, public policy summary, and configured limits. Registry records contain no plaintext or unwrapped keys. Per-account pressure is disabled by default until a versioned cohort and pressure rule completes privacy review; merely having enforcement counters does not authorize a creator-facing breakdown.
 
 Country, device class, browser family, operating-system family, and Viewer-version analytics are deferred beyond V1. A future implementation requires separate explicit analytics consent, a defined purpose and retention period, coarse values, minimum cohort protection, and a new privacy review. Optional analytics fields are not collected in advance merely because the event schema can carry them. Declining optional analytics does not authorize hidden collection or retroactive derivation.
 

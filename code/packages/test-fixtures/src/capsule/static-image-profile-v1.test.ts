@@ -1,5 +1,7 @@
 import {
+    ContentProfileRegistry,
     ContentProfileValidationError,
+    DuplicateContentProfileError,
     STATIC_IMAGE_MAX_DECODED_RGBA_BYTES,
     STATIC_IMAGE_MAX_ENCODED_BYTES,
     STATIC_IMAGE_MAX_HEIGHT,
@@ -158,6 +160,27 @@ describe('Static Image Content Profile V1', () => {
         );
         expect(Object.isFrozen(STATIC_IMAGE_PROFILE_V1)).toBe(true);
         expect(Object.isFrozen(STATIC_IMAGE_MEDIA_TYPES)).toBe(true);
+    });
+
+    it('makes additional trusted profile registration an explicit composition step', () => {
+        const textProfile = Object.freeze({
+            id: 'ctx.content.plain-text',
+            version: '1.0',
+            mediaTypes: Object.freeze(['text/plain']),
+        });
+        const registry = new ContentProfileRegistry([STATIC_IMAGE_PROFILE_V1, textProfile]);
+
+        expect(registry.resolve(textProfile.id, textProfile.version)).toBe(textProfile);
+        expect(registry.list()).toEqual([STATIC_IMAGE_PROFILE_V1, textProfile]);
+        expect(() => registry.resolve(textProfile.id, '2.0')).toThrow(
+            UnsupportedContentProfileError,
+        );
+    });
+
+    it('rejects ambiguous duplicate profile registrations', () => {
+        expect(
+            () => new ContentProfileRegistry([STATIC_IMAGE_PROFILE_V1, STATIC_IMAGE_PROFILE_V1]),
+        ).toThrow(DuplicateContentProfileError);
     });
 
     it('keeps manifest parsing aligned with the profile envelope', () => {

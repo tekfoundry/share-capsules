@@ -4,3 +4,4 @@ _infra/.env
 _infra/backups/
 _infra/data/*
 !_infra/data/.gitkeep
+_capsules/

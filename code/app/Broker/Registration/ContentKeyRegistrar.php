@@ -52,7 +52,9 @@ final readonly class ContentKeyRegistrar
                 ->lockForUpdate()
                 ->first();
             if ($existing instanceof BrokerContentKey) {
-                $matches = hash_equals($existing->creator_id, $principal->creatorId)
+                $matches = is_string($existing->creator_id)
+                    && in_array($existing->status, [BrokerContentKeyStatus::Pending, BrokerContentKeyStatus::Active], true)
+                    && hash_equals($existing->creator_id, $principal->creatorId)
                     && hash_equals($existing->capsule_id, $capsuleId)
                     && $existing->capsule_revision === $principal->capsuleRevision
                     && hash_equals($existing->payload_id, $payloadId)
@@ -82,7 +84,8 @@ final readonly class ContentKeyRegistrar
                 'protection_key_id' => $protected->keyId,
                 'protection_nonce' => $protected->nonce,
                 'protected_content_key' => $protected->ciphertext,
-                'status' => BrokerContentKeyStatus::Active,
+                'status' => BrokerContentKeyStatus::Pending,
+                'pending_expires_at' => now()->addMinutes((int) config('sharecapsules.capsules.pending_ttl_minutes')),
             ]);
             $this->audit->record('broker.content_key_registered', [
                 'record_id' => $recordId,

@@ -4,6 +4,7 @@ namespace App\Ctx\Tickets;
 
 use App\Ctx\Contracts\CtxV1;
 use App\Ctx\Contracts\ServiceIdentity;
+use Carbon\CarbonImmutable;
 use InvalidArgumentException;
 
 final readonly class CtxTicketBindings
@@ -17,6 +18,8 @@ final readonly class CtxTicketBindings
         public string $releaseHandle,
         public string $proofJkt,
         public string $agreementJkt,
+        public ?CarbonImmutable $notBefore = null,
+        public ?CarbonImmutable $notAfter = null,
         public ?int $capsuleLifetimeLimit = null,
         public ?int $accountCapsuleLifetimeLimit = null,
         public ?string $automationRiskIssuer = null,
@@ -41,6 +44,9 @@ final readonly class CtxTicketBindings
         }
         if ($automationRiskIssuer !== null) {
             ServiceIdentity::fromString($automationRiskIssuer);
+        }
+        if ($notBefore !== null && $notAfter !== null && ! $notBefore->lessThan($notAfter)) {
+            throw new InvalidArgumentException('The CTX ticket access window is invalid.');
         }
     }
 

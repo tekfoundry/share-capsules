@@ -7,7 +7,7 @@ Last updated: 2026-06-20
 
 This specification defines the V1 static-image profile identity, accepted media types, signed metadata, and provisional resource envelope. It defines the checks available from the signed manifest before key release and the requirements that later plaintext inspection must confirm.
 
-The reference contract and profile implementation are in [`content-profile.ts`](../../../../code/packages/capsule-core/src/content-profile.ts).
+The shared declaration contract is in [`content-profile.ts`](../../../../code/packages/capsule-core/src/content-profile.ts). Creator byte inspection is implemented by [`static-image-creator-profile.ts`](../../../../code/apps/browser-extension/src/static-image-creator-profile.ts).
 
 ## Profile identity
 
@@ -98,7 +98,9 @@ Before authenticated CTX traffic or key release, the Viewer MUST validate the si
 
 After authorized authenticated decryption and before rendering, the Viewer MUST inspect actual plaintext bytes and confirm the declared media type, static structure, dimensions, pixel count, and resource envelope. Declared-versus-actual mismatch fails closed.
 
-Actual JPEG, PNG, and WebP parsing, animation detection, decoder isolation, rendering, and disposal are not implemented by this Phase 2 contract. They remain required before the V1 Viewer can claim profile support.
+Creator inspection verifies actual signatures and bounded structure rather than trusting the filename or browser-reported media type. PNG inspection validates the signature, chunk bounds, chunk types, CRCs, IHDR fields, palette requirements, image-data ordering, and exact IEND boundary while rejecting APNG control/data chunks. JPEG inspection validates marker and segment bounds, supported frame structure, scan/entropy boundaries, dimensions, exact EOI, and rejects multi-picture MPF content. WebP inspection validates the exact RIFF envelope, chunk bounds and padding, VP8, VP8L, or VP8X dimensions, reserved flags, canvas agreement, and rejects animation flags and chunks.
+
+After structural inspection and all pre-decode limits pass, Creator tooling decodes through the browser image decoder with file-orientation transforms disabled, requires decoded dimensions to equal the parsed dimensions, and closes the decoded bitmap immediately. Decode failure or mismatch fails closed. The Viewer must apply the same structural, limit, decode, rendering, and disposal behavior after decryption; Viewer wiring remains a Phase 7 responsibility.
 
 ## Compatibility and finalization
 
@@ -120,6 +122,10 @@ Automated tests lock down:
 - Unsupported media types and profile identities
 - Exact trusted-profile resolution without aliases or negotiation
 - Alignment between runtime validation and manifest rejection
+- Structured success metadata and reviewed failure issues at the creator-profile boundary
+- Actual PNG CRC/chunk/order checks, JPEG marker/scan checks, and WebP RIFF/chunk/variant checks
+- GIF, SVG, APNG, animated WebP, multi-picture JPEG, malformed, truncated, trailing, and decoder-mismatched rejection
+- Pre-read encoded-size enforcement and pre-decode enforcement of every dimension, pixel, and nominal decoded-memory limit
 
 Reference tests are in [`static-image-profile-v1.test.ts`](../../../../code/packages/test-fixtures/src/capsule/static-image-profile-v1.test.ts).
 

@@ -7,6 +7,8 @@ use App\Account\Deletion\AccountDeletionService;
 use App\Account\Deletion\AccountTrustProfileRepository;
 use App\Broker\Lifecycle\BrokerContentKeyLifecycle;
 use App\Broker\Lifecycle\BrokerContentKeyLifecycleFailed;
+use App\Capsules\Registry\CapsuleLifecycleStatus;
+use App\Models\CreatorCapsule;
 use App\Models\User;
 use App\Models\ViewerDevice;
 use App\OAuth\ExtensionOAuthClientConfiguration;
@@ -36,6 +38,7 @@ final class PermanentAccountDeletionTest extends TestCase
         $user = $this->closedUser(now()->subSecond());
         $profiles->profiles[$user->getKey()] = ['viewer_score' => 42];
         $device = $this->device($user);
+        $capsule = $this->capsule($user);
         [$accessToken, $refreshToken, $authCode] = $this->oauthCredentials($user, $device);
         DB::table('sessions')->insert([
             'id' => 'expired-account-session',
@@ -63,6 +66,7 @@ final class PermanentAccountDeletionTest extends TestCase
 
         $this->assertModelMissing($user);
         $this->assertModelMissing($device);
+        $this->assertModelMissing($capsule);
         $this->assertModelMissing($accessToken);
         $this->assertModelMissing($refreshToken);
         $this->assertModelMissing($authCode);
@@ -128,6 +132,7 @@ final class PermanentAccountDeletionTest extends TestCase
     {
         $user = $this->closedUser(now()->subDay());
         $device = $this->device($user);
+        $capsule = $this->capsule($user);
         $this->app->when(AccountDeletionService::class)
             ->needs('$participants')
             ->give([new FailingDeletionParticipant]);
@@ -138,12 +143,14 @@ final class PermanentAccountDeletionTest extends TestCase
 
         $this->assertModelExists($user);
         $this->assertModelExists($device);
+        $this->assertSame(CapsuleLifecycleStatus::Active, $capsule->fresh()->status);
     }
 
     public function test_broker_destruction_must_succeed_before_personal_data_is_erased(): void
     {
         $user = $this->closedUser(now()->subDay());
         $device = $this->device($user);
+        $capsule = $this->capsule($user);
         $this->mock(BrokerContentKeyLifecycle::class)
             ->shouldReceive('destroyCreator')
             ->once()
@@ -156,6 +163,7 @@ final class PermanentAccountDeletionTest extends TestCase
         $this->assertSame([(int) $user->getKey()], $result->failedAccountIds);
         $this->assertModelExists($user);
         $this->assertModelExists($device);
+        $this->assertSame(CapsuleLifecycleStatus::Active, $capsule->fresh()->status);
     }
 
     public function test_the_command_rejects_an_unsafe_batch_limit(): void
@@ -201,6 +209,24 @@ final class PermanentAccountDeletionTest extends TestCase
             'agreement_jkt' => $this->key(),
             'status' => ViewerDeviceStatus::Suspended,
             'suspended_at' => now(),
+        ]);
+    }
+
+    private function capsule(User $user): CreatorCapsule
+    {
+        return CreatorCapsule::query()->create([
+            'user_id' => $user->getKey(),
+            'registration_id' => 'registration_'.bin2hex(random_bytes(16)),
+            'capsule_id' => 'urn:uuid:'.Str::uuid(),
+            'capsule_revision' => 1,
+            'payload_id' => 'primary',
+            'broker' => 'https://broker.example.test',
+            'release_handle' => $this->key(),
+            'policy_sha256' => $this->key(),
+            'policy' => [],
+            'status' => CapsuleLifecycleStatus::Active,
+            'pending_expires_at' => now()->addMinutes(15),
+            'finalized_at' => now(),
         ]);
     }
 

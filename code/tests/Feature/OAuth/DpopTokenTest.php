@@ -213,6 +213,15 @@ final class DpopTokenTest extends TestCase
             ->assertJsonPath('scope', 'capsule:create');
         $accessToken = $issued->json('access_token');
         $resourceUrl = route('api.broker-registration-grants.store');
+        $policy = [
+            'type' => 'ctx-policy', 'version' => 1, 'combiner' => 'all',
+            'requirements' => [
+                ['predicate' => 'ctx.account.email-verified', 'equals' => true],
+                ['predicate' => 'ctx.account.active', 'equals' => true],
+                ['predicate' => 'ctx.viewer.device-registered', 'equals' => true],
+                ['predicate' => 'ctx.consent.capsule-view-event', 'equals' => true],
+            ],
+        ];
 
         $this->withHeaders([
             'Authorization' => 'DPoP '.$accessToken,
@@ -222,14 +231,26 @@ final class DpopTokenTest extends TestCase
             'capsule_id' => 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703',
             'capsule_revision' => 1,
             'payload_id' => 'primary-image',
-            'policy_sha256' => str_repeat('p', 43),
+            'policy_sha256' => (new CtxPolicyDigest)->calculate($policy),
+            'policy' => $policy,
             'content_key_sha256' => str_repeat('h', 43),
+            'title' => 'Protected landscape',
+            'content_profile_id' => 'ctx.content.static-image',
+            'content_profile_version' => '1.0',
+            'media_type' => 'image/png',
         ])->assertCreated()
             ->assertHeader('Cache-Control', 'no-store, private')
             ->assertJsonPath('type', 'broker-registration-grant')
             ->assertJsonPath('version', 1)
             ->assertJsonPath('expires_in', 60)
             ->assertJsonStructure(['grant', 'broker']);
+        $this->assertDatabaseHas('creator_capsules', [
+            'user_id' => $user->getKey(),
+            'title' => 'Protected landscape',
+            'content_profile_id' => 'ctx.content.static-image',
+            'content_profile_version' => '1.0',
+            'media_type' => 'image/png',
+        ]);
     }
 
     #[Test]

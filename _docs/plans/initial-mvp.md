@@ -285,20 +285,37 @@ Deferred extension integration gate:
 
 Objective: let a creator produce a valid Capsule without sending plaintext or creator signing keys to Laravel.
 
-- ⬜️ Build the authenticated Laravel Capsule-creation page for descriptive metadata, embedded policy, and extension handoff.
-- ⬜️ Explain supported formats, limits, policy consequences, hosting requirements, extension requirement, and residual screenshot/capture risk.
-- ⬜️ Build the Creator Studio surface inside the extension or an extension-controlled page.
-- ⬜️ Generate the creator Ed25519 signing key locally and support multiple signing-key records and status.
-- ⬜️ Require an encrypted recovery bundle and independently generated high-entropy recovery code before first publication.
-- ⬜️ Validate actual JPEG, PNG, or WebP structure, reject animation/active formats, and enforce every V1 image limit before packaging.
-- ⬜️ Generate a fresh random AES content key and nonce for each protected payload.
-- ⬜️ Register the content key with the configured broker without exposing it to the Laravel page.
-- ⬜️ Build canonical metadata and policy, encrypt the image, sign the manifest, and assemble the exact `.capsule` ZIP layout locally.
-- ⬜️ Immediately re-open and verify the produced Capsule with the same strict reader before download.
-- ⬜️ Present copyable `<capsule-viewer>` integration instructions, compatible Host requirements, and public fallback guidance.
-- ⬜️ Provide a Capsule inventory with status, identifiers, policy summary, release counts, revocation, and account-deletion impact.
-- ⬜️ Build the per-Capsule operational metrics dashboard for committed-release totals and time buckets, authorization and safe denial aggregates, global limit status, and thresholded per-account limit pressure with visible freshness, retention, and suppression explanations.
-- ⬜️ Keep country, device class, browser/OS family, and Viewer-version analytics outside V1 while preserving a versioned optional-dimensions boundary that collects nothing without later consent and privacy approval.
+- ✅ Build the authenticated Laravel Capsule-creation page for descriptive metadata, embedded policy, and extension handoff.
+- ✅ Explain supported formats, limits, policy consequences, hosting requirements, extension requirement, and residual screenshot/capture risk.
+- ✅ Build the Creator Studio surface inside the extension or an extension-controlled page.
+- ✅ Generate the creator Ed25519 signing key locally and support multiple signing-key records and status.
+- ✅ Require an encrypted recovery bundle and independently generated high-entropy recovery code before first publication.
+- ✅ Validate actual JPEG, PNG, or WebP structure, reject animation/active formats, and enforce every V1 image limit before packaging.
+- ✅ Generate a fresh random AES content key and nonce for each protected payload.
+- ✅ Register the content key with the configured broker without exposing it to the Laravel page.
+- ✅ Build canonical metadata and policy, encrypt the image, sign the manifest, and assemble the exact `.capsule` ZIP layout locally.
+- ✅ Immediately re-open and verify the produced Capsule with the same strict reader before download.
+- ✅ Present copyable `<capsule-viewer>` integration instructions, compatible Host requirements, and public fallback guidance.
+- ✅ Provide a Capsule inventory with status, identifiers, policy summary, release counts, revocation, and account-deletion impact.
+- ✅ Build the per-Capsule operational metrics dashboard for committed-release totals and time buckets, authorization and safe denial aggregates, global limit status, and thresholded per-account limit pressure with visible freshness, retention, and suppression explanations.
+- ✅ Keep country, device class, browser/OS family, and Viewer-version analytics outside V1 while preserving a versioned optional-dimensions boundary that collects nothing without later consent and privacy approval.
+
+Phase 6 completion hardening — reopened 2026-06-22:
+
+- ✅ Add a durable creator-owned Capsule-revision registry with immutable Capsule, revision, payload, broker, release-handle, policy-digest, canonical policy-summary, creation, and ownership bindings; registration grants, authorization tickets, counters, and metrics are not substitutes for this source of truth.
+- ✅ Make the registry lifecycle authoritative with explicit `pending`, `active`, `revocation_pending`, `revoked`, `cleanup_pending`, and `destroyed` semantics; authorization and inventory must fail closed whenever the authoritative state is not active, and metrics must never determine lifecycle state.
+- ✅ Change broker key registration to create a bounded pending, non-releasable record; activate it only after the extension has assembled and strictly re-opened the exact Capsule and completed an idempotent finalization operation.
+- ✅ Add idempotent cancellation, expiry, and retryable cleanup for incomplete or abandoned builds so broker-held content keys cannot remain indefinitely orphaned after signing, packaging, verification, transport, or local-download failure.
+- ✅ Drive inventory, policy summaries, metrics limit status, revocation, account closure, permanent deletion, and deletion-ledger recovery from the durable registry while preserving authoritative committed-release counters and creator-ownership checks.
+- ✅ Suppress per-account limit-pressure output by default until its cohort and pressure thresholds complete privacy review; then expose only versioned, configured, tested aggregate rules rather than controller literals.
+- ✅ Add failure-path, retry, concurrency, ownership, cleanup, closure/deletion, backup-replay, and metrics-independence tests; update the production change ledger for the registry migration, broker pending/finalization contract, cleanup schedule, verification, and rollback boundary.
+
+Phase 6 completion-hardening evidence recorded on 2026-06-22:
+
+- `creator_capsules` is the creator-owned source of truth for immutable revision bindings, canonical policy summaries, and the closed lifecycle. Release-binding checks and atomic redemption require an exact active registry record; pending, revocation-pending, revoked, cleanup-pending, destroyed, missing, or mismatched records fail closed without consulting metrics for lifecycle state.
+- Broker registrations begin pending and non-releasable. The Creator builder finalizes only after signing, exact ZIP assembly, and strict local re-open verification; local failures and ambiguous finalization responses request cancellation of either pending or newly active material, and the five-minute cleanup command retries expired or incomplete destruction.
+- Inventory, limits, revocation, closure, deletion, and restored-backup deletion replay use registry ownership. Authoritative committed-release counters remain separate. Per-account pressure is neither computed nor rendered while privacy review is incomplete, even if an obsolete feature flag is supplied.
+- Failure, idempotency, expiry, ownership, revocation-race, cleanup-retry, deletion rollback, restored-backup replay, and registry/metrics-independence tests lock the design intent. The full gate passes with 362 TypeScript tests and 273 PHP tests / 1,339 assertions.
 
 Success goals:
 
@@ -306,12 +323,124 @@ Success goals:
 - Produced Capsules pass shared fixtures and fail if any signed byte or encrypted entry changes.
 - A creator can download a Capsule and obtain complete static-host integration instructions.
 
+Phase 6 Creator Studio entry evidence recorded on 2026-06-21:
+
+- The verified-account-only Creator Studio prepares a required Title, one optional public Description reused as initial suggested fallback accessibility text, and the four optional V1 creator policy choices without asking creators to author protocol predicates. When Description is blank, Title supplies the minimal fallback text.
+- The page contains no file input, server submission, creator private-key field, recovery-code field, or content-key field. It explicitly assigns source selection, key use, encryption, signing, and packaging to the connected extension.
+- A versioned DOM handoff emits only the reviewed draft fields as a JSON string. Blank numeric fields omit that limit; configured limits must be positive safe JSON integers, and zero is never an unlimited sentinel. Either scope may be used independently; when both are present, Creator Studio requires the shared total to be at least the per-viewer-account value.
+- Automated feature tests lock authentication, email verification, V1 policy language, extension handoff markers, and the absence of a server content form. TypeScript tests lock the closed draft shape, trimming, optional-gate behavior, and limit boundaries.
+- The full gate passes with 257 TypeScript tests and 244 PHP tests / 1,169 assertions.
+
+Phase 6 Creator Studio guidance evidence recorded on 2026-06-21:
+
+- The creation page leads with the nontechnical compatibility facts: JPEG, PNG, or WebP and an approximately 26 MB maximum. An optional details disclosure preserves the exact provisional V1 envelope—25 MiB encoded size, 16,384 pixels per dimension, and 40,000,000 decoded pixels—and rejection of SVG, GIF, APNG, animated WebP, active, and unrecognized content. Every limit remains enforced before packaging.
+- Policy guidance distinguishes committed content-key releases from page loads, denied requests, and proof of human attention; explains exact-revision lifetime limits and the account-not-person boundary; and describes automation risk without identity, personhood, or intent claims.
+- The extension explanation names every local-only operation and rejects server upload or secret custody as a compatibility fallback. Adjacent risk language states that authorized screenshots, recordings, cameras, modified browsers, and post-render copying remain possible.
+- Publishing guidance captures the compatible Host boundary: HTTPS, unauthenticated GET, recommended HEAD, public noncredentialed CORS, immutable revision URLs, public fallback content, and no required database, SDK, account system, CTX logic, broker integration, cookies, or range support.
+- Feature tests lock every required explanation to the Creator Studio surface. The full gate passes with 257 TypeScript tests and 245 PHP tests / 1,191 assertions.
+
+Phase 6 creator-selected access-window evidence recorded on 2026-06-21:
+
+- The accepted V1 policy now includes one optional canonical `ctx.time.capsule-access-window` requirement with `not_before`, `not_after`, or both. Instants are exact whole-second UTC values; the opening boundary is inclusive, the closing boundary is exclusive, and malformed, empty, equal, reversed, offset, or noncanonical values fail closed.
+- Creator Studio accepts blank, start-only, end-only, and bounded calendar dates in the creator's browser time zone. A start date maps to local midnight at its beginning; a closing date remains usable for the whole selected day and maps to the following local midnight. The handoff contains only the corresponding exact UTC instants.
+- The PHP policy parser independently reproduces the shared TypeScript contract. Authorization checks current provider time before ticket issuance; the private ticket mapping persists both boundaries; atomic redemption checks them again before any counter increment or key release.
+- `2026_06_21_094000_add_access_window_to_ctx_authorization_tickets.php` was applied locally without resetting development data. The production change ledger records the pending migration, coordinated contract deployment, clock-monitoring dependency, verification, and recovery requirements.
+- Exact tests cover omitted and one-sided windows, canonical ordering, invalid dates and instants, start inclusion, end exclusion, ticket persistence, redemption recheck, local-date conversion, and Creator Studio explanations. The full gate passes with 269 TypeScript tests and 250 PHP tests / 1,225 assertions.
+
+Phase 6 extension-owned Creator Studio evidence recorded on 2026-06-21:
+
+- The browser-extension package now owns a dedicated Creator Studio page, plain-language draft review, accessible local file chooser, and responsive extension-origin styling. It clearly states that the original remains on the creator's computer and presents only supported type and approximate file-size guidance at the selection point.
+- A strict closed-shape parser accepts only the reviewed V1 public handoff. Unknown fields, private-material fields, unsupported versions, mismatched fallback text, invalid limits, and invalid access windows fail closed before the local surface starts.
+- The surface controller retains the browser `File` object as opaque local state. Its renderer receives only file name, byte length, and reported media type, and automated tests prove that source bytes cannot enter the rendered view model.
+- The page exposes an explicit mounting boundary for the future Manifest V3 runtime. Draft transport and extension identity remain Phase 7 shell responsibilities; source validation, key generation, encryption, signing, and packaging remain the following Phase 6 tasks rather than being implied by file selection.
+- The full gate passes with 279 TypeScript tests and 250 PHP tests / 1,231 assertions.
+
+Phase 6 creator signing-key evidence recorded on 2026-06-21:
+
+- The browser extension generates purpose-bound Ed25519 signing keys locally through WebCrypto, derives the exact 32-byte canonical public value, assigns an opaque manifest-compatible identifier, and stores the private `CryptoKey` only in creator-scoped IndexedDB. Creator Studio receives public summaries and never receives or renders the private key.
+- The key ring supports multiple versioned records with a closed `active`, `retiring`, `revoked`, and `expired` lifecycle. Adding a replacement atomically retires every prior active record; signing requires exactly one active record; terminal records cannot be reactivated.
+- Creator Studio shows the active signing identity and prior record statuses in plain language and can create a replacement. It explains that account recovery cannot restore the signing identity and that encrypted recovery material is required before first publication.
+- Private keys remain exportable solely for the immediately following encrypted-recovery-bundle workflow. Raw private bytes are not persisted, rendered, logged, or transmitted, and publication gating remains the next Phase 6 task.
+- The full gate passes with 284 TypeScript tests and 250 PHP tests / 1,231 assertions.
+
+Phase 6 creator signing-key recovery evidence recorded on 2026-06-21:
+
+- Creator tooling generates an independent 256-bit recovery code, 128-bit salt, and 96-bit nonce with separate cryptographic-random requests. HKDF-SHA-256 derives a non-extractable AES-256-GCM key; the strict versioned bundle authenticates its key identity, public key, creation time, KDF parameters, and encryption parameters as canonical additional data.
+- The downloadable bundle contains only public bindings and authenticated ciphertext. It contains neither the recovery code nor an unencrypted private key; temporary PKCS #8, plaintext, and code byte arrays are overwritten on a best-effort basis after use and never enter Laravel or ordinary network paths.
+- Recovery rejects malformed codes, unknown fields, unsupported versions, changed headers, wrong codes, ciphertext tampering, invalid plaintext, and public/private key mismatch. Successful recovery proves the Ed25519 key pair matches before returning restored signing authority.
+- New signing keys remain recovery-required. Creator Studio downloads the encrypted bundle, displays the separate code, requires explicit confirmation that both were saved separately, and only then makes the active key eligible for future publication. Restored keys are recovery-confirmed after possession of both items is proven.
+- The manual save-and-restore exercise remains deferred until the complete Capsule creation pipeline can prove the restored key by signing and verifying a real Capsule; the recovery contract is independently covered by automated round-trip and failure tests now.
+- The full gate passes with 297 TypeScript tests and 250 PHP tests / 1,231 assertions.
+
+Phase 6 creator content-profile validation evidence recorded on 2026-06-21:
+
+- The browser extension now defines the generic `CreatorContentProfile<TMetadata>` boundary agreed for future content types. Inspection receives an abstract byte source and returns either immutable normalized metadata or reviewed structured issues; generic Creator Studio code contains no image-format parsing or media-type branches.
+- The trusted creator-profile registry maps the exact static-image identifier/version to its implementation. Adding another reviewed content type requires its own creator inspector and registry entry, while the current format `1.0` manifest remains the explicitly image-specific compatibility slice.
+- Static-image inspection determines JPEG, PNG, and WebP from actual bytes rather than filename or browser MIME hints. It validates PNG chunks and CRCs, supported JPEG frames and scan boundaries, and simple or extended lossy/lossless WebP RIFF structures; it rejects GIF, SVG, APNG, animated WebP, multi-picture JPEG, unsupported encodings, malformed lengths, bad checksums, truncation, and trailing data.
+- The encoded limit is enforced before reading when possible and again against actual bytes. Width, height, pixel count, and nominal RGBA memory limits are all enforced before decode. The isolated browser decoder must succeed with orientation transforms disabled and report the exact parsed dimensions before the source and normalized signed metadata are retained.
+- Focused tests cover each accepted format and WebP variant, palette PNG, animation and active-format rejection, structural corruption, exact boundaries, every over-limit outcome, read/size/decode failures, decoder mismatch, immutability, registry resolution, and Creator Studio refusal to retain invalid sources.
+- The full gate passes with 317 TypeScript tests and 250 PHP tests / 1,231 assertions.
+
+Phase 6 creator payload-secret evidence recorded on 2026-06-21:
+
+- Capsule Core remains the authority for exact 32-byte AES-256 content keys and 12-byte GCM nonces. The extension now creates one payload-scoped secret handle with two independent secure-random requests for every protected payload rather than exposing generation calls throughout the future builder.
+- The handle returns nonce copies and grants serialized, callback-scoped access to a temporary content-key copy for broker registration and encryption. Concurrent access fails closed; callback completion or failure overwrites its working copy; explicit idempotent destruction overwrites retained key and nonce bytes and rejects all later use.
+- Factory construction defensively copies generated material and overwrites the original generation buffers. Capsule Core now also overwrites a partially filled key or nonce buffer if the secure random source throws, ensuring every caller inherits the same failure cleanup.
+- Tests lock exact request sizes and independence across payloads, defensive-copy behavior, sequential broker/encryption access, concurrent-access rejection, temporary-copy erasure, idempotent destruction, post-destruction failure, partial-randomness cleanup, and the existing AES-256-GCM vectors and authenticated payload contract.
+- The full gate passes with 323 TypeScript tests and 250 PHP tests / 1,231 assertions.
+
+Phase 6 creator broker-registration evidence recorded on 2026-06-21:
+
+- The extension registration client uses the active device's DPoP-bound `capsule:create` token to send Laravel only the stable registration identity, Capsule/payload/policy bindings, and SHA-256 content-key digest. The exact control-plane request shape has no `content_key` field.
+- A strict no-store 60-second grant must name the configured broker exactly. The extension then sends the grant and temporary raw-key encoding directly to that broker's `/registrations` endpoint with omitted credentials; Laravel never proxies or receives the raw key.
+- Registration identities are generated once outside the network operation and remain stable across accepted idempotent retry. Broker success accepts only the exact versioned response and opaque 32-byte release handle; unexpected fields, origins, lifetimes, cacheability, statuses, encodings, tokens, scopes, bindings, proofs, and transport failures fail closed.
+- Payload-secret callback scoping overwrites the temporary digest and broker key copies after each stage. Tests inspect both captured requests to prove that only the digest crosses the Laravel boundary while the raw key travels only to the configured broker.
+- The full gate passes with 332 TypeScript tests and 250 PHP tests / 1,231 assertions.
+
+Phase 6 local Capsule assembly evidence recorded on 2026-06-21:
+
+- The extension-owned builder turns the reviewed Creator Studio draft and validated static-image metadata into the exact canonical V1 policy, payload authenticated-data context, manifest, detached Ed25519 signature, and three-entry `.capsule` archive entirely in local memory.
+- The original source bytes are encrypted with the payload-scoped AES-256-GCM key before broker registration. The resulting release handle and broker identity are signed into the manifest; the raw content key, source bytes, signing private key, and recovery material never enter the Laravel page or control-plane request.
+- The shared Capsule Core ZIP writer emits only `manifest.json`, raw 64-byte `manifest.sig`, and the ID-derived encrypted payload path. It validates the manifest, payload commitment, signature representation, and exact archive allowlist before writing a deterministic stored ZIP without ZIP64, comments, data descriptors, or filesystem extraction.
+- Publication fails before source access unless the active signing key has confirmed recovery. Every success and failure path overwrites the local plaintext buffer and destroys the payload-secret handle; broker failures collapse to a reviewed builder error without leaking transport detail.
+- Automated tests decrypt the produced ciphertext under its manifest-derived authenticated context, verify the manifest signature and broker/policy bindings, inspect the archive entry contract, and cover omitted policy gates, recovery gating, changed-source rejection, broker failure, and secret cleanup. The full gate passes with 337 TypeScript tests and 250 PHP tests / 1,231 assertions.
+
+Phase 6 immediate Capsule verification evidence recorded on 2026-06-21:
+
+- Capsule Core now owns one bounded, in-memory V1 ZIP reader used by both creator self-verification and future Viewer parsing. The Creator builder reopens the final emitted bytes through that reader before returning a downloadable result; successful construction alone is not publication success.
+- The reader requires one single-disk, comment-free central directory and exactly three stored entries. It rejects encryption flags, compression, data descriptors, extra fields, ZIP64-scale values, duplicate names, gaps, overlaps, trailing data, unsafe UTF-8 names, local/central disagreement, CRC mismatch, and archives over the bounded V1 envelope without filesystem extraction.
+- `manifest.json` must be exact canonical UTF-8 bytes, which also prevents permissive JSON parsing from hiding duplicate keys or insignificant alternate serialization. The strict manifest/schema/policy/profile contracts, exact entry allowlist, signed ciphertext length and SHA-256 commitment, raw signature representation, and Ed25519 signature are all verified before the archive is accepted.
+- Tamper tests cover payload mutation, invalid signatures, ZIP encryption and compression flags, extra fields, comments, truncation, and name/header disagreement. The full gate passes with 346 TypeScript tests and 250 PHP tests / 1,231 assertions.
+
+Phase 6 Host-integration guidance evidence recorded on 2026-06-21:
+
+- Creator Studio now turns a permanent public HTTPS Capsule URL and the draft's suggested fallback text into copyable, escaped `<capsule-viewer>` markup. URL validation rejects HTTP, credentials, queries, fragments, relative locations, padding, and oversized input so generated examples do not normalize credential-bearing or temporary links into publication guidance.
+- Suggested fallback is ordinary public child content, remains editable outside the signed Capsule, and is safely HTML-escaped. The surface explicitly asks creators to test without the extension rather than treating fallback as private, signed, or guaranteed to be replaced.
+- The checklist states the complete minimum Host contract in plain language: immutable HTTPS bytes, anonymous GET, public noncredentialed CORS, accepted media types, recommended HEAD, and useful child fallback. It also makes clear that the Host needs no Share Capsules account, SDK, database, content key, or server-side decryption.
+- Copy uses the browser clipboard from a user action when available and falls back to selecting the complete readonly markup for keyboard copy. Automated tests lock exact output, escaping, and unsafe URL/fallback rejection. The full gate passes with 359 TypeScript tests and 250 PHP tests / 1,231 assertions.
+
+Phase 6 inventory, operational metrics, and analytics-boundary evidence recorded on 2026-06-21:
+
+- The authenticated Creator Studio inventory now derives ownership from successfully redeemed broker registration grants and lists exact Capsule/revision, payload and registration identifiers, policy fingerprint, active/revoked status, registration time, and committed-opening total. The same repository powers the account-closure/recovery export, eliminating the prior empty placeholder.
+- Permanent revocation requires verified ownership and recent password confirmation, calls the creator-scoped broker lifecycle, and projects an idempotent revocation metric. The UI plainly explains irreversibility, hosted encrypted-file behavior, closure pausing, permanent key destruction, and the need to retain local Capsule and signing-recovery files.
+- The creator-scoped operational dashboard shows Capsule totals, authorization aggregates, safe denial categories, up to 24 recent hourly buckets, known global-limit progress, freshness, detail-retention guidance, and per-account limit pressure only after a five-account cohort threshold. It exposes no account identifiers or individual histories; cross-account inventory, metrics, and revocation access return not found.
+- The versioned metric envelope retains `optional_dimensions` as an exact empty object/array boundary. Event, storage, and projection tests explicitly prohibit country, device class, browser/OS family, Viewer version, IP address, user agent, viewer device, proof, ticket, key, and account identifiers. Adding any later dimension still requires separate purpose, consent, retention, suppression, and privacy approval.
+- The final complete gate passes with 359 TypeScript tests and 253 PHP tests / 1,258 assertions.
+
+Phase 6 hardening audit recorded on 2026-06-22:
+
+- The existing implementation and test evidence remain useful, but Phase 6 is reopened. Redeemed registration grants are temporary protocol artifacts, metrics are non-authoritative projections, and authorization tickets are short-lived decisions; none is an acceptable durable Capsule lifecycle or policy source of truth.
+- A successful broker registration currently precedes manifest signing and final archive verification. Until pending registration, finalization, and cleanup compensation exist, a later local failure can leave broker-held key material for a Capsule that was never delivered.
+- The extension-owned Creator components remain independently tested but are not yet connected through the Manifest V3 runtime to one user-visible build-and-download operation. That connection is an explicit first Phase 7 integration task after Phase 6 hardening, not evidence that the current components already form an end-to-end UI.
+- The current five-account and eighty-percent pressure values have not completed the privacy review required by the accepted metrics design. Phase 6 hardening must suppress this output until an approved versioned rule replaces implementation literals.
+
 ### Phase 7 — Viewer extension and `<capsule-viewer>` integration
 
 Objective: securely discover, authorize, decrypt, validate, and render protected images on approved Hosts.
 
-- ⬜️ Create the Chrome Manifest V3 extension with only the accepted required permissions and runtime HTTPS-origin grants.
-- ⬜️ Use separate production and development extension identities and OAuth registrations.
+- ⬜️ Connect the hardened Creator Studio components through the Manifest V3 runtime into one authenticated select, validate, recover, encrypt, register, finalize, strictly verify, download, and integration-guidance flow; complete the deferred real-Capsule signing-key recovery exercise before treating Creator creation as user-viable.
+- ✅ Create the Chrome Manifest V3 extension with only the accepted required permissions and runtime HTTPS-origin grants.
+- ✅ Use separate production and development extension identities and OAuth registrations.
 - ⬜️ Discover explicit `<capsule-viewer>` elements only on user-approved top-level origins.
 - ⬜️ Preserve Host-provided child content as public fallback and never treat it as signed Capsule metadata.
 - ⬜️ Insert an extension-origin iframe or full-page extension Viewer so Host scripts cannot read Viewer DOM, keys, or plaintext.
@@ -325,6 +454,17 @@ Objective: securely discover, authorize, decrypt, validate, and render protected
 - ⬜️ Require fresh online authorization on reload or reopen; persist no plaintext or content key in ordinary storage or cache.
 - ⬜️ Implement accessible loading, consent, denial, revocation, device-limit, unsupported-profile, network, and security-failure states.
 - ⬜️ Implement the no-extension install/onboarding link with safe return state and no credentials or tokens in URLs.
+
+Phase 7 Creator-runtime implementation evidence recorded on 2026-06-22:
+
+- Creator output now uses a deterministic `share-capsules/<account-folder>/` boundary beneath a parent directory explicitly selected through the browser. The account folder is derived from the signed-in account label when available, avoiding an extra `workspaces/workspace-*` layer in the user-visible file tree. The extension retains the granted handle in IndexedDB and rechecks write permission while keeping structural directory names fixed. A muted setup area runs after account connection to repair or create `workspace.json` and the exact encrypted recovery bundle before the main creation controls are enabled; the separate recovery code is shown only when a fresh recovery bundle must be confirmed and is never retained or written into the workspace. Changing locations repairs the complete structure in the new parent. The main creation area then groups the signed Capsule details, source-file selection, Capsule filename, and verified create-and-save action.
+- New Capsule registrations project the public title, content-profile identity/version, and media type into the creator-owned Laravel inventory. Cards lead with a human name and content format while technical identifiers remain disclosed on demand; an ownership-scoped management label can rename the account view without changing signed Capsule bytes. Existing rows remain valid and render explicit legacy fallbacks. A creator may retain a revoked Capsule for operational history or delete one revision; deletion fails closed, destroys only that revision's broker-held key, removes it from inventory, and retains a terminal lifecycle tombstone for cleanup and audit safety.
+- The authenticated Laravel management surfaces share one responsive account shell with Dashboard, Capsules, Account, and Sign out navigation. Dashboard summarizes Capsule and account state, Capsule inventory exposes a prominent New Capsule action, and each page identifies the active destination without changing its security or protocol boundary.
+
+- The reproducible unpacked build contains a Manifest V3 service worker, a narrowly matched local Creator handoff script, and an extension-owned Creator Studio bundle. The one-use handoff retains only the bounded public draft in `storage.session`; replay, unknown fields, wrong sender paths, and malformed request identifiers fail closed.
+- The extension page now connects through OAuth Authorization Code with PKCE, registers non-exportable device keys, obtains a DPoP `capsule:create` session, validates the selected file through the trusted content-profile registry, requires a confirmed or restored creator signing key, builds and strictly reopens the exact archive, finalizes the broker registration, and downloads only that verified result. Build or download failure attempts cancellation so pending or newly active key material does not become an abandoned usable registration.
+- The fixed development manifest public key produces extension ID `dhconceamghcnndjodjhjikknblhkmej`; local OAuth configuration was provisioned for its exact Chromium callback. Production configuration retains a distinct placeholder identity and callback. Automated tests lock the development ID, packaged-code CSP, exact automatic localhost origins, optional HTTPS grants, and reviewed permissions.
+- The full non-browser gate passes with 378 TypeScript tests and 273 PHP tests / 1,339 assertions. `npm run build` now also produces the loadable extension bundle. The first Phase 7 task remains open until `_docs/operations/phase7-creator-runtime-manual-test.md` proves a real build, recovery restore, matching signing identity, and negative recovery-code behavior in the unpacked browser runtime.
 
 Success goals:
 
@@ -340,7 +480,7 @@ Objective: prove separation of concerns using an ordinary static website rather 
 - ⬜️ Create a static HTTPS-compatible example containing several `<capsule-viewer>` elements on one page.
 - ⬜️ Include useful accessible fallback content between each element's opening and closing tags.
 - ⬜️ Host Capsule files with anonymous GET, optional HEAD, accepted media type, public CORS, immutable revision URLs, and bounded content lengths.
-- ⬜️ Include examples with no optional limits, a Capsule-global lifetime limit, a per-account lifetime limit, and the automation-risk gate.
+- ⬜️ Include examples with no optional gates, opening and closing date boundaries, a Capsule-global lifetime limit, a per-account lifetime limit, and the automation-risk gate.
 - ⬜️ Demonstrate individual opening, open-all consent, lazy automatic opening, denial, limit exhaustion, revocation, and no-extension behavior.
 - ⬜️ Verify separately hosted page and Capsule origins require and respect distinct runtime Host permissions.
 - ⬜️ Document deployment to at least one representative static Host without requiring its accounts, cookies, server code, or plugins.

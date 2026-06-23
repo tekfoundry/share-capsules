@@ -11,6 +11,7 @@ use App\Ctx\Policy\PreliminaryPolicyEvaluator;
 use App\Models\User;
 use App\Models\ViewerDevice;
 use App\ViewerDevices\ViewerDeviceStatus;
+use Carbon\CarbonImmutable;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -94,6 +95,30 @@ final class PreliminaryPolicyEvaluatorTest extends TestCase
         $this->assertSame(PolicyDecisionCode::AccountCapsuleLimitReached, $account->code);
     }
 
+    public function test_access_window_uses_inclusive_start_and_exclusive_end_boundaries(): void
+    {
+        $user = $this->user();
+        $device = $this->device($user);
+        $policy = $this->policy(
+            notBefore: '2026-07-01T05:00:00Z',
+            notAfter: '2026-08-01T05:00:00Z',
+        );
+        $evaluate = fn (string $now): PolicyDecisionCode => $this->evaluator()->evaluate(
+            $policy,
+            $user,
+            $device,
+            'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703',
+            1,
+            true,
+            CarbonImmutable::parse($now),
+        )->code;
+
+        $this->assertSame(PolicyDecisionCode::PolicyUnsatisfied, $evaluate('2026-07-01T04:59:59Z'));
+        $this->assertSame(PolicyDecisionCode::Allowed, $evaluate('2026-07-01T05:00:00Z'));
+        $this->assertSame(PolicyDecisionCode::Allowed, $evaluate('2026-08-01T04:59:59Z'));
+        $this->assertSame(PolicyDecisionCode::PolicyUnsatisfied, $evaluate('2026-08-01T05:00:00Z'));
+    }
+
     public function test_optional_automation_risk_fails_closed_without_disclosing_history(): void
     {
         $user = $this->user();
@@ -168,14 +193,26 @@ final class PreliminaryPolicyEvaluatorTest extends TestCase
         ]);
     }
 
-    private function policy(?int $capsule = null, ?int $account = null, ?string $riskIssuer = null): CtxPolicyV1
-    {
+    private function policy(
+        ?int $capsule = null,
+        ?int $account = null,
+        ?string $riskIssuer = null,
+        ?string $notBefore = null,
+        ?string $notAfter = null,
+    ): CtxPolicyV1 {
         $requirements = [
             ['predicate' => 'ctx.account.email-verified', 'equals' => true],
             ['predicate' => 'ctx.account.active', 'equals' => true],
             ['predicate' => 'ctx.viewer.device-registered', 'equals' => true],
             ['predicate' => 'ctx.consent.capsule-view-event', 'equals' => true],
         ];
+        if ($notBefore !== null || $notAfter !== null) {
+            $requirements[] = array_filter([
+                'predicate' => 'ctx.time.capsule-access-window',
+                'not_before' => $notBefore,
+                'not_after' => $notAfter,
+            ], fn (mixed $value): bool => $value !== null);
+        }
         if ($capsule !== null) {
             $requirements[] = ['predicate' => 'ctx.usage.capsule-lifetime-limit', 'scope' => 'capsule', 'maximum' => $capsule];
         }

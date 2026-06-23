@@ -5,6 +5,8 @@ import {
     Passkeys,
     UserCancelledError,
 } from '@laravel/passkeys';
+import { initializeCapsuleCreatorHandoff } from './creator-studio.js';
+import { initializeConfirmationDialogs } from './confirmation-dialog.js';
 
 const messageFor = (error) => {
     if (error instanceof NotSupportedError) return 'This browser does not support passkeys.';
@@ -139,3 +141,5 @@ const initializePasskeyRegistration = () => {
 initializePasskeyLogin();
 initializePasskeyConfirmation();
 initializePasskeyRegistration();
+initializeCapsuleCreatorHandoff();
+initializeConfirmationDialogs();

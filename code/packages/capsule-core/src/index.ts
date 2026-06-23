@@ -67,6 +67,9 @@ export {
 } from './manifest.js';
 
 export type { CapsuleManifestV1, CapsulePayloadV1, ManifestValidationIssue } from './manifest.js';
+
+export { CapsuleZipError, assembleCapsuleZipV1, verifyCapsuleZipV1 } from './capsule-zip.js';
+export type { VerifiedCapsuleArchiveV1 } from './capsule-zip.js';
 export {
     JsonCanonicalizationError,
     MAX_CANONICAL_JSON_DEPTH,
@@ -91,6 +94,9 @@ export type { CapsuleArchiveEntryV1, DigestProvider } from './entry-commitment.j
 
 export {
     ContentProfileValidationError,
+    CONTENT_PROFILE_REGISTRY,
+    ContentProfileRegistry,
+    DuplicateContentProfileError,
     STATIC_IMAGE_MAX_DECODED_RGBA_BYTES,
     STATIC_IMAGE_MAX_ENCODED_BYTES,
     STATIC_IMAGE_MAX_HEIGHT,
@@ -103,6 +109,7 @@ export {
     STATIC_IMAGE_RGBA_BYTES_PER_PIXEL,
     StaticImageProfileV1,
     UnsupportedContentProfileError,
+    TRUSTED_CONTENT_PROFILES,
     isStaticImageMediaType,
     resolveContentProfile,
 } from './content-profile.js';
@@ -111,6 +118,7 @@ export {
     ACCOUNT_ACTIVE_PREDICATE,
     ACCOUNT_CAPSULE_LIFETIME_LIMIT_PREDICATE,
     AUTOMATION_RISK_NOT_HIGH_PREDICATE,
+    CAPSULE_ACCESS_WINDOW_PREDICATE,
     CAPSULE_LIFETIME_LIMIT_PREDICATE,
     CTX_POLICY_COMBINER,
     CTX_POLICY_LIMIT_MAXIMUM,
@@ -130,6 +138,7 @@ export type {
     AccountCapsuleLifetimeLimitRequirementV1,
     AutomationRiskNotHighRequirementV1,
     BooleanPolicyRequirementV1,
+    CapsuleAccessWindowRequirementV1,
     CapsuleLifetimeLimitRequirementV1,
     CtxPolicyRequirementV1,
     CtxPolicyV1,
@@ -140,6 +149,7 @@ export { canonicalizeCtxPolicyV1, ctxPolicySha256 } from './policy-digest.js';
 
 export type {
     ContentProfile,
+    ContentProfileRegistration,
     ContentProfileValidationIssue,
     StaticImageMediaTypeV1,
     StaticImageMetadataV1,

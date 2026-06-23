@@ -51,7 +51,37 @@ interface ContentProfile<TDeclaration, TMetadata> {
 }
 ```
 
-The V1 implementation returns immutable normalized signed metadata. Creator inspection, plaintext validation, rendering, and disposal remain profile responsibilities but will use browser-specific interfaces added with the Creator and Viewer implementations rather than coupling generic Capsule Core to `Blob`, DOM, or extension types.
+The shared declaration implementation returns immutable normalized signed metadata. Browser-specific creator inspection uses a separate interface so Capsule Core remains independent of `File`, `Blob`, DOM, and extension APIs:
+
+```ts
+interface CreatorContentProfile<TMetadata> {
+  readonly id: string;
+  readonly version: string;
+  readonly mediaTypes: readonly string[];
+
+  inspect(source: ContentByteSource): Promise<ContentInspection<TMetadata>>;
+}
+
+type ContentInspection<TMetadata> =
+  | { readonly valid: true; readonly metadata: TMetadata }
+  | { readonly valid: false; readonly issues: readonly ContentInspectionIssue[] };
+```
+
+The generic Creator Studio retains a source only after its registered profile returns a valid inspection. It also retains the immutable normalized metadata for later manifest assembly, avoiding a second format-specific parse. A boolean is appropriate for small internal signature checks, but the profile boundary returns structured issues so the trusted UI can explain rejection without parsing exceptions or knowing content-specific rules.
+
+### Adding another supported content type
+
+Content profiles are trusted, compile-time extension modules—not executable plugins supplied by a Capsule or website. The code path for adding one is intentionally explicit:
+
+1. Define a stable profile identifier and version plus its accepted media types and compatibility envelope.
+2. Implement the shared `ContentProfile` declaration-validation contract in a profile-specific class.
+3. Implement the browser-extension `CreatorContentProfile` adapter that inspects actual local bytes and produces only that profile's normalized signed metadata or reviewed validation issues.
+4. Implement the browser-extension Viewer adapter that revalidates decrypted bytes, renders them inside the trusted boundary, supplies the profile's accessibility behavior, and disposes every plaintext resource.
+5. Register the reviewed implementation in the trusted `TRUSTED_CONTENT_PROFILES` composition root. `ContentProfileRegistry` rejects duplicate identifier/version registrations and unsupported profiles fail closed.
+6. Add profile fixtures covering valid, malformed, oversized, active, mismatched, and unsupported content plus creator/Viewer agreement tests.
+7. Extend the versioned manifest schema and TypeScript manifest union only through an accepted compatibility change. Format `1.0` is currently the static-image slice; another content type may require a new format version rather than silently broadening an already published contract.
+
+Generic creation and viewing orchestration must depend on the profile interfaces and registry. It must not gain `if image`, `if PDF`, or media-type-specific branches as profiles are added. Profile-specific parsing, limits, rendering, and cleanup stay in that profile's module.
 
 ## V1 image profile
 

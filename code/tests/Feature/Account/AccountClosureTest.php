@@ -5,7 +5,9 @@ namespace Tests\Feature\Account;
 use App\Account\Closure\AccountClosureService;
 use App\Broker\Lifecycle\BrokerContentKeyLifecycle;
 use App\Broker\Lifecycle\BrokerContentKeyLifecycleFailed;
+use App\Capsules\Registry\CapsuleLifecycleStatus;
 use App\Models\BrokerRegistrationGrant;
+use App\Models\CreatorCapsule;
 use App\Models\CtxCapsuleMetricProjection;
 use App\Models\User;
 use App\Models\ViewerDevice;
@@ -70,6 +72,20 @@ final class AccountClosureTest extends TestCase
             'policy_sha256' => str_repeat('p', 43),
             'content_key_sha256' => str_repeat('k', 43),
             'expires_at' => now()->addMinute(),
+        ]);
+        CreatorCapsule::query()->create([
+            'user_id' => $user->getKey(),
+            'registration_id' => 'registration_'.str_repeat('a', 32),
+            'capsule_id' => 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703',
+            'capsule_revision' => 1,
+            'payload_id' => 'primary-image',
+            'broker' => 'https://broker.example.test',
+            'release_handle' => str_repeat('h', 43),
+            'policy_sha256' => str_repeat('p', 43),
+            'policy' => [],
+            'status' => CapsuleLifecycleStatus::Active,
+            'pending_expires_at' => now()->addMinutes(15),
+            'finalized_at' => now(),
         ]);
         $revokedDevice = $this->device($user, ViewerDeviceStatus::Revoked);
         [$accessToken, $refreshToken, $authCode] = $this->oauthCredentials($user, $activeDevice);

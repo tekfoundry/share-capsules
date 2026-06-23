@@ -41,6 +41,7 @@ services:
       SHARECAPSULES_COMPONENT: control-plane
       SHARECAPSULES_BROKER_CONTROL_PLANE_TOKEN: ${BROKER_CONTROL_PLANE_TOKEN}
       SHARECAPSULES_BROKER_CALLBACK_TOKEN: ${BROKER_CALLBACK_TOKEN:-dev-broker-callback-token-0001-safe-change-me}
+      SHARECAPSULES_BROKER_INTERNAL_URL: http://broker:3000
     volumes: &app_volumes
       - ..:/workspace
       - code_vendor:/workspace/code/vendor

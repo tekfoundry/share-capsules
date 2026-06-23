@@ -1,7 +1,6 @@
-import Ajv2020, { type ErrorObject } from 'ajv/dist/2020.js';
-import addFormats from 'ajv-formats';
+import type { ErrorObject } from 'ajv';
 
-import policySchema from './schema/ctx-policy-v1.schema.json' with { type: 'json' };
+import { validatePolicySchema } from './generated/schema-validators.js';
 
 export const CTX_POLICY_TYPE = 'ctx-policy' as const;
 export const CTX_POLICY_VERSION = 1 as const;
@@ -12,6 +11,7 @@ export const EMAIL_VERIFIED_PREDICATE = 'ctx.account.email-verified' as const;
 export const ACCOUNT_ACTIVE_PREDICATE = 'ctx.account.active' as const;
 export const DEVICE_REGISTERED_PREDICATE = 'ctx.viewer.device-registered' as const;
 export const VIEW_EVENT_CONSENT_PREDICATE = 'ctx.consent.capsule-view-event' as const;
+export const CAPSULE_ACCESS_WINDOW_PREDICATE = 'ctx.time.capsule-access-window' as const;
 export const CAPSULE_LIFETIME_LIMIT_PREDICATE = 'ctx.usage.capsule-lifetime-limit' as const;
 export const ACCOUNT_CAPSULE_LIFETIME_LIMIT_PREDICATE =
     'ctx.usage.capsule-account-lifetime-limit' as const;
@@ -22,6 +22,7 @@ export const CTX_POLICY_PREDICATE_ORDER = Object.freeze([
     ACCOUNT_ACTIVE_PREDICATE,
     DEVICE_REGISTERED_PREDICATE,
     VIEW_EVENT_CONSENT_PREDICATE,
+    CAPSULE_ACCESS_WINDOW_PREDICATE,
     CAPSULE_LIFETIME_LIMIT_PREDICATE,
     ACCOUNT_CAPSULE_LIFETIME_LIMIT_PREDICATE,
     AUTOMATION_RISK_NOT_HIGH_PREDICATE,
@@ -44,6 +45,12 @@ export interface CapsuleLifetimeLimitRequirementV1 {
     readonly maximum: number;
 }
 
+export interface CapsuleAccessWindowRequirementV1 {
+    readonly predicate: typeof CAPSULE_ACCESS_WINDOW_PREDICATE;
+    readonly not_before?: string;
+    readonly not_after?: string;
+}
+
 export interface AccountCapsuleLifetimeLimitRequirementV1 {
     readonly predicate: typeof ACCOUNT_CAPSULE_LIFETIME_LIMIT_PREDICATE;
     readonly scope: 'account-and-capsule';
@@ -57,6 +64,7 @@ export interface AutomationRiskNotHighRequirementV1 {
 
 export type CtxPolicyRequirementV1 =
     | BooleanPolicyRequirementV1
+    | CapsuleAccessWindowRequirementV1
     | CapsuleLifetimeLimitRequirementV1
     | AccountCapsuleLifetimeLimitRequirementV1
     | AutomationRiskNotHighRequirementV1;
@@ -79,10 +87,6 @@ export class PolicyValidationError extends Error {
         this.name = 'PolicyValidationError';
     }
 }
-
-const ajv = new Ajv2020({ allErrors: true, strict: true });
-addFormats(ajv);
-const validatePolicySchema = ajv.compile<CtxPolicyV1>(policySchema);
 
 export function validateCtxPolicyV1(value: unknown): asserts value is CtxPolicyV1 {
     if (!validatePolicySchema(value)) {
@@ -115,6 +119,9 @@ export function validateCtxPolicyV1(value: unknown): asserts value is CtxPolicyV
         if (requirement.predicate === AUTOMATION_RISK_NOT_HIGH_PREDICATE) {
             validateHttpsIssuer(requirement.issuer, `/requirements/${index}/issuer`, issues);
         }
+        if (requirement.predicate === CAPSULE_ACCESS_WINDOW_PREDICATE) {
+            validateAccessWindow(requirement, index, issues);
+        }
     }
 
     for (const [index, predicate] of CTX_POLICY_REQUIRED_PREDICATES.entries()) {
@@ -129,6 +136,39 @@ export function validateCtxPolicyV1(value: unknown): asserts value is CtxPolicyV
     if (issues.length > 0) {
         throw new PolicyValidationError(issues);
     }
+}
+
+function validateAccessWindow(
+    requirement: CapsuleAccessWindowRequirementV1,
+    index: number,
+    issues: PolicyValidationIssue[],
+): void {
+    const path = `/requirements/${index}`;
+    for (const [field, value] of [
+        ['not_before', requirement.not_before],
+        ['not_after', requirement.not_after],
+    ] as const) {
+        if (value !== undefined && !isCanonicalUtcSecond(value)) {
+            issues.push({ path: `${path}/${field}`, message: 'must be a canonical UTC instant' });
+        }
+    }
+    if (
+        requirement.not_before !== undefined &&
+        requirement.not_after !== undefined &&
+        Date.parse(requirement.not_before) >= Date.parse(requirement.not_after)
+    ) {
+        issues.push({ path, message: 'not_before must be earlier than not_after' });
+    }
+}
+
+function isCanonicalUtcSecond(value: string): boolean {
+    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(value)) return false;
+
+    const milliseconds = Date.parse(value);
+    return (
+        Number.isFinite(milliseconds) &&
+        new Date(milliseconds).toISOString().replace('.000Z', 'Z') === value
+    );
 }
 
 export function parseCtxPolicyV1(value: unknown): CtxPolicyV1 {

@@ -2,12 +2,14 @@
 
 namespace Tests\Unit\Ctx;
 
+use App\Capsules\Registry\CapsuleLifecycleStatus;
 use App\Ctx\Risk\AutomationRiskActivityType;
 use App\Ctx\Risk\AutomationRiskReason;
 use App\Ctx\Risk\V1AutomationRiskRules;
 use App\Ctx\SigningKeys\TicketSigningKeyLifecycle;
 use App\Ctx\Tickets\CtxTicketRedemptionService;
 use App\Ctx\Tickets\TicketRedemptionCode;
+use App\Models\CreatorCapsule;
 use App\Models\CtxAccountCapsuleReleaseCounter;
 use App\Models\CtxAuthorizationTicket;
 use App\Models\CtxAutomationRiskActivity;
@@ -18,6 +20,7 @@ use App\Models\CtxMetricEventRecord;
 use App\Models\User;
 use App\Models\ViewerDevice;
 use App\ViewerDevices\ViewerDeviceStatus;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -82,6 +85,19 @@ final class CtxTicketRedemptionServiceTest extends TestCase
         $this->assertSame(0, CtxCapsuleReleaseCounter::query()->count());
     }
 
+    public function test_registry_revocation_wins_the_race_before_any_counter_increment(): void
+    {
+        [$user, $device, $kid] = $this->identity();
+        $ticket = $this->ticket($user, $device, $kid, 'ticket-revoked-before-redemption', null, null);
+        CreatorCapsule::query()->sole()->forceFill(['status' => CapsuleLifecycleStatus::Revoked])->save();
+
+        $result = app(CtxTicketRedemptionService::class)->redeem($ticket->jti, $ticket->ticket_sha256);
+
+        $this->assertSame(TicketRedemptionCode::PolicyUnsatisfied, $result->code);
+        $this->assertDatabaseCount('ctx_capsule_release_counters', 0);
+        $this->assertSame('pending', $ticket->fresh()->status);
+    }
+
     public function test_current_automation_risk_is_rechecked_at_redemption(): void
     {
         [$user, $device, $kid] = $this->identity();
@@ -120,6 +136,43 @@ final class CtxTicketRedemptionServiceTest extends TestCase
         $this->assertSame(V1AutomationRiskRules::TICKET_REJECTION_LIMIT, CtxAutomationRiskActivity::query()->count());
     }
 
+    public function test_access_window_is_rechecked_at_redemption_boundaries(): void
+    {
+        [$user, $device, $kid] = $this->identity();
+        $service = app(CtxTicketRedemptionService::class);
+        $notYetOpen = $this->ticket(
+            $user,
+            $device,
+            $kid,
+            'ticket-window-early',
+            null,
+            null,
+            notBefore: CarbonImmutable::parse('2026-07-01T05:00:00Z'),
+        );
+        $atClose = $this->ticket(
+            $user,
+            $device,
+            $kid,
+            'ticket-window-closed',
+            null,
+            null,
+            notAfter: CarbonImmutable::parse('2026-08-01T05:00:00Z'),
+        );
+
+        $this->assertSame(
+            TicketRedemptionCode::PolicyUnsatisfied,
+            $service->redeem($notYetOpen->jti, $notYetOpen->ticket_sha256, CarbonImmutable::parse('2026-07-01T04:59:59Z'))->code,
+        );
+        $this->assertSame(
+            TicketRedemptionCode::Committed,
+            $service->redeem($notYetOpen->jti, $notYetOpen->ticket_sha256, CarbonImmutable::parse('2026-07-01T05:00:00Z'))->code,
+        );
+        $this->assertSame(
+            TicketRedemptionCode::PolicyUnsatisfied,
+            $service->redeem($atClose->jti, $atClose->ticket_sha256, CarbonImmutable::parse('2026-08-01T05:00:00Z'))->code,
+        );
+    }
+
     /** @return array{User, ViewerDevice, string} */
     private function identity(): array
     {
@@ -149,7 +202,29 @@ final class CtxTicketRedemptionServiceTest extends TestCase
         ?int $accountLimit,
         bool $expired = false,
         ?string $riskIssuer = null,
+        ?CarbonImmutable $notBefore = null,
+        ?CarbonImmutable $notAfter = null,
     ): CtxAuthorizationTicket {
+        $referenceTime = $notBefore ?? $notAfter ?? CarbonImmutable::now();
+        $policySha256 = $this->digest();
+        $releaseHandle = 'opaque-release-handle-0001';
+        CreatorCapsule::query()->firstOrCreate([
+            'capsule_id' => 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703',
+            'capsule_revision' => 1,
+        ], [
+            'user_id' => $user->getKey(),
+            'registration_id' => 'registration_'.str_repeat('a', 32),
+            'payload_id' => 'primary-image',
+            'broker' => 'https://broker.example.test',
+            'release_handle' => $releaseHandle,
+            'policy_sha256' => $policySha256,
+            'policy' => [],
+            'status' => CapsuleLifecycleStatus::Active,
+            'pending_expires_at' => $referenceTime,
+            'finalized_at' => $referenceTime,
+        ]);
+        $registered = CreatorCapsule::query()->sole();
+
         return CtxAuthorizationTicket::query()->create([
             'jti' => $jti,
             'user_id' => $user->getKey(),
@@ -159,17 +234,19 @@ final class CtxTicketRedemptionServiceTest extends TestCase
             'broker' => 'https://broker.example.test',
             'capsule_id' => 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703',
             'capsule_revision' => 1,
-            'policy_sha256' => $this->digest(),
+            'policy_sha256' => $registered->policy_sha256,
             'payload_id' => 'primary-image',
-            'release_handle' => 'opaque-release-handle-0001',
+            'release_handle' => $registered->release_handle,
             'proof_jkt' => $device->proof_jkt,
             'agreement_jkt' => $device->agreement_jkt,
             'capsule_lifetime_limit' => $capsuleLimit,
             'account_capsule_lifetime_limit' => $accountLimit,
             'automation_risk_issuer' => $riskIssuer,
+            'not_before' => $notBefore,
+            'not_after' => $notAfter,
             'status' => 'pending',
-            'issued_at' => now()->subMinute(),
-            'expires_at' => $expired ? now()->subSecond() : now()->addMinute(),
+            'issued_at' => $referenceTime->subMinute(),
+            'expires_at' => $expired ? now()->subSecond() : $referenceTime->addMinute(),
         ]);
     }
 

@@ -93,17 +93,19 @@ export function canonicalizePayloadAssociatedData(context: PayloadEncryptionCont
 export function generatePayloadContentKey(
     fillRandom: RandomByteFiller = defaultRandomFiller,
 ): Uint8Array {
-    const contentKey = new Uint8Array(CAPSULE_CRYPTOGRAPHIC_SUITE_V1.payloadEncryption.keyBytes);
-    fillRandom(contentKey);
-    return contentKey;
+    return generateRandomBytes(
+        CAPSULE_CRYPTOGRAPHIC_SUITE_V1.payloadEncryption.keyBytes,
+        fillRandom,
+    );
 }
 
 export function generatePayloadNonce(
     fillRandom: RandomByteFiller = defaultRandomFiller,
 ): Uint8Array {
-    const nonce = new Uint8Array(CAPSULE_CRYPTOGRAPHIC_SUITE_V1.payloadEncryption.nonceBytes);
-    fillRandom(nonce);
-    return nonce;
+    return generateRandomBytes(
+        CAPSULE_CRYPTOGRAPHIC_SUITE_V1.payloadEncryption.nonceBytes,
+        fillRandom,
+    );
 }
 
 export async function encryptAes256Gcm(
@@ -299,6 +301,17 @@ function defaultRandomFiller(target: Uint8Array): void {
     const randomBytes = new Uint8Array(target.byteLength);
     globalThis.crypto.getRandomValues(randomBytes);
     target.set(randomBytes);
+}
+
+function generateRandomBytes(length: number, fillRandom: RandomByteFiller): Uint8Array {
+    const value = new Uint8Array(length);
+    try {
+        fillRandom(value);
+        return value;
+    } catch (error) {
+        value.fill(0);
+        throw error;
+    }
 }
 
 function asArrayBuffer(value: Uint8Array): ArrayBuffer {

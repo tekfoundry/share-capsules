@@ -50,7 +50,11 @@ final class CtxMetricRecorderTest extends TestCase
         $this->assertSame('2026-06-21 12:00:00', CtxCapsuleMetricBucket::query()->sole()->bucket_start->format('Y-m-d H:i:s'));
 
         $stored = json_encode(CtxMetricEventRecord::query()->get()->toArray(), JSON_THROW_ON_ERROR);
-        foreach (['viewer_device_id', 'user_id', 'proof_jkt', 'agreement_jkt', 'ticket_sha256'] as $prohibited) {
+        $this->assertSame([], CtxMetricEventRecord::query()->firstOrFail()->optional_dimensions);
+        foreach ([
+            'viewer_device_id', 'user_id', 'proof_jkt', 'agreement_jkt', 'ticket_sha256',
+            'country', 'device_class', 'browser_family', 'os_family', 'viewer_version',
+        ] as $prohibited) {
             $this->assertStringNotContainsString($prohibited, $stored);
         }
     }

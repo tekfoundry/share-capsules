@@ -11,11 +11,13 @@
         "npm": ">=11.6.0 <12"
     },
     "scripts": {
-        "build": "npm run typecheck && vite build",
+        "build": "npm run generate:schema-validators && npm run typecheck && vite build && node scripts/build-extension.mjs",
+        "build:extension": "npm run generate:schema-validators && npm run typecheck && node scripts/build-extension.mjs",
         "dev": "vite",
         "format": "prettier --write .",
         "format:check": "prettier --check .",
-        "lint": "eslint apps packages resources/js tests/Browser playwright.config.ts vite.config.js",
+        "generate:schema-validators": "node scripts/generate-schema-validators.mjs",
+        "lint": "eslint apps packages resources/js scripts tests/Browser playwright.config.ts vite.config.js",
         "test:browser": "playwright test",
         "test:ts": "vitest run --passWithNoTests",
         "typecheck": "tsc --build --pretty false"
@@ -26,6 +28,8 @@
         "@playwright/test": "^1.61.0",
         "@tailwindcss/vite": "^4.0.0",
         "@types/node": "^24.13.2",
+        "ajv": "^8.20.0",
+        "ajv-formats": "^3.0.1",
         "concurrently": "^9.0.1",
         "eslint": "^10.5.0",
         "laravel-vite-plugin": "^3.1",

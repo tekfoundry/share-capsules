@@ -24,9 +24,24 @@ final readonly class HttpBrokerContentKeyLifecycle implements BrokerContentKeyLi
         $this->apply(BrokerContentKeyOperation::RevokeCapsule, $creatorId, $capsuleId, $capsuleRevision);
     }
 
+    public function destroyCapsule(int $creatorId, string $capsuleId, int $capsuleRevision): void
+    {
+        $this->apply(BrokerContentKeyOperation::DestroyCapsule, $creatorId, $capsuleId, $capsuleRevision);
+    }
+
     public function destroyCreator(int $creatorId): void
     {
         $this->apply(BrokerContentKeyOperation::DestroyCreator, $creatorId);
+    }
+
+    public function finalizeRegistration(int $creatorId, string $registrationId, string $releaseHandle): void
+    {
+        $this->apply(BrokerContentKeyOperation::FinalizeRegistration, $creatorId, registrationId: $registrationId, releaseHandle: $releaseHandle);
+    }
+
+    public function cancelRegistration(int $creatorId, string $registrationId): void
+    {
+        $this->apply(BrokerContentKeyOperation::CancelRegistration, $creatorId, registrationId: $registrationId);
     }
 
     private function apply(
@@ -34,19 +49,27 @@ final readonly class HttpBrokerContentKeyLifecycle implements BrokerContentKeyLi
         int $creatorId,
         ?string $capsuleId = null,
         ?int $capsuleRevision = null,
+        ?string $registrationId = null,
+        ?string $releaseHandle = null,
     ): void {
         $body = [
             'operation' => $operation->value,
             'creator_id' => (string) $creatorId,
         ];
-        if ($operation === BrokerContentKeyOperation::RevokeCapsule) {
+        if (in_array($operation, [BrokerContentKeyOperation::RevokeCapsule, BrokerContentKeyOperation::DestroyCapsule], true)) {
             $body['capsule_id'] = $capsuleId;
             $body['capsule_revision'] = $capsuleRevision;
+        }
+        if (in_array($operation, [BrokerContentKeyOperation::FinalizeRegistration, BrokerContentKeyOperation::CancelRegistration], true)) {
+            $body['registration_id'] = $registrationId;
+        }
+        if ($operation === BrokerContentKeyOperation::FinalizeRegistration) {
+            $body['release_handle'] = $releaseHandle;
         }
 
         try {
             $response = $this->http
-                ->baseUrl(rtrim((string) config('sharecapsules.broker.base_url'), '/'))
+                ->baseUrl(rtrim((string) config('sharecapsules.broker.internal_url'), '/'))
                 ->acceptJson()
                 ->asJson()
                 ->withToken((string) config('sharecapsules.broker.control_plane_token'))

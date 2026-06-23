@@ -95,6 +95,8 @@ final readonly class CtxTicketIssuer
                 'release_handle' => $bindings->releaseHandle,
                 'proof_jkt' => $bindings->proofJkt,
                 'agreement_jkt' => $bindings->agreementJkt,
+                'not_before' => $bindings->notBefore,
+                'not_after' => $bindings->notAfter,
                 'capsule_lifetime_limit' => $bindings->capsuleLifetimeLimit,
                 'account_capsule_lifetime_limit' => $bindings->accountCapsuleLifetimeLimit,
                 'automation_risk_issuer' => $bindings->automationRiskIssuer,

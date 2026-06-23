@@ -82,13 +82,14 @@ The primary V1 gallery uses a deliberately small set of policy inputs. Access to
 - A valid, non-revoked Share Capsules account
 - A registered, non-revoked Viewer extension device
 - Explicit consent to record Capsule view events
+- Satisfaction of any creator-configured opening and closing time boundaries
 - Remaining capacity under any creator-configured global lifetime limit for that Capsule
 - Remaining capacity under any creator-configured per-account lifetime limit for that Capsule
 - Satisfaction of an optional creator-selected current ecosystem automation-risk-not-high predicate
 
 The access decision is made online for every attempted open. Only committed single-use key release creates a qualifying view event and atomically updates both the Capsule-global and account-and-Capsule counters. Copies or mirrors with the same Capsule identifier share those counters. V1 offers no offline access; reopening or reloading requires another authorization and committed release.
 
-CTX does not impose hard-coded creator-policy values. The creator may embed a global lifetime maximum, a per-account lifetime maximum, both, or neither in each Capsule's signed policy. Operational rate limits used to protect Share Capsules itself are separate security controls and must not be presented as creator policy.
+CTX does not impose hard-coded creator-policy values. The creator may embed an opening instant, closing instant, or both and may independently select a global lifetime maximum, a per-account lifetime maximum, both, or neither in each Capsule's signed policy. Operational rate limits used to protect Share Capsules itself are separate security controls and must not be presented as creator policy.
 
 The retained V1 state is deliberately narrow and contains no universal trust score. See [V1 trust profile and retained state](trust-profile-v1.md).
 

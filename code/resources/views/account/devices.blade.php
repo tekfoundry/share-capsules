@@ -1,10 +1,10 @@
-@extends('layouts.app')
+@extends('layouts.account')
 
 @section('title', 'Viewer devices — Share Capsules')
 @section('description', 'Inspect and manage browser-extension Viewer devices.')
 
-@section('content')
-    <section class="mx-auto max-w-5xl px-5 py-16 sm:px-8 lg:px-10">
+@section('account-content')
+    <section>
         <a class="text-sm font-semibold text-brand hover:text-brand-strong" href="{{ route('account.security') }}">← Back to account security</a>
 
         <div class="mt-6">
@@ -45,17 +45,17 @@
                         @if ($device->status->value !== 'revoked')
                             <div class="flex flex-wrap gap-2">
                                 @if ($device->status->value === 'active')
-                                    <form method="POST" action="{{ route('account.devices.suspend', $device) }}">
+                                    <form method="POST" action="{{ route('account.devices.suspend', $device) }}" data-confirm data-confirm-title="Suspend this device?" data-confirm-message="This device will immediately lose access until you deliberately reactivate it." data-confirm-action="Suspend device">
                                         @csrf
                                         <button class="inline-flex min-h-10 items-center justify-center rounded-xl border border-amber-200 px-4 text-sm font-semibold text-amber-800 hover:bg-amber-50" type="submit">Suspend</button>
                                     </form>
                                 @else
-                                    <form method="POST" action="{{ route('account.devices.activate', $device) }}">
+                                    <form method="POST" action="{{ route('account.devices.activate', $device) }}" data-confirm data-confirm-title="Reactivate this device?" data-confirm-message="This device will regain access to eligible Capsules." data-confirm-action="Activate device" data-confirm-tone="standard">
                                         @csrf
                                         <button class="inline-flex min-h-10 items-center justify-center rounded-xl border border-teal-200 px-4 text-sm font-semibold text-teal-800 hover:bg-teal-50" type="submit">Activate</button>
                                     </form>
                                 @endif
-                                <form method="POST" action="{{ route('account.devices.destroy', $device) }}">
+                                <form method="POST" action="{{ route('account.devices.destroy', $device) }}" data-confirm data-confirm-title="Permanently revoke this device?" data-confirm-message="This device will permanently lose access and cannot be reactivated." data-confirm-action="Revoke device">
                                     @csrf
                                     @method('DELETE')
                                     <button class="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 px-4 text-sm font-semibold text-red-700 hover:bg-red-50" type="submit">Revoke</button>

@@ -4,7 +4,13 @@ import tseslint from 'typescript-eslint';
 
 export default defineConfig(
     {
-        ignores: ['node_modules/**', 'public/build/**', '**/dist/**', '**/*.d.ts'],
+        ignores: [
+            'node_modules/**',
+            'public/build/**',
+            'apps/browser-extension/build/**',
+            '**/dist/**',
+            '**/*.d.ts',
+        ],
     },
     eslint.configs.recommended,
     ...tseslint.configs.recommended.map((config) => ({
@@ -26,7 +32,7 @@ export default defineConfig(
         languageOptions: { parser: tseslint.parser },
     },
     {
-        files: ['playwright.config.ts'],
+        files: ['playwright.config.ts', 'scripts/**/*.mjs'],
         languageOptions: {
             globals: {
                 process: 'readonly',
@@ -38,11 +44,14 @@ export default defineConfig(
         languageOptions: {
             globals: {
                 console: 'readonly',
+                CustomEvent: 'readonly',
                 document: 'readonly',
                 HTMLButtonElement: 'readonly',
                 HTMLFormElement: 'readonly',
                 HTMLElement: 'readonly',
                 HTMLInputElement: 'readonly',
+                HTMLTextAreaElement: 'readonly',
+                Intl: 'readonly',
                 window: 'readonly',
             },
         },

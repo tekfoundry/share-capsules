@@ -4,7 +4,9 @@ namespace Tests\Feature\Account;
 
 use App\Account\Deletion\AccountDeletionService;
 use App\Broker\Lifecycle\BrokerContentKeyLifecycle;
+use App\Capsules\Registry\CapsuleLifecycleStatus;
 use App\Models\AccountDeletionLedgerEntry;
+use App\Models\CreatorCapsule;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
@@ -39,7 +41,8 @@ final class DeletionLedgerTest extends TestCase
         $this->assertInstanceOf(FakeBrokerContentKeyLifecycle::class, $broker);
         $accountId = $original->getKey();
         app(AccountDeletionService::class)->deleteAccount($accountId);
-        $this->restoreUser($accountId, $original->email);
+        $restored = $this->restoreUser($accountId, $original->email);
+        $restoredCapsule = $this->capsule($restored);
         $restoreId = (string) Str::uuid();
 
         $this->artisan('accounts:reapply-deletions', ['--restore-id' => $restoreId])
@@ -50,6 +53,7 @@ final class DeletionLedgerTest extends TestCase
             ->assertSuccessful();
 
         $this->assertDatabaseMissing('users', ['id' => $accountId]);
+        $this->assertModelMissing($restoredCapsule);
         $this->assertDatabaseHas('deletion_restore_checkpoints', ['restore_id' => $restoreId]);
         $destroyOperations = array_values(array_filter(
             $broker->operations,
@@ -124,6 +128,26 @@ final class DeletionLedgerTest extends TestCase
             'email' => $email,
             'password' => 'irrelevant-restored-hash',
             'email_verified_at' => now(),
+        ]);
+    }
+
+    private function capsule(User $user): CreatorCapsule
+    {
+        $digest = sodium_bin2base64(random_bytes(32), SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING);
+
+        return CreatorCapsule::query()->create([
+            'user_id' => $user->getKey(),
+            'registration_id' => 'registration_'.bin2hex(random_bytes(16)),
+            'capsule_id' => 'urn:uuid:'.Str::uuid(),
+            'capsule_revision' => 1,
+            'payload_id' => 'primary',
+            'broker' => 'https://broker.example.test',
+            'release_handle' => $digest,
+            'policy_sha256' => $digest,
+            'policy' => [],
+            'status' => CapsuleLifecycleStatus::Active,
+            'pending_expires_at' => now()->addMinutes(15),
+            'finalized_at' => now(),
         ]);
     }
 }

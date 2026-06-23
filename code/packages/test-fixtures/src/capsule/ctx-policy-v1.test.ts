@@ -2,6 +2,7 @@ import {
     ACCOUNT_ACTIVE_PREDICATE,
     ACCOUNT_CAPSULE_LIFETIME_LIMIT_PREDICATE,
     AUTOMATION_RISK_NOT_HIGH_PREDICATE,
+    CAPSULE_ACCESS_WINDOW_PREDICATE,
     CAPSULE_LIFETIME_LIMIT_PREDICATE,
     CTX_POLICY_LIMIT_MAXIMUM,
     CTX_POLICY_PREDICATE_ORDER,
@@ -43,6 +44,7 @@ describe('CTX embedded Policy V1', () => {
         ]);
         expect(CTX_POLICY_PREDICATE_ORDER).toEqual([
             ...CTX_POLICY_REQUIRED_PREDICATES,
+            CAPSULE_ACCESS_WINDOW_PREDICATE,
             CAPSULE_LIFETIME_LIMIT_PREDICATE,
             ACCOUNT_CAPSULE_LIFETIME_LIMIT_PREDICATE,
             AUTOMATION_RISK_NOT_HIGH_PREDICATE,
@@ -141,6 +143,39 @@ describe('CTX embedded Policy V1', () => {
         },
     );
 
+    it.each([
+        [{ not_before: '2026-07-01T05:00:00Z' }],
+        [{ not_after: '2026-08-01T05:00:00Z' }],
+        [{ not_before: '2026-07-01T05:00:00Z', not_after: '2026-08-01T05:00:00Z' }],
+    ])('accepts a canonical access window %j', (window) => {
+        expect(() =>
+            parseCtxPolicyV1(
+                policyWithOptionalRequirements({
+                    predicate: CAPSULE_ACCESS_WINDOW_PREDICATE,
+                    ...window,
+                }),
+            ),
+        ).not.toThrow();
+    });
+
+    it.each([
+        {},
+        { not_before: '2026-07-01' },
+        { not_before: '2026-07-01T00:00:00-05:00' },
+        { not_before: '2026-02-30T00:00:00Z' },
+        { not_before: '2026-08-01T05:00:00Z', not_after: '2026-07-01T05:00:00Z' },
+        { not_before: '2026-07-01T05:00:00Z', not_after: '2026-07-01T05:00:00Z' },
+    ])('rejects a malformed or empty access window %j', (window) => {
+        expect(() =>
+            parseCtxPolicyV1(
+                policyWithOptionalRequirements({
+                    predicate: CAPSULE_ACCESS_WINDOW_PREDICATE,
+                    ...window,
+                } as CtxPolicyV1['requirements'][number]),
+            ),
+        ).toThrow(PolicyValidationError);
+    });
+
     it.each([0, -1, 1.5, Number.MAX_SAFE_INTEGER + 1])(
         'rejects invalid lifetime maximum %s',
         (maximum) => {
@@ -159,6 +194,11 @@ describe('CTX embedded Policy V1', () => {
     it('accepts all optional requirements in their single canonical order', () => {
         const policy = parseCtxPolicyV1(
             policyWithOptionalRequirements(
+                {
+                    predicate: CAPSULE_ACCESS_WINDOW_PREDICATE,
+                    not_before: '2026-07-01T05:00:00Z',
+                    not_after: '2026-08-01T05:00:00Z',
+                },
                 { predicate: CAPSULE_LIFETIME_LIMIT_PREDICATE, scope: 'capsule', maximum: 5 },
                 {
                     predicate: ACCOUNT_CAPSULE_LIFETIME_LIMIT_PREDICATE,

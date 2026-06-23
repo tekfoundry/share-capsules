@@ -1,13 +1,11 @@
-@extends('layouts.app')
+@extends('layouts.account')
 
 @section('title', 'Account security — Share Capsules')
 @section('description', 'Inspect and revoke active Share Capsules browser sessions.')
 
-@section('content')
-    <section class="mx-auto max-w-5xl px-5 py-16 sm:px-8 lg:px-10">
-        <a class="text-sm font-semibold text-brand hover:text-brand-strong" href="{{ route('dashboard') }}">← Back to account</a>
-
-        <div class="mt-6">
+@section('account-content')
+    <section>
+        <div>
             <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">Account security</p>
             <h1 class="mt-3 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">Active browser sessions</h1>
             <p class="mt-3 max-w-2xl leading-7 text-muted">Review where your account is signed in. Revoking a session also invalidates existing persistent-login cookies so it cannot silently return.</p>
@@ -58,7 +56,7 @@
                     </div>
 
                     @unless ($session->isCurrent)
-                        <form method="POST" action="{{ route('account.sessions.destroy', $session->id) }}">
+                        <form method="POST" action="{{ route('account.sessions.destroy', $session->id) }}" data-confirm data-confirm-title="Revoke this session?" data-confirm-message="This browser will be signed out and will need to authenticate again." data-confirm-action="Revoke session">
                             @csrf
                             @method('DELETE')
                             <button class="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-4 text-sm font-semibold text-red-700 shadow-sm hover:bg-red-50" type="submit">Revoke</button>
@@ -74,7 +72,7 @@
             <h2 class="text-lg font-bold">Sign out everywhere else</h2>
             <p class="mt-2 text-sm leading-6 text-muted">Enter your password to revoke every other browser session. Your current session remains active.</p>
 
-            <form class="mt-5 max-w-md space-y-4" method="POST" action="{{ route('account.sessions.destroy-others') }}">
+            <form class="mt-5 max-w-md space-y-4" method="POST" action="{{ route('account.sessions.destroy-others') }}" data-confirm data-confirm-title="Revoke all other sessions?" data-confirm-message="Every other browser session will be signed out. Your current session will remain active." data-confirm-action="Revoke other sessions">
                 @csrf
                 @method('DELETE')
                 <x-forms.input label="Current password" name="password" type="password" autocomplete="current-password" required />

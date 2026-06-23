@@ -62,7 +62,7 @@ The Viewer uses a separate Ed25519 proof key for signed challenges and sender-co
 
 ## Recovery bundles
 
-Creator signing-key recovery bundles use authenticated encryption and a key derived from the separately generated high-entropy recovery code. Account passwords are not cryptographic inputs. Exact recovery-bundle derivation and encoding remain separate specification work and require dedicated test vectors.
+Creator signing-key recovery bundles use AES-256-GCM authenticated encryption and a key derived through HKDF-SHA-256 from a separately generated 256-bit recovery code. Account passwords are not cryptographic inputs. The exact envelope, authenticated bindings, and restoration checks are defined by [Creator Signing-Key Recovery V1](../10_specifications/capsule/creator-signing-key-recovery-v1.md).
 
 ## Implementation requirements
 

@@ -1,10 +1,10 @@
-@extends('layouts.app')
+@extends('layouts.account')
 
 @section('title', 'Passkeys — Share Capsules')
 @section('description', 'Enroll and revoke passkeys for your Share Capsules account.')
 
-@section('content')
-    <section class="mx-auto max-w-5xl px-5 py-16 sm:px-8 lg:px-10">
+@section('account-content')
+    <section>
         <a class="text-sm font-semibold text-brand hover:text-brand-strong" href="{{ route('account.security') }}">← Back to account security</a>
 
         <div class="mt-6">
@@ -33,7 +33,7 @@
                         </p>
                     </div>
 
-                    <form method="POST" action="{{ route('passkey.destroy', $passkey) }}">
+                    <form method="POST" action="{{ route('passkey.destroy', $passkey) }}" data-confirm data-confirm-title="Revoke this passkey?" data-confirm-message="This passkey will no longer be able to sign in to your account." data-confirm-action="Revoke passkey">
                         @csrf
                         @method('DELETE')
                         <button class="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-4 text-sm font-semibold text-red-700 shadow-sm hover:bg-red-50" type="submit">Revoke</button>

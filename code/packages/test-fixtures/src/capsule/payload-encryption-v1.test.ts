@@ -226,6 +226,20 @@ describe('Capsule payload encryption V1', () => {
         expect(firstKey).not.toBe(secondKey);
     });
 
+    it('erases partially filled key and nonce buffers when randomness fails', () => {
+        const observed: Uint8Array[] = [];
+        const fail = (target: Uint8Array): void => {
+            observed.push(target);
+            target.fill(91);
+            throw new Error('randomness failed');
+        };
+
+        expect(() => generatePayloadContentKey(fail)).toThrow('randomness failed');
+        expect(() => generatePayloadNonce(fail)).toThrow('randomness failed');
+        expect(observed).toHaveLength(2);
+        expect(observed.every((buffer) => buffer.every((byte) => byte === 0))).toBe(true);
+    });
+
     it('uses structured, non-secret-bearing encryption failures', () => {
         const error = new PayloadEncryptionError('authentication_failed', 'Payload failed.');
 

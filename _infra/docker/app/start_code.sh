@@ -26,7 +26,7 @@ case "$mode" in
 
         exec npx concurrently \
             -c "#93c5fd,#fb7185,#fdba74" \
-            "php -d upload_max_filesize=${php_upload_max_filesize} -d post_max_size=${php_post_max_size} -d memory_limit=${php_memory_limit} artisan serve --host=0.0.0.0 --port=3000" \
+            "cd public && php -d upload_max_filesize=${php_upload_max_filesize} -d post_max_size=${php_post_max_size} -d memory_limit=${php_memory_limit} -S 0.0.0.0:3000 ../vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php" \
             "php artisan pail --timeout=0" \
             "npm run dev -- --host=0.0.0.0 --port=5173" \
             --names=server,logs,vite \

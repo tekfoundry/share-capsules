@@ -1,8 +1,19 @@
-import Ajv2020, { type ErrorObject, type ValidateFunction } from 'ajv/dist/2020.js';
-import addFormats from 'ajv-formats';
+import type { ErrorObject, ValidateFunction } from 'ajv';
 import { decodeBase64Url } from '@sharecapsules/capsule-core';
 
-import contractsSchema from './schema/ctx-contracts-v1.schema.json' with { type: 'json' };
+import {
+    brokerMetadataValidator,
+    dpopClaimsValidator,
+    dpopHeaderValidator,
+    errorValidator,
+    hpkeEnvelopeValidator,
+    providerMetadataValidator,
+    ticketClaimsValidator,
+    ticketHeaderValidator,
+    ticketProofClaimsValidator,
+    ticketProofHeaderValidator,
+    ticketSigningJwksValidator,
+} from './generated/schema-validators.js';
 
 export const CTX_PROTOCOL_VERSION = 'ctx-1' as const;
 export const CTX_DISCOVERY_SUFFIX = 'ctx-configuration' as const;
@@ -159,23 +170,6 @@ export class ContractValidationError extends Error {
     }
 }
 
-const ajv = new Ajv2020({ allErrors: true, strict: true });
-addFormats(ajv);
-ajv.addSchema(contractsSchema);
-
-const schemaId = contractsSchema.$id;
-const providerValidator = compileDefinition<CtxProviderMetadataV1>('providerMetadata');
-const brokerValidator = compileDefinition<CtxBrokerMetadataV1>('brokerMetadata');
-const ticketHeaderValidator = compileDefinition<CtxTicketHeaderV1>('ticketHeader');
-const ticketClaimsValidator = compileDefinition<CtxTicketClaimsV1>('ticketClaims');
-const dpopHeaderValidator = compileDefinition<CtxDpopHeaderV1>('dpopHeader');
-const dpopClaimsValidator = compileDefinition<CtxDpopClaimsV1>('dpopClaims');
-const ticketProofHeaderValidator = compileDefinition<CtxTicketProofHeaderV1>('ticketProofHeader');
-const ticketProofClaimsValidator = compileDefinition<CtxTicketProofClaimsV1>('ticketProofClaims');
-const ticketSigningJwksValidator = compileDefinition<CtxTicketSigningJwksV1>('ticketSigningJwks');
-const hpkeEnvelopeValidator = compileDefinition<CtxHpkeEnvelopeV1>('hpkeEnvelope');
-const errorValidator = compileDefinition<CtxErrorV1>('error');
-
 export function ctxDiscoveryUrl(identifier: string): string {
     const url = parseSecureUrl(identifier, '/identifier');
     const path = url.pathname === '/' ? '' : url.pathname;
@@ -186,7 +180,7 @@ export function parseCtxProviderMetadataV1(
     value: unknown,
     expectedIssuer?: string,
 ): CtxProviderMetadataV1 {
-    const metadata = parseWithSchema(providerValidator, value);
+    const metadata = parseWithSchema<CtxProviderMetadataV1>(providerMetadataValidator, value);
     validateServiceUrls(
         [
             ['/issuer', metadata.issuer],
@@ -203,7 +197,7 @@ export function parseCtxBrokerMetadataV1(
     value: unknown,
     expectedBroker?: string,
 ): CtxBrokerMetadataV1 {
-    const metadata = parseWithSchema(brokerValidator, value);
+    const metadata = parseWithSchema<CtxBrokerMetadataV1>(brokerMetadataValidator, value);
     validateServiceUrls(
         [
             ['/broker', metadata.broker],
@@ -353,10 +347,6 @@ export function parseCtxHpkeEnvelopeV1(value: unknown): CtxHpkeEnvelopeV1 {
 
 export function parseCtxErrorV1(value: unknown): CtxErrorV1 {
     return deepFreeze(structuredClone(parseWithSchema(errorValidator, value)));
-}
-
-function compileDefinition<T>(name: string): ValidateFunction<T> {
-    return ajv.compile<T>({ $ref: `${schemaId}#/$defs/${name}` });
 }
 
 function parseWithSchema<T>(validator: ValidateFunction<T>, value: unknown): T {

@@ -2,6 +2,7 @@
 
 namespace App\Ctx\Tickets;
 
+use App\Capsules\Registry\CapsuleLifecycleStatus;
 use App\Ctx\Metrics\CtxMetricEvent;
 use App\Ctx\Metrics\CtxMetricEventType;
 use App\Ctx\Metrics\CtxMetricRecorder;
@@ -9,6 +10,7 @@ use App\Ctx\Policy\AutomationRiskDecision;
 use App\Ctx\Policy\AutomationRiskEvaluator;
 use App\Ctx\Risk\AutomationRiskActivityRecorder;
 use App\Ctx\Risk\AutomationRiskActivityType;
+use App\Models\CreatorCapsule;
 use App\Models\CtxAccountCapsuleReleaseCounter;
 use App\Models\CtxAuthorizationTicket;
 use App\Models\CtxCapsuleReleaseCounter;
@@ -63,6 +65,27 @@ final readonly class CtxTicketRedemptionService
                 $this->recordRejection($ticket, TicketRedemptionCode::DeviceUnavailable, $now);
 
                 return $this->result(TicketRedemptionCode::DeviceUnavailable);
+            }
+            if (($ticket->not_before !== null && $now->lessThan($ticket->not_before))
+                || ($ticket->not_after !== null && ! $now->lessThan($ticket->not_after))) {
+                $this->recordRejection($ticket, TicketRedemptionCode::PolicyUnsatisfied, $now);
+
+                return $this->result(TicketRedemptionCode::PolicyUnsatisfied);
+            }
+            $registeredCapsule = CreatorCapsule::query()
+                ->where('capsule_id', $ticket->capsule_id)
+                ->where('capsule_revision', $ticket->capsule_revision)
+                ->where('payload_id', $ticket->payload_id)
+                ->where('broker', $ticket->broker)
+                ->where('release_handle', $ticket->release_handle)
+                ->where('policy_sha256', $ticket->policy_sha256)
+                ->where('status', CapsuleLifecycleStatus::Active->value)
+                ->lockForUpdate()
+                ->first();
+            if (! $registeredCapsule instanceof CreatorCapsule) {
+                $this->recordRejection($ticket, TicketRedemptionCode::PolicyUnsatisfied, $now);
+
+                return $this->result(TicketRedemptionCode::PolicyUnsatisfied);
             }
             CtxCapsuleReleaseCounter::query()->insertOrIgnore([
                 'capsule_id' => $ticket->capsule_id,

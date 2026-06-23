@@ -55,12 +55,12 @@ The V1 Viewer and broker use a statically configured Share Capsules issuer and a
 1. The Viewer verifies the Capsule, embedded policy, content profile, and device compatibility.
 2. The viewer approves the required disclosure and view-event accounting.
 3. The extension sends an authenticated authorization request to the CTX Provider using its DPoP-bound OAuth token and RFC 9449 proof.
-4. The CTX Provider validates the account, registered device-key set, policy, consent, revocation state, and preliminary Capsule-global and per-account lifetime limits.
+4. The CTX Provider validates the account, registered device-key set, policy, consent, revocation state, creator-selected access window, and preliminary Capsule-global and per-account lifetime limits.
 5. The CTX Provider records the pending single-use ticket and returns its signed JWT.
 6. The extension presents the ticket and a fresh `ctx-key-release-proof+jwt` device proof, bound to the exact ticket hash and broker endpoint, to the ticket's named key broker.
 7. The broker validates the JWS signature, token type, fixed algorithm, issuer, exact audience, time window, Capsule and payload bindings, and proof-key binding.
 8. The broker prepares the content key wrapped to the ticket's X25519 agreement key using the V1 HPKE suite but does not return it yet.
-9. The broker submits the ticket for online redemption. The issuer atomically revalidates ticket state and both creator-configured limits, marks the ticket consumed, and increments the Capsule-global and account-and-Capsule counters.
+9. The broker submits the ticket for online redemption. The issuer atomically revalidates ticket state, the creator-selected access window, and both creator-configured limits; marks the ticket consumed; and increments the Capsule-global and account-and-Capsule counters.
 10. After successful redemption, the broker returns the prepared HPKE-wrapped content key.
 11. The extension unwraps, decrypts, and renders for the current Viewer session.
 

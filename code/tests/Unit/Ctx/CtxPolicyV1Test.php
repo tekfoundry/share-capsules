@@ -4,6 +4,7 @@ namespace Tests\Unit\Ctx;
 
 use App\Ctx\Policy\CtxPolicyV1;
 use App\Ctx\Policy\UnsupportedCtxPolicy;
+use Carbon\CarbonImmutable;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -12,6 +13,11 @@ final class CtxPolicyV1Test extends TestCase
     public function test_it_accepts_the_exact_profile_and_extracts_creator_gates(): void
     {
         $policy = CtxPolicyV1::parse($this->policy([
+            [
+                'predicate' => 'ctx.time.capsule-access-window',
+                'not_before' => '2026-07-01T05:00:00Z',
+                'not_after' => '2026-08-01T05:00:00Z',
+            ],
             ['predicate' => 'ctx.usage.capsule-lifetime-limit', 'scope' => 'capsule', 'maximum' => 5],
             ['predicate' => 'ctx.usage.capsule-account-lifetime-limit', 'scope' => 'account-and-capsule', 'maximum' => 3],
             ['predicate' => 'ctx.risk.ecosystem-automation-not-high', 'issuer' => 'https://trust.example/tenant'],
@@ -20,6 +26,8 @@ final class CtxPolicyV1Test extends TestCase
         $this->assertSame(5, $policy->capsuleLifetimeLimit);
         $this->assertSame(3, $policy->accountCapsuleLifetimeLimit);
         $this->assertSame('https://trust.example/tenant', $policy->automationRiskIssuer);
+        $this->assertTrue($policy->notBefore?->equalTo(CarbonImmutable::parse('2026-07-01T05:00:00Z')));
+        $this->assertTrue($policy->notAfter?->equalTo(CarbonImmutable::parse('2026-08-01T05:00:00Z')));
     }
 
     /** @param callable(array<string, mixed>): array<string, mixed> $mutate */
@@ -59,6 +67,34 @@ final class CtxPolicyV1Test extends TestCase
                     'predicate' => 'ctx.usage.capsule-lifetime-limit',
                     'scope' => 'capsule',
                     'maximum' => CtxPolicyV1::MAXIMUM_LIMIT + 1,
+                ],
+            ],
+        ]];
+        yield 'empty access window' => [fn (array $policy): array => [
+            ...$policy,
+            'requirements' => [
+                ...$policy['requirements'],
+                ['predicate' => 'ctx.time.capsule-access-window'],
+            ],
+        ]];
+        yield 'noncanonical access instant' => [fn (array $policy): array => [
+            ...$policy,
+            'requirements' => [
+                ...$policy['requirements'],
+                [
+                    'predicate' => 'ctx.time.capsule-access-window',
+                    'not_before' => '2026-07-01T00:00:00-05:00',
+                ],
+            ],
+        ]];
+        yield 'reversed access window' => [fn (array $policy): array => [
+            ...$policy,
+            'requirements' => [
+                ...$policy['requirements'],
+                [
+                    'predicate' => 'ctx.time.capsule-access-window',
+                    'not_before' => '2026-08-01T05:00:00Z',
+                    'not_after' => '2026-07-01T05:00:00Z',
                 ],
             ],
         ]];

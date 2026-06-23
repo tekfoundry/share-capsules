@@ -67,6 +67,8 @@ final class CtxTicketIssuerTest extends TestCase
         $this->assertSame($user->getKey(), $stored->user_id);
         $this->assertSame($device->getKey(), $stored->viewer_device_id);
         $this->assertSame('pending', $stored->status);
+        $this->assertTrue($stored->not_before->equalTo(CarbonImmutable::parse('2026-07-01T05:00:00Z')));
+        $this->assertTrue($stored->not_after->equalTo(CarbonImmutable::parse('2026-08-01T05:00:00Z')));
         $this->assertArrayNotHasKey('sub', $claims);
         $this->assertStringNotContainsString('user_id', $issued->compact);
     }
@@ -108,6 +110,8 @@ final class CtxTicketIssuerTest extends TestCase
             releaseHandle: 'opaque-release-handle-0001',
             proofJkt: $device->proof_jkt,
             agreementJkt: $device->agreement_jkt,
+            notBefore: CarbonImmutable::parse('2026-07-01T05:00:00Z'),
+            notAfter: CarbonImmutable::parse('2026-08-01T05:00:00Z'),
             capsuleLifetimeLimit: 5,
             accountCapsuleLifetimeLimit: 3,
         );

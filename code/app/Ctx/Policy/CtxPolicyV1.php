@@ -2,6 +2,9 @@
 
 namespace App\Ctx\Policy;
 
+use Carbon\CarbonImmutable;
+use Throwable;
+
 final readonly class CtxPolicyV1
 {
     public const MAXIMUM_LIMIT = 9_007_199_254_740_991;
@@ -26,6 +29,7 @@ final readonly class CtxPolicyV1
         ];
         $order = [
             ...$required,
+            'ctx.time.capsule-access-window',
             'ctx.usage.capsule-lifetime-limit',
             'ctx.usage.capsule-account-lifetime-limit',
             'ctx.risk.ecosystem-automation-not-high',
@@ -35,6 +39,8 @@ final readonly class CtxPolicyV1
         $capsuleLimit = null;
         $accountCapsuleLimit = null;
         $riskIssuer = null;
+        $notBefore = null;
+        $notAfter = null;
 
         foreach ($value['requirements'] as $requirement) {
             if (! is_array($requirement) || array_is_list($requirement)) {
@@ -52,6 +58,24 @@ final readonly class CtxPolicyV1
                 self::exactKeys($requirement, ['equals', 'predicate']);
                 if (($requirement['equals'] ?? null) !== true) {
                     throw new UnsupportedCtxPolicy('A mandatory CTX predicate is malformed.');
+                }
+            } elseif ($predicate === 'ctx.time.capsule-access-window') {
+                self::exactKeys($requirement, array_values(array_filter([
+                    isset($requirement['not_after']) ? 'not_after' : null,
+                    isset($requirement['not_before']) ? 'not_before' : null,
+                    'predicate',
+                ])));
+                if (! isset($requirement['not_before']) && ! isset($requirement['not_after'])) {
+                    throw new UnsupportedCtxPolicy('The Capsule access window is empty.');
+                }
+                $notBefore = isset($requirement['not_before'])
+                    ? self::instant($requirement['not_before'])
+                    : null;
+                $notAfter = isset($requirement['not_after'])
+                    ? self::instant($requirement['not_after'])
+                    : null;
+                if ($notBefore !== null && $notAfter !== null && ! $notBefore->lessThan($notAfter)) {
+                    throw new UnsupportedCtxPolicy('The Capsule access window is invalid.');
                 }
             } elseif ($predicate === 'ctx.usage.capsule-lifetime-limit') {
                 self::exactKeys($requirement, ['maximum', 'predicate', 'scope']);
@@ -77,10 +101,12 @@ final readonly class CtxPolicyV1
             }
         }
 
-        return new self($capsuleLimit, $accountCapsuleLimit, $riskIssuer);
+        return new self($notBefore, $notAfter, $capsuleLimit, $accountCapsuleLimit, $riskIssuer);
     }
 
     private function __construct(
+        public ?CarbonImmutable $notBefore,
+        public ?CarbonImmutable $notAfter,
         public ?int $capsuleLifetimeLimit,
         public ?int $accountCapsuleLifetimeLimit,
         public ?string $automationRiskIssuer,
@@ -103,6 +129,25 @@ final readonly class CtxPolicyV1
         }
 
         return $value;
+    }
+
+    private static function instant(mixed $value): CarbonImmutable
+    {
+        if (! is_string($value)
+            || preg_match('/\A\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z\z/', $value) !== 1) {
+            throw new UnsupportedCtxPolicy('A Capsule access-window instant is invalid.');
+        }
+
+        try {
+            $instant = CarbonImmutable::createFromFormat('!Y-m-d\TH:i:s\Z', $value, 'UTC');
+        } catch (Throwable) {
+            throw new UnsupportedCtxPolicy('A Capsule access-window instant is invalid.');
+        }
+        if ($instant === false || $instant->format('Y-m-d\TH:i:s\Z') !== $value) {
+            throw new UnsupportedCtxPolicy('A Capsule access-window instant is invalid.');
+        }
+
+        return $instant;
     }
 
     private static function issuer(mixed $value): string

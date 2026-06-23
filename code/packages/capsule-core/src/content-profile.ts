@@ -1,8 +1,10 @@
-export interface ContentProfile<TDeclaration, TMetadata> {
+export interface ContentProfileRegistration {
     readonly id: string;
     readonly version: string;
     readonly mediaTypes: readonly string[];
+}
 
+export interface ContentProfile<TDeclaration, TMetadata> extends ContentProfileRegistration {
     validateDeclaration(declaration: TDeclaration): TMetadata;
 }
 
@@ -74,6 +76,43 @@ export class UnsupportedContentProfileError extends Error {
     public constructor() {
         super('The requested content profile is not supported.');
         this.name = 'UnsupportedContentProfileError';
+    }
+}
+
+export class DuplicateContentProfileError extends Error {
+    public readonly code = 'duplicate_content_profile' as const;
+
+    public constructor() {
+        super('A content profile identifier and version may be registered only once.');
+        this.name = 'DuplicateContentProfileError';
+    }
+}
+
+export class ContentProfileRegistry<TProfile extends ContentProfileRegistration> {
+    private readonly profilesByIdentity: ReadonlyMap<string, TProfile>;
+
+    public constructor(profiles: readonly TProfile[]) {
+        const byIdentity = new Map<string, TProfile>();
+        for (const profile of profiles) {
+            const identity = contentProfileIdentity(profile.id, profile.version);
+            if (byIdentity.has(identity)) throw new DuplicateContentProfileError();
+            byIdentity.set(identity, profile);
+        }
+        this.profilesByIdentity = byIdentity;
+    }
+
+    public resolve(id: unknown, version: unknown): TProfile {
+        if (typeof id !== 'string' || typeof version !== 'string') {
+            throw new UnsupportedContentProfileError();
+        }
+        const profile = this.profilesByIdentity.get(contentProfileIdentity(id, version));
+        if (profile === undefined) throw new UnsupportedContentProfileError();
+
+        return profile;
+    }
+
+    public list(): readonly TProfile[] {
+        return Object.freeze([...this.profilesByIdentity.values()]);
     }
 }
 
@@ -191,16 +230,16 @@ export class StaticImageProfileV1 implements ContentProfile<
 }
 
 export const STATIC_IMAGE_PROFILE_V1 = Object.freeze(new StaticImageProfileV1());
+export const TRUSTED_CONTENT_PROFILES = Object.freeze([STATIC_IMAGE_PROFILE_V1] as const);
+export const CONTENT_PROFILE_REGISTRY = Object.freeze(
+    new ContentProfileRegistry(TRUSTED_CONTENT_PROFILES),
+);
 
 export function resolveContentProfile(
     profileId: unknown,
     profileVersion: unknown,
 ): typeof STATIC_IMAGE_PROFILE_V1 {
-    if (profileId !== STATIC_IMAGE_PROFILE_ID || profileVersion !== STATIC_IMAGE_PROFILE_VERSION) {
-        throw new UnsupportedContentProfileError();
-    }
-
-    return STATIC_IMAGE_PROFILE_V1;
+    return CONTENT_PROFILE_REGISTRY.resolve(profileId, profileVersion);
 }
 
 export function isStaticImageMediaType(value: unknown): value is StaticImageMediaTypeV1 {
@@ -220,4 +259,8 @@ function validateDimension(
             message: `must be an integer from 1 through ${maximum}`,
         });
     }
+}
+
+function contentProfileIdentity(id: string, version: string): string {
+    return `${id}\u0000${version}`;
 }

@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use App\Account\Closure\CapsuleInventoryRepository;
-use App\Account\Closure\EmptyCapsuleInventoryRepository;
+use App\Account\Closure\DatabaseCapsuleInventoryRepository;
 use App\Account\Deletion\AccountDeletionService;
 use App\Account\Deletion\AccountTrustProfileRepository;
 use App\Account\Deletion\BrokerContentKeyDeletionParticipant;
@@ -57,7 +57,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Passport::ignoreRoutes();
         $this->app->bind(AccountSessionRepository::class, DatabaseAccountSessionRepository::class);
-        $this->app->bind(CapsuleInventoryRepository::class, EmptyCapsuleInventoryRepository::class);
+        $this->app->bind(CapsuleInventoryRepository::class, DatabaseCapsuleInventoryRepository::class);
         $this->app->bind(AccountTrustProfileRepository::class, EmptyAccountTrustProfileRepository::class);
         $this->app->bind(TicketSigningKeyGenerator::class, SodiumTicketSigningKeyGenerator::class);
         $this->app->bind(TicketIdentifierSource::class, NativeTicketIdentifierSource::class);

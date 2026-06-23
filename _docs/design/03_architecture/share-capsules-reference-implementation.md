@@ -1,7 +1,7 @@
 # Share Capsules Reference Implementation
 
 Status: Draft
-Last updated: 2026-06-20
+Last updated: 2026-06-22
 
 ## Purpose
 
@@ -99,18 +99,32 @@ The browser extension and shared TypeScript library provide:
 
 Plaintext creator content remains on the creator-controlled device during Capsule creation. Only the encrypted Capsule and intended public metadata are uploaded.
 
+The authenticated Laravel page prepares only a versioned public draft containing the creator's descriptive metadata and policy choices. The extension-owned Creator Studio accepts that draft through a strict closed-shape parser: unknown fields, private-material fields, unsupported versions, inconsistent fallback text, and invalid policy relationships fail closed. The extension page then presents a plain-language review before local creation begins.
+
+Local file selection belongs to an extension controller. The presentation layer receives only the selected file's name, byte length, and reported media type; it does not receive the browser `File` object or source bytes. The controller retains the opaque local source for the subsequent validation, encryption, signing, and packaging steps. The Manifest V3 runtime transport that carries an authenticated draft into the extension origin is part of the extension shell and does not weaken this boundary.
+
 ## Capsule creation flow
 
 1. The creator selects a local source file.
 2. The extension generates a unique random content-encryption key.
 3. The extension encrypts the payload locally.
 4. The extension constructs a canonical manifest.
-5. The extension protects the content key through the selected key-release arrangement.
-6. The extension signs the manifest with the creator-controlled signing key.
-7. The extension packages the manifest, signature, public assets, and encrypted payload into a Capsule.
-8. The creator downloads or exports the completed encrypted Capsule.
-9. The creator publishes the Capsule and optional public fallback assets through a creator-selected Host.
-10. Share Capsules retains only the metadata required for account, policy, and authorization services.
+5. The control plane creates an immutable creator-owned pending Capsule-revision record and issues a digest-bound broker-registration grant.
+6. The extension registers the content key as pending at the selected broker; pending material cannot be released.
+7. The extension constructs and signs the manifest, packages the Capsule, and immediately reopens it through the strict reader.
+8. After local verification succeeds, the extension idempotently finalizes the exact pending revision; the control plane and broker converge it to active.
+9. Only an active, finalized revision may be downloaded or exported as successfully created.
+10. The creator publishes the Capsule and optional public fallback assets through a creator-selected Host.
+
+## Authoritative Capsule registry
+
+Laravel maintains one durable creator-owned record for every registered Capsule revision. It stores only public or operational bindings required for ownership, policy enforcement, lifecycle, inventory, deletion, and broker coordination: Capsule and revision identifiers, payload identity, public title, content-profile identity/version, media type, broker identity, opaque release handle, policy digest, canonical policy summary, creation/finalization times, and lifecycle state. A separate optional management label is private account organization and does not alter the signed Capsule. Laravel stores no creator plaintext, unencrypted creator signing key, recovery code, or unwrapped content key.
+
+Registration grants are short-lived capabilities, authorization tickets are short-lived decisions, release counters are enforcement state, and metrics are retryable projections. None is the Capsule registry and none may infer or override ownership or lifecycle. The registry state machine is explicit: `pending`, `active`, `revocation_pending`, `revoked`, `cleanup_pending`, and `destroyed`. Authorization and broker binding checks fail closed for every state except `active`.
+
+Cross-service changes use an idempotent saga rather than claiming an atomic transaction across Laravel and the broker. A pending broker record is non-releasable and has a bounded cleanup deadline. Successful strict local verification permits an idempotent finalize request bound to the registration, Capsule, revision, payload, broker handle, and policy digest. Cancellation, expiry, or an unrecoverable post-registration failure moves the record to cleanup and destroys broker material idempotently. Ambiguous transport results are retried with stable identifiers; they are never guessed active.
+
+Revocation first makes the control-plane registry fail closed, then applies irreversible broker revocation, and finally records convergence. A broker or metric failure cannot make inventory report an active Capsule after revocation was requested. Existing scheduled work retries pending lifecycle and cleanup operations without introducing a second source of truth.
 
 ## Static reference Host
 
@@ -135,7 +149,7 @@ The page presents each Capsule through declarative custom-element markup with ac
 
 ```html
 <capsule-viewer src="./capsules/artwork-01.capsule">
-  <img src="./previews/artwork-01.jpg" alt="Public artwork preview">
+  <img src="./previews/artwork-01.jpg" alt="Public artwork preview" />
   <a
     href="https://sharecapsules.com/open?capsule=https%3A%2F%2Fcreator.example%2Fcapsules%2Fartwork-01.capsule"
   >
@@ -169,7 +183,7 @@ The library should be independently testable and should not depend on Share Caps
 
 The shared library reads and writes `.capsule` ZIP containers containing `manifest.json`, `manifest.sig`, and ID-addressed encrypted entries under `payloads/`. It canonicalizes the manifest according to RFC 8785 before signing or verification. The signed manifest contains a payload list with the declared path, media type, byte length, and cryptographic hash for every encrypted entry.
 
-V1 emits and accepts exactly one image payload while retaining the plural payload-list shape. It does not embed preview bytes. Creator Studio may generate suggested public fallback markup and an optional external preview file for the Host, but those assets are not signed Capsule content.
+V1 emits and accepts exactly one image payload while retaining the plural payload-list shape. It does not embed preview bytes. Creator Studio may generate suggested public fallback markup and an optional external preview file for the Host, but those assets are not signed Capsule content. The reference Studio may seed suggested fallback accessibility text from the optional signed Description, or from the Title when Description is omitted; this convenience does not place Host fallback inside the signature or require the Host copy to remain identical.
 
 ZIP container metadata is outside the signature boundary. Parsers must enforce the V1 entry allowlist and size limits before allocating or processing content; reject duplicates, path traversal, symbolic links, undeclared content, unsupported ZIP features, and hash or length mismatches; and avoid filesystem extraction.
 
@@ -188,6 +202,8 @@ The Capsule format is media-agnostic and describes arbitrary binary payloads wit
 V1 implements one trusted image content-profile class shared by creator tooling and the Viewer. It supports static JPEG, PNG, and WebP after validating file signatures and rejecting animated variants. SVG, GIF, APNG, animated WebP, and unrecognized image forms are unsupported.
 
 The generic client library resolves a signed profile identifier through a local implementation registry. Later content classes can be added without changing the Capsule parser or CTX flow. Capsules do not carry executable profile implementations, and unsupported profiles fail closed rather than falling back to plaintext download.
+
+The trusted registry is the visible extension point: each reviewed identifier/version maps to one profile implementation, and duplicate registrations fail at composition. A new profile supplies its own creator byte inspection, signed metadata validation, trusted Viewer rendering, accessibility behavior, limits, and disposal. Generic orchestration resolves those behaviors through profile contracts rather than branching on media types. The current format `1.0` manifest remains the image-specific compatibility slice, so supporting a new profile also requires an explicit compatible manifest-union change or a new format version.
 
 This Viewer-profile restriction is not a Capsule-format restriction. A Capsule may identify other media types even when a particular Viewer cannot render them.
 
@@ -215,6 +231,10 @@ The single V1 suite uses AES-256-GCM for payload encryption; separate Ed25519 ke
 ## Creator-key recovery
 
 Client-side creation makes creator-key recovery a required product flow. The extension generates the signing key and an encrypted recovery bundle locally. Before first publication, the creator must confirm that the bundle and its separately generated recovery code have been saved.
+
+The extension persists structured-cloneable private `CryptoKey` handles in its creator-only IndexedDB boundary and exposes only public summaries to the Creator Studio page. The key ring atomically maintains at most one active key while retaining retiring, revoked, and expired records for continuity and audit. Signing fails closed if the local store does not contain exactly one active record.
+
+The extension treats the signing identity as a portable Creator workspace boundary. The creator chooses a parent directory and lowercase kebab-case workspace name; Chromium then writes `share-capsules/workspaces/<workspace-name>/workspace.json`, `recovery/`, and `capsules/` beneath that explicitly granted parent. The directory handle is retained in extension-owned IndexedDB and its write permission is checked before use. The extension may retain the encrypted bundle locally so it can replace the exact recovery file whenever it saves a Capsule, but it never retains the separate recovery code. Existing recovery-confirmed keys without a retained encrypted bundle require a one-time import before workspace-backed Capsule saving is enabled.
 
 The account password must not encrypt the bundle or derive the recovery code. Share Capsules may store an opaque copy of the encrypted bundle, but it must not receive information sufficient to decrypt it. Recovery, import to a replacement device, incorrect-code handling, backup confirmation, and key rotation must be tested before creators entrust irreplaceable work to the production system.
 

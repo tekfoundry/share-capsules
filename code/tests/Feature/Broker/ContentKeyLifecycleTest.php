@@ -35,6 +35,8 @@ final class ContentKeyLifecycleTest extends BrokerTestCase
             $table->string('protection_nonce', 64)->nullable();
             $table->text('protected_content_key')->nullable();
             $table->string('status', 16);
+            $table->timestamp('pending_expires_at')->nullable();
+            $table->timestamp('finalized_at')->nullable();
             $table->timestamp('paused_at')->nullable();
             $table->timestamp('revoked_at')->nullable();
             $table->timestamp('destroyed_at')->nullable();
@@ -63,6 +65,44 @@ final class ContentKeyLifecycleTest extends BrokerTestCase
         $this->assertSame(3, BrokerContentKey::query()->where('status', 'active')->count());
     }
 
+    public function test_pending_registration_is_non_releasable_and_finalize_or_cancel_is_idempotent(): void
+    {
+        $this->key('record-pending', 'registration-pending', 'handle-pending-0001', '42', $this->capsule(4), 1, 'pending');
+        $pending = BrokerContentKey::query()->findOrFail('record-pending');
+        $this->assertFalse(app(FinalContentKeyReleaseCheck::class)->active($pending->record_id));
+
+        $body = [
+            'operation' => 'finalize_registration',
+            'creator_id' => '42',
+            'registration_id' => 'registration-pending',
+            'release_handle' => 'handle-pending-0001',
+        ];
+        $this->apply($body)->assertOk()->assertJsonPath('changed_records', 1);
+        $this->apply($body)->assertOk()->assertJsonPath('changed_records', 0);
+        $this->assertSame(BrokerContentKeyStatus::Active, $pending->fresh()->status);
+        $this->assertNotNull($pending->fresh()->finalized_at);
+
+        $cancelFinalized = [
+            'operation' => 'cancel_registration',
+            'creator_id' => '42',
+            'registration_id' => 'registration-pending',
+        ];
+        $this->apply($cancelFinalized)->assertOk()->assertJsonPath('changed_records', 1);
+        $this->assertSame(BrokerContentKeyStatus::Destroyed, $pending->fresh()->status);
+
+        $this->key('record-cancel', 'registration-cancel', 'handle-cancel', '42', $this->capsule(5), 1, 'pending');
+        $cancel = [
+            'operation' => 'cancel_registration',
+            'creator_id' => '42',
+            'registration_id' => 'registration-cancel',
+        ];
+        $this->apply($cancel)->assertOk()->assertJsonPath('changed_records', 1);
+        $this->apply($cancel)->assertOk()->assertJsonPath('changed_records', 0);
+        $cancelled = BrokerContentKey::query()->findOrFail('record-cancel');
+        $this->assertSame(BrokerContentKeyStatus::Destroyed, $cancelled->status);
+        $this->assertNull($cancelled->protected_content_key);
+    }
+
     public function test_capsule_revocation_is_irreversible_and_cannot_be_undone_by_restore(): void
     {
         $record = BrokerContentKey::query()->findOrFail('record-one');
@@ -73,12 +113,33 @@ final class ContentKeyLifecycleTest extends BrokerTestCase
             'capsule_revision' => 1,
         ])->assertOk()->assertJsonPath('changed_records', 1);
         $this->assertSame(BrokerContentKeyStatus::Revoked, $record->fresh()->status);
+
         $this->assertNotNull($record->fresh()->revoked_at);
         $this->assertFalse(app(FinalContentKeyReleaseCheck::class)->active($record->record_id));
 
         $this->apply(['operation' => 'resume_creator', 'creator_id' => '42'])
             ->assertOk()->assertJsonPath('changed_records', 0);
         $this->assertSame(BrokerContentKeyStatus::Revoked, $record->fresh()->status);
+    }
+
+    public function test_cleanup_destroys_key_material_after_revocation(): void
+    {
+        $record = BrokerContentKey::query()->findOrFail('record-one');
+        $this->apply([
+            'operation' => 'revoke_capsule',
+            'creator_id' => '42',
+            'capsule_id' => $record->capsule_id,
+            'capsule_revision' => 1,
+        ])->assertOk();
+
+        $this->apply([
+            'operation' => 'cancel_registration',
+            'creator_id' => '42',
+            'registration_id' => 'registration-one',
+        ])->assertOk()->assertJsonPath('changed_records', 1);
+
+        $this->assertSame(BrokerContentKeyStatus::Destroyed, $record->fresh()->status);
+        $this->assertNull($record->fresh()->protected_content_key);
     }
 
     public function test_permanent_deletion_destroys_key_material_and_removes_the_account_link(): void
@@ -100,6 +161,25 @@ final class ContentKeyLifecycleTest extends BrokerTestCase
         $this->assertSame(BrokerContentKeyStatus::Active, BrokerContentKey::query()->findOrFail('record-other')->status);
     }
 
+    public function test_capsule_deletion_destroys_only_the_selected_revision(): void
+    {
+        $record = BrokerContentKey::query()->findOrFail('record-one');
+        $this->apply([
+            'operation' => 'destroy_capsule',
+            'creator_id' => '42',
+            'capsule_id' => $record->capsule_id,
+            'capsule_revision' => 1,
+        ])->assertOk()->assertJsonPath('changed_records', 1);
+
+        $record->refresh();
+        $this->assertSame(BrokerContentKeyStatus::Destroyed, $record->status);
+        $this->assertNull($record->creator_id);
+        $this->assertNull($record->protected_content_key);
+        $this->assertNotNull($record->destroyed_at);
+        $this->assertSame(BrokerContentKeyStatus::Active, BrokerContentKey::query()->findOrFail('record-two')->status);
+        $this->assertSame(BrokerContentKeyStatus::Active, BrokerContentKey::query()->findOrFail('record-other')->status);
+    }
+
     public function test_lifecycle_endpoint_requires_authentication_and_an_exact_operation_shape(): void
     {
         $this->postJson('/internal/content-keys/lifecycle', [
@@ -113,6 +193,10 @@ final class ContentKeyLifecycleTest extends BrokerTestCase
         ])->assertUnprocessable();
         $this->apply([
             'operation' => 'revoke_capsule',
+            'creator_id' => '42',
+        ])->assertUnprocessable();
+        $this->apply([
+            'operation' => 'destroy_capsule',
             'creator_id' => '42',
         ])->assertUnprocessable();
     }
@@ -131,6 +215,7 @@ final class ContentKeyLifecycleTest extends BrokerTestCase
         string $creatorId,
         string $capsuleId,
         int $revision,
+        string $status = 'active',
     ): void {
         BrokerContentKey::query()->create([
             'record_id' => $recordId,
@@ -146,7 +231,8 @@ final class ContentKeyLifecycleTest extends BrokerTestCase
             'protection_key_id' => 'local-test-key',
             'protection_nonce' => str_repeat('n', 16),
             'protected_content_key' => 'protected-secret-material',
-            'status' => 'active',
+            'status' => $status,
+            'pending_expires_at' => $status === 'pending' ? now()->addMinutes(15) : null,
         ]);
     }
 

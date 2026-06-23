@@ -38,6 +38,11 @@ Schedule::command('accounts:delete-expired')
     ->onOneServer()
     ->withoutOverlapping();
 
+Schedule::command('capsules:clean-pending')
+    ->everyFiveMinutes()
+    ->onOneServer()
+    ->withoutOverlapping();
+
 Schedule::call(fn () => app(TicketSigningKeyLifecycle::class)->retireExpired())
     ->everyMinute()
     ->name('ctx-ticket-signing-key-retirement')

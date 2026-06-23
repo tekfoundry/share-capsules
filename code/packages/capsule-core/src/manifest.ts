@@ -1,17 +1,15 @@
-import Ajv2020, { type ErrorObject } from 'ajv/dist/2020.js';
-import addFormats from 'ajv-formats';
+import type { ErrorObject } from 'ajv';
 
 import { decodeBase64Url } from './base64url.js';
 import {
     ContentProfileValidationError,
     STATIC_IMAGE_PROFILE_ID,
-    STATIC_IMAGE_PROFILE_V1,
     STATIC_IMAGE_PROFILE_VERSION,
+    resolveContentProfile,
 } from './content-profile.js';
 import { PolicyValidationError, validateCtxPolicyV1, type CtxPolicyV1 } from './policy.js';
-import policySchema from './schema/ctx-policy-v1.schema.json' with { type: 'json' };
+import { validateManifestSchema } from './generated/schema-validators.js';
 import { CAPSULE_SUITE_ID, MANIFEST_SIGNATURE_ALGORITHM_ID } from './cryptographic-suite.js';
-import manifestSchema from './schema/capsule-manifest-v1.schema.json' with { type: 'json' };
 
 export const CAPSULE_MANIFEST_TYPE = 'capsule-manifest' as const;
 export const CAPSULE_FORMAT_VERSION = '1.0' as const;
@@ -91,11 +89,6 @@ export class ManifestValidationError extends Error {
     }
 }
 
-const ajv = new Ajv2020({ allErrors: true, strict: true });
-addFormats(ajv);
-ajv.addSchema(policySchema);
-const validateManifestSchema = ajv.compile<CapsuleManifestV1>(manifestSchema);
-
 export function isPayloadId(value: string): boolean {
     return value.length <= 64 && PAYLOAD_ID_PATTERN.test(value);
 }
@@ -157,7 +150,10 @@ export function parseCapsuleManifest(value: unknown): CapsuleManifestV1 {
     }
 
     try {
-        STATIC_IMAGE_PROFILE_V1.validateDeclaration({
+        resolveContentProfile(
+            value.content_profile.id,
+            value.content_profile.version,
+        ).validateDeclaration({
             contentProfile: value.content_profile,
             payload,
         });
@@ -278,7 +274,8 @@ function validateSecureServiceUrl(
     try {
         const url = new URL(value);
         if (
-            url.protocol !== 'https:' ||
+            (url.protocol !== 'https:' &&
+                !(url.protocol === 'http:' && isLoopbackHostname(url.hostname))) ||
             url.username !== '' ||
             url.password !== '' ||
             url.search !== '' ||
@@ -289,7 +286,12 @@ function validateSecureServiceUrl(
     } catch {
         issues.push({
             path,
-            message: 'must be an absolute HTTPS identity without credentials, query, or fragment',
+            message:
+                'must be an absolute HTTPS identity, or a loopback HTTP identity for local development, without credentials, query, or fragment',
         });
     }
+}
+
+function isLoopbackHostname(hostname: string): boolean {
+    return ['localhost', '127.0.0.1', '[::1]'].includes(hostname);
 }

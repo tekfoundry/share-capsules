@@ -52,6 +52,10 @@ return [
 
     'broker' => [
         'base_url' => env('SHARECAPSULES_BROKER_URL', 'http://localhost:3004'),
+        'internal_url' => env(
+            'SHARECAPSULES_BROKER_INTERNAL_URL',
+            env('SHARECAPSULES_BROKER_URL', 'http://localhost:3004'),
+        ),
         'control_plane_token' => env('SHARECAPSULES_BROKER_CONTROL_PLANE_TOKEN', ''),
         'callback_token' => env('SHARECAPSULES_BROKER_CALLBACK_TOKEN', ''),
         'control_plane_internal_url' => env(
@@ -64,5 +68,9 @@ return [
             'key_id' => env('BROKER_KMS_KEY_ID', 'local-development-key-0001'),
             'local_master_key' => env('BROKER_LOCAL_KMS_KEY'),
         ],
+    ],
+
+    'capsules' => [
+        'pending_ttl_minutes' => (int) env('CAPSULE_PENDING_TTL_MINUTES', 15),
     ],
 ];

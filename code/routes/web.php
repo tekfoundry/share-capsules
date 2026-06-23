@@ -5,6 +5,8 @@ use App\Http\Controllers\Account\AccountPasskeyController;
 use App\Http\Controllers\Account\AccountSecurityController;
 use App\Http\Controllers\Account\AccountViewerDeviceController;
 use App\Http\Controllers\Auth\AccountRecoveryController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Studio\CapsuleInventoryController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\PasswordResetLinkController;
 use Laravel\Fortify\Http\Controllers\RegisteredUserController;
@@ -17,6 +19,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::view('/how-it-works', 'public.how-it-works')->name('how-it-works');
+Route::view('/instructions', 'public.instructions')->name('instructions');
 Route::view('/technical', 'public.technical')->name('technical');
 
 Route::view('/terms', 'legal.terms')->name('terms');
@@ -51,9 +54,24 @@ Route::middleware('guest')->group(function (): void {
 });
 
 Route::middleware(['auth', 'account.active'])->group(function (): void {
-    Route::view('/dashboard', 'dashboard')
+    Route::get('/dashboard', DashboardController::class)
         ->middleware('verified')
         ->name('dashboard');
+
+    Route::view('/studio/capsules/create', 'studio.capsules.create')
+        ->middleware('verified')
+        ->name('studio.capsules.create');
+    Route::get('/studio/capsules', [CapsuleInventoryController::class, 'index'])
+        ->middleware('verified')->name('studio.capsules.index');
+    Route::get('/studio/capsules/{capsuleId}/revisions/{revision}/metrics', [CapsuleInventoryController::class, 'metrics'])
+        ->middleware('verified')->whereNumber('revision')->name('studio.capsules.metrics');
+    Route::patch('/studio/capsules/{capsuleId}/revisions/{revision}/label', [CapsuleInventoryController::class, 'updateLabel'])
+        ->middleware('verified')->whereNumber('revision')->name('studio.capsules.label');
+    Route::post('/studio/capsules/revoke', [CapsuleInventoryController::class, 'revoke'])
+        ->middleware(['verified', 'password.confirm'])->name('studio.capsules.revoke');
+    Route::delete('/studio/capsules/{capsuleId}/revisions/{revision}', [CapsuleInventoryController::class, 'destroy'])
+        ->middleware(['verified', 'password.confirm', 'throttle:6,1'])
+        ->whereNumber('revision')->name('studio.capsules.destroy');
 
     Route::middleware('verified')->prefix('account')->name('account.')->group(function (): void {
         Route::get('/security', [AccountSecurityController::class, 'show'])

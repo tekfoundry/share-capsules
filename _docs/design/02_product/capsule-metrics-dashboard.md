@@ -1,7 +1,7 @@
 # Capsule Metrics Dashboard
 
 Status: Accepted
-Last updated: 2026-06-20
+Last updated: 2026-06-22
 
 ## Purpose
 
@@ -30,7 +30,9 @@ Each creator-owned Capsule may expose a privacy-safe operational dashboard conta
 
 The dashboard is an operational and policy-management surface, not an audience-profiling product. Creators do not receive viewer account identifiers, scoped viewer pseudonyms, individual histories, exact access timestamps, raw trust evidence, raw denial reasons, IP addresses, user agents, or device identifiers.
 
-Low-volume breakdowns that could reveal one viewer's behavior or trust state are suppressed. The exact cohort and bucket thresholds are implementation policy and must be selected through privacy review and tested before release. Capsule-global enforcement totals remain available because they are creator-configured Capsule state; availability of a total does not justify exposing a more identifying breakdown.
+Capsule ownership, lifecycle, immutable policy summary, creation time, and configured limits come from the durable Capsule registry. Metrics projections and short-lived authorization tickets must not reconstruct or override those values. A metrics delivery failure therefore cannot change an active revision to revoked, or a revoked revision to active.
+
+Low-volume breakdowns that could reveal one viewer's behavior or trust state are suppressed. Per-account limit pressure remains completely hidden until exact cohort, time-bucket, and pressure thresholds pass privacy review and are recorded as a versioned configuration with boundary tests. Controller literals or undocumented defaults cannot enable the feature. Capsule-global enforcement totals remain available because they are creator-configured Capsule state; availability of a total does not justify exposing a more identifying breakdown.
 
 ## Metrics foundation
 

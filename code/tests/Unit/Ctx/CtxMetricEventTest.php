@@ -38,7 +38,11 @@ final class CtxMetricEventTest extends TestCase
             'optional_dimensions' => [],
         ], $event->envelope());
         $serialized = json_encode($event->envelope(), JSON_THROW_ON_ERROR);
-        foreach (['user_id', 'viewer_device', 'ticket', 'proof', 'content_key', 'ip_address', 'user_agent'] as $prohibited) {
+        foreach ([
+            'user_id', 'viewer_device', 'ticket', 'proof', 'content_key', 'ip_address',
+            'user_agent', 'country', 'device_class', 'browser_family', 'os_family',
+            'viewer_version',
+        ] as $prohibited) {
             $this->assertStringNotContainsString($prohibited, $serialized);
         }
     }

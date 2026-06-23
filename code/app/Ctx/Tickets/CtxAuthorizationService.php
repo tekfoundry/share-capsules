@@ -45,6 +45,8 @@ final readonly class CtxAuthorizationService
             releaseHandle: $releaseHandle,
             proofJkt: $device->proof_jkt,
             agreementJkt: $device->agreement_jkt,
+            notBefore: $policy->notBefore,
+            notAfter: $policy->notAfter,
             capsuleLifetimeLimit: $policy->capsuleLifetimeLimit,
             accountCapsuleLifetimeLimit: $policy->accountCapsuleLifetimeLimit,
             automationRiskIssuer: $policy->automationRiskIssuer,

@@ -1,7 +1,7 @@
 # End-to-End Capsule Access and Data Flow
 
 Status: Draft
-Last updated: 2026-06-19
+Last updated: 2026-06-22
 
 ## Purpose
 
@@ -32,14 +32,18 @@ Provide the canonical V1 interaction from local creator content through Host pub
 2. Creator tooling validates the source and derives safe signed metadata.
 3. The extension generates a unique AES-256-GCM content key and nonce.
 4. It encrypts the payload locally as `payloads/<payload-id>.enc`.
-5. It registers or protects the content key through the selected key broker and records only the release handle in the manifest.
-6. It builds the canonical manifest containing identifiers, versions, content-profile information, entry metadata, embedded CTX policy, CTX issuer, broker identifier, release handle, and cryptographic parameters.
-7. It signs the RFC 8785 canonical manifest bytes with the creator's Ed25519 signing key.
-8. It packages `manifest.json`, `manifest.sig`, and the ID-addressed encrypted payload entry into a `.capsule` ZIP container.
-9. The creator exports and uploads the opaque Capsule to a creator-selected HTTPS Host.
-10. The creator adds declarative Host markup referring to the file.
+5. The control plane validates the canonical public policy, verifies its digest, creates an immutable creator-owned pending revision, and issues a short-lived broker-registration grant.
+6. The broker stores the content key as pending and returns an opaque release handle; pending keys cannot satisfy release requests.
+7. The extension builds and signs the canonical manifest containing the exact registry and broker bindings.
+8. It packages `manifest.json`, `manifest.sig`, and the ID-addressed encrypted payload entry, then reopens the emitted bytes with the strict reader.
+9. After strict verification, the extension idempotently finalizes the pending revision. The control plane activates the authoritative registry record only as the broker confirms activation.
+10. The creator exports and uploads the active opaque Capsule to a creator-selected HTTPS Host and adds declarative Host markup.
 
 Share Capsules may retain creator, policy, broker, and Capsule metadata required for its CTX and key-release roles. It does not receive creator plaintext, an unencrypted creator signing key, or an unwrapped content key through the ordinary creation flow.
+
+For content-key registration, the extension first sends the authenticated Laravel control plane only a SHA-256 key digest plus the exact Capsule, revision, payload, canonical public policy, and stable registration bindings. Laravel independently parses the policy, verifies its digest, records its immutable safe summary, and issues a 60-second digest-bound grant. The extension then sends that grant and a temporary raw-key encoding directly to the configured broker over its separate origin. The Laravel page and control plane never proxy or receive the raw content key.
+
+Registration success is provisional rather than publication success. The broker record remains non-releasable until the locally assembled archive passes the shared strict reader and an exact idempotent finalization request succeeds. If signing, packaging, verification, download preparation, or finalization cannot complete, the extension requests cancellation; missing clients and ambiguous failures are covered by the pending deadline and scheduled idempotent cleanup. Stable registration identifiers make finalize and cancel safe to retry.
 
 ## Declarative Host integration
 
@@ -47,7 +51,7 @@ V1 uses an autonomous custom element name containing a hyphen:
 
 ```html
 <capsule-viewer src="/capsules/my-image.capsule">
-  <img src="/previews/my-image.jpg" alt="Protected artwork preview">
+  <img src="/previews/my-image.jpg" alt="Protected artwork preview" />
   <a href="https://sharecapsules.com/open?capsule=...">
     Open protected content
   </a>
@@ -188,7 +192,7 @@ The extension sends the CTX Provider:
 
 The provider obtains the signed policy from trusted registered metadata or receives sufficient signed manifest material to verify the request. It does not trust an unsigned client restatement of policy.
 
-The CTX Provider evaluates verified email, account and device status, consent, creator-configured Capsule-global and per-account limits, optional current automation risk, revocation, and operational abuse controls.
+The CTX Provider evaluates verified email, account and device status, consent, creator-configured opening and closing instants, Capsule-global and per-account limits, optional current automation risk, revocation, and operational abuse controls.
 
 ### 8. Return authorization or failure
 
@@ -249,14 +253,14 @@ The Host receives no detailed failure message. Any future Host-visible state mus
 
 ## Information boundaries
 
-| Party | Intended information |
-|---|---|
-| Host | Element source, public fallback, encrypted Capsule request, iframe placement, ordinary network metadata |
-| Isolated content script | Top-level site, Capsule element and resolved URL, generic frame lifecycle |
-| Trusted Viewer | Capsule, approved disclosure, ticket, content key, plaintext during the active session |
-| CTX Provider | Private account mapping, device proof, signed policy, consent, applicable evidence, limits, decision |
-| Key broker | Capsule and payload identifiers, valid ticket, proof/agreement public-key identifiers, release handle |
-| Creator | Policy-level or aggregate access information explicitly supported by the product |
+| Party                   | Intended information                                                                                    |
+| ----------------------- | ------------------------------------------------------------------------------------------------------- |
+| Host                    | Element source, public fallback, encrypted Capsule request, iframe placement, ordinary network metadata |
+| Isolated content script | Top-level site, Capsule element and resolved URL, generic frame lifecycle                               |
+| Trusted Viewer          | Capsule, approved disclosure, ticket, content key, plaintext during the active session                  |
+| CTX Provider            | Private account mapping, device proof, signed policy, consent, applicable evidence, limits, decision    |
+| Key broker              | Capsule and payload identifiers, valid ticket, proof/agreement public-key identifiers, release handle   |
+| Creator                 | Policy-level or aggregate access information explicitly supported by the product                        |
 
 ## V1 browser permissions implied by this flow
 

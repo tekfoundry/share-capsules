@@ -67,6 +67,27 @@ describe('Capsule Manifest V1', () => {
         expect(() => parseCapsuleManifest(value)).toThrow(ManifestValidationError);
     });
 
+    it.each(['http://localhost:3003', 'http://127.0.0.1:3004', 'http://[::1]:3004'])(
+        'accepts loopback HTTP service identity %s for local development',
+        (identity) => {
+            const value = structuredClone(validManifestV1);
+            value.ctx.issuer = identity;
+            value.payloads[0].key_release.broker = identity;
+
+            expect(parseCapsuleManifest(value)).toBeDefined();
+        },
+    );
+
+    it.each(['http://localhost.example', 'http://127.0.0.2:3004'])(
+        'rejects non-loopback HTTP service identity %s',
+        (identity) => {
+            const value = structuredClone(validManifestV1);
+            value.ctx.issuer = identity;
+
+            expect(() => parseCapsuleManifest(value)).toThrow(ManifestValidationError);
+        },
+    );
+
     it('rejects duplicate, missing, and undeclared archive entries', () => {
         const manifest = parseCapsuleManifest(structuredClone(validManifestV1));
 

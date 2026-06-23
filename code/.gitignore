@@ -24,6 +24,7 @@
 /storage/pail
 /vendor
 **/dist
+apps/browser-extension/build
 *.tsbuildinfo
 _ide_helper.php
 Homestead.json

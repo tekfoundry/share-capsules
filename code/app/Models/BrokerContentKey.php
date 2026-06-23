@@ -21,6 +21,8 @@ use Illuminate\Database\Eloquent\Model;
     'protection_nonce',
     'protected_content_key',
     'status',
+    'pending_expires_at',
+    'finalized_at',
     'paused_at',
     'revoked_at',
     'destroyed_at',
@@ -41,6 +43,8 @@ final class BrokerContentKey extends Model
         return [
             'capsule_revision' => 'integer',
             'status' => BrokerContentKeyStatus::class,
+            'pending_expires_at' => 'immutable_datetime',
+            'finalized_at' => 'immutable_datetime',
             'paused_at' => 'immutable_datetime',
             'revoked_at' => 'immutable_datetime',
             'destroyed_at' => 'immutable_datetime',

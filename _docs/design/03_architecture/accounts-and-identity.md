@@ -1,7 +1,7 @@
 # Accounts and Identity
 
 Status: Draft
-Last updated: 2026-06-21
+Last updated: 2026-06-22
 
 ## Purpose
 
@@ -31,7 +31,7 @@ Accounts are closable and deletable. Making an account permanent would not preve
 
 Share Capsules does not transfer Capsule ownership, release handles, signing authority, trust history, or reputation between accounts in V1. A creator who wants another person to republish content provides the unencrypted original through an external, mutually chosen channel. The recipient creates a wholly independent Capsule using their own account, signing key, policy, Capsule identifier, and broker release handle. CTX makes no provenance or ownership claim about that offline exchange.
 
-Before permanent deletion, Share Capsules warns the creator which Capsules will stop working and allows them to download an inventory of those Capsules. When the 30-day period expires, remaining Capsule release handles are revoked and the broker destroys the associated content-key material. Hosted `.capsule` files remain wherever the creator placed them, but Share Capsules can no longer authorize their decryption. Permanent deletion then removes the account's personal data and detailed trust profile subject only to narrowly justified, purpose-bound retention.
+Before permanent deletion, Share Capsules uses the durable creator-owned Capsule registry to warn the creator which revisions will stop working and allows them to download that inventory. Registration grants, tickets, metrics, and counters are not inventory sources. When the 30-day period expires, every registry-bound release handle is driven through retryable broker destruction before local personal data is erased. Hosted `.capsule` files remain wherever the creator placed them, but Share Capsules can no longer authorize their decryption. Deletion-ledger replay uses the retained internal account obligation to reapply destruction after backup restoration; it does not infer handles from expiring protocol artifacts. Permanent deletion then removes the account's personal data and detailed trust profile subject only to narrowly justified, purpose-bound retention.
 
 A replacement account starts without the deleted account's reputation, continuity, registered-device history, or per-account Capsule counters. It does not inherit either favorable or unfavorable standing. Capsule-global counters survive account deletion because they measure releases against the creator's Capsule rather than the viewer account.
 

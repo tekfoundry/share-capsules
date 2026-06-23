@@ -6,6 +6,7 @@ use App\Broker\Audit\BrokerAuditSink;
 use App\Broker\Keys\KeyProtectionContext;
 use App\Broker\Keys\KeyProtectionService;
 use App\Broker\Keys\ProtectedKeyMaterial;
+use App\Broker\Lifecycle\BrokerContentKeyStatus;
 use App\Broker\Registration\RegistrationAuthorizationFailed;
 use App\Broker\Registration\RegistrationGrantAuthorizer;
 use App\Broker\Registration\RegistrationGrantPrincipal;
@@ -37,7 +38,7 @@ final class ContentKeyRegistrationTest extends BrokerTestCase
             $table->string('record_id', 43)->primary();
             $table->string('registration_id', 128)->unique();
             $table->string('release_handle', 43)->unique();
-            $table->string('creator_id');
+            $table->string('creator_id')->nullable();
             $table->string('capsule_id', 45);
             $table->unsignedBigInteger('capsule_revision');
             $table->string('payload_id', 64);
@@ -48,6 +49,11 @@ final class ContentKeyRegistrationTest extends BrokerTestCase
             $table->string('protection_nonce', 64);
             $table->text('protected_content_key');
             $table->string('status', 16);
+            $table->timestamp('pending_expires_at')->nullable();
+            $table->timestamp('finalized_at')->nullable();
+            $table->timestamp('paused_at')->nullable();
+            $table->timestamp('revoked_at')->nullable();
+            $table->timestamp('destroyed_at')->nullable();
             $table->timestamps();
             $table->unique(['capsule_id', 'payload_id']);
         });
@@ -66,7 +72,7 @@ final class ContentKeyRegistrationTest extends BrokerTestCase
                 string $payloadId,
                 string $contentKeySha256,
             ): RegistrationGrantPrincipal {
-                return new RegistrationGrantPrincipal('creator-42', 1, str_repeat('p', 43));
+                return new RegistrationGrantPrincipal('42', 1, str_repeat('p', 43));
             }
         });
         $this->app->instance(BrokerAuditSink::class, new class implements BrokerAuditSink
@@ -97,6 +103,8 @@ final class ContentKeyRegistrationTest extends BrokerTestCase
         $this->assertSame(43, strlen($handle));
 
         $stored = BrokerContentKey::query()->sole();
+        $this->assertSame(BrokerContentKeyStatus::Pending, $stored->status);
+        $this->assertNotNull($stored->pending_expires_at);
         $serialized = json_encode($stored->toArray(), JSON_THROW_ON_ERROR);
         $this->assertStringNotContainsString($this->request['content_key'], $serialized);
         $recovered = app(KeyProtectionService::class)->recover(
@@ -115,14 +123,30 @@ final class ContentKeyRegistrationTest extends BrokerTestCase
             ->assertJsonPath('release_handle', $handle);
         $this->assertSame(1, BrokerContentKey::query()->count());
 
+        $binding = [
+            'capsule_id' => $this->request['capsule_id'],
+            'capsule_revision' => 1,
+            'policy_sha256' => str_repeat('p', 43),
+            'payload_id' => $this->request['payload_id'],
+            'release_handle' => $handle,
+        ];
         $this->withToken('test-broker-control-plane-token-0001')
-            ->postJson('/internal/release-bindings/validate', [
-                'capsule_id' => $this->request['capsule_id'],
-                'capsule_revision' => 1,
-                'policy_sha256' => str_repeat('p', 43),
-                'payload_id' => $this->request['payload_id'],
+            ->postJson('/internal/release-bindings/validate', $binding)
+            ->assertOk()->assertExactJson(['valid' => false]);
+        $this->withToken('test-broker-control-plane-token-0001')
+            ->postJson('/internal/content-keys/lifecycle', [
+                'operation' => 'finalize_registration',
+                'creator_id' => '42',
+                'registration_id' => $this->request['registration_id'],
                 'release_handle' => $handle,
-            ])->assertOk()->assertExactJson(['valid' => true]);
+            ])->assertOk()->assertJsonPath('changed_records', 1);
+        $this->assertSame(BrokerContentKeyStatus::Active, $stored->refresh()->status);
+        $this->assertNull($stored->pending_expires_at);
+        $this->assertNotNull($stored->finalized_at);
+
+        $this->withToken('test-broker-control-plane-token-0001')
+            ->postJson('/internal/release-bindings/validate', $binding)
+            ->assertOk()->assertExactJson(['valid' => true]);
     }
 
     public function test_it_rejects_unknown_fields_and_noncanonical_keys(): void
@@ -158,6 +182,13 @@ final class ContentKeyRegistrationTest extends BrokerTestCase
     public function test_it_strictly_validates_device_proof_and_prepares_hpke_without_releasing(): void
     {
         $handle = $this->postJson('/registrations', $this->request)->assertCreated()->json('release_handle');
+        $this->withToken('test-broker-control-plane-token-0001')
+            ->postJson('/internal/content-keys/lifecycle', [
+                'operation' => 'finalize_registration',
+                'creator_id' => '42',
+                'registration_id' => $this->request['registration_id'],
+                'release_handle' => $handle,
+            ])->assertOk();
         config()->set('sharecapsules.ctx.issuer', 'https://provider.example.test');
         $ticketKeys = sodium_crypto_sign_keypair();
         $ticketPublic = sodium_crypto_sign_publickey($ticketKeys);

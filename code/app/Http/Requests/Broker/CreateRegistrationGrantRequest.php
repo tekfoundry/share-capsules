@@ -20,7 +20,12 @@ final class CreateRegistrationGrantRequest extends FormRequest
             'capsule_revision' => ['required', 'integer', 'min:1'],
             'payload_id' => ['required', 'string', 'max:64', 'regex:/\A[a-z][a-z0-9]*(?:-[a-z0-9]+)*\z/'],
             'policy_sha256' => ['required', 'string', 'size:43', 'regex:/\A[A-Za-z0-9_-]+\z/'],
+            'policy' => ['required', 'array'],
             'content_key_sha256' => ['required', 'string', 'size:43', 'regex:/\A[A-Za-z0-9_-]+\z/'],
+            'title' => ['sometimes', 'required', 'string', 'min:1', 'max:200'],
+            'content_profile_id' => ['sometimes', 'required', 'string', 'max:128', 'regex:/\A[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*\z/'],
+            'content_profile_version' => ['sometimes', 'required', 'string', 'max:32', 'regex:/\A\d+\.\d+\z/'],
+            'media_type' => ['sometimes', 'required', 'string', 'max:127', 'regex:/\A[a-z0-9][a-z0-9!#$&^_.+\-]*\/[a-z0-9][a-z0-9!#$&^_.+\-]*\z/'],
         ];
     }
 }

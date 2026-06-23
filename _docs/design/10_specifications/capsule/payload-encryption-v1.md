@@ -22,6 +22,8 @@ Creator tooling MUST obtain key and nonce bytes from a cryptographically secure 
 
 The raw content key and nonce exist only within trusted creator or Viewer tooling for the time needed to perform their accepted operations. They MUST NOT enter ordinary Laravel paths, Host-page JavaScript, logs, analytics, or error details.
 
+Creator orchestration retains each generated pair in a single payload-scoped secret handle. The nonce is exposed only through defensive copies. Raw content-key access is callback-scoped for the broker-registration and encryption operations; each working copy is overwritten when its callback settles. Concurrent content-key access fails closed, and destroying the handle overwrites its retained key and nonce and permanently rejects later use. These JavaScript overwrites are best-effort defense in depth rather than a claim of guaranteed garbage-collected memory erasure.
+
 ## Ciphertext representation
 
 The encrypted payload entry contains the Web Cryptography AES-GCM result:
@@ -121,6 +123,9 @@ Automated tests lock down:
 - Failure after ciphertext, tag, key, nonce, or AAD changes
 - Rejection of invalid key, nonce, plaintext, and ciphertext lengths
 - Fresh buffer creation through an injectable secure-random boundary
+- Independent key and nonce requests for every payload-scoped creator handle
+- Defensive nonce copies, serialized temporary content-key access, and deterministic handle destruction
+- Best-effort cleanup after successful use, callback failure, and partially filled random-source failure
 - Structured, non-secret-bearing failures
 
 Reference tests are in [`payload-encryption-v1.test.ts`](../../../../code/packages/test-fixtures/src/capsule/payload-encryption-v1.test.ts).

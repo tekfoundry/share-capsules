@@ -1,10 +1,10 @@
-@extends('layouts.app')
+@extends('layouts.account')
 
 @section('title', 'Close account — Share Capsules')
 @section('description', 'Review and begin the Share Capsules account closure process.')
 
-@section('content')
-    <section class="mx-auto max-w-3xl px-5 py-16 sm:px-8 lg:px-10">
+@section('account-content')
+    <section>
         <a class="text-sm font-semibold text-brand hover:text-brand-strong" href="{{ route('account.security') }}">← Back to account security</a>
 
         <div class="mt-6 rounded-2xl border border-red-200 bg-white p-6 shadow-card sm:p-8">
@@ -22,7 +22,7 @@
                 <a class="mt-3 inline-flex min-h-10 items-center justify-center rounded-xl border border-line bg-white px-4 text-sm font-semibold text-brand shadow-sm hover:border-brand/30" href="{{ route('account.closure.inventory') }}">Download Capsule inventory</a>
             </div>
 
-            <form class="mt-8" method="POST" action="{{ route('account.closure.store') }}">
+            <form class="mt-8" method="POST" action="{{ route('account.closure.store') }}" data-confirm data-confirm-title="Close your account?" data-confirm-message="Access will stop immediately, all sessions will be signed out, and permanent deletion will follow after the recovery period unless you restore the account." data-confirm-action="Close account">
                 @csrf
                 <label class="flex items-start gap-3 text-sm leading-6 text-ink">
                     <input class="mt-1 size-4 rounded border-line text-red-700 focus:ring-red-600" name="acknowledge" type="checkbox" value="1" required>

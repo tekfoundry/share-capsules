@@ -135,7 +135,7 @@ final readonly class AccountClosureService
 
     private function recordReleasePause(User $user): void
     {
-        foreach ($user->brokerRegistrationGrants()
+        foreach ($user->creatorCapsules()
             ->select(['capsule_id', 'capsule_revision'])
             ->distinct()
             ->get() as $grant) {

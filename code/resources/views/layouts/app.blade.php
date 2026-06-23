@@ -67,6 +67,7 @@
                     <nav class="hidden items-center gap-8 text-sm font-medium text-muted lg:flex" aria-label="Primary navigation">
                         <a class="transition-colors hover:text-ink" href="{{ route('home') }}#problem">The problem</a>
                         <a class="transition-colors hover:text-ink" href="{{ route('how-it-works') }}">How it works</a>
+                        <a class="transition-colors hover:text-ink" href="{{ route('instructions') }}">Instructions</a>
                         <a class="transition-colors hover:text-ink" href="{{ route('home') }}#trust">How trust works</a>
                         <a class="transition-colors hover:text-ink" href="{{ route('technical') }}">Technical overview</a>
                     </nav>
@@ -78,7 +79,7 @@
                                 href="{{ route('dashboard') }}"
                                 class="inline-flex min-h-10 items-center justify-center rounded-xl border border-line bg-white px-4 text-sm font-semibold text-ink shadow-sm transition hover:border-brand/30 hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                             >
-                                Account
+                                Dashboard
                             </a>
                         @else
                             <a
@@ -93,9 +94,10 @@
             </header>
 
             <nav class="border-b border-line/80 bg-white/80 lg:hidden" aria-label="Mobile primary navigation">
-                <div class="mx-auto grid max-w-2xl grid-cols-3 gap-x-4 gap-y-2 px-5 py-3 text-center text-xs font-semibold text-muted sm:grid-cols-5 sm:px-8 sm:text-sm">
+                <div class="mx-auto grid max-w-2xl grid-cols-3 gap-x-4 gap-y-2 px-5 py-3 text-center text-xs font-semibold text-muted sm:grid-cols-6 sm:px-8 sm:text-sm">
                     <a class="hover:text-ink" href="{{ route('home') }}#problem">The problem</a>
                     <a class="hover:text-ink" href="{{ route('how-it-works') }}">How it works</a>
+                    <a class="hover:text-ink" href="{{ route('instructions') }}">Instructions</a>
                     <a class="hover:text-ink" href="{{ route('home') }}#trust">Trust</a>
                     <a class="hover:text-ink" href="{{ route('technical') }}">Technical</a>
                     <a class="hover:text-ink" href="{{ route('home') }}#project-status">Status</a>
@@ -114,6 +116,7 @@
                     </div>
                     <nav class="flex flex-wrap items-center gap-x-6 gap-y-2" aria-label="Footer navigation">
                         <a class="font-semibold text-brand hover:text-brand-strong" href="{{ route('how-it-works') }}">How it works</a>
+                        <a class="font-semibold text-brand hover:text-brand-strong" href="{{ route('instructions') }}">Instructions</a>
                         <a class="font-semibold text-brand hover:text-brand-strong" href="{{ route('technical') }}">Technical overview</a>
                         <a class="font-semibold text-brand hover:text-brand-strong" href="{{ config('sharecapsules.public.repository_url') }}" target="_blank" rel="noopener noreferrer">GitHub</a>
                         <span>
@@ -125,5 +128,7 @@
                 </div>
             </footer>
         </div>
+
+        <x-confirmation-dialog />
     </body>
 </html>

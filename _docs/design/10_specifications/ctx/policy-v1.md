@@ -38,9 +38,10 @@ Requirements MUST appear at most once and in the following order. The first four
 2. `ctx.account.active`
 3. `ctx.viewer.device-registered`
 4. `ctx.consent.capsule-view-event`
-5. `ctx.usage.capsule-lifetime-limit` (optional)
-6. `ctx.usage.capsule-account-lifetime-limit` (optional)
-7. `ctx.risk.ecosystem-automation-not-high` (optional)
+5. `ctx.time.capsule-access-window` (optional)
+6. `ctx.usage.capsule-lifetime-limit` (optional)
+7. `ctx.usage.capsule-account-lifetime-limit` (optional)
+8. `ctx.risk.ecosystem-automation-not-high` (optional)
 
 Canonical ordering gives one array representation to one V1 policy meaning. A parser MUST reject missing mandatory requirements, duplicate requirements, unknown predicates, and out-of-order requirements.
 
@@ -60,6 +61,24 @@ Every V1 policy MUST begin with these exact objects:
 The CTX Provider MUST establish that the requesting account has a verified email address, the account is active and not revoked, the proof is bound to an active registered Viewer device-key set, and the viewer has consented to the Capsule view event used for authorization and release accounting.
 
 These predicates describe account and device state. They do not establish that an account represents one unique human.
+
+### Optional Capsule access window
+
+```json
+{
+  "predicate": "ctx.time.capsule-access-window",
+  "not_before": "2026-07-01T05:00:00Z",
+  "not_after": "2026-08-01T05:00:00Z"
+}
+```
+
+The requirement MUST contain `not_before`, `not_after`, or both. Each present value MUST be an exact RFC 3339 UTC instant at whole-second precision in `YYYY-MM-DDTHH:MM:SSZ` form. When both are present, `not_before` MUST be earlier than `not_after`.
+
+`not_before` is inclusive: authorization and release are allowed when current provider time is equal to or later than that instant. `not_after` is exclusive: authorization and release fail when current provider time is equal to or later than that instant. Omitting the requirement means the creator selected no time restriction; empty strings, `null`, and sentinel dates are invalid.
+
+Creator Studio presents calendar dates in the creator's browser time zone. A selected opening date maps to local midnight at the start of that date. A selected closing date remains open for the whole selected date and maps to local midnight at the start of the following date. Creator tooling converts those boundaries to the exact signed UTC instants; the policy does not retain the creator's time-zone identifier.
+
+The CTX Provider evaluates its current time during authorization and repeats the check during atomic ticket redemption so a ticket issued near a boundary cannot release a key outside the signed window. Provider clock operation and monitoring are security dependencies. The Viewer may explain the signed instants in the viewer's local time, but it cannot reinterpret or extend them.
 
 ### Optional Capsule lifetime limit
 
@@ -112,7 +131,7 @@ Authorization requests and key-release tickets bind this digest so a Viewer, pro
 
 ## Evaluation and failure behavior
 
-The Viewer MUST validate and explain every requirement before sending account credentials, device proof, or consent evidence. The CTX Provider evaluates current account, device, consent, usage, and assertion state. The broker repeats authoritative limit and revocation checks during atomic redemption.
+The Viewer MUST validate and explain every requirement before sending account credentials, device proof, or consent evidence. The CTX Provider evaluates current time, account, device, consent, usage, and assertion state. The authenticated online redemption path repeats authoritative time-window, limit, and revocation checks before the broker releases a key.
 
 Malformed or unsupported policy versions, combiners, predicates, fields, values, issuers, or operators MUST fail closed before key release. A Viewer SHOULD present a stable privacy-safe failure category without disclosing raw trust history or sensitive evaluation inputs to the Host or creator.
 

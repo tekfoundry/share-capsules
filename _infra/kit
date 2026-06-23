@@ -244,6 +244,10 @@ broker_lifecycle() {
         up)
             provision_broker_database
             compose_cmd --profile broker up -d --build --wait --wait-timeout 180 broker
+            compose_cmd exec -T broker php artisan migrate \
+                --database=broker \
+                --path=database/migrations/broker \
+                --force
             ;;
         down) compose_cmd stop broker ;;
         logs) compose_cmd logs -f broker ;;

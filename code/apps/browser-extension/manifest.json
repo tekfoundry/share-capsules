@@ -1,0 +1,24 @@
+{
+    "manifest_version": 3,
+    "name": "Share Capsules (Development)",
+    "version": "0.1.0",
+    "description": "Creates and views Share Capsules without exposing protected content to websites.",
+    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlOwE0UgfIp5MUQNusv7zGk9LpXxwjGwHSxjsS+CsvNgf3ce8BBq9YJ/C5sNJnXQp3x3J6jShtovhn2QPffjdTprN8ypI5OfjhpXYXSjlod7EzvioatwoCCLg2pnrudLgBv12td9reLPhumtntyRkPzSPlPJ8wtC1Pl1a2HYu4nnSFePtH/Bbus6TvnYOJcfhzAcVgMpPFsPndDlL0XOJaMsgtMfwwzBcad+YhOa8vvqFrzJZdnnjfpyO72uQYg1uNPUemoQKTe66EDXhdHZphoJfLF1a4qUmr721ZscBJIpK0bJ6wf9VGbh9bqTWfDTuCgrGBrrXu7qgfKlWZb/VVwIDAQAB",
+    "permissions": ["identity", "storage"],
+    "host_permissions": ["http://localhost:3003/*", "http://localhost:3004/*"],
+    "optional_host_permissions": ["https://*/*"],
+    "background": {
+        "service_worker": "service-worker.js",
+        "type": "module"
+    },
+    "content_scripts": [
+        {
+            "matches": ["http://localhost:3003/studio/capsules/create"],
+            "js": ["creator-handoff.js"],
+            "run_at": "document_start"
+        }
+    ],
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"
+    }
+}

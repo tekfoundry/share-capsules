@@ -12,13 +12,14 @@
         "requirements": {
             "type": "array",
             "minItems": 4,
-            "maxItems": 7,
+            "maxItems": 8,
             "items": {
                 "oneOf": [
                     { "$ref": "#/$defs/emailVerified" },
                     { "$ref": "#/$defs/accountActive" },
                     { "$ref": "#/$defs/deviceRegistered" },
                     { "$ref": "#/$defs/viewEventConsent" },
+                    { "$ref": "#/$defs/capsuleAccessWindow" },
                     { "$ref": "#/$defs/capsuleLifetimeLimit" },
                     { "$ref": "#/$defs/accountCapsuleLifetimeLimit" },
                     { "$ref": "#/$defs/automationRiskNotHigh" }
@@ -61,6 +62,25 @@
             "properties": {
                 "predicate": { "const": "ctx.consent.capsule-view-event" },
                 "equals": { "const": true }
+            }
+        },
+        "capsuleAccessWindow": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["predicate"],
+            "minProperties": 2,
+            "properties": {
+                "predicate": { "const": "ctx.time.capsule-access-window" },
+                "not_before": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+                },
+                "not_after": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+                }
             }
         },
         "limitMaximum": {
