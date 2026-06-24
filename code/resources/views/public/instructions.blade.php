@@ -54,6 +54,9 @@
     &lt;article class="rounded-2xl bg-white p-6 shadow-sm"&gt;
       &lt;h2&gt;Protected photo&lt;/h2&gt;
       &lt;p&gt;Install or enable the Share Capsules Viewer to open this Capsule.&lt;/p&gt;
+      &lt;a href="https://sharecapsules.com/viewer/install?return_to=https%3A%2F%2Fexample.com%2Fgallery%2F"&gt;
+        Install the Viewer
+      &lt;/a&gt;
     &lt;/article&gt;
   &lt;/fallback&gt;
 
@@ -80,7 +83,7 @@
                 <div class="mt-5 grid gap-4 text-sm leading-6 text-muted sm:grid-cols-3">
                     <div class="rounded-xl border border-line bg-white p-4">
                         <p class="font-bold text-ink"><code>&lt;fallback&gt;</code></p>
-                        <p class="mt-2">Public content shown before the extension opens the Capsule or when the Viewer is unavailable.</p>
+                        <p class="mt-2">Public content shown before the extension opens the Capsule or when the Viewer is unavailable. It should include a link to the Viewer install page with only ordinary return navigation.</p>
                     </div>
                     <div class="rounded-xl border border-line bg-white p-4">
                         <p class="font-bold text-ink"><code>&lt;template&gt;</code></p>
@@ -97,6 +100,7 @@
                     <li>If the Capsule is on a different origin, the host should allow public cross-origin reads.</li>
                     <li>Surrounding template markup uses your normal page CSS. Decrypted content stays inside the extension iframe.</li>
                     <li>The optional <code>&lt;error&gt;</code> section receives only safe messages, never tickets, keys, proofs, account identifiers, or technical secrets.</li>
+                    <li>No-extension fallback links should point to <code>{{ route('viewer.install') }}</code>. A <code>return_to</code> value may contain the public page URL, but never credentials, authorization codes, tokens, tickets, proofs, recovery material, or content keys.</li>
                 </ul>
             </article>
 

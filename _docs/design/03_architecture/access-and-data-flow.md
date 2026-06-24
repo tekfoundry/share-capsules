@@ -125,17 +125,17 @@ V1 does not scan unrelated DOM content or nested third-party frames for implicit
 
 An authenticated account alone does not imply permission for a Host to consume Capsule views. On first use, the viewer separately approves site access and whether that site may automatically open eligible Capsules.
 
-With standing site-scoped consent, compatible Capsules may open automatically as they approach the viewport. Without it, the frame remains locked and offers individual activation plus an action to open all currently eligible Capsules.
+With standing site-scoped consent, compatible Capsules may open automatically so protected content behaves like ordinary web media when the Viewer can satisfy the current policy. Without it, the frame remains locked until the viewer connects and approves the required disclosure.
 
 Automatic opening must:
 
 - Be revocable per site
 - Re-prompt when required disclosure or policy meaning materially changes
-- Avoid key release for hidden or non-rendered elements
-- Apply a safety limit to unusual bulk automatic releases
+- Preserve normal Host show/hide layouts such as tabs, accordions, carousels, and modals
+- Apply queueing, rate handling, and safety limits to unusual bulk automatic releases
 - Explain that committed automatic releases count against creator limits
 
-The safety and visibility checks are local Viewer controls, not behavioral reputation telemetry.
+The safety checks are local Viewer controls, not behavioral reputation telemetry. Visibility can inform future user experience decisions, but visibility alone is not a hard key-release blocker.
 
 ### 3. Fetch the encrypted Capsule
 

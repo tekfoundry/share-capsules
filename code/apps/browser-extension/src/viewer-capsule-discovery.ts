@@ -73,9 +73,13 @@ export function discoverCapsuleViewerElements(document: Document): readonly HTML
     return Object.freeze(
         [...document.querySelectorAll('capsule-viewer')].filter(
             (element): element is HTMLElement =>
-                element instanceof HTMLElement && isDiscoverableElement(element),
+                element instanceof HTMLElement && isDiscoverableCapsuleViewerElement(element),
         ),
     );
+}
+
+export function isDiscoverableCapsuleViewerElement(element: HTMLElement): boolean {
+    return element.localName.toLowerCase() === 'capsule-viewer';
 }
 
 export function markCapsuleViewerDetected(
@@ -274,21 +278,6 @@ function replaceTextPlaceholders(root: ParentNode, message: ViewerStateMessage):
 
 function isViewerState(value: unknown): value is ViewerStateMessage['state'] {
     return value === 'action_required' || value === 'opened' || value === 'error';
-}
-
-function isDiscoverableElement(element: HTMLElement): boolean {
-    if (element.hidden || element.getAttribute('aria-hidden') === 'true') return false;
-    const view = element.ownerDocument.defaultView;
-    const style = view?.getComputedStyle(element);
-    if (
-        style !== undefined &&
-        (style.display === 'none' ||
-            style.visibility === 'hidden' ||
-            style.contentVisibility === 'hidden')
-    ) {
-        return false;
-    }
-    return element.getClientRects().length > 0;
 }
 
 function normalizeFallbackText(value: string): string {

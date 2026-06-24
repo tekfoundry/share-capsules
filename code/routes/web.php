@@ -7,6 +7,7 @@ use App\Http\Controllers\Account\AccountViewerDeviceController;
 use App\Http\Controllers\Auth\AccountRecoveryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Studio\CapsuleInventoryController;
+use App\Http\Controllers\ViewerInstallController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\PasswordResetLinkController;
 use Laravel\Fortify\Http\Controllers\RegisteredUserController;
@@ -21,6 +22,7 @@ Route::get('/', function () {
 Route::view('/how-it-works', 'public.how-it-works')->name('how-it-works');
 Route::view('/instructions', 'public.instructions')->name('instructions');
 Route::view('/technical', 'public.technical')->name('technical');
+Route::get('/viewer/install', ViewerInstallController::class)->name('viewer.install');
 
 Route::view('/terms', 'legal.terms')->name('terms');
 Route::view('/privacy', 'legal.privacy')->name('privacy');

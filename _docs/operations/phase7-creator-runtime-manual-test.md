@@ -4,6 +4,14 @@ This is the manual acceptance gate for the first Phase 7 task. Complete it only 
 
 The development extension identity is `dhconceamghcnndjodjhjikknblhkmej`. It is intentionally distinct from the future production Web Store identity. Never replace the production identity or OAuth callback with this development value.
 
+## Progress record
+
+- 2026-06-23: Local service and extension preparation completed successfully with the development extension identity.
+- 2026-06-23: All twelve steps in **Create the first Capsule and recovery kit** completed as expected.
+- 2026-06-23: Steps 1-4 in **Restore and prove the signing identity** completed after closing the stale extension page and reopening it from Creator Studio.
+- 2026-06-23: All eight steps in **Restore and prove the signing identity** completed successfully, including matching creator signing-key identity and negative recovery-code behavior.
+- Remaining gate: record the expected privacy/failure behavior observations below.
+
 ## Prepare the local services and extension
 
 From the repository root:
@@ -61,6 +69,7 @@ This test intentionally clears development-extension state. It does not delete t
 2. Return to `/studio/capsules/create`, prepare a second draft, and continue into the extension.
 3. Reconnect the account.
 4. Under **Restore an existing signing key**, choose the saved recovery file and enter the separate recovery code.
+   - If the extension page was already open when extension data was cleared, close that page and reopen it from **Continue in the extension** before retrying the restore. A stale extension page can retain obsolete runtime state after the browser clears or reloads extension storage.
 5. Choose another supported image and create a second Capsule.
 6. Inspect both manifests without extracting their payloads:
 

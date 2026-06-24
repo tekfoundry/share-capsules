@@ -1,7 +1,7 @@
 # Viewer Fallback and Assurance
 
 Status: Draft
-Last updated: 2026-06-19
+Last updated: 2026-06-23
 
 ## Purpose
 
@@ -33,6 +33,8 @@ V1 Laravel services evaluate policy and coordinate authorization; they do not de
 ## No-extension viewer experience
 
 Every structured `<capsule-viewer>` may contain ordinary accessible `<fallback>` content, normally a public preview, explanation, and link to a Share Capsules opening page. Legacy unstructured child content is treated only as public fallback during migration.
+
+The V1 fallback link target is `/viewer/install` on the Share Capsules site. A Host may include a `return_to` query parameter containing the public page URL the viewer should revisit after installation. The install page accepts only ordinary HTTP(S) return URLs and ignores values that include credentials, fragments, or sensitive query names such as tokens, authorization codes, tickets, proofs, recovery material, or keys.
 
 When the extension is missing:
 

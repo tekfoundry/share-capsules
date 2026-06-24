@@ -203,11 +203,11 @@ The V1 image profile additionally enforces the signed 25 MiB encoded-size, 16,38
 
 ### TM-05: Drive-by automatic opening and quota exhaustion
 
-**Threat:** A Host embeds hidden or excessive Capsule elements to consume per-account or global views, pollute usage history, or trigger automation-risk sanctions.
+**Threat:** A Host embeds excessive Capsule elements, abuses scripted show/hide patterns, or repeatedly refreshes automatic openings to consume per-account or global views, pollute usage history, or trigger automation-risk sanctions.
 
-**Required controls:** Separate site and automatic-opening consent; top-level approved origins only; local visibility and lifecycle checks; lazy opening near the viewport; per-page/session bulk safety limit; re-consent on material policy changes; no release for hidden or removed elements; clear counting disclosure and revocation controls.
+**Required controls:** Separate site and automatic-opening consent; top-level approved origins only; local lifecycle checks; same-page queueing; retry-aware rate handling; per-page/session bulk safety limit; re-consent on material policy changes; no release for removed or invalidated elements; clear counting disclosure and revocation controls. Visibility alone must not be the only release gate because ordinary Hosts legitimately use hidden tabs, accordions, carousels, modals, and script-controlled reveal patterns.
 
-**Residual risk:** A malicious approved Host can manipulate layout and induce legitimate-looking opens. Visibility checks cannot prove human attention or eliminate adversarial page behavior.
+**Residual risk:** A malicious approved Host can manipulate layout and induce legitimate-looking opens. Local lifecycle and bulk controls cannot prove human attention or eliminate adversarial page behavior.
 
 ### TM-06: Arbitrary URL fetching and local-network access
 

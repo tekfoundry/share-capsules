@@ -44,10 +44,10 @@ Surrounding-site telemetry requires separate permission from telemetry inside th
 V1 site permission, automatic-opening consent, and CTX disclosure consent are distinct:
 
 - Site permission lets the extension discover `<capsule-viewer>` elements and fetch Capsules on that HTTPS origin.
-- Automatic-opening consent lets eligible Capsules on that site initiate authorization as they approach the viewport.
+- Automatic-opening consent lets eligible Capsules on that site initiate authorization when the Viewer can satisfy the current policy and disclosure requirements.
 - CTX disclosure consent defines which evidence may be used or disclosed for policy evaluation.
 
-Approving one does not silently approve the others. Standing automatic-opening and disclosure consent may reduce repeated prompts only within their displayed site, policy, recipient, and disclosure scope. Viewers can inspect and revoke automatic opening per site.
+Approving one does not silently approve the others. Standing automatic-opening and disclosure consent may reduce repeated prompts only within their displayed site, policy, recipient, and disclosure scope. Viewers can inspect and revoke automatic opening per site. Visibility alone is not a privacy boundary: ordinary sites may hide content inside tabs, accordions, carousels, modals, and other scripted layouts before showing it. The Viewer protects against drive-by bulk consumption with scoped consent, queueing, rate handling, and page/session safety limits rather than refusing every currently hidden Capsule.
 
 ## Data minimization
 
@@ -117,6 +117,8 @@ The V1 baseline does not collect pointer movement, keyboard patterns, scrolling 
 For V1, Share Capsules necessarily learns that the account and registered device requested and received authorization for a particular Capsule at a particular time. The Host and creator do not receive the viewer's global account identifier or detailed event history through the normal flow.
 
 V1 may derive a short-lived automation-risk assertion from authorization and committed-release metadata across Share Capsules. The creator receives only the selected policy result, not raw ecosystem usage. Adding pointer, interaction, surrounding-page, or other passive telemetry requires a new explicit consent and versioned policy decision; it is not silently included in the V1 risk gate.
+
+The Viewer extension stores only reviewed connection and consent state in browser extension storage. Plaintext, unwrapped content keys, one-use CTX authorization tickets, key-release proofs, and decrypted object URLs remain current-opening material and are not durable state. Reloading a Host page therefore requires a fresh authorization and key-release path rather than reusing protected material from storage.
 
 ## Creator Capsule metrics
 

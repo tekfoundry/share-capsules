@@ -1,299 +1,316 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Share Capsules static host example</title>
-        <style>
-            :root {
-                color-scheme: light;
-                font-family:
-                    Inter,
-                    ui-sans-serif,
-                    system-ui,
-                    -apple-system,
-                    BlinkMacSystemFont,
-                    'Segoe UI',
-                    sans-serif;
-                color: #162033;
-                background: #f5f7fb;
-            }
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Share Capsules static host example</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        color: #162033;
+        background: #f5f7fb;
+      }
 
-            * {
-                box-sizing: border-box;
-            }
+      * {
+        box-sizing: border-box;
+      }
 
-            body {
-                margin: 0;
-            }
+      body {
+        margin: 0;
+      }
 
-            main {
-                width: min(960px, calc(100% - 32px));
-                margin: 0 auto;
-                padding: 56px 0;
-            }
+      main {
+        width: min(960px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 56px 0;
+      }
 
-            header,
-            article,
-            aside {
-                border: 1px solid #d7dfec;
-                border-radius: 18px;
-                background: #fff;
-                box-shadow: 0 10px 30px rgb(31 48 78 / 6%);
-            }
+      header,
+      article,
+      aside {
+        border: 1px solid #d7dfec;
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: 0 10px 30px rgb(31 48 78 / 6%);
+      }
 
-            header {
-                padding: 32px;
-            }
+      header {
+        padding: 32px;
+      }
 
-            h1 {
-                margin: 0;
-                font-size: clamp(2rem, 6vw, 4rem);
-                line-height: 1;
-                letter-spacing: -0.045em;
-            }
+      h1 {
+        margin: 0;
+        font-size: clamp(2rem, 6vw, 4rem);
+        line-height: 1;
+        letter-spacing: -0.045em;
+      }
 
-            h2 {
-                margin: 0 0 12px;
-                font-size: 1.45rem;
-            }
+      h2 {
+        margin: 0 0 12px;
+        font-size: 1.45rem;
+      }
 
-            p {
-                margin: 0;
-                color: #526078;
-                line-height: 1.6;
-            }
+      p {
+        margin: 0;
+        color: #526078;
+        line-height: 1.6;
+      }
 
-            code {
-                font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-            }
+      .install-link {
+        display: inline-flex;
+        width: fit-content;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: #315ea8;
+        color: #fff;
+        font-weight: 800;
+        padding: 10px 14px;
+        text-decoration: none;
+      }
 
-            pre {
-                margin: 0;
-                overflow-x: auto;
-                border-radius: 14px;
-                background: #162033;
-                color: #fff;
-                font-size: 0.78rem;
-                line-height: 1.6;
-                padding: 18px;
-            }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      }
 
-            .eyebrow {
-                margin-bottom: 10px;
-                color: #315ea8;
-                font-size: 0.78rem;
-                font-weight: 800;
-                letter-spacing: 0.14em;
-                text-transform: uppercase;
-            }
+      pre {
+        margin: 0;
+        overflow-x: auto;
+        border-radius: 14px;
+        background: #162033;
+        color: #fff;
+        font-size: 0.78rem;
+        line-height: 1.6;
+        padding: 18px;
+      }
 
-            .examples {
-                display: grid;
-                gap: 24px;
-                margin-top: 24px;
-            }
+      .eyebrow {
+        margin-bottom: 10px;
+        color: #315ea8;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
 
-            .example-case {
-                display: grid;
-                gap: 18px;
-                padding: 24px;
-            }
+      .examples {
+        display: grid;
+        gap: 24px;
+        margin-top: 24px;
+      }
 
-            .example-layout {
-                display: grid;
-                grid-template-columns: minmax(0, 1fr) minmax(320px, 0.85fr);
-                gap: 20px;
-                align-items: stretch;
-            }
+      .example-case {
+        display: grid;
+        gap: 18px;
+        padding: 24px;
+      }
 
-            .example-layout.is-stacked {
-                grid-template-columns: 1fr;
-            }
+      .example-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(320px, 0.85fr);
+        gap: 20px;
+        align-items: stretch;
+      }
 
-            .result-panel {
-                display: grid;
-                align-content: start;
-                gap: 14px;
-                border: 1px solid #d7dfec;
-                border-radius: 16px;
-                background: #f8fafc;
-                padding: 18px;
-            }
+      .example-layout.is-stacked {
+        grid-template-columns: 1fr;
+      }
 
-            .code-panel {
-                display: grid;
-                gap: 12px;
-            }
+      .result-panel {
+        display: grid;
+        align-content: start;
+        gap: 14px;
+        border: 1px solid #d7dfec;
+        border-radius: 16px;
+        background: #f8fafc;
+        padding: 18px;
+      }
 
-            capsule-viewer {
-                display: block;
-                min-height: 240px;
-            }
+      .code-panel {
+        display: grid;
+        gap: 12px;
+      }
 
-            capsule-viewer > template,
-            capsule-viewer > error {
-                display: none;
-            }
+      capsule-viewer {
+        display: block;
+        min-height: 240px;
+      }
 
-            .fallback-card,
-            .viewer-card {
-                display: grid;
-                gap: 12px;
-            }
+      capsule-viewer > template,
+      capsule-viewer > error {
+        display: none;
+      }
 
-            .viewer-frame {
-                display: block;
-                width: 100%;
-                min-height: 320px;
-                border-radius: 14px;
-                background: #f8fafc;
-            }
+      .fallback-card,
+      .viewer-card {
+        display: grid;
+        gap: 12px;
+      }
 
-            .viewer-frame.logo {
-                object-fit: contain;
-            }
+      .viewer-frame {
+        display: block;
+        width: 100%;
+        min-height: 320px;
+        border-radius: 14px;
+        background: #f8fafc;
+      }
 
-            .viewer-frame.photo {
-                object-fit: cover;
-            }
+      .viewer-frame.logo {
+        object-fit: contain;
+      }
 
-            .viewer-frame.photo-contain {
-                object-fit: contain;
-            }
+      .viewer-frame.photo {
+        object-fit: cover;
+      }
 
-            .viewer-frame.banner {
-                object-fit: contain;
-            }
+      .viewer-frame.photo-contain {
+        object-fit: contain;
+      }
 
-            .viewer-frame.hero {
-                object-fit: cover;
-            }
+      .viewer-frame.banner {
+        object-fit: contain;
+      }
 
-            .viewer-frame.full-height {
-                object-fit: contain;
-            }
+      .viewer-frame.hero {
+        object-fit: cover;
+      }
 
-            .viewer-frame.thumbnail {
-                object-fit: cover;
-            }
+      .viewer-frame.full-height {
+        object-fit: contain;
+      }
 
-            .result-shell {
-                display: grid;
-                gap: 12px;
-                border-radius: 16px;
-                background: #fff;
-                padding: 18px;
-            }
+      .viewer-frame.thumbnail {
+        object-fit: cover;
+      }
 
-            .result-shell.dark {
-                background: #162033;
-            }
+      .result-shell {
+        display: grid;
+        gap: 12px;
+        border-radius: 16px;
+        background: #fff;
+        padding: 18px;
+      }
 
-            .result-shell.dark h3,
-            .result-shell.dark figcaption {
-                color: #fff;
-            }
+      .result-shell.dark {
+        background: #162033;
+      }
 
-            .result-shell.dark p {
-                color: #c7d3e5;
-            }
+      .result-shell.dark h3,
+      .result-shell.dark figcaption {
+        color: #fff;
+      }
 
-            .result-shell.subtle {
-                border: 1px solid #d7dfec;
-                box-shadow: 0 10px 24px rgb(31 48 78 / 7%);
-            }
+      .result-shell.dark p {
+        color: #c7d3e5;
+      }
 
-            .result-shell.horizontal {
-                grid-template-columns: 160px minmax(0, 1fr);
-                align-items: center;
-            }
+      .result-shell.subtle {
+        border: 1px solid #d7dfec;
+        box-shadow: 0 10px 24px rgb(31 48 78 / 7%);
+      }
 
-            .result-shell.hero {
-                padding: 0;
-                overflow: hidden;
-            }
+      .result-shell.horizontal {
+        grid-template-columns: 160px minmax(0, 1fr);
+        align-items: center;
+      }
 
-            .result-shell.hero figcaption {
-                padding: 0 18px 18px;
-            }
+      .result-shell.hero {
+        padding: 0;
+        overflow: hidden;
+      }
 
-            .result-shell.full-height {
-                min-height: 520px;
-                align-content: start;
-            }
+      .result-shell.hero figcaption {
+        padding: 0 18px 18px;
+      }
 
-            .result-shell h3,
-            .result-shell figcaption {
-                margin: 0;
-                color: #162033;
-                font-size: 1.15rem;
-            }
+      .result-shell.full-height {
+        min-height: 520px;
+        align-content: start;
+      }
 
-            .error-card {
-                border: 1px solid #f1b7b7;
-                border-radius: 14px;
-                background: #fff5f5;
-                padding: 16px;
-            }
+      .result-shell h3,
+      .result-shell figcaption {
+        margin: 0;
+        color: #162033;
+        font-size: 1.15rem;
+      }
 
-            aside {
-                margin-top: 24px;
-                padding: 24px;
-            }
+      .error-card {
+        border: 1px solid #f1b7b7;
+        border-radius: 14px;
+        background: #fff5f5;
+        padding: 16px;
+      }
 
-            .syntax-card {
-                display: grid;
-                gap: 16px;
-            }
+      aside {
+        margin-top: 24px;
+        padding: 24px;
+      }
 
-            ul {
-                margin: 12px 0 0;
-                padding-left: 22px;
-                color: #526078;
-                line-height: 1.6;
-            }
+      .syntax-card {
+        display: grid;
+        gap: 16px;
+      }
 
-            @media (max-width: 720px) {
-                .example-layout,
-                .result-shell.horizontal {
-                    grid-template-columns: 1fr;
-                }
-            }
-        </style>
-    </head>
-    <body>
-        <main>
-            <header>
-                <p class="eyebrow">Share Capsules static host example</p>
-                <h1>Two locally-created Capsules on one static page.</h1>
-                <p>
-                    This example page shows the host-side markup for Capsules created by the
-                    development Creator extension. The encrypted <code>.capsule</code> files live
-                    beside this HTML page under <code>./capsules/</code>.
-                </p>
-            </header>
+      ul {
+        margin: 12px 0 0;
+        padding-left: 22px;
+        color: #526078;
+        line-height: 1.6;
+      }
 
-            <section class="examples" aria-label="Capsule markup examples">
-                <article class="example-case">
-                    <div>
-                        <p class="eyebrow">Example 1</p>
-                        <h2>Logo card with contained media</h2>
-                        <p>
-                            A simple card keeps the whole logo visible by using a contained
-                            protected-content surface.
-                        </p>
-                    </div>
-                    <div class="example-layout">
-                        <div class="code-panel">
-                            <p class="eyebrow">Code</p>
-                            <pre><code>&lt;capsule-viewer
+      @media (max-width: 720px) {
+        .example-layout,
+        .result-shell.horizontal {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">Share Capsules static host example</p>
+        <h1>Two locally-created Capsules on one static page.</h1>
+        <p>
+          This example page shows the host-side markup for Capsules created by
+          the development Creator extension. The encrypted
+          <code>.capsule</code> files live beside this HTML page under
+          <code>./capsules/</code>.
+        </p>
+      </header>
+
+      <section class="examples" aria-label="Capsule markup examples">
+        <article class="example-case">
+          <div>
+            <p class="eyebrow">Example 1</p>
+            <h2>Logo card with contained media</h2>
+            <p>
+              A simple card keeps the whole logo visible by using a contained
+              protected-content surface.
+            </p>
+          </div>
+          <div class="example-layout">
+            <div class="code-panel">
+              <p class="eyebrow">Code</p>
+              <pre><code>&lt;capsule-viewer
   src="./capsules/tekfoundry-logo.capsule"
   fit="contain"
   viewer-height="320px"
 &gt;
   &lt;fallback&gt;
     &lt;p&gt;Protected TekFoundry logo.&lt;/p&gt;
+    &lt;a class="install-link" href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2F"&gt;
+      Install the Viewer
+    &lt;/a&gt;
   &lt;/fallback&gt;
 
   &lt;template&gt;
@@ -303,48 +320,60 @@
     &lt;/figure&gt;
   &lt;/template&gt;
 &lt;/capsule-viewer&gt;</code></pre>
-                        </div>
-                        <div class="result-panel">
-                            <p class="eyebrow">Result</p>
-                            <capsule-viewer
-                                src="./capsules/tekfoundry-logo.capsule"
-                                fit="contain"
-                                viewer-height="320px"
-                            >
-                                <fallback>
-                                    <p>Protected TekFoundry logo.</p>
-                                </fallback>
+            </div>
+            <div class="result-panel">
+              <p class="eyebrow">Result</p>
+              <capsule-viewer
+                src="./capsules/tekfoundry-logo.capsule"
+                fit="contain"
+                viewer-height="320px"
+              >
+                <fallback>
+                  <p>Protected TekFoundry logo.</p>
+                  <a
+                    class="install-link"
+                    href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2F"
+                  >
+                    Install the Viewer
+                  </a>
+                </fallback>
 
-                                <template>
-                                    <figure class="result-shell subtle">
-                                        <content class="viewer-frame logo" style="height: 320px;"></content>
-                                        <figcaption>{{ title }}</figcaption>
-                                    </figure>
-                                </template>
-                            </capsule-viewer>
-                        </div>
-                    </div>
-                </article>
+                <template>
+                  <figure class="result-shell subtle">
+                    <content
+                      class="viewer-frame logo"
+                      style="height: 320px"
+                    ></content>
+                    <figcaption>{{ title }}</figcaption>
+                  </figure>
+                </template>
+              </capsule-viewer>
+            </div>
+          </div>
+        </article>
 
-                <article class="example-case">
-                    <div>
-                        <p class="eyebrow">Example 2</p>
-                        <h2>Photo card with cover crop</h2>
-                        <p>
-                            A photo-oriented layout uses cover behavior so the Capsule feels like a
-                            normal responsive image card.
-                        </p>
-                    </div>
-                    <div class="example-layout">
-                        <div class="code-panel">
-                            <p class="eyebrow">Code</p>
-                            <pre><code>&lt;capsule-viewer
+        <article class="example-case">
+          <div>
+            <p class="eyebrow">Example 2</p>
+            <h2>Photo card with cover crop</h2>
+            <p>
+              A photo-oriented layout uses cover behavior so the Capsule feels
+              like a normal responsive image card.
+            </p>
+          </div>
+          <div class="example-layout">
+            <div class="code-panel">
+              <p class="eyebrow">Code</p>
+              <pre><code>&lt;capsule-viewer
   src="./capsules/eclipse-photo.capsule"
   fit="cover"
   viewer-height="420px"
 &gt;
   &lt;fallback&gt;
     &lt;p&gt;Protected eclipse photo.&lt;/p&gt;
+    &lt;a class="install-link" href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2F"&gt;
+      Install the Viewer
+    &lt;/a&gt;
   &lt;/fallback&gt;
 
   &lt;template&gt;
@@ -355,49 +384,61 @@
     &lt;/article&gt;
   &lt;/template&gt;
 &lt;/capsule-viewer&gt;</code></pre>
-                        </div>
-                        <div class="result-panel">
-                            <p class="eyebrow">Result</p>
-                            <capsule-viewer
-                                src="./capsules/eclipse-photo.capsule"
-                                fit="cover"
-                                viewer-height="420px"
-                            >
-                                <fallback>
-                                    <p>Protected eclipse photo.</p>
-                                </fallback>
+            </div>
+            <div class="result-panel">
+              <p class="eyebrow">Result</p>
+              <capsule-viewer
+                src="./capsules/eclipse-photo.capsule"
+                fit="cover"
+                viewer-height="420px"
+              >
+                <fallback>
+                  <p>Protected eclipse photo.</p>
+                  <a
+                    class="install-link"
+                    href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2F"
+                  >
+                    Install the Viewer
+                  </a>
+                </fallback>
 
-                                <template>
-                                    <article class="result-shell">
-                                        <h3>{{ title }}</h3>
-                                        <p>{{ description }}</p>
-                                        <content class="viewer-frame photo" style="height: 420px;"></content>
-                                    </article>
-                                </template>
-                            </capsule-viewer>
-                        </div>
-                    </div>
-                </article>
+                <template>
+                  <article class="result-shell">
+                    <h3>{{ title }}</h3>
+                    <p>{{ description }}</p>
+                    <content
+                      class="viewer-frame photo"
+                      style="height: 420px"
+                    ></content>
+                  </article>
+                </template>
+              </capsule-viewer>
+            </div>
+          </div>
+        </article>
 
-                <article class="example-case">
-                    <div>
-                        <p class="eyebrow">Example 3</p>
-                        <h2>Compact dark banner</h2>
-                        <p>
-                            The Host page owns the surrounding treatment, while the extension still
-                            owns the decrypted rendering surface.
-                        </p>
-                    </div>
-                    <div class="example-layout">
-                        <div class="code-panel">
-                            <p class="eyebrow">Code</p>
-                            <pre><code>&lt;capsule-viewer
+        <article class="example-case">
+          <div>
+            <p class="eyebrow">Example 3</p>
+            <h2>Compact dark banner</h2>
+            <p>
+              The Host page owns the surrounding treatment, while the extension
+              still owns the decrypted rendering surface.
+            </p>
+          </div>
+          <div class="example-layout">
+            <div class="code-panel">
+              <p class="eyebrow">Code</p>
+              <pre><code>&lt;capsule-viewer
   src="./capsules/tekfoundry-logo.capsule"
   fit="contain"
   viewer-height="180px"
 &gt;
   &lt;fallback&gt;
     &lt;p&gt;Protected brand asset.&lt;/p&gt;
+    &lt;a class="install-link" href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2F"&gt;
+      Install the Viewer
+    &lt;/a&gt;
   &lt;/fallback&gt;
 
   &lt;template&gt;
@@ -407,48 +448,61 @@
     &lt;/figure&gt;
   &lt;/template&gt;
 &lt;/capsule-viewer&gt;</code></pre>
-                        </div>
-                        <div class="result-panel">
-                            <p class="eyebrow">Result</p>
-                            <capsule-viewer
-                                src="./capsules/tekfoundry-logo.capsule"
-                                fit="contain"
-                                viewer-height="180px"
-                            >
-                                <fallback>
-                                    <p>Protected brand asset.</p>
-                                </fallback>
+            </div>
+            <div class="result-panel">
+              <p class="eyebrow">Result</p>
+              <capsule-viewer
+                src="./capsules/tekfoundry-logo.capsule"
+                fit="contain"
+                viewer-height="180px"
+              >
+                <fallback>
+                  <p>Protected brand asset.</p>
+                  <a
+                    class="install-link"
+                    href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2F"
+                  >
+                    Install the Viewer
+                  </a>
+                </fallback>
 
-                                <template>
-                                    <figure class="result-shell dark">
-                                        <content class="viewer-frame banner" style="height: 180px;"></content>
-                                        <figcaption>{{ title }}</figcaption>
-                                    </figure>
-                                </template>
-                            </capsule-viewer>
-                        </div>
-                    </div>
-                </article>
+                <template>
+                  <figure class="result-shell dark">
+                    <content
+                      class="viewer-frame banner"
+                      style="height: 180px"
+                    ></content>
+                    <figcaption>{{ title }}</figcaption>
+                  </figure>
+                </template>
+              </capsule-viewer>
+            </div>
+          </div>
+        </article>
 
-                <article class="example-case">
-                    <div>
-                        <p class="eyebrow">Example 4</p>
-                        <h2>Contained photo with side filler</h2>
-                        <p>
-                            When the image should never crop or stretch, use contain. A portrait or
-                            tall photo stays centered and the empty space belongs to the frame.
-                        </p>
-                    </div>
-                    <div class="example-layout">
-                        <div class="code-panel">
-                            <p class="eyebrow">Code</p>
-                            <pre><code>&lt;capsule-viewer
+        <article class="example-case">
+          <div>
+            <p class="eyebrow">Example 4</p>
+            <h2>Contained photo with side filler</h2>
+            <p>
+              When the image should never crop or stretch, use contain. A
+              portrait or tall photo stays centered and the empty space belongs
+              to the frame.
+            </p>
+          </div>
+          <div class="example-layout">
+            <div class="code-panel">
+              <p class="eyebrow">Code</p>
+              <pre><code>&lt;capsule-viewer
   src="./capsules/eclipse-photo.capsule"
   fit="contain"
   viewer-height="320px"
 &gt;
   &lt;fallback&gt;
     &lt;p&gt;Protected eclipse photo.&lt;/p&gt;
+    &lt;a class="install-link" href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2F"&gt;
+      Install the Viewer
+    &lt;/a&gt;
   &lt;/fallback&gt;
 
   &lt;template&gt;
@@ -461,51 +515,60 @@
     &lt;/article&gt;
   &lt;/template&gt;
 &lt;/capsule-viewer&gt;</code></pre>
-                        </div>
-                        <div class="result-panel">
-                            <p class="eyebrow">Result</p>
-                            <capsule-viewer
-                                src="./capsules/eclipse-photo.capsule"
-                                fit="contain"
-                                viewer-height="320px"
-                            >
-                                <fallback>
-                                    <p>Protected eclipse photo.</p>
-                                </fallback>
+            </div>
+            <div class="result-panel">
+              <p class="eyebrow">Result</p>
+              <capsule-viewer
+                src="./capsules/eclipse-photo.capsule"
+                fit="contain"
+                viewer-height="320px"
+              >
+                <fallback>
+                  <p>Protected eclipse photo.</p>
+                  <a
+                    class="install-link"
+                    href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2F"
+                  >
+                    Install the Viewer
+                  </a>
+                </fallback>
 
-                                <template>
-                                    <article class="result-shell subtle">
-                                        <h3>{{ title }}</h3>
-                                        <content
-                                            class="viewer-frame photo-contain"
-                                            style="height: 320px; background: #eef3fb;"
-                                        ></content>
-                                    </article>
-                                </template>
-                            </capsule-viewer>
-                        </div>
-                    </div>
-                </article>
+                <template>
+                  <article class="result-shell subtle">
+                    <h3>{{ title }}</h3>
+                    <content
+                      class="viewer-frame photo-contain"
+                      style="height: 320px; background: #eef3fb"
+                    ></content>
+                  </article>
+                </template>
+              </capsule-viewer>
+            </div>
+          </div>
+        </article>
 
-                <article class="example-case">
-                    <div>
-                        <p class="eyebrow">Example 5</p>
-                        <h2>Full-width hero image</h2>
-                        <p>
-                            A Capsule can occupy the full content width of the page. The Host page
-                            still controls the surrounding section and caption.
-                        </p>
-                    </div>
-                    <div class="example-layout is-stacked">
-                        <div class="code-panel">
-                            <p class="eyebrow">Code</p>
-                            <pre><code>&lt;capsule-viewer
+        <article class="example-case">
+          <div>
+            <p class="eyebrow">Example 5</p>
+            <h2>Full-width hero image</h2>
+            <p>
+              A Capsule can occupy the full content width of the page. The Host
+              page still controls the surrounding section and caption.
+            </p>
+          </div>
+          <div class="example-layout is-stacked">
+            <div class="code-panel">
+              <p class="eyebrow">Code</p>
+              <pre><code>&lt;capsule-viewer
   src="./capsules/eclipse-photo.capsule"
   fit="cover"
   viewer-height="520px"
 &gt;
   &lt;fallback&gt;
     &lt;p&gt;Protected eclipse photo.&lt;/p&gt;
+    &lt;a class="install-link" href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2F"&gt;
+      Install the Viewer
+    &lt;/a&gt;
   &lt;/fallback&gt;
 
   &lt;template&gt;
@@ -515,49 +578,62 @@
     &lt;/figure&gt;
   &lt;/template&gt;
 &lt;/capsule-viewer&gt;</code></pre>
-                        </div>
-                        <div class="result-panel">
-                            <p class="eyebrow">Result</p>
-                            <capsule-viewer
-                                src="./capsules/eclipse-photo.capsule"
-                                fit="cover"
-                                viewer-height="520px"
-                            >
-                                <fallback>
-                                    <p>Protected eclipse photo.</p>
-                                </fallback>
+            </div>
+            <div class="result-panel">
+              <p class="eyebrow">Result</p>
+              <capsule-viewer
+                src="./capsules/eclipse-photo.capsule"
+                fit="cover"
+                viewer-height="520px"
+              >
+                <fallback>
+                  <p>Protected eclipse photo.</p>
+                  <a
+                    class="install-link"
+                    href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2F"
+                  >
+                    Install the Viewer
+                  </a>
+                </fallback>
 
-                                <template>
-                                    <figure class="result-shell hero">
-                                        <content class="viewer-frame hero" style="height: 520px;"></content>
-                                        <figcaption>{{ title }} — {{ description }}</figcaption>
-                                    </figure>
-                                </template>
-                            </capsule-viewer>
-                        </div>
-                    </div>
-                </article>
+                <template>
+                  <figure class="result-shell hero">
+                    <content
+                      class="viewer-frame hero"
+                      style="height: 520px"
+                    ></content>
+                    <figcaption>{{ title }} — {{ description }}</figcaption>
+                  </figure>
+                </template>
+              </capsule-viewer>
+            </div>
+          </div>
+        </article>
 
-                <article class="example-case">
-                    <div>
-                        <p class="eyebrow">Example 6</p>
-                        <h2>Full-height image area</h2>
-                        <p>
-                            This pattern is useful when the design gives the Capsule a full-height
-                            area. The image height fills the viewing surface, stays centered, and
-                            can scroll horizontally when the natural width is wider than the area.
-                        </p>
-                    </div>
-                    <div class="example-layout is-stacked">
-                        <div class="code-panel">
-                            <p class="eyebrow">Code</p>
-                            <pre><code>&lt;capsule-viewer
+        <article class="example-case">
+          <div>
+            <p class="eyebrow">Example 6</p>
+            <h2>Full-height image area</h2>
+            <p>
+              This pattern is useful when the design gives the Capsule a
+              full-height area. The image height fills the viewing surface,
+              stays centered, and can scroll horizontally when the natural width
+              is wider than the area.
+            </p>
+          </div>
+          <div class="example-layout is-stacked">
+            <div class="code-panel">
+              <p class="eyebrow">Code</p>
+              <pre><code>&lt;capsule-viewer
   src="./capsules/eclipse-photo.capsule"
   fit="full-height"
   viewer-height="420px"
 &gt;
   &lt;fallback&gt;
     &lt;p&gt;Protected photo in a full-height area.&lt;/p&gt;
+    &lt;a class="install-link" href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2F"&gt;
+      Install the Viewer
+    &lt;/a&gt;
   &lt;/fallback&gt;
 
   &lt;template&gt;
@@ -570,51 +646,61 @@
     &lt;/article&gt;
   &lt;/template&gt;
 &lt;/capsule-viewer&gt;</code></pre>
-                        </div>
-                        <div class="result-panel">
-                            <p class="eyebrow">Result</p>
-                            <capsule-viewer
-                                src="./capsules/eclipse-photo.capsule"
-                                fit="full-height"
-                                viewer-height="420px"
-                            >
-                                <fallback>
-                                    <p>Protected photo in a full-height area.</p>
-                                </fallback>
+            </div>
+            <div class="result-panel">
+              <p class="eyebrow">Result</p>
+              <capsule-viewer
+                src="./capsules/eclipse-photo.capsule"
+                fit="full-height"
+                viewer-height="420px"
+              >
+                <fallback>
+                  <p>Protected photo in a full-height area.</p>
+                  <a
+                    class="install-link"
+                    href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2F"
+                  >
+                    Install the Viewer
+                  </a>
+                </fallback>
 
-                                <template>
-                                    <article class="result-shell full-height">
-                                        <h3>{{ title }}</h3>
-                                        <content
-                                            class="viewer-frame full-height"
-                                            style="height: 420px; background: #f8fafc;"
-                                        ></content>
-                                    </article>
-                                </template>
-                            </capsule-viewer>
-                        </div>
-                    </div>
-                </article>
+                <template>
+                  <article class="result-shell full-height">
+                    <h3>{{ title }}</h3>
+                    <content
+                      class="viewer-frame full-height"
+                      style="height: 420px; background: #f8fafc"
+                    ></content>
+                  </article>
+                </template>
+              </capsule-viewer>
+            </div>
+          </div>
+        </article>
 
-                <article class="example-case">
-                    <div>
-                        <p class="eyebrow">Example 7</p>
-                        <h2>Image with a caption</h2>
-                        <p>
-                            A figure/figcaption pattern keeps the protected media and surrounding
-                            editorial text together while the decrypted pixels stay in the iframe.
-                        </p>
-                    </div>
-                    <div class="example-layout">
-                        <div class="code-panel">
-                            <p class="eyebrow">Code</p>
-                            <pre><code>&lt;capsule-viewer
+        <article class="example-case">
+          <div>
+            <p class="eyebrow">Example 7</p>
+            <h2>Image with a caption</h2>
+            <p>
+              A figure/figcaption pattern keeps the protected media and
+              surrounding editorial text together while the decrypted pixels
+              stay in the iframe.
+            </p>
+          </div>
+          <div class="example-layout">
+            <div class="code-panel">
+              <p class="eyebrow">Code</p>
+              <pre><code>&lt;capsule-viewer
   src="./capsules/tekfoundry-logo.capsule"
   fit="contain"
   viewer-height="260px"
 &gt;
   &lt;fallback&gt;
     &lt;p&gt;Protected logo with caption.&lt;/p&gt;
+    &lt;a class="install-link" href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2F"&gt;
+      Install the Viewer
+    &lt;/a&gt;
   &lt;/fallback&gt;
 
   &lt;template&gt;
@@ -626,50 +712,62 @@
     &lt;/figure&gt;
   &lt;/template&gt;
 &lt;/capsule-viewer&gt;</code></pre>
-                        </div>
-                        <div class="result-panel">
-                            <p class="eyebrow">Result</p>
-                            <capsule-viewer
-                                src="./capsules/tekfoundry-logo.capsule"
-                                fit="contain"
-                                viewer-height="260px"
-                            >
-                                <fallback>
-                                    <p>Protected logo with caption.</p>
-                                </fallback>
+            </div>
+            <div class="result-panel">
+              <p class="eyebrow">Result</p>
+              <capsule-viewer
+                src="./capsules/tekfoundry-logo.capsule"
+                fit="contain"
+                viewer-height="260px"
+              >
+                <fallback>
+                  <p>Protected logo with caption.</p>
+                  <a
+                    class="install-link"
+                    href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2F"
+                  >
+                    Install the Viewer
+                  </a>
+                </fallback>
 
-                                <template>
-                                    <figure class="result-shell subtle">
-                                        <content class="viewer-frame logo" style="height: 260px;"></content>
-                                        <figcaption>
-                                            {{ title }}. This caption is regular Host-page text.
-                                        </figcaption>
-                                    </figure>
-                                </template>
-                            </capsule-viewer>
-                        </div>
-                    </div>
-                </article>
+                <template>
+                  <figure class="result-shell subtle">
+                    <content
+                      class="viewer-frame logo"
+                      style="height: 260px"
+                    ></content>
+                    <figcaption>
+                      {{ title }}. This caption is regular Host-page text.
+                    </figcaption>
+                  </figure>
+                </template>
+              </capsule-viewer>
+            </div>
+          </div>
+        </article>
 
-                <article class="example-case">
-                    <div>
-                        <p class="eyebrow">Example 8</p>
-                        <h2>Small media card</h2>
-                        <p>
-                            A compact layout can treat the Capsule like a thumbnail next to normal
-                            public text, useful for lists or galleries.
-                        </p>
-                    </div>
-                    <div class="example-layout">
-                        <div class="code-panel">
-                            <p class="eyebrow">Code</p>
-                            <pre><code>&lt;capsule-viewer
+        <article class="example-case">
+          <div>
+            <p class="eyebrow">Example 8</p>
+            <h2>Small media card</h2>
+            <p>
+              A compact layout can treat the Capsule like a thumbnail next to
+              normal public text, useful for lists or galleries.
+            </p>
+          </div>
+          <div class="example-layout">
+            <div class="code-panel">
+              <p class="eyebrow">Code</p>
+              <pre><code>&lt;capsule-viewer
   src="./capsules/eclipse-photo.capsule"
   fit="cover"
   viewer-height="160px"
 &gt;
   &lt;fallback&gt;
     &lt;p&gt;Protected thumbnail.&lt;/p&gt;
+    &lt;a class="install-link" href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2F"&gt;
+      Install the Viewer
+    &lt;/a&gt;
   &lt;/fallback&gt;
 
   &lt;template&gt;
@@ -682,45 +780,55 @@
     &lt;/article&gt;
   &lt;/template&gt;
 &lt;/capsule-viewer&gt;</code></pre>
-                        </div>
-                        <div class="result-panel">
-                            <p class="eyebrow">Result</p>
-                            <capsule-viewer
-                                src="./capsules/eclipse-photo.capsule"
-                                fit="cover"
-                                viewer-height="160px"
-                            >
-                                <fallback>
-                                    <p>Protected thumbnail.</p>
-                                </fallback>
+            </div>
+            <div class="result-panel">
+              <p class="eyebrow">Result</p>
+              <capsule-viewer
+                src="./capsules/eclipse-photo.capsule"
+                fit="cover"
+                viewer-height="160px"
+              >
+                <fallback>
+                  <p>Protected thumbnail.</p>
+                  <a
+                    class="install-link"
+                    href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2F"
+                  >
+                    Install the Viewer
+                  </a>
+                </fallback>
 
-                                <template>
-                                    <article class="result-shell horizontal">
-                                        <content class="viewer-frame thumbnail" style="height: 160px;"></content>
-                                        <div>
-                                            <h3>{{ title }}</h3>
-                                            <p>{{ description }}</p>
-                                        </div>
-                                    </article>
-                                </template>
-                            </capsule-viewer>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="example-case">
+                <template>
+                  <article class="result-shell horizontal">
+                    <content
+                      class="viewer-frame thumbnail"
+                      style="height: 160px"
+                    ></content>
                     <div>
-                        <p class="eyebrow">Example 9</p>
-                        <h2>Custom safe error copy</h2>
-                        <p>
-                            The optional error section is hidden by default and is only for safe,
-                            user-facing messages when the Viewer cannot open the Capsule.
-                        </p>
+                      <h3>{{ title }}</h3>
+                      <p>{{ description }}</p>
                     </div>
-                    <div class="example-layout">
-                        <div class="code-panel">
-                            <p class="eyebrow">Code</p>
-                            <pre><code>&lt;capsule-viewer
+                  </article>
+                </template>
+              </capsule-viewer>
+            </div>
+          </div>
+        </article>
+
+        <article class="example-case">
+          <div>
+            <p class="eyebrow">Example 9</p>
+            <h2>Custom safe error copy</h2>
+            <p>
+              The optional error section is hidden by default and is only for
+              safe, user-facing messages when the Viewer cannot open the
+              Capsule.
+            </p>
+          </div>
+          <div class="example-layout">
+            <div class="code-panel">
+              <p class="eyebrow">Code</p>
+              <pre><code>&lt;capsule-viewer
   src="./capsules/eclipse-photo.capsule"
   fit="contain"
   viewer-height="320px"
@@ -728,6 +836,9 @@
 &gt;
   &lt;fallback&gt;
     &lt;p&gt;Protected eclipse photo.&lt;/p&gt;
+    &lt;a class="install-link" href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2F"&gt;
+      Install the Viewer
+    &lt;/a&gt;
   &lt;/fallback&gt;
 
   &lt;template&gt;
@@ -741,49 +852,58 @@
     &lt;/div&gt;
   &lt;/error&gt;
 &lt;/capsule-viewer&gt;</code></pre>
-                        </div>
-                        <div class="result-panel">
-                            <p class="eyebrow">Result</p>
-                            <capsule-viewer
-                                src="./capsules/eclipse-photo.capsule"
-                                fit="contain"
-                                viewer-height="320px"
-                                debug
-                            >
-                                <fallback>
-                                    <p>Protected eclipse photo.</p>
-                                </fallback>
+            </div>
+            <div class="result-panel">
+              <p class="eyebrow">Result</p>
+              <capsule-viewer
+                src="./capsules/eclipse-photo.capsule"
+                fit="contain"
+                viewer-height="320px"
+                debug
+              >
+                <fallback>
+                  <p>Protected eclipse photo.</p>
+                  <a
+                    class="install-link"
+                    href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2F"
+                  >
+                    Install the Viewer
+                  </a>
+                </fallback>
 
-                                <template>
-                                    <content class="viewer-frame photo" style="height: 320px;"></content>
-                                </template>
+                <template>
+                  <content
+                    class="viewer-frame photo"
+                    style="height: 320px"
+                  ></content>
+                </template>
 
-                                <error>
-                                    <div class="error-card">
-                                        <strong>Capsule unavailable</strong>
-                                        <p>{{ error_message }}</p>
-                                    </div>
-                                </error>
-                            </capsule-viewer>
-                        </div>
-                    </div>
-                </article>
-            </section>
+                <error>
+                  <div class="error-card">
+                    <strong>Capsule unavailable</strong>
+                    <p>{{ error_message }}</p>
+                  </div>
+                </error>
+              </capsule-viewer>
+            </div>
+          </div>
+        </article>
+      </section>
 
-            <aside>
-                <h2>Development note</h2>
-                <p>
-                    These Capsules were created against the local development control plane and
-                    broker, so their manifests reference <code>localhost:3003</code> and
-                    <code>localhost:3004</code>. They are useful for local static-host testing, not
-                    production viewing.
-                </p>
-                <ul>
-                    <li>No creator recovery files are included.</li>
-                    <li>No recovery code is included.</li>
-                    <li>No source images are included.</li>
-                </ul>
-            </aside>
-        </main>
-    </body>
+      <aside>
+        <h2>Development note</h2>
+        <p>
+          These Capsules were created against the local development control
+          plane and broker, so their manifests reference
+          <code>localhost:3003</code> and <code>localhost:3004</code>. They are
+          useful for local static-host testing, not production viewing.
+        </p>
+        <ul>
+          <li>No creator recovery files are included.</li>
+          <li>No recovery code is included.</li>
+          <li>No source images are included.</li>
+        </ul>
+      </aside>
+    </main>
+  </body>
 </html>

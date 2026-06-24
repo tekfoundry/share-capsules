@@ -21,10 +21,7 @@ import {
     type OAuthTokenSet,
 } from './oauth.js';
 import { ViewerCtxAuthorizationClient } from './viewer-ctx-authorization.js';
-import {
-    ViewerBrokerRedemptionClient,
-    type ViewerBrokerRedemptionResult,
-} from './viewer-broker-redemption.js';
+import { ViewerBrokerRedemptionClient } from './viewer-broker-redemption.js';
 import {
     viewerOpenSlotAcquireMessage,
     viewerOpenSlotReleaseMessage,
@@ -35,7 +32,17 @@ import {
     ViewerPayloadRenderer,
     type ViewerPayloadRenderResult,
 } from './viewer-payload-renderer.js';
+import { viewerFrameStateView, type ViewerFrameState } from './viewer-frame-state.js';
 import type { StoredViewerDeviceKeys } from './viewer-device.js';
+import {
+    brokerRedemptionFailureIsRetryable,
+    brokerRedemptionFailureMessage,
+    viewerAuthorizationFailureIsRetryable,
+    viewerAuthorizationFailureMessage,
+    viewerFetchFailureIsRetryable,
+    viewerFetchFailureMessage,
+} from './viewer-blocker-state.js';
+import { guardedViewerStorage } from './viewer-storage-policy.js';
 
 declare const chrome: {
     readonly storage: {
@@ -84,7 +91,7 @@ const capsuleUrl = frameParameters.get('capsule');
 const siteOrigin = frameParameters.get('site');
 const debugEnabled = frameParameters.get('debug') === '1';
 const imageFit = viewerImageFitParameter(frameParameters.get('image_fit'));
-const shellElement = document.querySelector('.viewer-shell');
+const shellElement = document.querySelector('[data-viewer-shell]');
 const statusElement = document.querySelector('[data-viewer-status]');
 const urlElement = document.querySelector('[data-viewer-capsule-url]');
 const actionsElement = document.querySelector('[data-viewer-actions]');
@@ -107,29 +114,34 @@ async function initializeViewerFrame(): Promise<void> {
     ) {
         return;
     }
+    actionsElement.replaceChildren();
     if (capsuleUrl === null || capsuleUrl.trim() === '') {
-        statusElement.textContent = 'No Capsule URL was provided to this Viewer frame.';
+        setViewerFrameState('error', 'No Capsule URL was provided to this Viewer frame.');
         urlElement.textContent = '';
         return;
     }
     if (siteOrigin === null || siteOrigin.trim() === '') {
-        statusElement.textContent = 'No Host site origin was provided to this Viewer frame.';
+        setViewerFrameState('error', 'No Host site origin was provided to this Viewer frame.');
         urlElement.textContent = capsuleUrl;
         return;
     }
 
     debugLog('frame_initialized', { siteOrigin, capsuleOrigin: safeOrigin(capsuleUrl) });
-    statusElement.textContent = 'Fetching this Capsule safely before verification.';
+    setViewerFrameState('loading', 'Fetching this Capsule safely before verification.');
     urlElement.textContent = capsuleUrl;
 
     const fetchResult = await fetchViewerCapsule(capsuleUrl);
     if (!fetchResult.ok) {
         debugLog('fetch_failed', { code: fetchResult.code });
-        statusElement.textContent =
-            'This Capsule could not be fetched safely. The protected content remains locked.';
-        postViewerState('error', {
-            errorMessage: 'This Capsule could not be fetched safely.',
-        });
+        showBlocker(
+            statusElement,
+            actionsElement,
+            viewerFetchFailureMessage(fetchResult.code),
+            viewerFetchFailureIsRetryable(fetchResult.code),
+            async () => {
+                await initializeViewerFrame();
+            },
+        );
         return;
     }
     debugLog('fetched', {
@@ -137,14 +149,19 @@ async function initializeViewerFrame(): Promise<void> {
         capsuleOrigin: safeOrigin(fetchResult.url),
     });
 
-    statusElement.textContent = `Capsule fetched safely (${formatBytes(fetchResult.bytes.byteLength)}). Verifying its signed package.`;
+    setViewerFrameState(
+        'loading',
+        `Capsule fetched safely (${formatBytes(fetchResult.bytes.byteLength)}). Verifying its signed package.`,
+    );
     urlElement.textContent = fetchResult.url;
 
     const verificationResult = await verifyFetchedViewerCapsule(fetchResult.bytes);
     if (!verificationResult.ok) {
         debugLog('verification_failed', { code: verificationResult.code });
-        statusElement.textContent =
-            'This Capsule could not be verified safely. The protected content remains locked.';
+        setViewerFrameState(
+            'error',
+            'This Capsule could not be verified safely. The protected content remains locked.',
+        );
         postViewerState('error', {
             errorMessage: 'This Capsule could not be verified safely.',
         });
@@ -178,6 +195,17 @@ function formatBytes(bytes: number): string {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function setViewerFrameState(state: ViewerFrameState, message: string): void {
+    const view = viewerFrameStateView(state);
+    if (shellElement instanceof HTMLElement) {
+        shellElement.dataset.viewerState = state;
+        shellElement.setAttribute('aria-busy', view.ariaBusy);
+        shellElement.classList.toggle('is-open', view.className === 'is-open');
+    }
+    if (headingElement instanceof HTMLElement) headingElement.textContent = view.heading;
+    if (statusElement instanceof HTMLElement) statusElement.textContent = message;
+}
+
 async function renderAuthorizationGate(
     status: HTMLElement,
     actions: HTMLElement,
@@ -203,12 +231,17 @@ async function renderAuthorizationGate(
                 encryptedPayload,
             );
         });
-        status.textContent = `Verified “${summary.title ?? 'Capsule'}”. Connect your Share Capsules account to continue.`;
+        setViewerFrameState(
+            'action_required',
+            `Verified “${summary.title ?? 'Capsule'}”. Connect your Share Capsules account to continue.`,
+        );
         const connect = button('Connect account');
         connect.addEventListener('click', () => {
             void withDisabledButton(connect, async () => {
-                status.textContent =
-                    'Connecting your Share Capsules account and registered device.';
+                setViewerFrameState(
+                    'loading',
+                    'Connecting your Share Capsules account and registered device.',
+                );
                 await runtime.connector.ensureConnected('Viewer extension');
                 await resumeAfterSharedConnection(async () => {
                     await renderAuthorizationGate(
@@ -241,7 +274,10 @@ async function renderAuthorizationGate(
 
     debugLog('consent_required', debugSummary(summary));
     postViewerState('action_required', metadataFromSummary(summary));
-    status.textContent = `Verified “${summary.title ?? 'Capsule'}”. Approve view-event accounting before authorization.`;
+    setViewerFrameState(
+        'action_required',
+        `Verified “${summary.title ?? 'Capsule'}”. Approve view-event accounting before authorization.`,
+    );
     const remember = checkbox(
         'Remember this consent for this site when the signed policy is unchanged.',
     );
@@ -278,7 +314,8 @@ function viewerRuntime(): {
     readonly renderer: ViewerPayloadRenderer;
 } {
     const deviceKeys = new IndexedDbViewerDeviceKeyStore();
-    const credentials = new ViewerCredentialStore(chrome.storage.local, deviceKeys);
+    const viewerStorage = guardedViewerStorage(chrome.storage.local);
+    const credentials = new ViewerCredentialStore(viewerStorage, deviceKeys);
     const oauth = new ExtensionOAuthClient(
         {
             issuer: CONTROL_PLANE,
@@ -304,7 +341,7 @@ function viewerRuntime(): {
             deviceKeys,
             credentials,
         ),
-        consents: new ViewerDisclosureConsentStore(chrome.storage.local),
+        consents: new ViewerDisclosureConsentStore(viewerStorage),
         authorization: new ViewerCtxAuthorizationClient(`${CONTROL_PLANE}/ctx/authorize`),
         redemption: new ViewerBrokerRedemptionClient(),
         renderer: new ViewerPayloadRenderer(),
@@ -342,43 +379,73 @@ async function authorizeAndOpenVerifiedCapsule(
     token: OAuthTokenSet,
     device: StoredViewerDeviceKeys,
 ): Promise<void> {
-    status.textContent = `Requesting authorization for “${summary.title ?? 'Capsule'}”.`;
+    setViewerFrameState('loading', `Requesting authorization for “${summary.title ?? 'Capsule'}”.`);
     const authorization = await runtime.authorization.authorize(summary, token, device, true);
     if (!authorization.ok) {
         debugLog('authorization_failed', { code: authorization.code, ...debugSummary(summary) });
-        status.textContent =
-            'Authorization was not approved. The protected content remains locked.';
-        postViewerState('error', {
-            ...metadataFromSummary(summary),
-            errorMessage: 'Authorization was not approved.',
-        });
+        showBlocker(
+            status,
+            document.querySelector('[data-viewer-actions]'),
+            viewerAuthorizationFailureMessage(authorization.code),
+            viewerAuthorizationFailureIsRetryable(authorization.code),
+            async () => {
+                await authorizeVerifiedCapsule(
+                    status,
+                    runtime,
+                    summary,
+                    encryptedPayload,
+                    token,
+                    device,
+                );
+            },
+            metadataFromSummary(summary),
+        );
         return;
     }
     debugLog('authorization_approved', debugSummary(summary));
 
-    status.textContent = `Authorization approved for “${summary.title ?? 'Capsule'}”. Requesting the key from the broker.`;
+    setViewerFrameState(
+        'loading',
+        `Authorization approved for “${summary.title ?? 'Capsule'}”. Requesting the key from the broker.`,
+    );
     const redemption = await runtime.redemption.redeem(
         summary,
         authorization.authorization.ticket,
         device,
     );
     if (!redemption.ok) {
+        const message = brokerRedemptionFailureMessage(redemption);
         debugLog('redemption_failed', {
             code: redemption.code,
             denialCode: redemption.denialCode,
             retryable: redemption.retryable,
             ...debugSummary(summary),
         });
-        status.textContent = brokerRedemptionFailureMessage(redemption);
-        postViewerState('error', {
-            ...metadataFromSummary(summary),
-            errorMessage: brokerRedemptionFailureMessage(redemption),
-        });
+        showBlocker(
+            status,
+            document.querySelector('[data-viewer-actions]'),
+            message,
+            brokerRedemptionFailureIsRetryable(redemption),
+            async () => {
+                await authorizeVerifiedCapsule(
+                    status,
+                    runtime,
+                    summary,
+                    encryptedPayload,
+                    token,
+                    device,
+                );
+            },
+            metadataFromSummary(summary),
+        );
         return;
     }
     debugLog('key_released', debugSummary(summary));
 
-    status.textContent = `Key released for “${summary.title ?? 'Capsule'}”. Opening locally inside the extension.`;
+    setViewerFrameState(
+        'loading',
+        `Key released for “${summary.title ?? 'Capsule'}”. Opening locally inside the extension.`,
+    );
     const rendered = await runtime.renderer.render(
         summary,
         encryptedPayload,
@@ -386,8 +453,10 @@ async function authorizeAndOpenVerifiedCapsule(
     );
     if (!rendered.ok) {
         debugLog('render_failed', { code: rendered.code, ...debugSummary(summary) });
-        status.textContent =
-            'This Capsule could not be decrypted and displayed safely. The protected content remains locked.';
+        setViewerFrameState(
+            'error',
+            'This Capsule could not be decrypted and displayed safely. The protected content remains locked.',
+        );
         postViewerState('error', {
             ...metadataFromSummary(summary),
             errorMessage: 'This Capsule could not be decrypted and displayed safely.',
@@ -396,9 +465,10 @@ async function authorizeAndOpenVerifiedCapsule(
     }
 
     showRenderedPayload(runtime.renderer, rendered);
-    if (headingElement instanceof HTMLElement) headingElement.textContent = 'Capsule opened';
-    if (shellElement instanceof HTMLElement) shellElement.classList.add('is-open');
-    status.textContent = `Opened “${summary.title ?? 'Capsule'}” locally inside the Share Capsules Viewer.`;
+    setViewerFrameState(
+        'opened',
+        `Opened “${summary.title ?? 'Capsule'}” locally inside the Share Capsules Viewer.`,
+    );
     postViewerState('opened', metadataFromSummary(summary));
     debugLog('opened', {
         ...debugSummary(summary),
@@ -415,6 +485,39 @@ function postViewerState(
     window.parent.postMessage(viewerStateMessage(capsuleUrl, state, metadata), siteOrigin);
 }
 
+function showBlocker(
+    status: HTMLElement,
+    actions: Element | null,
+    message: string,
+    retryable: boolean,
+    retry: () => Promise<void>,
+    metadata: Parameters<typeof viewerStateMessage>[2] = {},
+): void {
+    void status;
+    if (!(actions instanceof HTMLElement)) {
+        setViewerFrameState('error', message);
+        postViewerState('error', { ...metadata, errorMessage: message });
+        return;
+    }
+    actions.replaceChildren();
+    if (!retryable) {
+        setViewerFrameState('error', message);
+        postViewerState('error', { ...metadata, errorMessage: message });
+        return;
+    }
+
+    setViewerFrameState('action_required', message);
+    postViewerState('action_required', { ...metadata, errorMessage: message });
+    const retryButton = button('Try again');
+    retryButton.addEventListener('click', () => {
+        void withDisabledButton(retryButton, async () => {
+            actions.replaceChildren();
+            await retry();
+        });
+    });
+    actions.append(retryButton);
+}
+
 function metadataFromSummary(
     summary: VerifiedViewerCapsuleSummary,
 ): Parameters<typeof viewerStateMessage>[2] {
@@ -429,7 +532,8 @@ async function acquireViewerOpenSlot(
     summary: VerifiedViewerCapsuleSummary,
 ): Promise<() => Promise<void>> {
     const requestId = `viewer-open-${crypto.randomUUID().replaceAll('-', '')}`;
-    status.textContent = `Waiting to open “${summary.title ?? 'Capsule'}” safely.`;
+    void status;
+    setViewerFrameState('loading', `Waiting to open “${summary.title ?? 'Capsule'}” safely.`);
     const response = await chrome.runtime.sendMessage(viewerOpenSlotAcquireMessage(requestId));
     if (!isViewerOpenSlotAcquireResponse(response)) {
         throw new Error('The Viewer opening queue did not grant a slot.');
@@ -501,10 +605,10 @@ async function withDisabledButton(
     try {
         await action();
     } catch {
-        if (statusElement instanceof HTMLElement) {
-            statusElement.textContent =
-                'That step could not be completed. Nothing has been opened.';
-        }
+        setViewerFrameState(
+            'action_required',
+            'That step could not be completed. Nothing has been opened.',
+        );
     } finally {
         buttonElement.disabled = false;
     }
@@ -562,49 +666,6 @@ async function resumeAfterSharedConnection(action: () => Promise<void>): Promise
 function debugLog(event: string, details: Record<string, unknown> = {}): void {
     if (!debugEnabled) return;
     console.info('[Share Capsules Viewer]', event, details);
-}
-
-function brokerRedemptionFailureMessage(
-    redemption: Extract<ViewerBrokerRedemptionResult, { readonly ok: false }>,
-): string {
-    if (redemption.code === 'rate_limited') {
-        return 'Opening is temporarily limited because too many Capsules were requested at once. Wait a moment, then try again.';
-    }
-    if (redemption.code === 'invalid_ticket' || redemption.denialCode === 'invalid_ticket') {
-        return 'This opening request could not be verified. Refresh the page and try again.';
-    }
-    if (redemption.denialCode === 'invalid_proof') {
-        return 'This viewer session could not be verified. Reconnect your Share Capsules account and try again.';
-    }
-    if (redemption.denialCode === 'ticket_expired' || redemption.denialCode === 'ticket_replayed') {
-        return 'This opening request is no longer fresh. Refresh the page and try again.';
-    }
-    if (redemption.denialCode === 'release_unavailable') {
-        return 'This Capsule is no longer available to open.';
-    }
-    if (redemption.denialCode === 'capsule_limit_reached') {
-        return 'This Capsule has reached its total opening limit.';
-    }
-    if (redemption.denialCode === 'account_capsule_limit_reached') {
-        return 'Your account has reached its opening limit for this Capsule.';
-    }
-    if (redemption.denialCode === 'account_unavailable') {
-        return 'Your Share Capsules account is not currently allowed to open this Capsule.';
-    }
-    if (redemption.denialCode === 'device_registration_required') {
-        return 'This browser is not registered for viewing. Reconnect your Share Capsules account and try again.';
-    }
-    if (redemption.denialCode === 'policy_unsatisfied') {
-        return 'This Capsule cannot be opened right now because its access rules are not satisfied.';
-    }
-    if (redemption.denialCode === 'automation_risk_high') {
-        return 'This Capsule cannot be opened because automated viewing protection was triggered.';
-    }
-    if (redemption.retryable || redemption.denialCode === 'temporarily_unavailable') {
-        return 'The key service is temporarily unavailable. Wait a moment, then try again.';
-    }
-
-    return 'This Capsule could not be opened safely. The protected content remains locked.';
 }
 
 function debugSummary(summary: VerifiedViewerCapsuleSummary): Record<string, unknown> {

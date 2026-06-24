@@ -15,7 +15,7 @@ export interface ViewerDisclosureConsentRecord extends ViewerConsentScope {
     readonly grantedAt: string;
 }
 
-const STORAGE_KEY = 'viewer_disclosure_consents_v1';
+export const VIEWER_DISCLOSURE_CONSENT_STORAGE_KEY = 'viewer_disclosure_consents_v1';
 
 export class ViewerDisclosureConsentStore {
     public constructor(
@@ -42,15 +42,15 @@ export class ViewerDisclosureConsentStore {
         const records = (await this.records()).filter(
             (existing) => consentKey(existing) !== consentKey(record),
         );
-        await this.storage.set({ [STORAGE_KEY]: [...records, record] });
+        await this.storage.set({ [VIEWER_DISCLOSURE_CONSENT_STORAGE_KEY]: [...records, record] });
         return record;
     }
 
     private async records(): Promise<readonly ViewerDisclosureConsentRecord[]> {
-        const stored = await this.storage.get([STORAGE_KEY]);
-        if (!Array.isArray(stored[STORAGE_KEY])) return [];
+        const stored = await this.storage.get([VIEWER_DISCLOSURE_CONSENT_STORAGE_KEY]);
+        if (!Array.isArray(stored[VIEWER_DISCLOSURE_CONSENT_STORAGE_KEY])) return [];
 
-        return stored[STORAGE_KEY].flatMap((value) => {
+        return stored[VIEWER_DISCLOSURE_CONSENT_STORAGE_KEY].flatMap((value) => {
             const record = parseRecord(value);
             return record === undefined ? [] : [record];
         });

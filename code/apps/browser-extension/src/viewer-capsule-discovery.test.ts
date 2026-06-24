@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+    isDiscoverableCapsuleViewerElement,
     isSupportedCapsuleUrl,
     normalizeCapsuleViewerCandidate,
     parseViewerStateMessage,
@@ -24,6 +25,29 @@ describe('Viewer Capsule discovery', () => {
             fallbackText: 'Protected eclipse photo.',
             debug: false,
         });
+    });
+
+    it('discovers explicit Capsule Viewer tags even when Host layout hides them', () => {
+        expect(
+            isDiscoverableCapsuleViewerElement(
+                fakeCapsuleViewerElement({
+                    hidden: true,
+                    ariaHidden: 'true',
+                    display: 'none',
+                }),
+            ),
+        ).toBe(true);
+    });
+
+    it('does not treat similarly named custom elements as Capsule Viewers', () => {
+        expect(
+            isDiscoverableCapsuleViewerElement(fakeCapsuleViewerElement({ localName: 'div' })),
+        ).toBe(false);
+        expect(
+            isDiscoverableCapsuleViewerElement(
+                fakeCapsuleViewerElement({ localName: 'capsule-viewer-preview' }),
+            ),
+        ).toBe(false);
     });
 
     it('allows HTTPS Capsules and local development HTTP Capsules only', () => {
@@ -135,11 +159,35 @@ describe('Viewer Capsule discovery', () => {
 function fakeElementWithDebug(value: string | null): HTMLElement {
     return {
         getAttribute: (name: string) => (name === 'debug' ? value : null),
-    } as HTMLElement;
+    } as unknown as HTMLElement;
 }
 
 function fakeElementWithAttributes(attributes: Record<string, string>): HTMLElement {
     return {
         getAttribute: (name: string) => attributes[name] ?? null,
-    } as HTMLElement;
+    } as unknown as HTMLElement;
+}
+
+function fakeCapsuleViewerElement(
+    options: {
+        readonly localName?: string;
+        readonly hidden?: boolean;
+        readonly ariaHidden?: string;
+        readonly display?: string;
+    } = {},
+): HTMLElement {
+    const element = {
+        localName: options.localName ?? 'capsule-viewer',
+        hidden: options.hidden ?? false,
+        getAttribute: (name: string) =>
+            name === 'aria-hidden' ? (options.ariaHidden ?? null) : null,
+        ownerDocument: {
+            defaultView: {
+                getComputedStyle: () => ({ display: options.display ?? 'block' }),
+            },
+        },
+        getClientRects: () => ({ length: options.display === 'none' ? 0 : 1 }),
+    };
+
+    return element as unknown as HTMLElement;
 }

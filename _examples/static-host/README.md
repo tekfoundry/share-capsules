@@ -29,3 +29,9 @@ The page shows the intended Host authoring contract:
 - optional `<error>` for safe failure copy.
 
 The current Phase 7 runtime still supports transitional `fit` and `viewer-height` attributes while full structured-template activation is being implemented.
+
+Each fallback example includes a local development install/onboarding link:
+
+`http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2F`
+
+The `return_to` value is ordinary page navigation back to the public static page. It must never contain account credentials, authorization codes, tokens, CTX tickets, proofs, recovery material, or content keys.

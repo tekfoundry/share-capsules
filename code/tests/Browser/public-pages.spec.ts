@@ -6,6 +6,7 @@ const publicPages = [
     '/how-it-works',
     '/instructions',
     '/technical',
+    '/viewer/install',
     '/terms',
     '/privacy',
 ] as const;

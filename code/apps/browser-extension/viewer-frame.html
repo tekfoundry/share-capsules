@@ -7,15 +7,22 @@
         <link rel="stylesheet" href="./viewer-frame.css" />
     </head>
     <body>
-        <main class="viewer-shell">
+        <main
+            class="viewer-shell"
+            data-viewer-shell
+            data-viewer-state="loading"
+            role="region"
+            aria-labelledby="share-capsules-viewer-heading"
+            aria-busy="true"
+        >
             <p class="eyebrow" data-viewer-brand>Share Capsules Viewer</p>
-            <h1 data-viewer-heading>Capsule locked</h1>
-            <p data-viewer-status>
+            <h1 id="share-capsules-viewer-heading" data-viewer-heading>Capsule locked</h1>
+            <p data-viewer-status role="status" aria-live="polite">
                 This protected Capsule was detected. Verification and opening are coming next.
             </p>
             <p class="capsule-url" data-viewer-capsule-url></p>
             <div class="viewer-render" data-viewer-render></div>
-            <div class="viewer-actions" data-viewer-actions></div>
+            <div class="viewer-actions" data-viewer-actions aria-label="Viewer actions"></div>
         </main>
         <script type="module" src="./viewer-frame.js"></script>
     </body>
