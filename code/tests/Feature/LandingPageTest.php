@@ -19,34 +19,37 @@ final class LandingPageTest extends TestCase
             ->assertSee('Encrypted content with creator-defined access.')
             ->assertSee('Capsule Trust Exchange (CTX)')
             ->assertSee('without exposing the Viewer’s raw account history to the creator or Host')
-            ->assertSeeInOrder([
-                'Capsule Trust Exchange (CTX)',
-                'A trusted Viewer uses CTX',
-            ])
             ->assertSee('no technology can prevent an authorized viewer from copying what they can see')
             ->assertSee('How an encrypted Capsule becomes viewable')
             ->assertSeeInOrder([
-                'Encrypted content + signed policy',
+                'Encrypted content + trust policy',
                 'Trusted Viewer',
                 'CTX protocol',
                 'Trust Provider',
                 'Key Broker',
                 'decrypts locally',
             ])
-            ->assertSee('Protected content moves. Control stays visible.')
+            ->assertSee('Open protocol, trusted providers')
+            ->assertSee('Anyone can build. Official tools choose carefully.')
+            ->assertSee('Secure content')
+            ->assertSee('Publish content')
+            ->assertSee('View content')
+            ->assertSee('From original work to a trusted viewing session.')
             ->assertSeeInOrder([
-                'Encrypt + sign',
-                'Serve ciphertext',
-                'Fetch + verify',
-                'Evaluate policy',
-                'Release to device',
-                'Decrypt + render',
+                'Content creation',
+                'Capsule creation',
+                'Publish capsule',
+                'Connection',
+                'Policy check',
+                'Key release',
+                'Decryption',
             ])
-            ->assertSee('The Host distributes an encrypted file.')
-            ->assertSee('The Viewer decrypts locally.')
+            ->assertSee('Official registry')
+            ->assertSee('CTX Protocol')
+            ->assertSee('Trust Provider')
+            ->assertSee('Key Broker')
             ->assertSee('Trust, without a universal trust score.')
-            ->assertSee('Each creator defines the conditions required for their Capsule.')
-            ->assertSee('Viewer-consented evidence')
+            ->assertSee('Viewer decides whether to disclose the evidence needed for this request')
             ->assertSee('The creator receives the policy result')
             ->assertSee('not the Viewer’s email, identity, complete history, or raw evidence')
             ->assertSee('Security without mystery.')
@@ -76,12 +79,16 @@ final class LandingPageTest extends TestCase
             ->assertSee('tabindex="-1"', false)
             ->assertSee('id="problem"', false)
             ->assertSee('id="approach"', false)
-            ->assertSee('id="workflow"', false)
+            ->assertSee('id="lifecycle"', false)
             ->assertSee('aria-labelledby="access-architecture-title"', false)
             ->assertSee('aria-label="CTX protocol connections"', false)
-            ->assertSee('aria-label="Share Capsules access workflow"', false)
             ->assertSee('id="trust"', false)
             ->assertSee('id="boundaries"', false)
             ->assertSee('id="project-status"', false);
+    }
+
+    public function test_the_registry_home_draft_route_is_removed_after_promotion(): void
+    {
+        $this->get('/draft/home-registry')->assertNotFound();
     }
 }

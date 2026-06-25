@@ -32,7 +32,7 @@ describe('local Creator Capsule builder', () => {
                 new CreatorCapsuleBuilderV1(
                     {
                         ctxIssuer: 'http://localhost:3003',
-                        automationRiskIssuer: 'https://trust.example',
+                        automationRiskIssuer: 'http://localhost:3003',
                     },
                     new RecordingBroker(),
                 ),
@@ -153,6 +153,23 @@ describe('local Creator Capsule builder', () => {
         ]);
     });
 
+    it('builds a trust policy with a loopback development issuer only', () => {
+        const draft = parseCreatorStudioDraftV1({
+            version: 1,
+            description: { title: 'Trust Capsule' },
+            fallback: { alt_text: 'Trust Capsule' },
+            policy: { automation_risk_required: true },
+        });
+
+        const policy = buildCtxPolicyV1(draft, 'http://localhost:3003');
+
+        expect(policy.requirements).toContainEqual({
+            predicate: 'ctx.risk.ecosystem-automation-not-high',
+            issuer: 'http://localhost:3003',
+        });
+        expect(() => buildCtxPolicyV1(draft, 'http://trust.example')).toThrow();
+    });
+
     it('requires recovery confirmation before reading content or registering a key', async () => {
         let reads = 0;
         const broker = new RecordingBroker();
@@ -225,7 +242,7 @@ describe('local Creator Capsule builder', () => {
                 token: token(),
                 device: await device(),
             }),
-        ).rejects.toEqual(new CreatorCapsuleBuildError('build_failed'));
+        ).rejects.toEqual(new CreatorCapsuleBuildError('build_failed', 'manifest_signing_failed'));
         expect(broker.finalized).toBe(false);
         expect(broker.cancelled).toBe(true);
     });

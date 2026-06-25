@@ -130,8 +130,15 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('broker-callback', fn (Request $request): Limit => Limit::perMinute(120)
             ->by($request->ip()));
 
-        RateLimiter::for('ctx-authorize', fn (Request $request): Limit => Limit::perMinute(30)
-            ->by(($request->user()?->getAuthIdentifier() ?? 'guest').'|'.$request->ip()));
+        RateLimiter::for('ctx-authorize', function (Request $request): array {
+            $principal = ($request->user()?->getAuthIdentifier() ?? 'guest').'|'.$request->ip();
+            $capsule = (string) $request->input('capsule_id', 'unknown-capsule');
+
+            return [
+                Limit::perMinute(180)->by($principal),
+                Limit::perMinute(30)->by($principal.'|'.$capsule),
+            ];
+        });
 
         RateLimiter::for('account-closure', fn (Request $request): Limit => Limit::perHour(3)
             ->by(($request->user()?->getAuthIdentifier() ?? 'guest').'|'.$request->ip()));

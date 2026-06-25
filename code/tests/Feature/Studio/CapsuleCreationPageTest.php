@@ -45,7 +45,7 @@ final class CapsuleCreationPageTest extends TestCase
             ->assertSee('Access remains available for this entire date')
             ->assertSee('only a starting date or only a closing date')
             ->assertSee('active account, a verified email address, and a connected Share Capsules extension')
-            ->assertSee('Limit how many times this Capsule can be opened')
+            ->assertSee('Limit Capsules restrict how often content can be opened')
             ->assertSee('count increases by one each time this Capsule is opened')
             ->assertSee('same opening increases both counts')
             ->assertSee('Leave a field blank for no limit at that level')

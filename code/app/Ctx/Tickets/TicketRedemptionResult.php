@@ -8,6 +8,10 @@ final readonly class TicketRedemptionResult
 
     public function committed(): bool
     {
-        return $this->code === TicketRedemptionCode::Committed;
+        return in_array(
+            $this->code,
+            [TicketRedemptionCode::Committed, TicketRedemptionCode::AlreadyCommitted],
+            true,
+        );
     }
 }

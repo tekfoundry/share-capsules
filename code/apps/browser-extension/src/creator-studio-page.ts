@@ -423,17 +423,62 @@ export function mountCreatorBuildPanel(
     });
 }
 
-function creatorBuildErrorMessage(error: unknown): string {
+export function creatorBuildErrorMessage(error: unknown): string {
     if (!(error instanceof CreatorCapsuleWorkflowError)) {
         return 'The Capsule could not be created. No unverified file was downloaded.';
+    }
+    if (error.code === 'build_failed') {
+        return creatorBuildFailureMessage(error.detail);
     }
     return {
         file_required: 'Choose a supported file before creating your Capsule.',
         signing_key_required: 'Create or restore a signing key and save its recovery kit first.',
         session_required: 'Connect this extension to your Share Capsules account first.',
-        build_failed: 'The Capsule could not be safely built and verified. Nothing was downloaded.',
         download_failed: 'The Capsule was verified, but the browser could not save it.',
     }[error.code];
+}
+
+function creatorBuildFailureMessage(detail: string | undefined): string {
+    return (
+        {
+            broker_registration_failed:
+                'The Capsule key could not be registered with Share Capsules. Nothing was saved.',
+            build_failed: 'The Capsule could not be safely built and verified. Nothing was saved.',
+            grant_failed:
+                'Share Capsules rejected the registration approval. Reconnect your account and try again.',
+            invalid_configuration:
+                'The extension is not configured for this Share Capsules environment.',
+            invalid_grant_response:
+                'Share Capsules returned an unexpected registration approval response. Nothing was saved.',
+            invalid_input:
+                'Share Capsules could not accept this Capsule policy. Check the access settings and try again.',
+            invalid_lifecycle_response:
+                'Share Capsules returned an unexpected Capsule activation response. Nothing was saved.',
+            invalid_registration_response:
+                'The key service returned an unexpected registration response. Nothing was saved.',
+            invalid_source:
+                'The selected file changed or could not be verified. Choose the file again.',
+            invalid_token:
+                'Your account connection expired. Reconnect this extension and try again.',
+            archive_assembly_failed:
+                'The Capsule package could not be assembled safely. Nothing was saved.',
+            archive_verification_failed:
+                'The Capsule package was created, but the extension could not verify it. Nothing was saved.',
+            manifest_signing_failed:
+                'The Capsule could not be signed with this browser’s creator key. Nothing was saved.',
+            manifest_validation_failed:
+                'The Capsule details could not be converted into a valid Capsule manifest. Nothing was saved.',
+            payload_encryption_failed:
+                'The selected file could not be encrypted safely. Nothing was saved.',
+            policy_build_failed:
+                'The access settings could not be converted into a valid Capsule policy. Nothing was saved.',
+            recovery_required: 'Create or restore a signing key and save its recovery kit first.',
+            registration_failed:
+                'The Capsule key service could not register this Capsule. Nothing was saved.',
+            verified_manifest_mismatch:
+                'The Capsule package did not verify against the generated manifest. Nothing was saved.',
+        }[detail ?? ''] ?? 'The Capsule could not be safely built and verified. Nothing was saved.'
+    );
 }
 
 export function mountCreatorHostIntegrationPanel(

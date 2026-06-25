@@ -34,9 +34,9 @@
             <article id="capsule-creation" class="scroll-mt-24 rounded-2xl border border-line bg-canvas p-6 sm:p-8">
                 <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">Capsule Creation</p>
                 <h2 class="mt-3 text-2xl font-semibold tracking-[-0.025em] text-ink">Create the protected Capsule locally.</h2>
-                <p class="mt-4 text-sm leading-6 text-muted">In Creator Studio, enter the public details and access rules. Then continue in the extension, choose the file, and save the Capsule into your local workspace.</p>
+                <p class="mt-4 text-sm leading-6 text-muted">In Creator Studio, enter the public details and access rules. Optional rules can create Time Capsules, Limit Capsules, Trust Capsules, or a Capsule that combines those patterns. Then continue in the extension, choose the file, and save the Capsule into your local workspace.</p>
                 <ol class="mt-5 list-decimal space-y-2 pl-5 text-sm leading-6 text-muted">
-                    <li>Enter a title, optional description, and access limits.</li>
+                    <li>Enter a title, optional description, and any Time, Limit, or Trust rules.</li>
                     <li>Choose a workspace folder when the extension asks for one.</li>
                     <li>Save the recovery code separately if the extension shows one.</li>
                     <li>Choose the source file and create the `.capsule` file.</li>

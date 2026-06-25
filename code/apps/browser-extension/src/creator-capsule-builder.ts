@@ -32,6 +32,7 @@ import {
 } from '@sharecapsules/capsule-core';
 
 import {
+    CreatorBrokerRegistrationError,
     type CreatorBrokerRegistrationInput,
     type CreatorBrokerRegistrationResult,
     createBrokerRegistrationId,
@@ -92,11 +93,21 @@ export class CreatorCapsuleBuildError extends Error {
             | 'invalid_configuration'
             | 'invalid_source'
             | 'recovery_required',
+        public readonly detail?: string,
     ) {
         super(code);
         this.name = 'CreatorCapsuleBuildError';
     }
 }
+
+type CreatorCapsuleBuildFailureDetail =
+    | 'archive_assembly_failed'
+    | 'archive_verification_failed'
+    | 'manifest_signing_failed'
+    | 'manifest_validation_failed'
+    | 'payload_encryption_failed'
+    | 'policy_build_failed'
+    | 'verified_manifest_mismatch';
 
 export class CreatorCapsuleBuilderV1 {
     public constructor(
@@ -126,8 +137,12 @@ export class CreatorCapsuleBuilderV1 {
             const capsuleRevision = 1;
             const payloadId = 'primary';
             const path = payloadPath(payloadId);
-            const policy = buildCtxPolicyV1(input.draft, this.configuration.automationRiskIssuer);
-            const policySha256 = await ctxPolicySha256(policy);
+            const policy = buildStage('policy_build_failed', () =>
+                buildCtxPolicyV1(input.draft, this.configuration.automationRiskIssuer),
+            );
+            const policySha256 = await buildAsyncStage('policy_build_failed', () =>
+                ctxPolicySha256(policy),
+            );
             const nonce = secrets.nonceBytes();
             const context: PayloadEncryptionContextV1 = Object.freeze({
                 type: 'ctx-capsule-payload-aad',
@@ -145,8 +160,10 @@ export class CreatorCapsuleBuilderV1 {
                     plaintext_size: plaintext.byteLength,
                 }),
             });
-            const encrypted = await secrets.withContentKey((contentKey) =>
-                encryptPayloadV1(plaintext, contentKey, nonce, context),
+            const encrypted = await buildAsyncStage('payload_encryption_failed', () =>
+                secrets.withContentKey((contentKey) =>
+                    encryptPayloadV1(plaintext, contentKey, nonce, context),
+                ),
             );
 
             try {
@@ -167,80 +184,95 @@ export class CreatorCapsuleBuilderV1 {
                     input.token,
                     input.device,
                 );
-            } catch {
-                throw new CreatorCapsuleBuildError('broker_registration_failed');
+            } catch (error) {
+                throw new CreatorCapsuleBuildError(
+                    'broker_registration_failed',
+                    brokerRegistrationFailureDetail(error),
+                );
             }
-            const manifest = parseCapsuleManifest({
-                type: 'capsule-manifest',
-                format_version: '1.0',
-                capsule: {
-                    id: capsuleId,
-                    revision: capsuleRevision,
-                    created_at: canonicalInstant(this.now()),
-                },
-                cryptographic_suite: CAPSULE_SUITE_ID,
-                creator: {
-                    signing_key: {
-                        id: input.signingKey.id,
-                        algorithm: input.signingKey.algorithm,
-                        public_key: input.signingKey.publicKey,
+            const brokerRegistration = registration;
+            const manifest = await buildAsyncStage('manifest_validation_failed', async () =>
+                parseCapsuleManifest({
+                    type: 'capsule-manifest',
+                    format_version: '1.0',
+                    capsule: {
+                        id: capsuleId,
+                        revision: capsuleRevision,
+                        created_at: canonicalInstant(this.now()),
                     },
-                },
-                content_profile: {
-                    id: STATIC_IMAGE_PROFILE_ID,
-                    version: STATIC_IMAGE_PROFILE_VERSION,
-                },
-                description: {
-                    title: input.draft.description.title,
-                    ...(input.draft.description.description === undefined
-                        ? {}
-                        : { description: input.draft.description.description }),
-                },
-                policy,
-                ctx: { issuer: this.configuration.ctxIssuer },
-                payloads: [
-                    {
-                        id: payloadId,
-                        path,
-                        media_type: input.metadata.mediaType,
-                        plaintext_size: plaintext.byteLength,
-                        ciphertext_size: encrypted.ciphertext.byteLength,
-                        ciphertext_sha256: await sha256Base64Url(encrypted.ciphertext),
-                        encryption: {
-                            representation: 'whole',
-                            nonce: encodeBase64Url(nonce),
-                        },
-                        key_release: {
-                            broker: registration.broker,
-                            handle: registration.releaseHandle,
-                        },
-                        profile_metadata: {
-                            width: input.metadata.width,
-                            height: input.metadata.height,
-                            pixel_count: input.metadata.pixelCount,
+                    cryptographic_suite: CAPSULE_SUITE_ID,
+                    creator: {
+                        signing_key: {
+                            id: input.signingKey.id,
+                            algorithm: input.signingKey.algorithm,
+                            public_key: input.signingKey.publicKey,
                         },
                     },
-                ],
-            });
-            const publicKey = await importEd25519PublicKey(
-                decodeBase64Url(input.signingKey.publicKey),
+                    content_profile: {
+                        id: STATIC_IMAGE_PROFILE_ID,
+                        version: STATIC_IMAGE_PROFILE_VERSION,
+                    },
+                    description: {
+                        title: input.draft.description.title,
+                        ...(input.draft.description.description === undefined
+                            ? {}
+                            : { description: input.draft.description.description }),
+                    },
+                    policy,
+                    ctx: { issuer: this.configuration.ctxIssuer },
+                    payloads: [
+                        {
+                            id: payloadId,
+                            path,
+                            media_type: input.metadata.mediaType,
+                            plaintext_size: plaintext.byteLength,
+                            ciphertext_size: encrypted.ciphertext.byteLength,
+                            ciphertext_sha256: await sha256Base64Url(encrypted.ciphertext),
+                            encryption: {
+                                representation: 'whole',
+                                nonce: encodeBase64Url(nonce),
+                            },
+                            key_release: {
+                                broker: brokerRegistration.broker,
+                                handle: brokerRegistration.releaseHandle,
+                            },
+                            profile_metadata: {
+                                width: input.metadata.width,
+                                height: input.metadata.height,
+                                pixel_count: input.metadata.pixelCount,
+                            },
+                        },
+                    ],
+                }),
             );
-            const signature = await signCapsuleManifest(manifest, {
-                privateKey: input.signingKey.privateKey,
-                publicKey,
-            });
-            const archive = await assembleCapsuleZipV1(manifest, signature, encrypted.ciphertext);
-            const verified = await verifyCapsuleZipV1(archive);
+            const publicKey = await buildAsyncStage('manifest_signing_failed', () =>
+                importEd25519PublicKey(decodeBase64Url(input.signingKey.publicKey)),
+            );
+            const signature = await buildAsyncStage('manifest_signing_failed', () =>
+                signCapsuleManifest(manifest, {
+                    privateKey: input.signingKey.privateKey,
+                    publicKey,
+                }),
+            );
+            const archive = await buildAsyncStage('archive_assembly_failed', () =>
+                assembleCapsuleZipV1(manifest, signature, encrypted.ciphertext),
+            );
+            const verified = await buildAsyncStage('archive_verification_failed', () =>
+                verifyCapsuleZipV1(archive),
+            );
             if (
                 verified.manifest.capsule.id !== manifest.capsule.id ||
                 verified.manifest.capsule.revision !== manifest.capsule.revision
             ) {
-                throw new CreatorCapsuleBuildError('build_failed');
+                throw new CreatorCapsuleBuildError('build_failed', 'verified_manifest_mismatch');
             }
             try {
                 await this.broker.finalize(registration, input.token, input.device);
-            } catch {
-                throw new CreatorCapsuleBuildError('broker_registration_failed');
+            } catch (error) {
+                throw new CreatorCapsuleBuildError(
+                    'broker_registration_failed',
+                    brokerRegistrationFailureDetail(error),
+                );
             }
 
             return Object.freeze({
@@ -264,6 +296,35 @@ export class CreatorCapsuleBuilderV1 {
             plaintext.fill(0);
             secrets.destroy();
         }
+    }
+}
+
+function brokerRegistrationFailureDetail(error: unknown): string | undefined {
+    if (error instanceof CreatorBrokerRegistrationError) {
+        return error.code;
+    }
+
+    return undefined;
+}
+
+function buildStage<T>(detail: CreatorCapsuleBuildFailureDetail, callback: () => T): T {
+    try {
+        return callback();
+    } catch (error) {
+        if (error instanceof CreatorCapsuleBuildError) throw error;
+        throw new CreatorCapsuleBuildError('build_failed', detail);
+    }
+}
+
+async function buildAsyncStage<T>(
+    detail: CreatorCapsuleBuildFailureDetail,
+    callback: () => Promise<T>,
+): Promise<T> {
+    try {
+        return await callback();
+    } catch (error) {
+        if (error instanceof CreatorCapsuleBuildError) throw error;
+        throw new CreatorCapsuleBuildError('build_failed', detail);
     }
 }
 

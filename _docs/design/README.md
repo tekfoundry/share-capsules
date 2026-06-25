@@ -1,13 +1,13 @@
 # Share Capsules Design Documentation
 
 Status: Living documentation
-Last updated: 2026-06-20
+Last updated: 2026-06-24
 
 ## Purpose
 
 This documentation captures the evolving design intent for Share Capsules, the Capsule format, the Capsule Trust Exchange (CTX), and trusted Viewers.
 
-Share Capsules is the hosted product, first CTX Provider, and reference implementation at `sharecapsules.com`. Capsule is the portable encrypted content format. CTX is the open protocol for presenting creator-selected trust evidence and obtaining authorization. Other compatible CTX Providers may operate independently in the future. The system is intended to let content be distributed publicly without becoming universally accessible.
+Share Capsules is the hosted product, first CTX Provider, first Key Broker, and reference implementation at `sharecapsules.com`. Capsule is the portable encrypted content format. CTX is the open protocol for presenting creator-selected trust evidence and obtaining authorization. The official Share Capsules tools form an opinionated trusted network backed by a service registry, while the protocol remains open to independent ecosystems. The system is intended to let content be distributed publicly without becoming universally accessible.
 
 These documents are living design records. They describe current direction, rationale, uncertainties, and rejected simplifications. They are not yet normative protocol specifications.
 
@@ -27,23 +27,25 @@ These documents are living design records. They describe current direction, rati
 12. [End-to-end Capsule access and data flow](03_architecture/access-and-data-flow.md)
 13. [Compatible Host contract](03_architecture/compatible-host.md)
 14. [Share Capsules reference implementation](03_architecture/share-capsules-reference-implementation.md)
-15. [CTX trust model](05_ctx/trust-model.md)
-16. [V1 trust profile and retained state](05_ctx/trust-profile-v1.md)
-17. [CTX policy model](05_ctx/policy-model.md)
-18. [CTX authorization and key release](05_ctx/authorization-and-key-release.md)
-19. [V1 automation risk](05_ctx/automation-risk.md)
-20. [Reputation and signals](05_ctx/reputation-and-signals.md)
-21. [Human confidence](05_ctx/human-confidence.md)
-22. [Browser Viewer](06_viewer/browser-viewer.md)
-23. [Viewer Host Markup](06_viewer/host-markup.md)
-24. [Viewer content profiles](06_viewer/content-profiles.md)
-25. [Viewer fallback and assurance](06_viewer/fallback-and-assurance.md)
-26. [Privacy model](07_security-and-privacy/privacy-model.md)
-27. [Identity and device verification](07_security-and-privacy/identity-and-device-verification.md)
-28. [V1 threat model](07_security-and-privacy/threat-model-v1.md)
-29. [V1 cryptographic suite](07_security-and-privacy/cryptographic-suite-v1.md)
-30. [Open questions](09_planning/open-questions.md)
-31. [Capsule Manifest V1 specification](10_specifications/capsule/manifest-v1.md)
+15. [Official network and service registry](03_architecture/official-network-and-registry.md)
+16. [ADR-0001: Open protocol and opinionated official network](08_decisions/ADR-0001-open-protocol-official-network.md)
+17. [CTX trust model](05_ctx/trust-model.md)
+18. [V1 trust profile and retained state](05_ctx/trust-profile-v1.md)
+19. [CTX policy model](05_ctx/policy-model.md)
+20. [CTX authorization and key release](05_ctx/authorization-and-key-release.md)
+21. [V1 automation risk](05_ctx/automation-risk.md)
+22. [Reputation and signals](05_ctx/reputation-and-signals.md)
+23. [Human confidence](05_ctx/human-confidence.md)
+24. [Browser Viewer](06_viewer/browser-viewer.md)
+25. [Viewer Host Markup](06_viewer/host-markup.md)
+26. [Viewer content profiles](06_viewer/content-profiles.md)
+27. [Viewer fallback and assurance](06_viewer/fallback-and-assurance.md)
+28. [Privacy model](07_security-and-privacy/privacy-model.md)
+29. [Identity and device verification](07_security-and-privacy/identity-and-device-verification.md)
+30. [V1 threat model](07_security-and-privacy/threat-model-v1.md)
+31. [V1 cryptographic suite](07_security-and-privacy/cryptographic-suite-v1.md)
+32. [Open questions](09_planning/open-questions.md)
+33. [Capsule Manifest V1 specification](10_specifications/capsule/manifest-v1.md)
 
 ## Documentation structure
 

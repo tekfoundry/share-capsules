@@ -6,9 +6,11 @@ import {
     checkCreatorAccountConnection,
     ensureActiveCreatorSigningKey,
     establishCreatorAccountConnection,
+    creatorBuildErrorMessage,
     prepareCreatorSigningRecovery,
     replacementWorkspaceRecoveryMaterials,
 } from './creator-studio-page.js';
+import { CreatorCapsuleWorkflowError } from './creator-capsule-workflow.js';
 import type { CreatorSigningKeyRecord, CreatorSigningKeySummary } from './creator-signing-key.js';
 import type { CreatorSigningKeyRecoveryMaterials } from './creator-signing-key-recovery.js';
 
@@ -37,6 +39,24 @@ describe('Creator Studio creation flow', () => {
         expect(html).not.toContain('Signing identity and recovery');
         expect(html).not.toContain('data-creator-host-url');
         expect(html).not.toContain('data-creator-host-fallback');
+    });
+
+    it('surfaces safe creation failure details without exposing secrets', () => {
+        expect(
+            creatorBuildErrorMessage(
+                new CreatorCapsuleWorkflowError('build_failed', 'invalid_input'),
+            ),
+        ).toBe(
+            'Share Capsules could not accept this Capsule policy. Check the access settings and try again.',
+        );
+        expect(
+            creatorBuildErrorMessage(
+                new CreatorCapsuleWorkflowError('build_failed', 'registration_failed'),
+            ),
+        ).toBe('The Capsule key service could not register this Capsule. Nothing was saved.');
+        expect(creatorBuildErrorMessage(new CreatorCapsuleWorkflowError('build_failed'))).toBe(
+            'The Capsule could not be safely built and verified. Nothing was saved.',
+        );
     });
 });
 

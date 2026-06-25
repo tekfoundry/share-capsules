@@ -13,18 +13,23 @@ use App\Ctx\Risk\AutomationRiskActivityRecorder;
 use App\Ctx\Risk\AutomationRiskActivityType;
 use App\Ctx\Tickets\CtxAuthorizationDenied;
 use App\Ctx\Tickets\CtxAuthorizationService;
+use App\Ctx\Tickets\IssuedCtxTicket;
 use App\Ctx\Tickets\TicketIssuanceFailed;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Ctx\AuthorizeCtxRequest;
 use App\Models\User;
 use App\Models\ViewerDevice;
 use Carbon\CarbonImmutable;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
 final class AuthorizeCtxController extends Controller
 {
+    private const IDEMPOTENCY_WINDOW_SECONDS = 3;
+
     public function __invoke(
         AuthorizeCtxRequest $request,
         CtxAuthorizationService $authorization,
@@ -66,17 +71,11 @@ final class AuthorizeCtxController extends Controller
         );
 
         try {
-            $ticket = $authorization->authorize(
+            $ticket = $this->authorizeWithShortWindowIdempotency(
+                $authorization,
                 $user,
                 $device,
-                $request->array('policy'),
-                $request->string('policy_sha256')->toString(),
-                $request->string('broker')->toString(),
-                $request->string('capsule_id')->toString(),
-                $request->integer('capsule_revision'),
-                $request->string('payload_id')->toString(),
-                $request->string('release_handle')->toString(),
-                $request->boolean('view_event_consent'),
+                $request,
             );
         } catch (UnsupportedCtxPolicy) {
             $this->recordMetric($metrics, $metricIdentifiers, CtxMetricEventType::AuthorizationDenied, $request, $occurredAt, 'unsupported_contract');
@@ -108,8 +107,99 @@ final class AuthorizeCtxController extends Controller
             'type' => 'ctx-authorization',
             'version' => 1,
             'ticket' => $ticket->compact,
-            'expires_in' => 60,
+            'expires_in' => max(1, $ticket->expiresAt->getTimestamp() - CarbonImmutable::now()->getTimestamp()),
         ], 201, ['Cache-Control' => 'no-store']);
+    }
+
+    private function authorizeWithShortWindowIdempotency(
+        CtxAuthorizationService $authorization,
+        User $user,
+        ViewerDevice $device,
+        AuthorizeCtxRequest $request,
+    ): IssuedCtxTicket {
+        $cacheKey = $this->authorizationTicketCacheKey($user, $device, $request);
+
+        try {
+            return Cache::lock($cacheKey.':lock', 5)->block(5, function () use (
+                $authorization,
+                $user,
+                $device,
+                $request,
+                $cacheKey,
+            ): IssuedCtxTicket {
+                $cached = Cache::get($cacheKey);
+                if ($ticket = $this->ticketFromCache($cached)) {
+                    return $ticket;
+                }
+
+                $ticket = $authorization->authorize(
+                    $user,
+                    $device,
+                    $request->array('policy'),
+                    $request->string('policy_sha256')->toString(),
+                    $request->string('broker')->toString(),
+                    $request->string('capsule_id')->toString(),
+                    $request->integer('capsule_revision'),
+                    $request->string('payload_id')->toString(),
+                    $request->string('release_handle')->toString(),
+                    $request->boolean('view_event_consent'),
+                );
+                Cache::put($cacheKey, [
+                    'compact' => $ticket->compact,
+                    'identifier' => $ticket->identifier,
+                    'expires_at' => $ticket->expiresAt->toIso8601String(),
+                ], CarbonImmutable::now()->addSeconds(self::IDEMPOTENCY_WINDOW_SECONDS));
+
+                return $ticket;
+            });
+        } catch (LockTimeoutException) {
+            throw new TicketIssuanceFailed('The CTX authorization request could not be safely serialized.');
+        }
+    }
+
+    private function authorizationTicketCacheKey(
+        User $user,
+        ViewerDevice $device,
+        AuthorizeCtxRequest $request,
+    ): string {
+        return 'ctx:authorization-ticket:'.hash('sha256', json_encode([
+            'user_id' => (string) $user->getKey(),
+            'viewer_device_id' => (string) $device->getKey(),
+            'proof_jkt' => $device->proof_jkt,
+            'agreement_jkt' => $device->agreement_jkt,
+            'type' => $request->string('type')->toString(),
+            'version' => $request->integer('version'),
+            'broker' => $request->string('broker')->toString(),
+            'capsule_id' => $request->string('capsule_id')->toString(),
+            'capsule_revision' => $request->integer('capsule_revision'),
+            'policy_sha256' => $request->string('policy_sha256')->toString(),
+            'policy' => $request->array('policy'),
+            'payload_id' => $request->string('payload_id')->toString(),
+            'release_handle' => $request->string('release_handle')->toString(),
+            'action' => $request->string('action')->toString(),
+            'cryptographic_suite' => $request->string('cryptographic_suite')->toString(),
+            'view_event_consent' => $request->boolean('view_event_consent'),
+        ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES));
+    }
+
+    private function ticketFromCache(mixed $cached): ?IssuedCtxTicket
+    {
+        if (! is_array($cached)) {
+            return null;
+        }
+        if (
+            ! is_string($cached['compact'] ?? null)
+            || ! is_string($cached['identifier'] ?? null)
+            || ! is_string($cached['expires_at'] ?? null)
+        ) {
+            return null;
+        }
+        $expiresAt = CarbonImmutable::parse($cached['expires_at']);
+        if (! $expiresAt->isFuture()) {
+            return null;
+        }
+
+        return new IssuedCtxTicket($cached['compact'], $cached['identifier'], $expiresAt);
     }
 
     private function recordRiskActivity(

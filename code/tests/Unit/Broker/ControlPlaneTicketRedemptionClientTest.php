@@ -47,6 +47,17 @@ final class ControlPlaneTicketRedemptionClientTest extends TestCase
         $this->assertTrue($this->client()->redeem('ticket-identifier-0001', str_repeat('a', 64))->committed());
     }
 
+    public function test_it_accepts_an_idempotent_already_committed_response(): void
+    {
+        Http::fake(['*' => Http::response([
+            'type' => 'ctx-ticket-redemption',
+            'version' => 1,
+            'code' => 'already_committed',
+        ], 200)]);
+
+        $this->assertTrue($this->client()->redeem('ticket-identifier-0001', str_repeat('a', 64))->committed());
+    }
+
     public function test_malformed_unknown_or_status_mismatched_responses_fail_to_availability_only(): void
     {
         foreach ([

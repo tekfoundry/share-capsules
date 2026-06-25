@@ -25,7 +25,11 @@ final readonly class TicketRedemptionOutcome
 
     public function committed(): bool
     {
-        return $this->available && $this->code === TicketRedemptionCode::Committed;
+        return $this->available && in_array(
+            $this->code,
+            [TicketRedemptionCode::Committed, TicketRedemptionCode::AlreadyCommitted],
+            true,
+        );
     }
 
     public function publicError(): CtxErrorCode
@@ -44,7 +48,9 @@ final readonly class TicketRedemptionOutcome
             TicketRedemptionCode::AccountCapsuleLimitReached => CtxErrorCode::AccountCapsuleLimitReached,
             TicketRedemptionCode::AutomationRiskHigh => CtxErrorCode::AutomationRiskHigh,
             TicketRedemptionCode::PolicyUnsatisfied => CtxErrorCode::PolicyUnsatisfied,
-            TicketRedemptionCode::Committed, null => throw new LogicException('A committed redemption has no public error.'),
+            TicketRedemptionCode::Committed,
+            TicketRedemptionCode::AlreadyCommitted,
+            null => throw new LogicException('A committed redemption has no public error.'),
         };
     }
 }

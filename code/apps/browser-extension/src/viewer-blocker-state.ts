@@ -1,8 +1,17 @@
+import {
+    CAPSULE_ACCESS_WINDOW_PREDICATE,
+    type CapsuleAccessWindowRequirementV1,
+    type CtxPolicyV1,
+} from '@sharecapsules/capsule-core';
+
 import type { ViewerCapsuleFetchFailureCode } from './viewer-capsule-fetcher.js';
 import type { ViewerCtxAuthorizationFailureCode } from './viewer-ctx-authorization.js';
 import type { ViewerBrokerRedemptionResult } from './viewer-broker-redemption.js';
 
 export function viewerFetchFailureMessage(code: ViewerCapsuleFetchFailureCode): string {
+    if (code === 'missing_host_permission') {
+        return 'Allow this Capsule host before opening protected content from it.';
+    }
     if (code === 'network_error' || code === 'unexpected_status') {
         return 'This Capsule could not be reached. Check the connection, then try again.';
     }
@@ -17,10 +26,17 @@ export function viewerFetchFailureMessage(code: ViewerCapsuleFetchFailureCode): 
 }
 
 export function viewerFetchFailureIsRetryable(code: ViewerCapsuleFetchFailureCode): boolean {
-    return code === 'network_error' || code === 'unexpected_status';
+    return (
+        code === 'missing_host_permission' ||
+        code === 'network_error' ||
+        code === 'unexpected_status'
+    );
 }
 
 export function viewerAuthorizationFailureMessage(code: ViewerCtxAuthorizationFailureCode): string {
+    if (code === 'rate_limited') {
+        return 'Opening is temporarily limited because too many Capsules were requested at once. Wait a moment, then try again.';
+    }
     if (code === 'network_error') {
         return 'Share Capsules could not be reached for authorization. Check the connection, then try again.';
     }
@@ -37,11 +53,12 @@ export function viewerAuthorizationFailureMessage(code: ViewerCtxAuthorizationFa
 export function viewerAuthorizationFailureIsRetryable(
     code: ViewerCtxAuthorizationFailureCode,
 ): boolean {
-    return code === 'network_error';
+    return code === 'network_error' || code === 'rate_limited';
 }
 
 export function brokerRedemptionFailureMessage(
     redemption: Extract<ViewerBrokerRedemptionResult, { readonly ok: false }>,
+    policy?: CtxPolicyV1,
 ): string {
     if (redemption.code === 'rate_limited') {
         return 'Opening is temporarily limited because too many Capsules were requested at once. Wait a moment, then try again.';
@@ -71,7 +88,10 @@ export function brokerRedemptionFailureMessage(
         return 'This browser is not registered for viewing. Reconnect your Share Capsules account and try again.';
     }
     if (redemption.denialCode === 'policy_unsatisfied') {
-        return 'This Capsule cannot be opened right now because its access rules are not satisfied.';
+        return (
+            accessWindowPolicyMessage(policy) ??
+            'This Capsule cannot be opened right now because its access rules are not satisfied.'
+        );
     }
     if (redemption.denialCode === 'automation_risk_high') {
         return 'This Capsule cannot be opened because automated viewing protection was triggered.';
@@ -81,6 +101,46 @@ export function brokerRedemptionFailureMessage(
     }
 
     return 'This Capsule could not be opened safely. The protected content remains locked.';
+}
+
+function accessWindowPolicyMessage(policy?: CtxPolicyV1): string | null {
+    const requirement = policy?.requirements.find(
+        (candidate): candidate is CapsuleAccessWindowRequirementV1 =>
+            candidate.predicate === CAPSULE_ACCESS_WINDOW_PREDICATE,
+    );
+    if (requirement === undefined) return null;
+
+    const now = Date.now();
+    if (requirement.not_before !== undefined) {
+        const notBefore = Date.parse(requirement.not_before);
+        if (Number.isFinite(notBefore) && now < notBefore) {
+            return `This Time Capsule cannot be opened yet. It unlocks on ${formatUtcPolicyInstant(requirement.not_before)}.`;
+        }
+    }
+
+    if (requirement.not_after !== undefined) {
+        const notAfter = Date.parse(requirement.not_after);
+        if (Number.isFinite(notAfter) && now >= notAfter) {
+            return `This Time Capsule is closed. Its opening window ended on ${formatUtcPolicyInstant(requirement.not_after)}.`;
+        }
+    }
+
+    return null;
+}
+
+function formatUtcPolicyInstant(value: string): string {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+
+    return new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        timeZone: 'UTC',
+        timeZoneName: 'short',
+    }).format(date);
 }
 
 export function brokerRedemptionFailureIsRetryable(

@@ -44,6 +44,10 @@ final class TicketRedemptionOutcomeTest extends TestCase
 
         $committed = TicketRedemptionOutcome::responded(TicketRedemptionCode::Committed);
         $this->assertTrue($committed->committed());
+
+        $alreadyCommitted = TicketRedemptionOutcome::responded(TicketRedemptionCode::AlreadyCommitted);
+        $this->assertTrue($alreadyCommitted->committed());
+
         $this->expectException(LogicException::class);
         $committed->publicError();
     }

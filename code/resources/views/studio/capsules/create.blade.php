@@ -58,12 +58,12 @@
 
                 <section aria-labelledby="capsule-policy-heading" class="mt-10 border-t border-line pt-8">
                     <p class="text-xs font-bold tracking-[0.14em] text-brand uppercase">Step 2</p>
-                    <h2 id="capsule-policy-heading" class="mt-2 text-xl font-semibold text-ink">Choose access limits</h2>
-                    <p class="mt-2 text-sm leading-6 text-muted">A viewer must have an active account, a verified email address, and a connected Share Capsules extension. They must also agree that each approved opening will be counted. You can add the optional restrictions below.</p>
+                    <h2 id="capsule-policy-heading" class="mt-2 text-xl font-semibold text-ink">Choose access rules</h2>
+                    <p class="mt-2 text-sm leading-6 text-muted">A viewer must have an active account, a verified email address, and a connected Share Capsules extension. They must also agree that each approved opening will be counted. You can add optional Time Capsule, Limit Capsule, and Trust Capsule rules below, and future Capsules may combine these patterns.</p>
 
                     <div class="mt-6 space-y-4">
                         <div class="rounded-xl border border-line p-4">
-                            <h3 class="font-semibold text-ink">Choose when it can be opened <span class="font-normal text-muted">(optional)</span></h3>
+                            <h3 class="font-semibold text-ink">Time Capsule rules <span class="font-normal text-muted">(optional)</span></h3>
                             <p class="mt-1 text-sm leading-6 text-muted">Leave both dates blank to allow access at any time. Dates use your current time zone: <span data-capsule-time-zone class="font-semibold text-ink">local time</span>.</p>
                             <div class="mt-4 grid gap-4 sm:grid-cols-2">
                                 <div>
@@ -81,8 +81,8 @@
                         </div>
 
                         <div class="rounded-xl border border-line p-4">
-                            <h3 class="font-semibold text-ink">Limit how many times this Capsule can be opened <span class="font-normal text-muted">(optional)</span></h3>
-                            <p class="mt-1 text-sm leading-6 text-muted">In normal use, the count increases by one each time this Capsule is opened. If you set both limits, the same opening increases both counts. Leave a field blank for no limit at that level; <code>0</code> does not mean unlimited.</p>
+                            <h3 class="font-semibold text-ink">Limit Capsule rules <span class="font-normal text-muted">(optional)</span></h3>
+                            <p class="mt-1 text-sm leading-6 text-muted">Limit Capsules restrict how often content can be opened. In normal use, the count increases by one each time this Capsule is opened. If you set both limits, the same opening increases both counts. Leave a field blank for no limit at that level; <code>0</code> does not mean unlimited.</p>
 
                             <div class="mt-5 grid gap-5 md:grid-cols-2">
                                 <div class="rounded-xl bg-surface p-4">
@@ -103,7 +103,7 @@
                         <label class="flex items-start gap-3 rounded-xl border border-line p-4" for="capsule-automation-risk">
                             <input id="capsule-automation-risk" name="automation_risk_required" type="checkbox" value="1" class="mt-1 size-4 rounded border-line text-brand focus:ring-brand">
                             <span>
-                                <span class="block font-semibold text-ink">Reject high automation risk</span>
+                                <span class="block font-semibold text-ink">Trust Capsule rule: reject high automation risk</span>
                                 <span class="mt-1 block text-sm leading-6 text-muted">Block access when Share Capsules detects opening patterns that strongly resemble automation. This does not verify someone’s identity or intentions.</span>
                             </span>
                         </label>

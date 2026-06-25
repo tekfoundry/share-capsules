@@ -41,6 +41,9 @@ final readonly class CtxTicketRedemptionService
                 || ! hash_equals($ticket->ticket_sha256, $ticketSha256)) {
                 return $this->result(TicketRedemptionCode::Invalid);
             }
+            if ($ticket->status === 'redeemed') {
+                return $this->result(TicketRedemptionCode::AlreadyCommitted);
+            }
             if ($ticket->status !== 'pending') {
                 $this->recordRejection($ticket, TicketRedemptionCode::Replayed, $now);
 

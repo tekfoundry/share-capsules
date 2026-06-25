@@ -117,7 +117,11 @@ export function validateCtxPolicyV1(value: unknown): asserts value is CtxPolicyV
         previousOrder = order;
 
         if (requirement.predicate === AUTOMATION_RISK_NOT_HIGH_PREDICATE) {
-            validateHttpsIssuer(requirement.issuer, `/requirements/${index}/issuer`, issues);
+            validateSecureServiceIssuer(
+                requirement.issuer,
+                `/requirements/${index}/issuer`,
+                issues,
+            );
         }
         if (requirement.predicate === CAPSULE_ACCESS_WINDOW_PREDICATE) {
             validateAccessWindow(requirement, index, issues);
@@ -186,11 +190,16 @@ export function parseCtxPolicyV1(value: unknown): CtxPolicyV1 {
     });
 }
 
-function validateHttpsIssuer(issuer: string, path: string, issues: PolicyValidationIssue[]): void {
+function validateSecureServiceIssuer(
+    issuer: string,
+    path: string,
+    issues: PolicyValidationIssue[],
+): void {
     try {
         const url = new URL(issuer);
         if (
-            url.protocol !== 'https:' ||
+            (url.protocol !== 'https:' &&
+                !(url.protocol === 'http:' && isLoopbackHostname(url.hostname))) ||
             url.username !== '' ||
             url.password !== '' ||
             url.search !== '' ||
@@ -201,9 +210,14 @@ function validateHttpsIssuer(issuer: string, path: string, issues: PolicyValidat
     } catch {
         issues.push({
             path,
-            message: 'must be an absolute HTTPS issuer URL without credentials, query, or fragment',
+            message:
+                'must be an absolute HTTPS issuer URL, or a loopback HTTP issuer URL for local development, without credentials, query, or fragment',
         });
     }
+}
+
+function isLoopbackHostname(hostname: string): boolean {
+    return ['localhost', '127.0.0.1', '[::1]'].includes(hostname);
 }
 
 function schemaIssues(errors: ErrorObject[] | null | undefined): PolicyValidationIssue[] {

@@ -35,13 +35,16 @@ final readonly class ControlPlaneTicketRedemptionClient implements TicketRedempt
             if ($keys !== ['code', 'type', 'version']
                 || ($body['type'] ?? null) !== 'ctx-ticket-redemption'
                 || ($body['version'] ?? null) !== 1
-                || $code === null
-                || ($code === TicketRedemptionCode::Committed && $response->status() !== 200)
-                || ($code !== TicketRedemptionCode::Committed && $response->status() !== 409)) {
+                || $code === null) {
+                return TicketRedemptionOutcome::unavailable();
+            }
+            $outcome = TicketRedemptionOutcome::responded($code);
+            if (($outcome->committed() && $response->status() !== 200)
+                || (! $outcome->committed() && $response->status() !== 409)) {
                 return TicketRedemptionOutcome::unavailable();
             }
 
-            return TicketRedemptionOutcome::responded($code);
+            return $outcome;
         } catch (Throwable) {
             return TicketRedemptionOutcome::unavailable();
         }

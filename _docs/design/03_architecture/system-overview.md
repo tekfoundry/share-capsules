@@ -1,7 +1,7 @@
 # System Overview
 
 Status: Draft
-Last updated: 2026-06-19
+Last updated: 2026-06-24
 
 ## Purpose
 
@@ -85,7 +85,13 @@ Trust providers issue credentials or assertions, including:
 - Personhood or identity assurance
 - Session or account risk
 
-Creators choose which providers they accept.
+Creators choose which providers they accept. Official Share Capsules tools expose only providers and brokers recognized by the official network registry by default.
+
+### Service registry
+
+The Share Capsules service registry is the official network's trust list for CTX Providers and Key Brokers. It records which service identities the official creator and Viewer tools may use, what protocol capabilities they support, and whether they are recognized, deprecated, suspended, revoked, test-only, or lower-assurance.
+
+The registry does not define universal protocol validity. Independent ecosystems may use different registries or trust lists. Official Share Capsules tools use this registry to avoid sending credentials, device proofs, tickets, or key-release requests to unknown or revoked services.
 
 ## Conceptual access flow
 
@@ -126,7 +132,7 @@ The accepted V1 threats, mitigations, residual risks, and release-security gates
 
 ## Centralized V1 and open protocol
 
-Share Capsules is the initial centralized CTX Provider. Centralization can make account recovery, reputation continuity, policy evaluation, abuse detection, and key release tractable in V1. The design must not confuse this reference implementation with the protocol or make it permanently necessary.
+Share Capsules is the initial centralized CTX Provider and Key Broker. Centralization can make account recovery, reputation continuity, policy evaluation, abuse detection, and key release tractable in V1. The design must not confuse this reference implementation with the protocol or make it permanently necessary.
 
 The Share Capsules reference implementation uses Laravel for hosted account and CTX services and client-side TypeScript for creator-controlled Capsule cryptography, trusted Viewer behavior, and local plaintext processing.
 
@@ -136,20 +142,21 @@ Long-term portability requires:
 
 - Stable, open Capsule and CTX specifications
 - Exportable creator content and policies
-- Multiple acceptable trust providers
+- Multiple acceptable trust providers and key brokers
 - Credential and account portability where feasible
 - Provider discovery and key rotation
 - No permanent dependence on one Viewer origin or API operator
 - Discovery and selection of compatible CTX Providers
+- A recognition model that separates protocol compatibility from official-network trust
 - Migration paths that do not require re-encrypting every Capsule where secure key rewrapping is possible
 
 ## Key unresolved architecture
 
-- Which service makes the final authorization decision?
 - Can policy evaluation occur locally, remotely, or both?
 - What does the centralized Share Capsules operator learn about Capsule opens?
 - How are per-creator pseudonyms reconciled with ecosystem-wide abuse limits?
 - Which capabilities define lower-assurance web Viewers after V1?
+- Which registry and governance model should be used when third-party services are ready for recognition?
 
 ## Related documents
 
@@ -158,6 +165,7 @@ Long-term portability requires:
 - [Key management](key-management.md)
 - [Access and data flow](access-and-data-flow.md)
 - [Share Capsules reference implementation](share-capsules-reference-implementation.md)
+- [Official network and service registry](official-network-and-registry.md)
 - [V1 threat model](../07_security-and-privacy/threat-model-v1.md)
 - [Trust model](../05_ctx/trust-model.md)
 - [Privacy model](../07_security-and-privacy/privacy-model.md)

@@ -537,15 +537,44 @@ Success goals:
 
 ### Phase 8 — Static reference Host and end-to-end scenario
 
-Objective: prove separation of concerns using an ordinary static website rather than a Share Capsules hosting feature.
+Objective: prove separation of concerns using ordinary static websites rather than a Share Capsules hosting feature.
 
-- ⬜️ Create a static HTTPS-compatible example containing several `<capsule-viewer>` elements on one page.
-- ⬜️ Include useful accessible fallback content between each element's opening and closing tags.
-- ⬜️ Host Capsule files with anonymous GET, optional HEAD, accepted media type, public CORS, immutable revision URLs, and bounded content lengths.
-- ⬜️ Include examples with no optional gates, opening and closing date boundaries, a Capsule-global lifetime limit, a per-account lifetime limit, and the automation-risk gate.
-- ⬜️ Demonstrate individual opening, open-all consent, lazy automatic opening, denial, limit exhaustion, revocation, and no-extension behavior.
-- ⬜️ Verify separately hosted page and Capsule origins require and respect distinct runtime Host permissions.
-- ⬜️ Document deployment to at least one representative static Host without requiring its accounts, cookies, server code, or plugins.
+- ✅ Create a local static reference site containing multiple `<capsule-viewer>` examples and real development Capsule files.
+- ✅ Include useful public fallback content, structured `<fallback>`, `<template>`, `<content>`, and `<error>` examples, and no-extension install/onboarding links with safe return navigation.
+- ✅ Demonstrate the local happy path with several Capsules on one page: extension discovery, shared account connection, consent, authorization, broker release, decrypt/render, retry after transient failures, and content-first styling.
+- ✅ Verify the local reference Host contract: anonymous GET and HEAD, stable Capsule URLs, accepted `application/octet-stream` responses, bounded example file sizes, no recovery files, no recovery code, and no source images.
+- ✅ Create and test baseline Capsules with no optional policy gates.
+- ✅ Create and test a Time Capsule with a not-before date that stays locked before the opening date and opens after the date is reached.
+- ✅ Create and test a Time Capsule with a not-after date that opens before the closing date and stays locked after the date has passed.
+- ✅ Create and test a Limit Capsule with a Capsule-global lifetime limit, including the successful openings before exhaustion and the locked state after the limit is reached.
+- ✅ Create and test a Limit Capsule with a per-account lifetime limit, including successful openings before exhaustion and the locked state after the same viewer account reaches the limit.
+- ✅ Create and test a Trust Capsule with an automation-risk gate that blocks risky automated openings and still allows a normal eligible viewer.
+- ✅ Create and test revocation for an otherwise eligible Capsule, including the locked state after permanent revocation.
+- ✅ Create and test a combined Capsule that uses Time, Limit, and Trust gates together without changing the underlying Capsule format.
+- ✅ Demonstrate bulk-page safety on the static reference page: ordinary hidden/show patterns, same-page queueing, retry-aware rate handling, and no surprise release consumption.
+- ✅ Verify separately hosted page and Capsule origins require and respect distinct runtime Host permissions.
+- ✅ Document deployment to at least one representative static Host without requiring its accounts, cookies, server code, or plugins.
+
+Phase 8 static-host evidence recorded on 2026-06-24:
+
+- `_examples/static-host` now contains a public static page with multiple code/result examples using two real development Capsules, structured fallback/template/content/error syntax, fit and viewer-height variations, no-extension install links, and a local preview helper.
+- The reference Capsules intentionally exclude creator recovery files, recovery codes, and source images.
+- The checked-in TekFoundry Logo and Eclipse Photo Capsules are baseline policy fixtures. Their policies require only the standard account-active, email-verified, registered-device, and viewer-consent checks; they do not include date windows, lifetime limits, or automation-risk gates.
+- Phase 8 uses the product vocabulary Time Capsule, Limit Capsule, and Trust Capsule for creator-facing policy patterns. These names describe optional gates, not separate Capsule container formats.
+- Time Capsule not-before behavior is covered by two static host fixtures: `time-capsule-open-in-future.capsule` confirms the locked-before-opening behavior, and `time-capsule-open-in-past.capsule` confirms the open-after-opening-date behavior.
+- Time Capsule not-after behavior is covered by two static host fixtures: `time-capsule-not-after-in-the-past.capsule` confirms the locked-after-closing-date behavior, and `time-capsule-not-after-in-the-future.capsule` confirms open-before-closing-date behavior.
+- A full Time Capsule access-window fixture, `time-capsule-in-between-before-and-after.capsule`, has been added to confirm open behavior when the current time is after the opening instant and before the closing instant.
+- Limit Capsule per-account behavior is covered by `limit-capsule-per-account-limit-of-5.capsule`. Manual testing confirmed one eligible viewer account could open the Capsule until its fifth committed opening, and the next opening stayed locked.
+- Limit Capsule global behavior is covered by `limit-capsule-global-limit-of-15.capsule`. Manual testing confirmed the Capsule opened before exhaustion and stayed locked once the shared global opening limit was reached.
+- Trust Capsule automation-risk behavior is covered by `trust-capsule.capsule`. Manual testing confirmed normal eligible viewer activity opened the Capsule, and simulated high automation-risk activity locked it.
+- Revoked Capsule behavior is covered by `revoked-capsule-baseline.capsule`, an otherwise baseline-eligible fixture with a unique signed Capsule identity. Automated testing confirms the static page documents the expected locked state, the authoritative registry status is `revoked`, redemption returns a locked policy outcome, the ticket remains pending, and no committed-release counter is created.
+- Combined Capsule behavior is covered by `combined-capsule.capsule`. Manual testing confirmed an eligible viewer opened one ordinary Capsule manifest that combines the active Time access window, Capsule-global and per-account Limit gates, and the V1 Trust automation-risk gate.
+- Bulk-page safety is now demonstrated on `test.html` with a dedicated `#bulk-page-safety` section containing an open accordion, a closed accordion, and a hidden tab/modal-style panel. The page and README state the same-page queue, retry-aware temporary and rate-limit handling, scoped consent/lifecycle boundary, and the no-surprise consumption rule: connection, disclosure approval, hidden markup, denied policy checks, revocation, and unredeemed tickets do not count; only a successful broker key release creates a committed opening. Automated static-host tests pin this documentation and the existing revoked-fixture test continues to verify no release counter is created for a locked revocation outcome.
+- Cross-origin Host permission behavior is covered by the Viewer fetch boundary and `cross-origin-permissions.html`. The extension checks the Capsule URL's exact runtime Host permission before each Capsule request and repeats the check for every validated redirect target. A page-origin grant can discover `<capsule-viewer>` elements without authorizing a separately hosted Capsule origin, and redirected final origins require their own grant before the network request proceeds.
+- `_examples/static-host/README.md` now documents a representative GitHub Pages-style deployment with same-origin `index.html` and `capsules/*.capsule` files. The recipe requires only public static HTTPS files, anonymous `GET`/`HEAD`, stable revisioned Capsule URLs, bounded response sizes, and ordinary no-extension return navigation; it explicitly excludes Host viewer accounts, cookies, private redirects, signed URLs, server-side code, plugins, databases, CTX logic, broker credentials, and plaintext access.
+- Phase 7 manual/browser testing has already proven the local static page can discover multiple Capsules, share Viewer account connection across frames, queue openings, authorize, redeem, decrypt, render, retry after transient rate limiting, and keep plaintext inside extension-origin iframes.
+- Local host-contract verification confirmed `200` responses for the example page and checked-in Capsule files; the Capsule files are served as `application/octet-stream` with exact `Content-Length` values matching the checked-in archives.
+- Production test gates are green after the Phase 7 commit; production static-host deployment, exact public URLs, extension distribution identity, media-type conventions, CORS behavior for split-origin deployment, and cache/header validation are deferred to Phase 11 with the rest of the release/distribution work.
 
 Success goals:
 
@@ -553,7 +582,30 @@ Success goals:
 - Replacing Share Capsules with protocol-compatible discovery identities remains structurally possible.
 - The reference page demonstrates the complete creator-to-viewer flow without Share Capsules storing content.
 
-### Phase 9 — Security, privacy, and compatibility hardening
+### Phase 9 — Human challenge and Trust Capsule confidence scoring
+
+Objective: evolve Trust Capsules beyond "no known bad history" by adding an accessible, privacy-aware challenge path for viewers who have too little history to evaluate confidently.
+
+- ⬜️ Define the Trust Capsule decision model for `not_high`, `high`, and `unknown_or_low_confidence` viewer states, including how the Viewer should explain each state without claiming personhood certainty.
+- ⬜️ Design the human challenge contract: when it is required, how long a successful result lasts, how it is bound to account/device/site/Capsule context, and how it interacts with standing consent.
+- ⬜️ Build the challenge page shell with multiple accessible mini-challenge patterns rather than one brittle CAPTCHA-style puzzle.
+- ⬜️ Capture safe challenge interaction events and derive a bounded `challenge_score` without storing plaintext content, secrets, raw pointer traces longer than needed, or unnecessary biometric-style data.
+- ⬜️ Add challenge result storage, retention, pruning, and audit fields that keep successful challenge evidence temporary and explainable.
+- ⬜️ Integrate challenge requirements into CTX authorization so an eligible but low-confidence viewer receives a challenge-required response instead of a generic Trust Capsule denial.
+- ⬜️ Update the Viewer extension to launch or navigate to the challenge flow, resume the original Capsule opening after success, and show safe retry/failure messages.
+- ⬜️ Add creator-facing language that explains Trust Capsules as risk-reduction gates using activity history and optional human checks, not as proof of identity, personhood, or one-human-one-account.
+- ⬜️ Add automated tests for challenge scoring, expiry, replay resistance, account/device binding, accessibility fallbacks, and safe error handling.
+- ⬜️ Add a static-host challenge fixture that verifies a new/low-history viewer is challenged, a successful challenge opens the Capsule, and high automation risk still blocks.
+- ⬜️ Document operational tuning knobs for challenge thresholds, score expiry, abuse limits, and emergency disablement.
+
+Success goals:
+
+- A low-history eligible viewer can complete an accessible challenge and then open a Trust Capsule.
+- A viewer with high automation-risk activity remains blocked even if a challenge is attempted.
+- Challenge evidence is temporary, bounded, auditable, and free of prohibited sensitive content or durable biometric-style telemetry.
+- User-facing language accurately frames the feature as confidence scoring, not proof that the viewer is human or trustworthy in all contexts.
+
+### Phase 10 — Security, privacy, and compatibility hardening
 
 Objective: satisfy the documented threat model and prove that privacy promises are implemented rather than aspirational.
 
@@ -579,7 +631,7 @@ Success goals:
 - The finalized image profile is stable on the published minimum desktop configuration.
 - No unresolved critical or high-severity security finding remains at release.
 
-### Phase 10 — Deployment, distribution, and MVP release
+### Phase 11 — Deployment, distribution, and MVP release
 
 Objective: operate the complete system with controlled identities, monitoring, documentation, and rollback paths.
 
@@ -595,6 +647,7 @@ Objective: operate the complete system with controlled identities, monitoring, d
 - ⬜️ Audit the complete public working tree and history for secrets, local data, logs, generated artifacts, unrelated private information, and third-party licensing obligations.
 - ⬜️ Configure the public GitHub repository, Discussions, protected primary branch, required CI, and private vulnerability-reporting path.
 - ⬜️ Publish the static reference Host and downloadable example Capsules.
+- ⬜️ Verify the production static-host contract: public noncredentialed CORS, immutable revision URLs, bounded content lengths, accepted Capsule media type, and cache/header behavior that works from a separately hosted page.
 - ⬜️ Run clean-account creator and viewer acceptance tests against production-like infrastructure.
 - ⬜️ Run load and concurrency tests for authorization, redemption, counters, and broker operations at the intended MVP scale.
 - ⬜️ Exercise incident response, signing-key rotation, extension-version suspension, Capsule revocation, backup restoration, and rollback procedures.
@@ -610,10 +663,10 @@ Success goals:
 
 The operational MVP may be released only when:
 
-- All Phase 1–10 success goals are met and required tasks are marked complete.
+- All Phase 1–11 success goals are met and required tasks are marked complete.
 - One creator can produce, independently host, revoke, and inspect a valid static-image Capsule.
 - Multiple Capsules on one static page can be opened under individual or site-scoped standing consent.
-- Embedded policy, global/per-account limits, optional automation risk, ticket replay prevention, and atomic redemption behave correctly under concurrency.
+- Embedded policy, global/per-account limits, optional automation risk and challenge confidence, ticket replay prevention, and atomic redemption behave correctly under concurrency.
 - The Viewer performs all plaintext decryption and rendering locally in the extension-controlled boundary.
 - Account/device revocation and the full closure/deletion lifecycle have verified behavior.
 - The threat-model release gates and provisional image benchmarks have recorded evidence.

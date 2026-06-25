@@ -4,6 +4,7 @@ import {
     fetchViewerCapsule,
     VIEWER_CAPSULE_MAX_BYTES,
     VIEWER_CAPSULE_MAX_REDIRECTS,
+    viewerHostPermissionPattern,
 } from './viewer-capsule-fetcher.js';
 
 describe('Viewer Capsule fetcher', () => {
@@ -69,6 +70,46 @@ describe('Viewer Capsule fetcher', () => {
         ).resolves.toEqual({ ok: false, code: 'unsupported_url' });
     });
 
+    it('requires a separate runtime Host permission before fetching each Capsule origin', async () => {
+        const fetchShouldNotRun = async (): Promise<Response> => {
+            throw new Error('fetch should not run before Host permission is granted');
+        };
+
+        await expect(
+            fetchViewerCapsule('https://capsules.example/artwork.capsule', {
+                fetch: fetchShouldNotRun,
+                hostPermissions: { contains: async () => false },
+            }),
+        ).resolves.toEqual({
+            ok: false,
+            code: 'missing_host_permission',
+            origin: 'https://capsules.example',
+            permission: 'https://capsules.example/*',
+        });
+    });
+
+    it('requires the redirected Capsule origin even after the first origin is allowed', async () => {
+        const visitedUrls: string[] = [];
+        const granted = new Set(['https://capsules.example/*']);
+        const result = await fetchViewerCapsule('https://capsules.example/start.capsule', {
+            hostPermissions: {
+                contains: async (permission) => granted.has(permission),
+            },
+            fetch: async (url) => {
+                visitedUrls.push(url.toString());
+                return redirectResponse('https://cdn.example/final.capsule');
+            },
+        });
+
+        expect(result).toEqual({
+            ok: false,
+            code: 'missing_host_permission',
+            origin: 'https://cdn.example',
+            permission: 'https://cdn.example/*',
+        });
+        expect(visitedUrls).toEqual(['https://capsules.example/start.capsule']);
+    });
+
     it('rejects credentialed, private-network, and non-HTTPS public Capsule URLs', async () => {
         const fetchShouldNotRun = async (): Promise<Response> => {
             throw new Error('fetch should not run');
@@ -103,6 +144,18 @@ describe('Viewer Capsule fetcher', () => {
             url: 'http://localhost:8088/capsules/a.capsule',
             bytes: new Uint8Array([7]),
         });
+    });
+
+    it('derives exact origin Host permission patterns for Capsule fetches', () => {
+        expect(viewerHostPermissionPattern('https://capsules.example/a/b.capsule')).toBe(
+            'https://capsules.example/*',
+        );
+        expect(viewerHostPermissionPattern('https://capsules.example:8443/a.capsule')).toBe(
+            'https://capsules.example:8443/*',
+        );
+        expect(viewerHostPermissionPattern('http://localhost:8088/capsules/a.capsule')).toBe(
+            'http://localhost:8088/*',
+        );
     });
 
     it('fails closed on unsafe statuses, missing redirect locations, and oversized bodies', async () => {

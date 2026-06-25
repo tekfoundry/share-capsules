@@ -14,6 +14,7 @@ export type ViewerCtxAuthorizationFailureCode =
     | 'invalid_session'
     | 'invalid_response'
     | 'authorization_denied'
+    | 'rate_limited'
     | 'network_error';
 
 export type ViewerCtxAuthorizationResult =
@@ -71,6 +72,10 @@ export class ViewerCtxAuthorizationClient {
                 },
                 body: JSON.stringify(authorizationRequest(summary, viewEventConsent)),
             });
+            if (response.status === 429) {
+                return { ok: false, code: 'rate_limited' };
+            }
+
             const payload: unknown = await response.json();
 
             if (!response.ok) return { ok: false, code: 'authorization_denied' };

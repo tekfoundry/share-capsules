@@ -156,11 +156,26 @@ final readonly class CtxPolicyV1
             throw new UnsupportedCtxPolicy('The automation-risk issuer is invalid.');
         }
         $parts = parse_url($value);
-        if (! is_array($parts) || ($parts['scheme'] ?? null) !== 'https' || ! isset($parts['host'])
+        if (! is_array($parts) || ! isset($parts['host'])
             || isset($parts['user']) || isset($parts['pass']) || isset($parts['query']) || isset($parts['fragment'])) {
+            throw new UnsupportedCtxPolicy('The automation-risk issuer is invalid.');
+        }
+        $scheme = $parts['scheme'] ?? null;
+        $host = $parts['host'];
+        if (! is_string($host) || ! self::allowsIssuerScheme($scheme, $host)) {
             throw new UnsupportedCtxPolicy('The automation-risk issuer is invalid.');
         }
 
         return $value;
+    }
+
+    private static function allowsIssuerScheme(mixed $scheme, string $host): bool
+    {
+        if ($scheme === 'https') {
+            return true;
+        }
+
+        return $scheme === 'http'
+            && in_array($host, ['localhost', '127.0.0.1', '[::1]', '::1'], true);
     }
 }

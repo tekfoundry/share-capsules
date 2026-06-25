@@ -1,4 +1,16 @@
-import { describe, expect, it } from 'vitest';
+import {
+    ACCOUNT_ACTIVE_PREDICATE,
+    CAPSULE_ACCESS_WINDOW_PREDICATE,
+    CTX_POLICY_COMBINER,
+    CTX_POLICY_TYPE,
+    CTX_POLICY_VERSION,
+    DEVICE_REGISTERED_PREDICATE,
+    EMAIL_VERIFIED_PREDICATE,
+    VIEW_EVENT_CONSENT_PREDICATE,
+    type CapsuleAccessWindowRequirementV1,
+    type CtxPolicyV1,
+} from '@sharecapsules/capsule-core';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
     brokerRedemptionFailureIsRetryable,
@@ -10,7 +22,15 @@ import {
 } from './viewer-blocker-state.js';
 
 describe('Viewer blocker states', () => {
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
     it('treats transient Capsule fetch failures as retryable without over-sharing details', () => {
+        expect(viewerFetchFailureIsRetryable('missing_host_permission')).toBe(true);
+        expect(viewerFetchFailureMessage('missing_host_permission')).toBe(
+            'Allow this Capsule host before opening protected content from it.',
+        );
         expect(viewerFetchFailureIsRetryable('network_error')).toBe(true);
         expect(viewerFetchFailureMessage('network_error')).toBe(
             'This Capsule could not be reached. Check the connection, then try again.',
@@ -22,7 +42,11 @@ describe('Viewer blocker states', () => {
         );
     });
 
-    it('keeps authorization retry available only for temporary connection failures', () => {
+    it('keeps authorization retry available for temporary connection failures and rate limits', () => {
+        expect(viewerAuthorizationFailureIsRetryable('rate_limited')).toBe(true);
+        expect(viewerAuthorizationFailureMessage('rate_limited')).toBe(
+            'Opening is temporarily limited because too many Capsules were requested at once. Wait a moment, then try again.',
+        );
         expect(viewerAuthorizationFailureIsRetryable('network_error')).toBe(true);
         expect(viewerAuthorizationFailureMessage('network_error')).toBe(
             'Share Capsules could not be reached for authorization. Check the connection, then try again.',
@@ -141,4 +165,61 @@ describe('Viewer blocker states', () => {
             }),
         ).toBe('This Capsule cannot be opened because automated viewing protection was triggered.');
     });
+
+    it('explains when a future Time Capsule unlocks', () => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-06-24T00:00:00Z'));
+
+        expect(
+            brokerRedemptionFailureMessage(
+                {
+                    ok: false,
+                    code: 'release_denied',
+                    denialCode: 'policy_unsatisfied',
+                    retryable: false,
+                },
+                policyWithAccessWindow({
+                    predicate: CAPSULE_ACCESS_WINDOW_PREDICATE,
+                    not_before: '2026-11-26T06:00:00Z',
+                }),
+            ),
+        ).toBe('This Time Capsule cannot be opened yet. It unlocks on Nov 26, 2026, 6:00 AM UTC.');
+    });
+
+    it('explains when a Time Capsule opening window has ended', () => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-12-01T00:00:00Z'));
+
+        expect(
+            brokerRedemptionFailureMessage(
+                {
+                    ok: false,
+                    code: 'release_denied',
+                    denialCode: 'policy_unsatisfied',
+                    retryable: false,
+                },
+                policyWithAccessWindow({
+                    predicate: CAPSULE_ACCESS_WINDOW_PREDICATE,
+                    not_after: '2026-11-26T06:00:00Z',
+                }),
+            ),
+        ).toBe(
+            'This Time Capsule is closed. Its opening window ended on Nov 26, 2026, 6:00 AM UTC.',
+        );
+    });
 });
+
+function policyWithAccessWindow(accessWindow: CapsuleAccessWindowRequirementV1): CtxPolicyV1 {
+    return {
+        type: CTX_POLICY_TYPE,
+        version: CTX_POLICY_VERSION,
+        combiner: CTX_POLICY_COMBINER,
+        requirements: [
+            { predicate: EMAIL_VERIFIED_PREDICATE, equals: true },
+            { predicate: ACCOUNT_ACTIVE_PREDICATE, equals: true },
+            { predicate: DEVICE_REGISTERED_PREDICATE, equals: true },
+            { predicate: VIEW_EVENT_CONSENT_PREDICATE, equals: true },
+            accessWindow,
+        ],
+    };
+}

@@ -30,6 +30,18 @@ final class CtxPolicyV1Test extends TestCase
         $this->assertTrue($policy->notAfter?->equalTo(CarbonImmutable::parse('2026-08-01T05:00:00Z')));
     }
 
+    public function test_it_allows_loopback_http_for_local_automation_risk_development(): void
+    {
+        $policy = CtxPolicyV1::parse($this->policy([
+            [
+                'predicate' => 'ctx.risk.ecosystem-automation-not-high',
+                'issuer' => 'http://localhost:3003',
+            ],
+        ]));
+
+        $this->assertSame('http://localhost:3003', $policy->automationRiskIssuer);
+    }
+
     /** @param callable(array<string, mixed>): array<string, mixed> $mutate */
     #[DataProvider('invalidPolicies')]
     public function test_it_fails_closed_on_noncanonical_or_unsupported_policy(callable $mutate): void
@@ -105,6 +117,26 @@ final class CtxPolicyV1Test extends TestCase
                 [
                     'predicate' => 'ctx.risk.ecosystem-automation-not-high',
                     'issuer' => 'https://user@trust.example',
+                ],
+            ],
+        ]];
+        yield 'public http issuer' => [fn (array $policy): array => [
+            ...$policy,
+            'requirements' => [
+                ...$policy['requirements'],
+                [
+                    'predicate' => 'ctx.risk.ecosystem-automation-not-high',
+                    'issuer' => 'http://trust.example',
+                ],
+            ],
+        ]];
+        yield 'loopback issuer with query string' => [fn (array $policy): array => [
+            ...$policy,
+            'requirements' => [
+                ...$policy['requirements'],
+                [
+                    'predicate' => 'ctx.risk.ecosystem-automation-not-high',
+                    'issuer' => 'http://localhost:3003?debug=1',
                 ],
             ],
         ]];

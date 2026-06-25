@@ -13,15 +13,12 @@
 
         <div class="p-5 sm:p-7">
             <div class="mx-auto flex max-w-xs items-center gap-4 rounded-xl border border-amber-300/25 bg-amber-300/[0.06] p-4">
-                <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-amber-300/10 text-amber-300" aria-hidden="true">
-                    <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                        <path d="M7 3.75h7l3 3V20.25H7z" />
-                        <path d="M14 3.75v3h3M9.5 12h5M9.5 15.5h5" />
-                    </svg>
+                <span class="grid size-14 shrink-0 place-items-center" aria-hidden="true">
+                    <x-public.icons.capsule style="--icon-bg: transparent; --icon-soft-bg: transparent; --icon-line: #52627a; --icon-ink: #f8fafc; --icon-keyhole: #17243a;" />
                 </span>
                 <div>
                     <p class="text-[0.65rem] font-bold tracking-[0.15em] text-amber-300 uppercase">Capsule</p>
-                    <p class="mt-1 text-sm font-semibold">Encrypted content + signed policy</p>
+                    <p class="mt-1 text-sm font-semibold">Encrypted content + trust policy</p>
                 </div>
             </div>
 
@@ -32,11 +29,8 @@
             </div>
 
             <div class="mx-auto flex max-w-sm items-center gap-4 rounded-xl border border-violet-300/25 bg-violet-300/[0.07] p-4">
-                <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-violet-300/10 text-violet-300" aria-hidden="true">
-                    <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                        <rect x="4" y="4" width="16" height="12" rx="2" />
-                        <path d="M8 20h8M12 16v4" />
-                    </svg>
+                <span class="grid size-14 shrink-0 place-items-center" aria-hidden="true">
+                    <x-public.icons.trusted-viewer style="--icon-bg: transparent; --icon-line: #52627a;" />
                 </span>
                 <div>
                     <p class="text-[0.65rem] font-bold tracking-[0.15em] text-violet-300 uppercase">Trusted Viewer</p>
@@ -52,22 +46,16 @@
 
             <div class="mt-4 grid grid-cols-2 gap-3">
                 <div class="rounded-xl border border-teal-300/20 bg-white/[0.035] p-4 text-center">
-                    <span class="mx-auto grid size-9 place-items-center rounded-lg bg-teal-300/10 text-teal-300" aria-hidden="true">
-                        <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <path d="M12 3.5 19 6v5c0 4.5-2.7 7.5-7 9.5C7.7 18.5 5 15.5 5 11V6z" />
-                            <path d="m9 12 2 2 4-4" />
-                        </svg>
+                    <span class="mx-auto grid size-14 place-items-center" aria-hidden="true">
+                        <x-public.icons.trust-provider style="--icon-bg: transparent; --icon-line: #52627a;" />
                     </span>
                     <p class="mt-3 text-xs font-bold text-white">Trust Provider</p>
                     <p class="mt-1 text-[0.68rem] leading-5 text-slate-400"><span class="text-teal-300">1.</span> Evaluates the policy</p>
                 </div>
 
                 <div class="rounded-xl border border-amber-300/20 bg-white/[0.035] p-4 text-center">
-                    <span class="mx-auto grid size-9 place-items-center rounded-lg bg-amber-300/10 text-amber-300" aria-hidden="true">
-                        <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <circle cx="8.5" cy="12" r="3.5" />
-                            <path d="M12 12h8M17 12v3M20 12v2" />
-                        </svg>
+                    <span class="mx-auto grid size-14 place-items-center" aria-hidden="true">
+                        <x-public.icons.key-broker style="--icon-bg: transparent; --icon-line: #52627a;" />
                     </span>
                     <p class="mt-3 text-xs font-bold text-white">Key Broker</p>
                     <p class="mt-1 text-[0.68rem] leading-5 text-slate-400"><span class="text-amber-300">2.</span> Releases a wrapped key</p>

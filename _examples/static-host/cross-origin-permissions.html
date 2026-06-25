@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Share Capsules cross-origin Host permission test</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        color: #162033;
+        background: #f5f7fb;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+      }
+
+      main {
+        width: min(960px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 48px 0;
+      }
+
+      header,
+      article {
+        border: 1px solid #d7dfec;
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: 0 10px 30px rgb(31 48 78 / 6%);
+        padding: 28px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: clamp(2rem, 6vw, 3.7rem);
+        line-height: 1;
+        letter-spacing: -0.045em;
+      }
+
+      h2 {
+        font-size: 1.45rem;
+      }
+
+      p {
+        color: #526078;
+        line-height: 1.6;
+      }
+
+      code {
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      }
+
+      capsule-viewer {
+        display: block;
+        min-height: 300px;
+      }
+
+      capsule-viewer > template,
+      capsule-viewer > error {
+        display: none;
+      }
+
+      .eyebrow {
+        margin-bottom: 10px;
+        color: #315ea8;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .stack {
+        display: grid;
+        gap: 24px;
+        margin-top: 24px;
+      }
+
+      .case {
+        display: grid;
+        gap: 18px;
+      }
+
+      .expectation,
+      .fallback-card,
+      .error-card,
+      .viewer-shell {
+        display: grid;
+        gap: 12px;
+        border-radius: 16px;
+        background: #f8fafc;
+        padding: 18px;
+      }
+
+      .viewer-frame {
+        display: block;
+        width: 100%;
+        height: 320px;
+        border-radius: 14px;
+        background: #eef3f8;
+        object-fit: contain;
+      }
+
+      .install-link {
+        display: inline-flex;
+        width: fit-content;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: #315ea8;
+        color: #fff;
+        font-weight: 800;
+        padding: 10px 14px;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">Phase 8 Host permissions</p>
+        <h1>Cross-origin Capsule host test</h1>
+        <p style="margin-top: 18px">
+          Use this page when the HTML page and <code>.capsule</code> files are
+          served from different HTTPS origins. The expected behavior is two
+          distinct runtime Host permissions: one for this page origin so the
+          extension can discover <code>&lt;capsule-viewer&gt;</code>, and one
+          for the Capsule origin before the extension fetches the encrypted
+          artifact.
+        </p>
+      </header>
+
+      <section class="stack" aria-label="Cross-origin Host permission cases">
+        <article id="separate-capsule-origin" class="case">
+          <div>
+            <p class="eyebrow">Separate Capsule origin</p>
+            <h2>Page permission does not imply Capsule fetch permission</h2>
+          </div>
+
+          <div class="expectation">
+            <p>
+              <strong>Fixture:</strong>
+              replace <code>https://capsules.example.test/phase8/</code> with a
+              real static Capsule origin serving the checked-in fixture file.
+            </p>
+            <p>
+              <strong>Expected:</strong> after granting only the page origin,
+              discovery works but the Viewer asks for the Capsule origin before
+              making the Capsule request.
+            </p>
+          </div>
+
+          <capsule-viewer
+            src="https://capsules.example.test/phase8/tekfoundry-logo.capsule"
+            fit="contain"
+            viewer-height="320px"
+          >
+            <fallback>
+              <section class="fallback-card">
+                <h3>Protected cross-origin Capsule</h3>
+                <p>
+                  This fixture is for separately hosted static pages and Capsule
+                  files. Install or connect the Viewer, grant this page origin,
+                  then grant the Capsule origin when prompted.
+                </p>
+                <a
+                  class="install-link"
+                  href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2Fcross-origin-permissions.html%23separate-capsule-origin"
+                  >Install or connect Viewer</a
+                >
+              </section>
+            </fallback>
+
+            <template>
+              <section class="viewer-shell">
+                <h3>{{ title }}</h3>
+                <p>{{ description }}</p>
+                <content class="viewer-frame"></content>
+              </section>
+            </template>
+
+            <error>
+              <section class="error-card">
+                <h3>Capsule host permission required</h3>
+                <p>{{ error_message }}</p>
+              </section>
+            </error>
+          </capsule-viewer>
+        </article>
+
+        <article id="redirected-capsule-origin" class="case">
+          <div>
+            <p class="eyebrow">Redirected Capsule origin</p>
+            <h2>Redirect targets require their own origin grant</h2>
+          </div>
+
+          <div class="expectation">
+            <p>
+              <strong>Fixture:</strong>
+              point this URL at a static endpoint that redirects to a different
+              HTTPS Capsule origin.
+            </p>
+            <p>
+              <strong>Expected:</strong> the Viewer validates the redirect but
+              stops before fetching the final URL until the redirected origin is
+              also granted.
+            </p>
+          </div>
+
+          <capsule-viewer
+            src="https://capsules.example.test/phase8/redirect-to-tekfoundry-logo.capsule"
+            fit="contain"
+            viewer-height="320px"
+          >
+            <fallback>
+              <section class="fallback-card">
+                <h3>Protected redirected Capsule</h3>
+                <p>
+                  This case verifies that redirects cannot smuggle a Capsule
+                  fetch onto a newly introduced origin.
+                </p>
+              </section>
+            </fallback>
+
+            <template>
+              <section class="viewer-shell">
+                <h3>{{ title }}</h3>
+                <p>{{ description }}</p>
+                <content class="viewer-frame"></content>
+              </section>
+            </template>
+
+            <error>
+              <section class="error-card">
+                <h3>Redirected Capsule host permission required</h3>
+                <p>{{ error_message }}</p>
+              </section>
+            </error>
+          </capsule-viewer>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

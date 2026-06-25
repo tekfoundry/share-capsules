@@ -1,9 +1,10 @@
 import type { StaticImageMetadataV1 } from '@sharecapsules/capsule-core';
 
-import type {
-    BrokerKeyRegistrar,
-    BuiltCapsuleV1,
-    CreatorCapsuleBuilderV1,
+import {
+    CreatorCapsuleBuildError,
+    type BrokerKeyRegistrar,
+    type BuiltCapsuleV1,
+    type CreatorCapsuleBuilderV1,
 } from './creator-capsule-builder.js';
 import type { ContentByteSource } from './creator-content-profile.js';
 import type { CreatorStudioDraftV1, LocalCreatorSource } from './creator-studio.js';
@@ -42,6 +43,7 @@ export class CreatorCapsuleWorkflowError extends Error {
             | 'file_required'
             | 'session_required'
             | 'signing_key_required',
+        public readonly detail?: string,
     ) {
         super(code);
         this.name = 'CreatorCapsuleWorkflowError';
@@ -87,8 +89,13 @@ export class CreatorCapsuleWorkflow {
                 token: session.token,
                 device: session.device,
             });
-        } catch {
-            throw new CreatorCapsuleWorkflowError('build_failed');
+        } catch (error) {
+            throw new CreatorCapsuleWorkflowError(
+                'build_failed',
+                error instanceof CreatorCapsuleBuildError
+                    ? (error.detail ?? error.code)
+                    : undefined,
+            );
         }
 
         try {

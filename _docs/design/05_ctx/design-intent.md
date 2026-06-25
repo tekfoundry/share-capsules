@@ -50,6 +50,14 @@ Policy is embedded as a versioned structured JSON object with stable predicate i
 
 The V1 reference policy is intentionally narrower than the eventual policy model. Each Capsule embeds its creator-signed policy. That policy requires verified email, a valid account, a registered Viewer device, and explicit consent to Capsule view-event accounting. The creator may also select an opening instant, closing instant, or both for the exact Capsule revision; set global and per-account Capsule lifetime limits; and require a current provider-issued ecosystem automation-risk-not-high predicate. Access-window time is evaluated online at authorization and again immediately before committed key release. V1 automation risk uses CTX usage metadata only; higher-assurance identity, personhood, account-age, and passive behavioral inputs remain separately defined concerns.
 
+Product language groups these optional policy gates into creator-facing Capsule patterns:
+
+- **Time Capsules** use date or time-window gates to control when protected content may be opened.
+- **Limit Capsules** use count or future rate gates to control how often protected content may be opened.
+- **Trust Capsules** use trust, risk, or evidence gates to control whether a specific viewer/session should be allowed.
+
+These are not separate container formats. They are human-readable patterns over the signed CTX policy, and a single Capsule may combine Time, Limit, and Trust gates.
+
 The embedded policy is immutable within its signed Capsule revision. CTX evaluates that policy as written. A provider may deny, suspend, or revoke access, but it must not authorize access under requirements weaker than the signed policy.
 
 ## Authorization artifact

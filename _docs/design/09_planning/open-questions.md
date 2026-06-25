@@ -1,7 +1,7 @@
 # Open Questions
 
 Status: Draft
-Last updated: 2026-06-20
+Last updated: 2026-06-24
 
 ## Purpose
 
@@ -62,10 +62,11 @@ Maintain a visible backlog of unresolved design questions. An unanswered questio
 
 ## Federation and governance
 
-- How are trust providers discovered and selected?
+- What exact registry format and distribution mechanism should official tools use?
 - What makes one CTX service compatible with another?
-- Which registries, if any, need shared governance?
-- How are malicious or compromised providers removed?
+- Which recognition criteria should allow third-party providers and brokers into the official Share Capsules network?
+- Which registries, if any, need shared governance beyond the Share Capsules official network?
+- How are malicious or compromised providers removed from official recognition while making the action auditable?
 - What governance model earns the confidence of both creators and viewers?
 
 ## Near-term decisions

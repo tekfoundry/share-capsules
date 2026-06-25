@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { BuiltCapsuleV1 } from './creator-capsule-builder.js';
+import { CreatorCapsuleBuildError, type BuiltCapsuleV1 } from './creator-capsule-builder.js';
 import {
     CreatorCapsuleWorkflow,
     CreatorCapsuleWorkflowError,
@@ -96,14 +96,36 @@ describe('Creator Capsule publication workflow', () => {
         ).rejects.toEqual(new CreatorCapsuleWorkflowError('download_failed'));
         expect(cancellation.calls).toBe(1);
     });
+
+    it('preserves safe builder failure details for creator troubleshooting', async () => {
+        const builder = new RecordingBuilder();
+        builder.buildError = new CreatorCapsuleBuildError(
+            'broker_registration_failed',
+            'invalid_input',
+        );
+
+        await expect(
+            new CreatorCapsuleWorkflow(
+                selection(true),
+                keys(true),
+                sessions(true),
+                builder,
+                new RecordingCancellation(),
+                new RecordingDownloader(),
+                'Capsule',
+            ).buildAndDownload(),
+        ).rejects.toEqual(new CreatorCapsuleWorkflowError('build_failed', 'invalid_input'));
+    });
 });
 
 class RecordingBuilder {
     public calls = 0;
     public fail = false;
+    public buildError: Error | undefined;
 
     public async build(): Promise<BuiltCapsuleV1> {
         this.calls++;
+        if (this.buildError !== undefined) throw this.buildError;
         if (this.fail) throw new Error('build failed');
         return {
             manifest: {} as never,

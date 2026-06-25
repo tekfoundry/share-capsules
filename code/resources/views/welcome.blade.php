@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Share Capsules — Share your work with people, not harvesters')
-@section('description', 'Share Capsules is an open, experimental approach to sharing encrypted creative work under creator-defined access conditions.')
+@section('description', 'Share Capsules is an open, experimental approach to sharing encrypted creative work through an opinionated official network of recognized trust and key-release services.')
 @section('robots', 'index, follow')
 
 @section('content')
@@ -23,7 +23,7 @@
 
             <div class="mt-9 flex flex-col gap-3 sm:flex-row">
                 <a
-                    href="#workflow"
+                    href="#lifecycle"
                     class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-brand px-5 text-sm font-bold text-white shadow-lg shadow-brand/15 transition hover:-translate-y-0.5 hover:bg-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                 >
                     See how it could work
@@ -41,20 +41,44 @@
                 <strong class="text-ink">An honest boundary:</strong> no technology can prevent an authorized viewer from copying what they can see. The goal is to make effortless, anonymous, large-scale access harder—not to promise impossible DRM.
             </p>
 
-            <dl class="mt-8 grid max-w-xl grid-cols-3 gap-5 border-t border-line pt-6">
-                <div>
-                    <dt class="text-xs font-semibold tracking-wide text-muted uppercase">Content</dt>
-                    <dd class="mt-1 text-sm font-bold text-ink">Encrypted locally</dd>
-                </div>
-                <div>
-                    <dt class="text-xs font-semibold tracking-wide text-muted uppercase">Policy</dt>
-                    <dd class="mt-1 text-sm font-bold text-ink">Creator signed</dd>
-                </div>
-                <div>
-                    <dt class="text-xs font-semibold tracking-wide text-muted uppercase">Hosting</dt>
-                    <dd class="mt-1 text-sm font-bold text-ink">Creator selected</dd>
-                </div>
-            </dl>
+            <ul class="mt-8 grid max-w-2xl grid-cols-2 gap-5 border-t border-line pt-6 sm:grid-cols-4">
+                <li class="flex items-start gap-3">
+                    <span class="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface" aria-hidden="true">
+                        <x-public.icons.artwork class="size-7" />
+                    </span>
+                    <div>
+                        <p class="text-xs font-semibold tracking-wide text-muted uppercase">Content</p>
+                        <p class="mt-1 text-sm font-bold text-ink">Encrypted locally</p>
+                    </div>
+                </li>
+                <li class="flex items-start gap-3">
+                    <span class="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface" aria-hidden="true">
+                        <x-public.icons.policy class="size-7" />
+                    </span>
+                    <div>
+                        <p class="text-xs font-semibold tracking-wide text-muted uppercase">Policy</p>
+                        <p class="mt-1 text-sm font-bold text-ink">Creator-defined</p>
+                    </div>
+                </li>
+                <li class="flex items-start gap-3">
+                    <span class="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface" aria-hidden="true">
+                        <x-public.icons.host class="size-7" />
+                    </span>
+                    <div>
+                        <p class="text-xs font-semibold tracking-wide text-muted uppercase">Hosting</p>
+                        <p class="mt-1 text-sm font-bold text-ink">Encrypted only</p>
+                    </div>
+                </li>
+                <li class="flex items-start gap-3">
+                    <span class="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface" aria-hidden="true">
+                        <x-public.icons.trusted-viewer class="size-7" />
+                    </span>
+                    <div>
+                        <p class="text-xs font-semibold tracking-wide text-muted uppercase">Viewer</p>
+                        <p class="mt-1 text-sm font-bold text-ink">Policy-gated</p>
+                    </div>
+                </li>
+            </ul>
         </div>
 
         <x-public.access-architecture />
@@ -88,24 +112,45 @@
             <div class="max-w-2xl">
                 <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">What we are building</p>
                 <h2 class="mt-4 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">Encrypted content with creator-defined access.</h2>
-                <p class="mt-5 text-lg leading-8 text-muted">A Capsule carries encrypted content and a signed access policy. <strong class="font-semibold text-ink">Capsule Trust Exchange (CTX)</strong> is the open protocol a Viewer uses to ask a creator-recognized provider whether those access conditions are satisfied—without exposing the Viewer’s raw account history to the creator or Host. This separates hosting, trust evaluation, and key release so creators can choose where they publish.</p>
+                <p class="mt-5 text-lg leading-8 text-muted">Share Capsules separates protected content from public hosting. Creators secure the work, publish the encrypted file where they choose, and let the Viewer ask trusted services whether the work should open.</p>
             </div>
 
             <div class="mt-12 grid gap-5 md:grid-cols-3">
                 @foreach ([
-                    ['01', 'Create a Capsule', 'Creator-controlled tooling encrypts the source, signs its manifest, and packages the access policy.'],
-                    ['02', 'Host it independently', 'The encrypted file can live on an ordinary compatible static host chosen by the creator.'],
-                    ['03', 'Authorize each release', 'A trusted Viewer uses CTX to satisfy the policy before decrypting and rendering locally.'],
-                ] as [$number, $heading, $copy])
+                    ['01', 'capsule', 'Secure content', 'The creator tool turns the original work into a Capsule: encrypted content plus a custom trust policy.'],
+                    ['02', 'host', 'Publish content', 'The encrypted Capsule can be hosted on an ordinary website chosen by the creator.'],
+                    ['03', 'trusted-viewer', 'View content', 'A trusted Viewer checks whether the visitor meets the policy before decrypting and rendering the original work locally.'],
+                ] as [$number, $icon, $heading, $copy])
                     <article class="rounded-2xl border border-line bg-surface p-6 shadow-card">
-                        <span class="text-xs font-bold tracking-[0.16em] text-brand uppercase">{{ $number }}</span>
-                        <h3 class="mt-5 text-lg font-bold">{{ $heading }}</h3>
+                        <div class="flex items-start justify-between gap-4">
+                            <span class="text-xs font-bold tracking-[0.16em] text-brand uppercase">{{ $number }}</span>
+                            <span class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-white" aria-hidden="true">
+                                <x-dynamic-component :component="'public.icons.'.$icon" class="size-10" />
+                            </span>
+                        </div>
+                        <h3 class="mt-4 text-lg font-bold">{{ $heading }}</h3>
                         <p class="mt-3 text-sm leading-6 text-muted">{{ $copy }}</p>
                     </article>
                 @endforeach
             </div>
 
-            <x-public.access-workflow id="workflow" class="mt-16" />
+            <p class="mt-8 max-w-3xl text-base leading-7 text-muted"><strong class="font-semibold text-ink">Capsule Trust Exchange (CTX)</strong> is the open protocol behind that approval step. It lets a Viewer ask whether the creator’s access rules are met without exposing the Viewer’s raw account history to the creator or Host.</p>
+        </div>
+    </section>
+
+    <x-public.lifecycle-section />
+
+    <section class="border-b border-line bg-white py-16 sm:py-20">
+        <div class="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+            <div class="rounded-2xl border border-line bg-canvas p-6 sm:p-7">
+                <div class="grid gap-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
+                    <div>
+                        <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">Open protocol, trusted providers</p>
+                        <h3 class="mt-3 text-2xl font-semibold tracking-[-0.025em] text-ink">Anyone can build. Official tools choose carefully.</h3>
+                    </div>
+                    <p class="text-sm leading-6 text-muted">Independent projects can build with Capsule and CTX. The official Share Capsules tools use approved network services by default, so creators and viewers are not asked to rely on random providers just because they appear on a web page.</p>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -115,18 +160,23 @@
                 <div>
                     <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">How trust works</p>
                     <h2 class="mt-4 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">Trust, without a universal trust score.</h2>
-                    <p class="mt-5 text-base leading-7 text-muted">CTX does not decide whether someone is a “good” or “trustworthy” person. Each creator defines the conditions required for their Capsule. A recognized provider evaluates only the relevant, Viewer-consented evidence and returns whether those conditions are satisfied.</p>
+                    <p class="mt-5 text-base leading-7 text-muted">CTX does not decide whether someone is a “good” or “trustworthy” person. It checks only the conditions the creator set for this Capsule, using information the Viewer agrees to share.</p>
                 </div>
 
                 <div class="overflow-hidden rounded-2xl border border-line bg-white shadow-card">
                     <ol class="grid divide-y divide-line sm:grid-cols-3 sm:divide-x sm:divide-y-0">
                         @foreach ([
-                            ['01', 'Creator chooses', 'The Capsule carries the creator’s signed access conditions.'],
-                            ['02', 'Viewer consents', 'The Viewer decides whether to disclose the evidence needed for this request.'],
-                            ['03', 'Provider evaluates', 'The provider returns a limited policy result rather than a raw account history.'],
-                        ] as [$number, $heading, $copy])
+                            ['01', 'policy', 'Creator chooses', 'The Capsule carries the creator’s signed access conditions.'],
+                            ['02', 'viewer', 'Viewer consents', 'The Viewer decides whether to disclose the evidence needed for this request.'],
+                            ['03', 'trust-provider', 'Provider evaluates', 'The provider returns a limited policy result rather than a raw account history.'],
+                        ] as [$number, $icon, $heading, $copy])
                             <li class="p-5 sm:p-6">
-                                <span class="text-xs font-bold tracking-[0.14em] text-brand uppercase">{{ $number }}</span>
+                                <div class="flex items-start justify-between gap-4">
+                                    <span class="text-xs font-bold tracking-[0.14em] text-brand uppercase">{{ $number }}</span>
+                                    <span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-surface" aria-hidden="true">
+                                        <x-dynamic-component :component="'public.icons.'.$icon" class="size-9" />
+                                    </span>
+                                </div>
                                 <h3 class="mt-3 font-bold text-ink">{{ $heading }}</h3>
                                 <p class="mt-2 text-sm leading-6 text-muted">{{ $copy }}</p>
                             </li>
@@ -142,32 +192,44 @@
                         </ul>
                         <p class="mt-5 border-l-2 border-teal-500 pl-4 text-sm leading-6 text-muted"><strong class="text-ink">The creator receives the policy result</strong>—not the Viewer’s email, identity, complete history, or raw evidence.</p>
                     </div>
+
+                    <div class="border-t border-line bg-white p-5 sm:p-6">
+                        <p class="text-xs font-bold tracking-[0.14em] text-muted uppercase">Recognized services</p>
+                        <p class="mt-3 text-sm leading-6 text-muted">Official Viewers only work with services the network recognizes. If a service is no longer trusted, the Viewer can stop before sharing private account information or opening the protected work.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="boundaries" class="mx-auto max-w-7xl px-5 py-20 sm:px-8 sm:py-24 lg:px-10">
-        <div class="grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:items-start">
+    <section id="boundaries" class="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20 lg:px-10">
+        <div class="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-start">
             <div>
                 <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">Designed for clarity</p>
                 <h2 class="mt-4 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">Security without mystery.</h2>
-                <p class="mt-5 text-base leading-7 text-muted">The interface should explain what is happening, who receives information, and what an authorization consumes—without exposing raw trust history to creators or Hosts.</p>
+                <p class="mt-5 text-sm leading-6 text-muted">Each part has a bounded job, so creators and viewers can understand who sees what.</p>
             </div>
 
-            <dl class="grid gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-2">
+            <div class="grid gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-2">
                 @foreach ([
-                    ['Host website', 'Serves public fallback and opaque encrypted Capsule files.'],
-                    ['Trusted Viewer', 'Validates, authorizes, decrypts, and renders in an isolated surface.'],
-                    ['CTX Provider', 'Evaluates the exact creator-signed policy using consented evidence.'],
-                    ['Key Broker', 'Releases only the ticket-bound content key to the registered device.'],
-                ] as [$term, $description])
-                    <div class="bg-white p-6">
-                        <dt class="font-bold text-ink">{{ $term }}</dt>
-                        <dd class="mt-2 text-sm leading-6 text-muted">{{ $description }}</dd>
-                    </div>
+                    ['host', 'Host website', 'Serves public fallback and opaque encrypted Capsule files.'],
+                    ['trusted-viewer', 'Trusted Viewer', 'Validates, authorizes, decrypts, and renders in an isolated surface.'],
+                    ['registry', 'Official registry', 'Identifies which providers and brokers the official tools recognize.'],
+                    ['ctx-protocol', 'CTX Protocol', 'Coordinates the Viewer, provider, and broker requests without giving the Host plaintext access.'],
+                    ['trust-provider', 'Trust Provider', 'Evaluates the exact creator-signed policy using consented evidence.'],
+                    ['key-broker', 'Key Broker', 'Releases only the ticket-bound content key to the registered device.'],
+                ] as [$icon, $term, $description])
+                    <article class="flex gap-4 bg-white p-5">
+                        <span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-surface" aria-hidden="true">
+                            <x-dynamic-component :component="'public.icons.'.$icon" class="size-9" />
+                        </span>
+                        <div>
+                            <h3 class="font-bold text-ink">{{ $term }}</h3>
+                            <p class="mt-2 text-sm leading-6 text-muted">{{ $description }}</p>
+                        </div>
+                    </article>
                 @endforeach
-            </dl>
+            </div>
         </div>
     </section>
 

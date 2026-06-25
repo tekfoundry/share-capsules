@@ -1,13 +1,13 @@
 # Share Capsules Reference Implementation
 
 Status: Draft
-Last updated: 2026-06-22
+Last updated: 2026-06-24
 
 ## Purpose
 
 Define the intended V1 implementation boundaries for `sharecapsules.com` without turning implementation choices into requirements for every future CTX Provider.
 
-Share Capsules presents one user-facing account and product workflow. Its CTX Provider, automation-risk Trust Provider, and Key Broker roles remain logically distinct but are selected automatically by V1 tooling rather than exposed as routine creator or viewer configuration. See [V1 creator and viewer experience](../02_product/v1-user-experience.md).
+Share Capsules presents one user-facing account and product workflow. Its CTX Provider, automation-risk Trust Provider, and Key Broker roles remain logically distinct but are selected automatically by V1 tooling rather than exposed as routine creator or viewer configuration. The official tools participate in the Share Capsules recognized network; they do not treat arbitrary provider or broker URLs as trusted simply because those services speak the protocol. See [V1 creator and viewer experience](../02_product/v1-user-experience.md) and [Official network and service registry](official-network-and-registry.md).
 
 ## Technology direction
 
@@ -21,7 +21,7 @@ The Share Capsules reference implementation uses:
 - A logically isolated key-release component
 - A separately deployable static reference Host used for examples and interoperability testing
 
-Future CTX Providers may use different technology stacks as long as they conform to the eventual Capsule, CTX, and Viewer specifications.
+Future CTX Providers may use different technology stacks as long as they conform to the eventual Capsule, CTX, and Viewer specifications. Protocol conformance alone does not imply recognition by the official Share Capsules creator or Viewer tools. Recognition is governed by the official service registry or a future equivalent trust list.
 
 MySQL is an implementation choice for Share Capsules, not a CTX requirement. The V1 schema and transaction design must use supported transactional tables, foreign keys, uniqueness constraints, and row-level locking where required for atomic ticket redemption and counter enforcement. Redis may accelerate queues, caching, and service protection, but it must not weaken durable authorization invariants.
 
@@ -201,7 +201,8 @@ The Capsule format is media-agnostic and describes arbitrary binary payloads wit
 - One manifest version
 - One supported cryptographic suite
 - One Share Capsules CTX Provider
-- One key-release arrangement
+- One Share Capsules Key Broker
+- One official-network registry entry set, currently represented by configuration
 - One Chrome/Chromium-compatible desktop extension
 
 V1 implements one trusted image content-profile class shared by creator tooling and the Viewer. It supports static JPEG, PNG, and WebP after validating file signatures and rejecting animated variants. SVG, GIF, APNG, animated WebP, and unrecognized image forms are unsupported.

@@ -41,11 +41,11 @@ final class CtxTicketRedemptionServiceTest extends TestCase
             $service->redeem($ticket->jti, $ticket->ticket_sha256)->code,
         );
         $this->assertSame(
-            TicketRedemptionCode::Replayed,
+            TicketRedemptionCode::AlreadyCommitted,
             $service->redeem($ticket->jti, $ticket->ticket_sha256)->code,
         );
         $this->assertSame(
-            TicketRedemptionCode::Replayed,
+            TicketRedemptionCode::AlreadyCommitted,
             $service->redeem($ticket->jti, $ticket->ticket_sha256)->code,
         );
         $this->assertSame(1, CtxCapsuleReleaseCounter::query()->value('committed_releases'));
@@ -53,9 +53,9 @@ final class CtxTicketRedemptionServiceTest extends TestCase
         $this->assertSame('redeemed', $ticket->refresh()->status);
         $projection = CtxCapsuleMetricProjection::query()->sole();
         $this->assertSame(1, $projection->redemption_committed);
-        $this->assertSame(1, $projection->ticket_rejected);
-        $this->assertSame(2, CtxMetricEventRecord::query()->count());
-        $this->assertSame(3, CtxAutomationRiskActivity::query()->count());
+        $this->assertSame(0, $projection->ticket_rejected);
+        $this->assertSame(1, CtxMetricEventRecord::query()->count());
+        $this->assertSame(1, CtxAutomationRiskActivity::query()->count());
     }
 
     public function test_a_second_pending_ticket_cannot_exceed_the_exact_limit(): void

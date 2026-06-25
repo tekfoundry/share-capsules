@@ -1,7 +1,7 @@
 # CTX Trust Model
 
 Status: Draft
-Last updated: 2026-06-18
+Last updated: 2026-06-24
 
 ## Purpose
 
@@ -14,6 +14,8 @@ The difficult problem is not content encryption. It is allowing a creator to exp
 > Who do I trust to decide whether this viewer may access my content, and what evidence do I require?
 
 CTX does not define trust universally. CTX evaluates creator-selected evidence according to creator-selected policy.
+
+In the official Share Capsules network, creator selection is mediated by the official service registry. A provider or broker may be protocol-compatible without being recognized by the official creator and Viewer tools.
 
 ## Three-layer model
 
@@ -168,6 +170,7 @@ Useful decentralized patterns may include user-controlled credential wallets, si
 - How are score definitions made understandable and comparable?
 - Who may issue negative risk assertions, and how are they challenged?
 - How does account portability preserve continuity without enabling reputation resets?
+- Which recognition criteria make a third-party provider or broker acceptable for the official Share Capsules network?
 
 ## Related documents
 
@@ -177,3 +180,4 @@ Useful decentralized patterns may include user-controlled credential wallets, si
 - [V1 trust profile and retained state](trust-profile-v1.md)
 - [Privacy model](../07_security-and-privacy/privacy-model.md)
 - [Accounts and identity](../03_architecture/accounts-and-identity.md)
+- [Official network and service registry](../03_architecture/official-network-and-registry.md)

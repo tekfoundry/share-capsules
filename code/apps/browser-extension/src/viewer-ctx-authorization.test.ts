@@ -98,6 +98,15 @@ describe('Viewer CTX authorization client', () => {
             }).authorize(summary(), token(['ctx:authorize']), device(), true),
         ).resolves.toEqual({ ok: false, code: 'invalid_response' });
     });
+
+    it('reports authorization throttling as a retryable rate limit instead of a lost session', async () => {
+        await expect(
+            new ViewerCtxAuthorizationClient('https://trust.example/ctx/authorize', {
+                dpop: proofFactory(),
+                fetch: async () => jsonResponse({ message: 'Too Many Requests' }, 429),
+            }).authorize(summary(), token(['ctx:authorize']), device(), true),
+        ).resolves.toEqual({ ok: false, code: 'rate_limited' });
+    });
 });
 
 function proofFactory(): ViewerCtxAuthorizationOptions['dpop'] {

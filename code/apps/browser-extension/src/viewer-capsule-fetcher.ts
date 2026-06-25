@@ -6,6 +6,7 @@ export const VIEWER_CAPSULE_TIMEOUT_MS = 15_000;
 
 export type ViewerCapsuleFetchFailureCode =
     | 'unsupported_url'
+    | 'missing_host_permission'
     | 'too_many_redirects'
     | 'redirect_without_location'
     | 'unexpected_status'
@@ -22,13 +23,20 @@ export type ViewerCapsuleFetchResult =
     | {
           readonly ok: false;
           readonly code: ViewerCapsuleFetchFailureCode;
+          readonly origin?: string;
+          readonly permission?: string;
       };
 
 export interface ViewerCapsuleFetchOptions {
     readonly fetch?: typeof fetch;
+    readonly hostPermissions?: ViewerCapsuleHostPermissions;
     readonly maxBytes?: number;
     readonly maxRedirects?: number;
     readonly timeoutMs?: number;
+}
+
+export interface ViewerCapsuleHostPermissions {
+    contains(permission: string): Promise<boolean>;
 }
 
 export async function fetchViewerCapsule(
@@ -39,10 +47,21 @@ export async function fetchViewerCapsule(
     const maxRedirects = options.maxRedirects ?? VIEWER_CAPSULE_MAX_REDIRECTS;
     const timeoutMs = options.timeoutMs ?? VIEWER_CAPSULE_TIMEOUT_MS;
     const fetchImplementation = options.fetch ?? fetch;
+    const hostPermissions = options.hostPermissions;
     let currentUrl = normalizedFetchUrl(capsuleUrl);
     if (currentUrl === undefined) return { ok: false, code: 'unsupported_url' };
 
     for (let redirectCount = 0; redirectCount <= maxRedirects; redirectCount += 1) {
+        const permission = viewerHostPermissionPattern(currentUrl);
+        if (hostPermissions !== undefined && !(await hostPermissions.contains(permission))) {
+            return {
+                ok: false,
+                code: 'missing_host_permission',
+                origin: new URL(currentUrl).origin,
+                permission,
+            };
+        }
+
         const attempt = await fetchAttempt(fetchImplementation, currentUrl, timeoutMs);
         if (attempt.response === undefined) {
             return { ok: false, code: attempt.timedOut ? 'network_error' : 'network_error' };
@@ -73,6 +92,11 @@ export async function fetchViewerCapsule(
     }
 
     return { ok: false, code: 'too_many_redirects' };
+}
+
+export function viewerHostPermissionPattern(url: string): string {
+    const parsed = new URL(url);
+    return `${parsed.origin}/*`;
 }
 
 function normalizedFetchUrl(rawUrl: string, baseUrl?: string): string | undefined {

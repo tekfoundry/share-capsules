@@ -1,4 +1,5 @@
 import { fetchViewerCapsule } from './viewer-capsule-fetcher.js';
+import type { ViewerCapsuleFetchResult } from './viewer-capsule-fetcher.js';
 import {
     verifyFetchedViewerCapsule,
     type VerifiedViewerCapsuleSummary,
@@ -80,6 +81,10 @@ declare const chrome: {
     readonly runtime: {
         sendMessage(message: unknown): Promise<unknown>;
     };
+    readonly permissions: {
+        contains(permissions: { readonly origins: readonly string[] }): Promise<boolean>;
+        request(permissions: { readonly origins: readonly string[] }): Promise<boolean>;
+    };
 };
 
 const CONTROL_PLANE = 'http://localhost:3003';
@@ -101,6 +106,8 @@ let activeRenderedPayload: ViewerPayloadRenderResult | undefined;
 let stopWaitingForViewerCredentials: (() => void) | undefined;
 let resumeAfterConnectionRunning = false;
 let activeOpenSlotRelease: (() => Promise<void>) | undefined;
+let activeOpenAttempt: Promise<void> | undefined;
+let payloadOpened = false;
 
 void initializeViewerFrame();
 
@@ -130,9 +137,17 @@ async function initializeViewerFrame(): Promise<void> {
     setViewerFrameState('loading', 'Fetching this Capsule safely before verification.');
     urlElement.textContent = capsuleUrl;
 
-    const fetchResult = await fetchViewerCapsule(capsuleUrl);
+    const fetchResult = await fetchViewerCapsule(capsuleUrl, {
+        hostPermissions: {
+            contains: async (permission) => chrome.permissions.contains({ origins: [permission] }),
+        },
+    });
     if (!fetchResult.ok) {
         debugLog('fetch_failed', { code: fetchResult.code });
+        if (fetchResult.code === 'missing_host_permission') {
+            showCapsuleHostPermissionBlocker(fetchResult);
+            return;
+        }
         showBlocker(
             statusElement,
             actionsElement,
@@ -176,6 +191,48 @@ async function initializeViewerFrame(): Promise<void> {
         verificationResult.summary,
         verificationResult.encryptedPayload,
     );
+}
+
+function showCapsuleHostPermissionBlocker(
+    result: Extract<ViewerCapsuleFetchResult, { readonly ok: false }>,
+): void {
+    if (result.code !== 'missing_host_permission' || result.permission === undefined) return;
+    const permission = result.permission;
+    if (!(actionsElement instanceof HTMLElement)) {
+        setViewerFrameState(
+            'error',
+            'This Capsule host must be allowed before protected content can open.',
+        );
+        postViewerState('error', {
+            errorMessage: 'This Capsule host must be allowed before protected content can open.',
+        });
+        return;
+    }
+
+    const hostLabel = result.origin ?? result.permission;
+    const message = `Allow ${hostLabel} as a Capsule host before opening protected content from it.`;
+    actionsElement.replaceChildren();
+    setViewerFrameState('action_required', message);
+    postViewerState('action_required', { errorMessage: message });
+
+    const allow = button('Allow Capsule host');
+    allow.addEventListener('click', () => {
+        void withDisabledButton(allow, async () => {
+            const granted = await chrome.permissions.request({
+                origins: [permission],
+            });
+            if (granted) {
+                actionsElement.replaceChildren();
+                await initializeViewerFrame();
+                return;
+            }
+            setViewerFrameState(
+                'action_required',
+                `Capsule host access was not granted for ${hostLabel}. The protected content remains locked.`,
+            );
+        });
+    });
+    actionsElement.append(allow);
 }
 
 function viewerImageFitParameter(
@@ -356,8 +413,34 @@ async function authorizeVerifiedCapsule(
     token: OAuthTokenSet,
     device: StoredViewerDeviceKeys,
 ): Promise<void> {
+    if (payloadOpened) return;
+    if (activeOpenAttempt !== undefined) return activeOpenAttempt;
+
+    activeOpenAttempt = authorizeVerifiedCapsuleOnce(
+        status,
+        runtime,
+        summary,
+        encryptedPayload,
+        token,
+        device,
+    ).finally(() => {
+        activeOpenAttempt = undefined;
+    });
+
+    return activeOpenAttempt;
+}
+
+async function authorizeVerifiedCapsuleOnce(
+    status: HTMLElement,
+    runtime: ReturnType<typeof viewerRuntime>,
+    summary: VerifiedViewerCapsuleSummary,
+    encryptedPayload: Uint8Array,
+    token: OAuthTokenSet,
+    device: StoredViewerDeviceKeys,
+): Promise<void> {
     const releaseOpenSlot = await acquireViewerOpenSlot(status, summary);
     try {
+        if (payloadOpened) return;
         await authorizeAndOpenVerifiedCapsule(
             status,
             runtime,
@@ -414,7 +497,7 @@ async function authorizeAndOpenVerifiedCapsule(
         device,
     );
     if (!redemption.ok) {
-        const message = brokerRedemptionFailureMessage(redemption);
+        const message = brokerRedemptionFailureMessage(redemption, summary.policy);
         debugLog('redemption_failed', {
             code: redemption.code,
             denialCode: redemption.denialCode,
@@ -465,6 +548,7 @@ async function authorizeAndOpenVerifiedCapsule(
     }
 
     showRenderedPayload(runtime.renderer, rendered);
+    payloadOpened = true;
     setViewerFrameState(
         'opened',
         `Opened “${summary.title ?? 'Capsule'}” locally inside the Share Capsules Viewer.`,

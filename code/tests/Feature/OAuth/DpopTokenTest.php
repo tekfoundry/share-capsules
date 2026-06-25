@@ -7,6 +7,7 @@ use App\Ctx\SigningKeys\TicketSigningKeyLifecycle;
 use App\Ctx\Tickets\CtxTicketBindings;
 use App\Ctx\Tickets\ReleaseBindingVerifier;
 use App\Http\Middleware\ValidateDpopAccessToken;
+use App\Models\CtxAuthorizationTicket;
 use App\Models\CtxAutomationRiskActivity;
 use App\Models\CtxCapsuleMetricDenial;
 use App\Models\CtxCapsuleMetricProjection;
@@ -254,6 +255,60 @@ final class DpopTokenTest extends TestCase
     }
 
     #[Test]
+    public function a_creator_device_can_register_a_trust_capsule_policy_against_local_development_services(): void
+    {
+        config()->set('sharecapsules.deployment.environment', 'local');
+        [$user, $device] = $this->userAndDevice();
+        $code = $this->approveAndExtractCode($user, 'capsule:create');
+        $issued = $this->withHeader('DPoP', $this->proof())
+            ->postJson(route('passport.token'), $this->tokenParameters($code, $device))
+            ->assertOk()
+            ->assertJsonPath('scope', 'capsule:create');
+        $accessToken = $issued->json('access_token');
+        $resourceUrl = route('api.broker-registration-grants.store');
+        $policy = [
+            'type' => 'ctx-policy',
+            'version' => 1,
+            'combiner' => 'all',
+            'requirements' => [
+                ['predicate' => 'ctx.account.email-verified', 'equals' => true],
+                ['predicate' => 'ctx.account.active', 'equals' => true],
+                ['predicate' => 'ctx.viewer.device-registered', 'equals' => true],
+                ['predicate' => 'ctx.consent.capsule-view-event', 'equals' => true],
+                [
+                    'predicate' => 'ctx.risk.ecosystem-automation-not-high',
+                    'issuer' => 'http://localhost:3003',
+                ],
+            ],
+        ];
+
+        $this->withHeaders([
+            'Authorization' => 'DPoP '.$accessToken,
+            'DPoP' => $this->proof($resourceUrl, $accessToken),
+        ])->postJson($resourceUrl, [
+            'registration_id' => 'registration_0000000002',
+            'capsule_id' => 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db704',
+            'capsule_revision' => 1,
+            'payload_id' => 'primary-image',
+            'policy_sha256' => (new CtxPolicyDigest)->calculate($policy),
+            'policy' => $policy,
+            'content_key_sha256' => str_repeat('h', 43),
+            'title' => 'Trusted only',
+            'content_profile_id' => 'ctx.content.static-image',
+            'content_profile_version' => '1.0',
+            'media_type' => 'image/png',
+        ])->assertCreated()
+            ->assertHeader('Cache-Control', 'no-store, private')
+            ->assertJsonPath('type', 'broker-registration-grant');
+
+        $this->assertDatabaseHas('creator_capsules', [
+            'user_id' => $user->getKey(),
+            'title' => 'Trusted only',
+            'automation_risk_issuer' => 'http://localhost:3003',
+        ]);
+    }
+
+    #[Test]
     public function an_eligible_viewer_receives_an_exact_privacy_safe_ctx_ticket(): void
     {
         config()->set('sharecapsules.broker.base_url', 'https://broker.example.test');
@@ -338,6 +393,131 @@ final class DpopTokenTest extends TestCase
         $this->assertSame(2, CtxAutomationRiskActivity::query()->count());
         $this->assertFalse(Schema::hasColumn('ctx_metric_event_records', 'user_id'));
         $this->assertFalse(Schema::hasColumn('ctx_metric_event_records', 'viewer_device_id'));
+    }
+
+    #[Test]
+    public function duplicate_authorization_requests_reuse_the_short_lived_ticket(): void
+    {
+        config()->set('sharecapsules.broker.base_url', 'https://broker.example.test');
+        $this->app->instance(ReleaseBindingVerifier::class, new class implements ReleaseBindingVerifier
+        {
+            public function valid(CtxTicketBindings $bindings): bool
+            {
+                return true;
+            }
+        });
+        $key = app(TicketSigningKeyLifecycle::class)->stage();
+        app(TicketSigningKeyLifecycle::class)->activate($key->kid);
+        [$user, $device] = $this->userAndDevice();
+        $code = $this->approveAndExtractCode($user, 'ctx:authorize');
+        $issued = $this->withHeader('DPoP', $this->proof())
+            ->postJson(route('passport.token'), $this->tokenParameters($code, $device))
+            ->assertOk();
+        $accessToken = $issued->json('access_token');
+        $resourceUrl = route('ctx.authorize');
+        $policy = [
+            'type' => 'ctx-policy',
+            'version' => 1,
+            'combiner' => 'all',
+            'requirements' => [
+                ['predicate' => 'ctx.account.email-verified', 'equals' => true],
+                ['predicate' => 'ctx.account.active', 'equals' => true],
+                ['predicate' => 'ctx.viewer.device-registered', 'equals' => true],
+                ['predicate' => 'ctx.consent.capsule-view-event', 'equals' => true],
+                [
+                    'predicate' => 'ctx.usage.capsule-account-lifetime-limit',
+                    'scope' => 'account-and-capsule',
+                    'maximum' => 5,
+                ],
+            ],
+        ];
+        $payload = [
+            'type' => 'ctx-authorization-request',
+            'version' => 1,
+            'broker' => 'https://broker.example.test',
+            'capsule_id' => 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703',
+            'capsule_revision' => 1,
+            'policy' => $policy,
+            'policy_sha256' => app(CtxPolicyDigest::class)->calculate($policy),
+            'payload_id' => 'primary-image',
+            'release_handle' => 'opaque-release-handle-0001',
+            'action' => 'render',
+            'cryptographic_suite' => 'ctx-capsule-v1',
+            'view_event_consent' => true,
+        ];
+
+        $first = $this->withHeaders([
+            'Authorization' => 'DPoP '.$accessToken,
+            'DPoP' => $this->proof($resourceUrl, $accessToken),
+        ])->postJson($resourceUrl, $payload)->assertCreated();
+        $second = $this->withHeaders([
+            'Authorization' => 'DPoP '.$accessToken,
+            'DPoP' => $this->proof($resourceUrl, $accessToken),
+        ])->postJson($resourceUrl, $payload)->assertCreated();
+
+        $this->assertSame($first->json('ticket'), $second->json('ticket'));
+        $this->assertDatabaseCount('ctx_authorization_tickets', 1);
+        $this->assertSame('pending', CtxAuthorizationTicket::query()->sole()->status);
+    }
+
+    #[Test]
+    public function authorization_idempotency_only_covers_the_immediate_opening_burst(): void
+    {
+        config()->set('sharecapsules.broker.base_url', 'https://broker.example.test');
+        $this->app->instance(ReleaseBindingVerifier::class, new class implements ReleaseBindingVerifier
+        {
+            public function valid(CtxTicketBindings $bindings): bool
+            {
+                return true;
+            }
+        });
+        $key = app(TicketSigningKeyLifecycle::class)->stage();
+        app(TicketSigningKeyLifecycle::class)->activate($key->kid);
+        [$user, $device] = $this->userAndDevice();
+        $code = $this->approveAndExtractCode($user, 'ctx:authorize');
+        $issued = $this->withHeader('DPoP', $this->proof())
+            ->postJson(route('passport.token'), $this->tokenParameters($code, $device))
+            ->assertOk();
+        $accessToken = $issued->json('access_token');
+        $resourceUrl = route('ctx.authorize');
+        $policy = [
+            'type' => 'ctx-policy',
+            'version' => 1,
+            'combiner' => 'all',
+            'requirements' => [
+                ['predicate' => 'ctx.account.email-verified', 'equals' => true],
+                ['predicate' => 'ctx.account.active', 'equals' => true],
+                ['predicate' => 'ctx.viewer.device-registered', 'equals' => true],
+                ['predicate' => 'ctx.consent.capsule-view-event', 'equals' => true],
+            ],
+        ];
+        $payload = [
+            'type' => 'ctx-authorization-request',
+            'version' => 1,
+            'broker' => 'https://broker.example.test',
+            'capsule_id' => 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703',
+            'capsule_revision' => 1,
+            'policy' => $policy,
+            'policy_sha256' => app(CtxPolicyDigest::class)->calculate($policy),
+            'payload_id' => 'primary-image',
+            'release_handle' => 'opaque-release-handle-0001',
+            'action' => 'render',
+            'cryptographic_suite' => 'ctx-capsule-v1',
+            'view_event_consent' => true,
+        ];
+
+        $first = $this->withHeaders([
+            'Authorization' => 'DPoP '.$accessToken,
+            'DPoP' => $this->proof($resourceUrl, $accessToken),
+        ])->postJson($resourceUrl, $payload)->assertCreated();
+        $this->travel(4)->seconds();
+        $second = $this->withHeaders([
+            'Authorization' => 'DPoP '.$accessToken,
+            'DPoP' => $this->proof($resourceUrl, $accessToken),
+        ])->postJson($resourceUrl, $payload)->assertCreated();
+
+        $this->assertNotSame($first->json('ticket'), $second->json('ticket'));
+        $this->assertDatabaseCount('ctx_authorization_tickets', 2);
     }
 
     /** @return array{User, ViewerDevice} */

@@ -1,0 +1,1134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Share Capsules static host policy tests</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        color: #162033;
+        background: #f5f7fb;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+      }
+
+      main {
+        width: min(1080px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 48px 0;
+      }
+
+      header,
+      article,
+      aside {
+        border: 1px solid #d7dfec;
+        border-radius: 20px;
+        background: #fff;
+        box-shadow: 0 10px 30px rgb(31 48 78 / 6%);
+      }
+
+      header,
+      article,
+      aside {
+        padding: 28px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: clamp(2rem, 6vw, 4rem);
+        line-height: 1;
+        letter-spacing: -0.045em;
+      }
+
+      h2 {
+        font-size: 1.55rem;
+      }
+
+      p {
+        color: #526078;
+        line-height: 1.6;
+      }
+
+      code {
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      }
+
+      capsule-viewer {
+        display: block;
+        min-height: 260px;
+      }
+
+      capsule-viewer > template,
+      capsule-viewer > error {
+        display: none;
+      }
+
+      .eyebrow {
+        margin-bottom: 10px;
+        color: #315ea8;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .stack {
+        display: grid;
+        gap: 24px;
+        margin-top: 24px;
+      }
+
+      .test-case {
+        display: grid;
+        gap: 18px;
+      }
+
+      .expectation {
+        display: grid;
+        gap: 6px;
+        border-radius: 14px;
+        background: #f8fafc;
+        padding: 16px;
+      }
+
+      .expectation strong {
+        color: #162033;
+      }
+
+      .safety-grid {
+        display: grid;
+        gap: 18px;
+      }
+
+      .safety-patterns {
+        display: grid;
+        gap: 16px;
+      }
+
+      .safety-pattern {
+        display: grid;
+        gap: 12px;
+        border: 1px solid #d7dfec;
+        border-radius: 16px;
+        background: #f8fafc;
+        padding: 18px;
+      }
+
+      .hidden-panel {
+        display: none;
+      }
+
+      .viewer-shell {
+        display: grid;
+        gap: 14px;
+        border-radius: 18px;
+        background: #f8fafc;
+        padding: 20px;
+      }
+
+      .viewer-frame {
+        display: block;
+        width: 100%;
+        min-height: 320px;
+        border-radius: 16px;
+        background: #eef3f8;
+        object-fit: contain;
+      }
+
+      .fallback-card,
+      .error-card {
+        display: grid;
+        gap: 12px;
+        border-radius: 16px;
+        background: #f8fafc;
+        padding: 20px;
+      }
+
+      .install-link {
+        display: inline-flex;
+        width: fit-content;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: #315ea8;
+        color: #fff;
+        font-weight: 800;
+        padding: 10px 14px;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">Phase 8 policy fixtures</p>
+        <h1>Static host policy tests</h1>
+        <p style="margin-top: 18px">
+          This page is intentionally more test-focused than the polished static
+          host example. Each case uses a real <code>.capsule</code> file and
+          records the expected Viewer behavior.
+        </p>
+      </header>
+
+      <section class="stack" aria-label="Policy fixture test cases">
+        <article id="time-capsule-open-in-future" class="test-case">
+          <div>
+            <p class="eyebrow">Time Capsule</p>
+            <h2>Open in the future</h2>
+            <p style="margin-top: 10px">
+              This Capsule has a signed not-before gate. It should stay locked
+              until the opening date is reached.
+            </p>
+          </div>
+
+          <div class="expectation">
+            <p>
+              <strong>Fixture:</strong>
+              <code>./capsules/time-capsule-open-in-future.capsule</code>
+            </p>
+            <p><strong>Expected now:</strong> locked / not available yet</p>
+            <p>
+              <strong>Opening instant:</strong>
+              <time datetime="2026-11-26T06:00:00Z">2026-11-26 06:00 UTC</time>
+            </p>
+          </div>
+
+          <capsule-viewer
+            src="./capsules/time-capsule-open-in-future.capsule"
+            fit="contain"
+            viewer-height="320px"
+          >
+            <fallback>
+              <section class="fallback-card">
+                <h3>Protected Time Capsule</h3>
+                <p>
+                  This content can only be opened after its future opening date.
+                  Install or connect the Share Capsules Viewer to test the
+                  policy result.
+                </p>
+                <a
+                  class="install-link"
+                  href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2Ftest.html%23time-capsule-open-in-future"
+                  >Install or connect Viewer</a
+                >
+              </section>
+            </fallback>
+
+            <template>
+              <section class="viewer-shell">
+                <h3>{{ title }}</h3>
+                <p>{{ description }}</p>
+                <content
+                  class="viewer-frame"
+                  style="height: 320px"
+                ></content>
+              </section>
+            </template>
+
+            <error>
+              <section class="error-card">
+                <h3>Time Capsule locked</h3>
+                <p>
+                  This is the correct result for this test case. The Capsule
+                  should stay locked until
+                  <time datetime="2026-11-26T06:00:00Z"
+                    >2026-11-26 06:00 UTC</time
+                  >.
+                </p>
+              </section>
+            </error>
+          </capsule-viewer>
+        </article>
+
+        <article id="time-capsule-open-in-past" class="test-case">
+          <div>
+            <p class="eyebrow">Time Capsule</p>
+            <h2>Open date already reached</h2>
+            <p style="margin-top: 10px">
+              This Capsule has a signed not-before gate in the past and no
+              close date. It should open normally when the Viewer is connected
+              and the account/device checks pass.
+            </p>
+          </div>
+
+          <div class="expectation">
+            <p>
+              <strong>Fixture:</strong>
+              <code>./capsules/time-capsule-open-in-past.capsule</code>
+            </p>
+            <p><strong>Expected now:</strong> openable</p>
+            <p>
+              <strong>Opening instant:</strong>
+              <time datetime="2026-06-23T05:00:00Z">2026-06-23 05:00 UTC</time>
+            </p>
+            <p><strong>Closing instant:</strong> none</p>
+          </div>
+
+          <capsule-viewer
+            src="./capsules/time-capsule-open-in-past.capsule"
+            fit="contain"
+            viewer-height="320px"
+          >
+            <fallback>
+              <section class="fallback-card">
+                <h3>Protected Time Capsule</h3>
+                <p>
+                  This content should open because its opening date has already
+                  passed. Install or connect the Share Capsules Viewer to test
+                  the policy result.
+                </p>
+                <a
+                  class="install-link"
+                  href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2Ftest.html%23time-capsule-open-in-past"
+                  >Install or connect Viewer</a
+                >
+              </section>
+            </fallback>
+
+            <template>
+              <section class="viewer-shell">
+                <h3>{{ title }}</h3>
+                <p>{{ description }}</p>
+                <content
+                  class="viewer-frame"
+                  style="height: 320px"
+                ></content>
+              </section>
+            </template>
+
+            <error>
+              <section class="error-card">
+                <h3>Unexpected lock result</h3>
+                <p>
+                  This Capsule should be openable because its opening date has
+                  already passed and no closing date is set.
+                </p>
+              </section>
+            </error>
+          </capsule-viewer>
+        </article>
+
+        <article id="time-capsule-not-after-in-the-past" class="test-case">
+          <div>
+            <p class="eyebrow">Time Capsule</p>
+            <h2>Close date already passed</h2>
+            <p style="margin-top: 10px">
+              This Capsule has a signed cannot-be-opened-after gate in the
+              past. It should stay locked because the opening window has
+              already closed.
+            </p>
+          </div>
+
+          <div class="expectation">
+            <p>
+              <strong>Fixture:</strong>
+              <code>./capsules/time-capsule-not-after-in-the-past.capsule</code>
+            </p>
+            <p><strong>Expected now:</strong> locked / opening window ended</p>
+            <p><strong>Opening instant:</strong> none</p>
+            <p>
+              <strong>Closing instant:</strong>
+              <time datetime="2026-06-24T05:00:00Z">2026-06-24 05:00 UTC</time>
+            </p>
+          </div>
+
+          <capsule-viewer
+            src="./capsules/time-capsule-not-after-in-the-past.capsule"
+            fit="contain"
+            viewer-height="320px"
+          >
+            <fallback>
+              <section class="fallback-card">
+                <h3>Protected Time Capsule</h3>
+                <p>
+                  This content can no longer be opened because its closing date
+                  has passed. Install or connect the Share Capsules Viewer to
+                  test the policy result.
+                </p>
+                <a
+                  class="install-link"
+                  href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2Ftest.html%23time-capsule-not-after-in-the-past"
+                  >Install or connect Viewer</a
+                >
+              </section>
+            </fallback>
+
+            <template>
+              <section class="viewer-shell">
+                <h3>{{ title }}</h3>
+                <p>{{ description }}</p>
+                <content
+                  class="viewer-frame"
+                  style="height: 320px"
+                ></content>
+              </section>
+            </template>
+
+            <error>
+              <section class="error-card">
+                <h3>Time Capsule locked</h3>
+                <p>
+                  This is the correct result for this test case. The Capsule
+                  should stay locked because its closing date passed on
+                  <time datetime="2026-06-24T05:00:00Z"
+                    >2026-06-24 05:00 UTC</time
+                  >.
+                </p>
+              </section>
+            </error>
+          </capsule-viewer>
+        </article>
+
+        <article id="time-capsule-not-after-in-the-future" class="test-case">
+          <div>
+            <p class="eyebrow">Time Capsule</p>
+            <h2>Close date has not arrived</h2>
+            <p style="margin-top: 10px">
+              This Capsule has a signed cannot-be-opened-after gate in the
+              future. It should open normally until the closing date is reached.
+            </p>
+          </div>
+
+          <div class="expectation">
+            <p>
+              <strong>Fixture:</strong>
+              <code>./capsules/time-capsule-not-after-in-the-future.capsule</code>
+            </p>
+            <p><strong>Expected now:</strong> openable</p>
+            <p><strong>Opening instant:</strong> none</p>
+            <p>
+              <strong>Closing instant:</strong>
+              <time datetime="2026-08-01T05:00:00Z">2026-08-01 05:00 UTC</time>
+            </p>
+          </div>
+
+          <capsule-viewer
+            src="./capsules/time-capsule-not-after-in-the-future.capsule"
+            fit="contain"
+            viewer-height="320px"
+          >
+            <fallback>
+              <section class="fallback-card">
+                <h3>Protected Time Capsule</h3>
+                <p>
+                  This content should open because its closing date has not
+                  arrived yet. Install or connect the Share Capsules Viewer to
+                  test the policy result.
+                </p>
+                <a
+                  class="install-link"
+                  href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2Ftest.html%23time-capsule-not-after-in-the-future"
+                  >Install or connect Viewer</a
+                >
+              </section>
+            </fallback>
+
+            <template>
+              <section class="viewer-shell">
+                <h3>{{ title }}</h3>
+                <p>{{ description }}</p>
+                <content
+                  class="viewer-frame"
+                  style="height: 320px"
+                ></content>
+              </section>
+            </template>
+
+            <error>
+              <section class="error-card">
+                <h3>Unexpected lock result</h3>
+                <p>
+                  This Capsule should be openable because its closing date is
+                  still in the future:
+                  <time datetime="2026-08-01T05:00:00Z"
+                    >2026-08-01 05:00 UTC</time
+                  >.
+                </p>
+              </section>
+            </error>
+          </capsule-viewer>
+        </article>
+
+        <article id="time-capsule-in-between-before-and-after" class="test-case">
+          <div>
+            <p class="eyebrow">Time Capsule</p>
+            <h2>Inside the opening window</h2>
+            <p style="margin-top: 10px">
+              This Capsule has both a signed open date in the past and a signed
+              close date in the future. It should open normally while the
+              current time is inside that window.
+            </p>
+          </div>
+
+          <div class="expectation">
+            <p>
+              <strong>Fixture:</strong>
+              <code>./capsules/time-capsule-in-between-before-and-after.capsule</code>
+            </p>
+            <p><strong>Expected now:</strong> openable</p>
+            <p>
+              <strong>Opening instant:</strong>
+              <time datetime="2026-06-23T05:00:00Z">2026-06-23 05:00 UTC</time>
+            </p>
+            <p>
+              <strong>Closing instant:</strong>
+              <time datetime="2026-08-01T05:00:00Z">2026-08-01 05:00 UTC</time>
+            </p>
+          </div>
+
+          <capsule-viewer
+            src="./capsules/time-capsule-in-between-before-and-after.capsule"
+            fit="contain"
+            viewer-height="320px"
+          >
+            <fallback>
+              <section class="fallback-card">
+                <h3>Protected Time Capsule</h3>
+                <p>
+                  This content should open because the current time is inside
+                  its allowed opening window. Install or connect the Share
+                  Capsules Viewer to test the policy result.
+                </p>
+                <a
+                  class="install-link"
+                  href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2Ftest.html%23time-capsule-in-between-before-and-after"
+                  >Install or connect Viewer</a
+                >
+              </section>
+            </fallback>
+
+            <template>
+              <section class="viewer-shell">
+                <h3>{{ title }}</h3>
+                <p>{{ description }}</p>
+                <content
+                  class="viewer-frame"
+                  style="height: 320px"
+                ></content>
+              </section>
+            </template>
+
+            <error>
+              <section class="error-card">
+                <h3>Unexpected lock result</h3>
+                <p>
+                  This Capsule should be openable because the current time is
+                  after
+                  <time datetime="2026-06-23T05:00:00Z"
+                    >2026-06-23 05:00 UTC</time
+                  >
+                  and before
+                  <time datetime="2026-08-01T05:00:00Z"
+                    >2026-08-01 05:00 UTC</time
+                  >.
+                </p>
+              </section>
+            </error>
+          </capsule-viewer>
+        </article>
+
+        <article id="limit-capsule-per-account-limit-of-5" class="test-case">
+          <div>
+            <p class="eyebrow">Limit Capsule</p>
+            <h2>Per-user opening limit of 5</h2>
+            <p style="margin-top: 10px">
+              This Capsule has a signed per-user account opening limit. The
+              first five successful openings for the same viewer account should
+              work, and the sixth should stay locked.
+            </p>
+          </div>
+
+          <div class="expectation">
+            <p>
+              <strong>Fixture:</strong>
+              <code>./capsules/limit-capsule-per-account-limit-of-5.capsule</code>
+            </p>
+            <p><strong>Expected before exhaustion:</strong> openable</p>
+            <p>
+              <strong>Expected after five committed openings by the same account:</strong>
+              locked / per-user opening limit reached
+            </p>
+            <p><strong>Limit scope:</strong> viewer account + Capsule</p>
+            <p><strong>Maximum openings:</strong> 5</p>
+          </div>
+
+          <capsule-viewer
+            src="./capsules/limit-capsule-per-account-limit-of-5.capsule"
+            fit="contain"
+            viewer-height="320px"
+          >
+            <fallback>
+              <section class="fallback-card">
+                <h3>Protected Limit Capsule</h3>
+                <p>
+                  This content can be opened up to five times by the same viewer
+                  account. Install or connect the Share Capsules Viewer to test
+                  the policy result.
+                </p>
+                <a
+                  class="install-link"
+                  href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2Ftest.html%23limit-capsule-per-account-limit-of-5"
+                  >Install or connect Viewer</a
+                >
+              </section>
+            </fallback>
+
+            <template>
+              <section class="viewer-shell">
+                <h3>{{ title }}</h3>
+                <p>{{ description }}</p>
+                <content
+                  class="viewer-frame"
+                  style="height: 320px"
+                ></content>
+              </section>
+            </template>
+
+            <error>
+              <section class="error-card">
+                <h3>Limit Capsule locked</h3>
+                <p>
+                  If this account has already opened the Capsule five times,
+                  this is the correct result. A different eligible viewer
+                  account should still be tested separately.
+                </p>
+              </section>
+            </error>
+          </capsule-viewer>
+        </article>
+
+        <article id="limit-capsule-global-limit-of-15" class="test-case">
+          <div>
+            <p class="eyebrow">Limit Capsule</p>
+            <h2>Total opening limit of 15</h2>
+            <p style="margin-top: 10px">
+              This Capsule has a signed total opening limit shared by every
+              viewer account. The first fifteen successful openings should
+              work, and the sixteenth should stay locked for everyone.
+            </p>
+          </div>
+
+          <div class="expectation">
+            <p>
+              <strong>Fixture:</strong>
+              <code>./capsules/limit-capsule-global-limit-of-15.capsule</code>
+            </p>
+            <p><strong>Expected before exhaustion:</strong> openable</p>
+            <p>
+              <strong>Expected after fifteen committed openings:</strong>
+              locked / total opening limit reached
+            </p>
+            <p><strong>Limit scope:</strong> Capsule</p>
+            <p><strong>Maximum openings:</strong> 15</p>
+          </div>
+
+          <capsule-viewer
+            src="./capsules/limit-capsule-global-limit-of-15.capsule"
+            fit="contain"
+            viewer-height="320px"
+          >
+            <fallback>
+              <section class="fallback-card">
+                <h3>Protected Limit Capsule</h3>
+                <p>
+                  This content can be opened up to fifteen times total across
+                  all viewer accounts. Install or connect the Share Capsules
+                  Viewer to test the policy result.
+                </p>
+                <a
+                  class="install-link"
+                  href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2Ftest.html%23limit-capsule-global-limit-of-15"
+                  >Install or connect Viewer</a
+                >
+              </section>
+            </fallback>
+
+            <template>
+              <section class="viewer-shell">
+                <h3>{{ title }}</h3>
+                <p>{{ description }}</p>
+                <content
+                  class="viewer-frame"
+                  style="height: 320px"
+                ></content>
+              </section>
+            </template>
+
+            <error>
+              <section class="error-card">
+                <h3>Limit Capsule locked</h3>
+                <p>
+                  If this Capsule has already been opened fifteen times total,
+                  this is the correct result. The total limit is shared by all
+                  viewer accounts.
+                </p>
+              </section>
+            </error>
+          </capsule-viewer>
+        </article>
+
+        <article id="trust-capsule" class="test-case">
+          <div>
+            <p class="eyebrow">Trust Capsule</p>
+            <h2>Automation-risk gate</h2>
+            <p style="margin-top: 10px">
+              This Capsule has a signed trust gate based on automation-risk
+              checks. Normal eligible viewer activity should open it, while
+              activity that crosses the V1 automation-risk thresholds should
+              stay locked.
+            </p>
+          </div>
+
+          <div class="expectation">
+            <p>
+              <strong>Fixture:</strong>
+              <code>./capsules/trust-capsule.capsule</code>
+            </p>
+            <p>
+              <strong>Expected for normal viewer activity:</strong> openable
+            </p>
+            <p>
+              <strong>Expected for high automation risk:</strong>
+              locked / automation risk high
+            </p>
+            <p>
+              <strong>Trust rule:</strong>
+              V1 automation-risk decision is not high
+            </p>
+          </div>
+
+          <capsule-viewer
+            src="./capsules/trust-capsule.capsule"
+            fit="contain"
+            viewer-height="320px"
+          >
+            <fallback>
+              <section class="fallback-card">
+                <h3>Protected Trust Capsule</h3>
+                <p>
+                  This content opens only when the connected viewer passes the
+                  current trust checks. Install or connect the Share Capsules
+                  Viewer to test the policy result.
+                </p>
+                <a
+                  class="install-link"
+                  href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2Ftest.html%23trust-capsule"
+                  >Install or connect Viewer</a
+                >
+              </section>
+            </fallback>
+
+            <template>
+              <section class="viewer-shell">
+                <h3>{{ title }}</h3>
+                <p>{{ description }}</p>
+                <content
+                  class="viewer-frame"
+                  style="height: 320px"
+                ></content>
+              </section>
+            </template>
+
+            <error>
+              <section class="error-card">
+                <h3>Trust Capsule locked</h3>
+                <p>
+                  If this viewer has crossed the automation-risk threshold,
+                  this is the correct result. Pause and retry later, or test
+                  with a normal eligible viewer account.
+                </p>
+              </section>
+            </error>
+          </capsule-viewer>
+        </article>
+
+        <article id="combined-capsule" class="test-case">
+          <div>
+            <p class="eyebrow">Combined Capsule</p>
+            <h2>Time, limit, and trust gates together</h2>
+            <p style="margin-top: 10px">
+              This Capsule keeps the ordinary Capsule format while combining a
+              valid access window, total and per-account opening limits, and
+              the V1 automation-risk trust gate. It should open only when every
+              signed requirement is satisfied.
+            </p>
+          </div>
+
+          <div class="expectation">
+            <p>
+              <strong>Fixture:</strong>
+              <code>./capsules/combined-capsule.capsule</code>
+            </p>
+            <p>
+              <strong>Expected for normal viewer activity before exhaustion:</strong>
+              openable
+            </p>
+            <p>
+              <strong>Expected outside the access window:</strong>
+              locked / time window not satisfied
+            </p>
+            <p>
+              <strong>Expected after limit exhaustion or high automation risk:</strong>
+              locked / policy requirement not satisfied
+            </p>
+            <p>
+              <strong>Access window:</strong>
+              <time datetime="2026-06-24T05:00:00Z">2026-06-24 05:00 UTC</time>
+              to
+              <time datetime="2026-08-01T05:00:00Z">2026-08-01 05:00 UTC</time>
+            </p>
+            <p><strong>Total opening limit:</strong> 15</p>
+            <p><strong>Per-account opening limit:</strong> 5</p>
+            <p>
+              <strong>Trust rule:</strong>
+              V1 automation-risk decision is not high
+            </p>
+          </div>
+
+          <capsule-viewer
+            src="./capsules/combined-capsule.capsule"
+            fit="contain"
+            viewer-height="320px"
+          >
+            <fallback>
+              <section class="fallback-card">
+                <h3>Protected Combined Capsule</h3>
+                <p>
+                  This content opens only when the connected viewer satisfies
+                  the time, limit, and trust gates together. Install or connect
+                  the Share Capsules Viewer to test the combined policy result.
+                </p>
+                <a
+                  class="install-link"
+                  href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2Ftest.html%23combined-capsule"
+                  >Install or connect Viewer</a
+                >
+              </section>
+            </fallback>
+
+            <template>
+              <section class="viewer-shell">
+                <h3>{{ title }}</h3>
+                <p>{{ description }}</p>
+                <content
+                  class="viewer-frame"
+                  style="height: 320px"
+                ></content>
+              </section>
+            </template>
+
+            <error>
+              <section class="error-card">
+                <h3>Combined Capsule locked</h3>
+                <p>
+                  This is the correct result when any one of the combined Time,
+                  Limit, or Trust requirements is not satisfied.
+                </p>
+              </section>
+            </error>
+          </capsule-viewer>
+        </article>
+
+        <article id="revoked-capsule" class="test-case">
+          <div>
+            <p class="eyebrow">Revoked Capsule</p>
+            <h2>Permanent revocation</h2>
+            <p style="margin-top: 10px">
+              This Capsule has only the baseline signed eligibility policy, but
+              its creator-owned local registry record should be permanently
+              revoked before testing. The hosted encrypted file remains public;
+              the Viewer should stay locked because the content key is no
+              longer releasable.
+            </p>
+          </div>
+
+          <div class="expectation">
+            <p>
+              <strong>Fixture:</strong>
+              <code>./capsules/revoked-capsule-baseline.capsule</code>
+            </p>
+            <p>
+              <strong>Expected after permanent revocation:</strong>
+              locked / no longer available
+            </p>
+            <p><strong>Signed policy:</strong> baseline eligibility only</p>
+            <p>
+              <strong>Lifecycle source:</strong>
+              creator-owned Capsule registry, not Host markup or metrics
+            </p>
+          </div>
+
+          <capsule-viewer
+            src="./capsules/revoked-capsule-baseline.capsule"
+            fit="contain"
+            viewer-height="320px"
+          >
+            <fallback>
+              <section class="fallback-card">
+                <h3>Protected Revoked Capsule</h3>
+                <p>
+                  This encrypted file is still hosted, but access should remain
+                  locked after the creator permanently revokes the Capsule.
+                  Install or connect the Share Capsules Viewer to test the
+                  revocation result.
+                </p>
+                <a
+                  class="install-link"
+                  href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2Ftest.html%23revoked-capsule"
+                  >Install or connect Viewer</a
+                >
+              </section>
+            </fallback>
+
+            <template>
+              <section class="viewer-shell">
+                <h3>{{ title }}</h3>
+                <p>{{ description }}</p>
+                <content
+                  class="viewer-frame"
+                  style="height: 320px"
+                ></content>
+              </section>
+            </template>
+
+            <error>
+              <section class="error-card">
+                <h3>Revoked Capsule locked</h3>
+                <p>
+                  This is the correct result after permanent revocation. An
+                  otherwise eligible viewer should see that the Capsule is no
+                  longer available to open.
+                </p>
+              </section>
+            </error>
+          </capsule-viewer>
+        </article>
+      </section>
+
+      <section
+        id="bulk-page-safety"
+        class="stack"
+        aria-label="Bulk-page safety test cases"
+      >
+        <article class="test-case">
+          <div>
+            <p class="eyebrow">Bulk-page safety</p>
+            <h2>Ordinary hidden layouts and queued openings</h2>
+            <p style="margin-top: 10px">
+              This section uses the same static Host contract in ordinary
+              show/hide patterns: an open accordion, a closed details panel,
+              and a tab or modal panel that starts hidden. The Viewer should
+              discover explicit <code>&lt;capsule-viewer&gt;</code> elements in
+              these layouts while opening only one Capsule pipeline at a time.
+            </p>
+          </div>
+
+          <div class="expectation">
+            <p>
+              <strong>Hidden/show behavior:</strong>
+              tabs, accordions, carousels, modals, and scripted reveal patterns
+              are valid Host layouts.
+            </p>
+            <p>
+              <strong>Same-page queue:</strong>
+              multiple eligible Capsules on this page wait for a shared Viewer
+              opening slot before authorization, broker release, decryption, and
+              rendering.
+            </p>
+            <p>
+              <strong>Retry-aware rate handling:</strong>
+              temporary fetch, authorization, broker availability, and
+              rate-limit failures keep a retry action available instead of
+              replaying stale authorization material.
+            </p>
+            <p>
+              <strong>No surprise release consumption:</strong>
+              connecting an account, approving disclosure, hidden markup,
+              denied policy checks, revocation, and unredeemed tickets must not
+              create a committed release. Only a successful broker key release
+              counts as an opening.
+            </p>
+          </div>
+
+          <div class="safety-grid">
+            <details class="safety-pattern" open>
+              <summary>Accordion panel that starts open</summary>
+              <p>
+                This panel is intentionally visible on load. It should still use
+                the same shared queue as every other Capsule on the page.
+              </p>
+
+              <capsule-viewer
+                src="./capsules/tekfoundry-logo.capsule"
+                fit="contain"
+                viewer-height="260px"
+              >
+                <fallback>
+                  <section class="fallback-card">
+                    <h3>Queued logo Capsule</h3>
+                    <p>
+                      A baseline Capsule in an ordinary open accordion panel.
+                    </p>
+                    <a
+                      class="install-link"
+                      href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2Ftest.html%23bulk-page-safety"
+                      >Install or connect Viewer</a
+                    >
+                  </section>
+                </fallback>
+
+                <template>
+                  <section class="viewer-shell">
+                    <h3>{{ title }}</h3>
+                    <p>{{ description }}</p>
+                    <content
+                      class="viewer-frame"
+                      style="height: 260px"
+                    ></content>
+                  </section>
+                </template>
+
+                <error>
+                  <section class="error-card">
+                    <h3>Logo Capsule locked</h3>
+                    <p>{{ error_message }}</p>
+                  </section>
+                </error>
+              </capsule-viewer>
+            </details>
+
+            <details class="safety-pattern">
+              <summary>Accordion panel that starts closed</summary>
+              <p>
+                This panel starts collapsed like many real accordions. Discovery
+                must not depend on initial visual visibility.
+              </p>
+
+              <capsule-viewer
+                src="./capsules/eclipse-photo.capsule"
+                fit="cover"
+                viewer-height="260px"
+              >
+                <fallback>
+                  <section class="fallback-card">
+                    <h3>Queued photo Capsule</h3>
+                    <p>
+                      A baseline Capsule inside a closed accordion panel.
+                    </p>
+                    <a
+                      class="install-link"
+                      href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2Ftest.html%23bulk-page-safety"
+                      >Install or connect Viewer</a
+                    >
+                  </section>
+                </fallback>
+
+                <template>
+                  <section class="viewer-shell">
+                    <h3>{{ title }}</h3>
+                    <p>{{ description }}</p>
+                    <content
+                      class="viewer-frame"
+                      style="height: 260px"
+                    ></content>
+                  </section>
+                </template>
+
+                <error>
+                  <section class="error-card">
+                    <h3>Photo Capsule locked</h3>
+                    <p>{{ error_message }}</p>
+                  </section>
+                </error>
+              </capsule-viewer>
+            </details>
+
+            <div class="safety-pattern">
+              <h3>Tab or modal panel that starts hidden</h3>
+              <p>
+                This mirrors a tab, carousel slide, or modal body that a Host
+                script may reveal later. The markup remains explicit and the
+                Viewer safety boundary remains the same.
+              </p>
+
+              <div class="hidden-panel" data-demo-hidden-panel="true">
+                <capsule-viewer
+                  src="./capsules/limit-capsule-per-account-limit-of-5.capsule"
+                  fit="contain"
+                  viewer-height="260px"
+                >
+                  <fallback>
+                    <section class="fallback-card">
+                      <h3>Hidden Limit Capsule</h3>
+                      <p>
+                        A per-account Limit Capsule in a panel that starts
+                        hidden. A denied or unredeemed attempt must not consume
+                        this account's opening limit.
+                      </p>
+                      <a
+                        class="install-link"
+                        href="http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2Ftest.html%23bulk-page-safety"
+                        >Install or connect Viewer</a
+                      >
+                    </section>
+                  </fallback>
+
+                  <template>
+                    <section class="viewer-shell">
+                      <h3>{{ title }}</h3>
+                      <p>{{ description }}</p>
+                      <content
+                        class="viewer-frame"
+                        style="height: 260px"
+                      ></content>
+                    </section>
+                  </template>
+
+                  <error>
+                    <section class="error-card">
+                      <h3>Limit Capsule locked</h3>
+                      <p>{{ error_message }}</p>
+                    </section>
+                  </error>
+                </capsule-viewer>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <aside class="stack" style="margin-top: 24px">
+        <div>
+          <p class="eyebrow">Notes</p>
+          <p>
+            Add future Phase 8 fixtures here instead of overloading
+            <code>index.html</code>. The polished example page can stay focused
+            on developer-facing markup patterns while this page tracks policy
+            behavior.
+          </p>
+        </div>
+      </aside>
+    </main>
+  </body>
+</html>

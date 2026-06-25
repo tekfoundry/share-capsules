@@ -1,7 +1,7 @@
 # End-to-End Capsule Access and Data Flow
 
 Status: Draft
-Last updated: 2026-06-22
+Last updated: 2026-06-24
 
 ## Purpose
 
@@ -16,6 +16,8 @@ Provide the canonical V1 interaction from local creator content through Host pub
 5. The extension verifies the Capsule, establishes or reuses a CTX account connection, obtains consent, and asks the creator-selected CTX Provider to evaluate the embedded policy.
 6. On success, the CTX Provider issues a short-lived ticket and the creator-selected key broker releases the content key encrypted to the registered Viewer device.
 7. The extension decrypts and renders inside its own origin. The Host never receives account credentials, trust evidence, tickets, keys, or plaintext.
+
+For official Share Capsules tools, "creator-selected" means selected from the official recognized network. V1 recognizes only the Share Capsules CTX Provider and Key Broker. Future services may be selectable after registry recognition; arbitrary provider or broker URLs are not trusted by default.
 
 ## Terminology boundaries
 
@@ -34,7 +36,7 @@ Provide the canonical V1 interaction from local creator content through Host pub
 4. It encrypts the payload locally as `payloads/<payload-id>.enc`.
 5. The control plane validates the canonical public policy, verifies its digest, creates an immutable creator-owned pending revision, and issues a short-lived broker-registration grant.
 6. The broker stores the content key as pending and returns an opaque release handle; pending keys cannot satisfy release requests.
-7. The extension builds and signs the canonical manifest containing the exact registry and broker bindings.
+7. The extension builds and signs the canonical manifest containing the exact CTX Provider and broker bindings.
 8. It packages `manifest.json`, `manifest.sig`, and the ID-addressed encrypted payload entry, then reopens the emitted bytes with the strict reader.
 9. After strict verification, the extension idempotently finalizes the pending revision. The control plane activates the authoritative registry record only as the broker confirms activation.
 10. The creator exports and uploads the active opaque Capsule to a creator-selected HTTPS Host and adds declarative Host markup.
@@ -160,6 +162,8 @@ It then verifies:
 - CTX issuer and key-broker identifiers
 - Release handle and encryption metadata
 - Device compatibility and resource envelope
+
+Official Viewers also verify that the CTX issuer and key broker are recognized for the current environment and protocol profile before sending credentials, proofs, tickets, or key-release requests.
 
 No endpoint named by an unverified or incompatible manifest receives credentials or device proofs.
 
