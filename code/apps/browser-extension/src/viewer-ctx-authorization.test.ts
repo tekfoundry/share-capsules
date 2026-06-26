@@ -26,7 +26,13 @@ describe('Viewer CTX authorization client', () => {
         });
 
         await expect(
-            client.authorize(summary(), token(['ctx:authorize']), device(), true),
+            client.authorize(
+                summary(),
+                token(['ctx:authorize']),
+                device(),
+                'https://host.example',
+                true,
+            ),
         ).resolves.toEqual({
             ok: true,
             authorization: { ticket: 'header.claims.signature', expiresIn: 60 },
@@ -47,6 +53,7 @@ describe('Viewer CTX authorization client', () => {
             type: 'ctx-authorization-request',
             version: 1,
             broker: 'https://broker.example',
+            host_origin: 'https://host.example',
             capsule_id: 'urn:uuid:00000000-0000-4000-8000-000000000001',
             capsule_revision: 1,
             policy: summary().policy,
@@ -70,13 +77,20 @@ describe('Viewer CTX authorization client', () => {
         });
 
         await expect(
-            client.authorize(summary(), token(['ctx:authorize', 'capsule:create']), device(), true),
+            client.authorize(
+                summary(),
+                token(['ctx:authorize', 'capsule:create']),
+                device(),
+                'https://host.example',
+                true,
+            ),
         ).resolves.toEqual({ ok: false, code: 'invalid_session' });
         await expect(
             client.authorize(
                 summary(),
                 { ...token(['ctx:authorize']), tokenType: 'Bearer' },
                 device(),
+                'https://host.example',
                 true,
             ),
         ).resolves.toEqual({ ok: false, code: 'invalid_session' });
@@ -88,14 +102,26 @@ describe('Viewer CTX authorization client', () => {
             new ViewerCtxAuthorizationClient('https://trust.example/ctx/authorize', {
                 dpop: proofFactory(),
                 fetch: async () => jsonResponse({ type: 'ctx-error', version: 1 }, 403),
-            }).authorize(summary(), token(['ctx:authorize']), device(), true),
+            }).authorize(
+                summary(),
+                token(['ctx:authorize']),
+                device(),
+                'https://host.example',
+                true,
+            ),
         ).resolves.toEqual({ ok: false, code: 'authorization_denied' });
 
         await expect(
             new ViewerCtxAuthorizationClient('https://trust.example/ctx/authorize', {
                 dpop: proofFactory(),
                 fetch: async () => jsonResponse({ type: 'ctx-authorization', version: 1 }),
-            }).authorize(summary(), token(['ctx:authorize']), device(), true),
+            }).authorize(
+                summary(),
+                token(['ctx:authorize']),
+                device(),
+                'https://host.example',
+                true,
+            ),
         ).resolves.toEqual({ ok: false, code: 'invalid_response' });
     });
 
@@ -104,8 +130,65 @@ describe('Viewer CTX authorization client', () => {
             new ViewerCtxAuthorizationClient('https://trust.example/ctx/authorize', {
                 dpop: proofFactory(),
                 fetch: async () => jsonResponse({ message: 'Too Many Requests' }, 429),
-            }).authorize(summary(), token(['ctx:authorize']), device(), true),
+            }).authorize(
+                summary(),
+                token(['ctx:authorize']),
+                device(),
+                'https://host.example',
+                true,
+            ),
         ).resolves.toEqual({ ok: false, code: 'rate_limited' });
+    });
+
+    it('creates a signed provider challenge attempt for challenge-required authorization', async () => {
+        const requests: { readonly url: string; readonly init: RequestInit }[] = [];
+        const client = new ViewerCtxAuthorizationClient('https://trust.example/ctx/authorize', {
+            dpop: proofFactory(),
+            fetch: async (url, init) => {
+                requests.push({ url: url.toString(), init: init ?? {} });
+                return jsonResponse({
+                    type: 'ctx-challenge-attempt',
+                    version: 1,
+                    attempt_id: 'attempt-1',
+                    expires_in: 600,
+                    challenge_url:
+                        'https://trust.example/ctx/challenge-attempts/attempt-1?signature=signed',
+                    challenge_set_version: 'ctx-challenge-set-v1.0',
+                    selector_version: 'ctx-challenge-selector-v1.0',
+                    scoring_model_version: 'ctx-challenge-scoring-v1.0',
+                    modules: [
+                        {
+                            challenge_id: 'circuit_trace',
+                            module_version: '1.0.0',
+                            input_modes: ['keyboard'],
+                        },
+                    ],
+                });
+            },
+        });
+
+        await expect(
+            client.createChallengeAttempt(
+                summary(),
+                token(['ctx:authorize']),
+                device(),
+                'https://host.example',
+                'https://extension.chromiumapp.org/challenge/callback',
+            ),
+        ).resolves.toEqual({
+            attemptId: 'attempt-1',
+            expiresIn: 600,
+            challengeUrl: 'https://trust.example/ctx/challenge-attempts/attempt-1?signature=signed',
+        });
+
+        expect(requests[0]?.url).toBe('https://trust.example/ctx/challenge-attempts');
+        expect(JSON.parse(String(requests[0]?.init.body))).toMatchObject({
+            type: 'ctx-challenge-attempt-request',
+            version: 1,
+            host_origin: 'https://host.example',
+            return_to: 'https://extension.chromiumapp.org/challenge/callback',
+            capsule_id: 'urn:uuid:00000000-0000-4000-8000-000000000001',
+        });
     });
 });
 

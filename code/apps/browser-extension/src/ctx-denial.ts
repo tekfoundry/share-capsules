@@ -13,6 +13,7 @@ export type ViewerDenialCategory =
     | 'unsupported';
 
 export type ViewerDenialAction =
+    | 'complete_challenge'
     | 'connect_account'
     | 'manage_account'
     | 'none'
@@ -98,6 +99,13 @@ const explanations = {
         explanation:
             'Recent protected-content activity matches a high-confidence automation pattern. No human-identity judgment is being made.',
         action: 'retry_later',
+    },
+    challenge_required: {
+        category: 'risk',
+        title: 'Quick check required',
+        explanation:
+            'This Capsule needs a short access-confidence check before the Viewer can continue. No personhood or identity judgment is being made.',
+        action: 'complete_challenge',
     },
     unsupported_contract: {
         category: 'unsupported',

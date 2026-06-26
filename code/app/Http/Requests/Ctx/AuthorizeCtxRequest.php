@@ -19,6 +19,15 @@ final class AuthorizeCtxRequest extends FormRequest
         return [
             'type' => ['required', 'in:ctx-authorization-request'],
             'version' => ['required', 'integer', 'in:1'],
+            'host_origin' => [
+                'required',
+                'max:2048',
+                static function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (! is_string($value) || ! CreateChallengeAttemptRequest::isOrigin($value)) {
+                        $fail('The '.$attribute.' must be an HTTPS origin, or a loopback HTTP origin for local development.');
+                    }
+                },
+            ],
             'broker' => [
                 'required',
                 'max:2048',
@@ -50,7 +59,7 @@ final class AuthorizeCtxRequest extends FormRequest
         ], 422, ['Cache-Control' => 'no-store']));
     }
 
-    private static function isAcceptedServiceIdentity(string $value): bool
+    public static function isAcceptedServiceIdentity(string $value): bool
     {
         $parts = parse_url($value);
         if (! is_array($parts)) {

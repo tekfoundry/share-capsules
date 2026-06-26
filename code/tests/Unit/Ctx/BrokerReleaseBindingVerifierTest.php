@@ -39,6 +39,24 @@ final class BrokerReleaseBindingVerifierTest extends TestCase
         Http::assertSentCount(1);
     }
 
+    public function test_it_falls_back_to_the_public_broker_url_when_the_internal_url_is_unreachable(): void
+    {
+        config()->set('sharecapsules.broker.internal_url', 'https://broker-internal.example.test');
+        config()->set('sharecapsules.broker.base_url', 'https://broker-public.example.test');
+        Http::fake([
+            'broker-internal.example.test/*' => Http::response(['message' => 'unreachable'], 503),
+            'broker-public.example.test/*' => Http::response(['valid' => true]),
+        ]);
+        $bindings = $this->bindings();
+        $this->capsule($bindings, CapsuleLifecycleStatus::Active);
+
+        $this->assertTrue(app(BrokerReleaseBindingVerifier::class)->valid($bindings));
+        Http::assertSent(fn ($request): bool => str_starts_with(
+            $request->url(),
+            'https://broker-public.example.test/internal/release-bindings/validate',
+        ));
+    }
+
     private function bindings(): CtxTicketBindings
     {
         $digest = sodium_bin2base64(random_bytes(32), SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING);

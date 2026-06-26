@@ -40,7 +40,7 @@ final class AuthorizeCtxController extends Controller
         $keys = array_keys($request->all());
         sort($keys);
         if ($keys !== [
-            'action', 'broker', 'capsule_id', 'capsule_revision', 'cryptographic_suite',
+            'action', 'broker', 'capsule_id', 'capsule_revision', 'cryptographic_suite', 'host_origin',
             'payload_id', 'policy', 'policy_sha256', 'release_handle', 'type', 'version',
             'view_event_consent',
         ]) {
@@ -137,6 +137,7 @@ final class AuthorizeCtxController extends Controller
                     $device,
                     $request->array('policy'),
                     $request->string('policy_sha256')->toString(),
+                    $request->string('host_origin')->toString(),
                     $request->string('broker')->toString(),
                     $request->string('capsule_id')->toString(),
                     $request->integer('capsule_revision'),
@@ -170,6 +171,7 @@ final class AuthorizeCtxController extends Controller
             'type' => $request->string('type')->toString(),
             'version' => $request->integer('version'),
             'broker' => $request->string('broker')->toString(),
+            'host_origin' => $request->string('host_origin')->toString(),
             'capsule_id' => $request->string('capsule_id')->toString(),
             'capsule_revision' => $request->integer('capsule_revision'),
             'policy_sha256' => $request->string('policy_sha256')->toString(),

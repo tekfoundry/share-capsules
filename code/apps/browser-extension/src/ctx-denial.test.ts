@@ -42,6 +42,12 @@ describe('privacy-safe CTX denial presentation', () => {
         expect(risk.explanation).toContain('automation pattern');
         expect(risk.explanation).toContain('No human-identity judgment');
         expect(risk.explanation).not.toMatch(/\d/gu);
+        const challenge = viewerDenialFromResponse(error('challenge_required'));
+        expect(challenge).toMatchObject({
+            category: 'risk',
+            action: 'complete_challenge',
+        });
+        expect(challenge.explanation).toContain('No personhood or identity judgment');
     });
 
     it('rejects unknown fields and unsupported codes before presentation', () => {

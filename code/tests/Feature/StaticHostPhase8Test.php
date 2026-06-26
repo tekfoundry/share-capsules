@@ -3,11 +3,22 @@
 namespace Tests\Feature;
 
 use App\Capsules\Registry\CapsuleLifecycleStatus;
+use App\Ctx\Challenges\ChallengeAttemptContext;
+use App\Ctx\Challenges\ChallengeAttemptOrchestrator;
+use App\Ctx\Policy\CtxPolicyDigest;
+use App\Ctx\Policy\PolicyDecisionCode;
+use App\Ctx\Risk\AutomationRiskActivityType;
+use App\Ctx\Risk\V1AutomationRiskRules;
 use App\Ctx\SigningKeys\TicketSigningKeyLifecycle;
+use App\Ctx\Tickets\CtxAuthorizationDenied;
+use App\Ctx\Tickets\CtxAuthorizationService;
+use App\Ctx\Tickets\CtxTicketBindings;
 use App\Ctx\Tickets\CtxTicketRedemptionService;
+use App\Ctx\Tickets\ReleaseBindingVerifier;
 use App\Ctx\Tickets\TicketRedemptionCode;
 use App\Models\CreatorCapsule;
 use App\Models\CtxAuthorizationTicket;
+use App\Models\CtxAutomationRiskActivity;
 use App\Models\User;
 use App\Models\ViewerDevice;
 use App\ViewerDevices\ViewerDeviceStatus;
@@ -77,6 +88,122 @@ final class StaticHostPhase8Test extends TestCase
         $this->assertSame(TicketRedemptionCode::PolicyUnsatisfied, $result->code);
         $this->assertSame('pending', $ticket->fresh()->status);
         $this->assertDatabaseCount('ctx_capsule_release_counters', 0);
+    }
+
+    public function test_static_host_trust_capsule_fixture_challenges_opens_after_success_and_blocks_high_risk(): void
+    {
+        config()->set('sharecapsules.broker.base_url', 'http://localhost:3004');
+        $this->app->instance(ReleaseBindingVerifier::class, new class implements ReleaseBindingVerifier
+        {
+            public function valid(CtxTicketBindings $bindings): bool
+            {
+                return true;
+            }
+        });
+        $key = app(TicketSigningKeyLifecycle::class)->stage();
+        app(TicketSigningKeyLifecycle::class)->activate($key->kid);
+        $creator = User::factory()->create(['email_verified_at' => now()]);
+        [$viewer, $device] = $this->viewerIdentity();
+        [$policy, $payload] = $this->trustCapsuleFixturePayload();
+        $this->activeCapsule($creator, $payload, $policy);
+        $authorization = app(CtxAuthorizationService::class);
+
+        try {
+            $authorization->authorize(
+                $viewer,
+                $device,
+                $policy,
+                $payload['policy_sha256'],
+                $payload['host_origin'],
+                $payload['broker'],
+                $payload['capsule_id'],
+                $payload['capsule_revision'],
+                $payload['payload_id'],
+                $payload['release_handle'],
+                true,
+            );
+            $this->fail('A low-history Trust Capsule viewer should receive a challenge first.');
+        } catch (CtxAuthorizationDenied $denied) {
+            $this->assertSame(PolicyDecisionCode::ChallengeRequired, $denied->reason);
+        }
+
+        $attempt = app(ChallengeAttemptOrchestrator::class)->create(
+            $viewer,
+            $device,
+            new ChallengeAttemptContext(
+                hostOrigin: $payload['host_origin'],
+                broker: $payload['broker'],
+                capsuleId: $payload['capsule_id'],
+                capsuleRevision: $payload['capsule_revision'],
+                policySha256: $payload['policy_sha256'],
+                payloadId: $payload['payload_id'],
+                releaseHandle: $payload['release_handle'],
+                action: $payload['action'],
+            ),
+        );
+        $module = $attempt->modules()->firstOrFail();
+        app(ChallengeAttemptOrchestrator::class)->recordModuleScore($attempt, $module->challenge_id, 80, ['completed']);
+
+        $issued = $authorization->authorize(
+            $viewer,
+            $device,
+            $policy,
+            $payload['policy_sha256'],
+            $payload['host_origin'],
+            $payload['broker'],
+            $payload['capsule_id'],
+            $payload['capsule_revision'],
+            $payload['payload_id'],
+            $payload['release_handle'],
+            true,
+        );
+        $this->assertSame(
+            TicketRedemptionCode::Committed,
+            app(CtxTicketRedemptionService::class)
+                ->redeem($issued->identifier, hash('sha256', $issued->compact))
+                ->code,
+        );
+
+        $secondTicket = $authorization->authorize(
+            $viewer,
+            $device,
+            $policy,
+            $payload['policy_sha256'],
+            $payload['host_origin'],
+            $payload['broker'],
+            $payload['capsule_id'],
+            $payload['capsule_revision'],
+            $payload['payload_id'],
+            $payload['release_handle'],
+            true,
+        );
+        $this->recordHighAutomationRisk($viewer, $device, $payload['capsule_id'], $payload['capsule_revision']);
+
+        try {
+            $authorization->authorize(
+                $viewer,
+                $device,
+                $policy,
+                $payload['policy_sha256'],
+                $payload['host_origin'],
+                $payload['broker'],
+                $payload['capsule_id'],
+                $payload['capsule_revision'],
+                $payload['payload_id'],
+                $payload['release_handle'],
+                true,
+            );
+            $this->fail('High automation risk should block Trust Capsule authorization.');
+        } catch (CtxAuthorizationDenied $denied) {
+            $this->assertSame(PolicyDecisionCode::AutomationRiskHigh, $denied->reason);
+        }
+
+        $this->assertSame(
+            TicketRedemptionCode::AutomationRiskHigh,
+            app(CtxTicketRedemptionService::class)
+                ->redeem($secondTicket->identifier, hash('sha256', $secondTicket->compact))
+                ->code,
+        );
     }
 
     public function test_static_host_bulk_page_safety_fixture_documents_hidden_queue_retry_and_counter_boundaries(): void
@@ -170,5 +297,77 @@ final class StaticHostPhase8Test extends TestCase
     private function digest(): string
     {
         return sodium_bin2base64(random_bytes(32), SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING);
+    }
+
+    /** @return array{array<string, mixed>, array<string, mixed>} */
+    private function trustCapsuleFixturePayload(): array
+    {
+        $policy = [
+            'type' => 'ctx-policy',
+            'version' => 1,
+            'combiner' => 'all',
+            'requirements' => [
+                ['predicate' => 'ctx.account.email-verified', 'equals' => true],
+                ['predicate' => 'ctx.account.active', 'equals' => true],
+                ['predicate' => 'ctx.viewer.device-registered', 'equals' => true],
+                ['predicate' => 'ctx.consent.capsule-view-event', 'equals' => true],
+                [
+                    'predicate' => 'ctx.risk.ecosystem-automation-not-high',
+                    'issuer' => (string) config('sharecapsules.ctx.issuer'),
+                ],
+            ],
+        ];
+
+        return [$policy, [
+            'host_origin' => 'http://localhost:8088',
+            'broker' => 'http://localhost:3004',
+            'capsule_id' => 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703',
+            'capsule_revision' => 1,
+            'policy_sha256' => app(CtxPolicyDigest::class)->calculate($policy),
+            'payload_id' => 'primary-image',
+            'release_handle' => 'opaque-release-handle-0001',
+            'action' => 'render',
+        ]];
+    }
+
+    /** @param array<string, mixed> $payload */
+    private function activeCapsule(User $creator, array $payload, array $policy): void
+    {
+        CreatorCapsule::query()->create([
+            'user_id' => $creator->getKey(),
+            'registration_id' => 'registration_'.str_repeat('b', 32),
+            'capsule_id' => $payload['capsule_id'],
+            'capsule_revision' => $payload['capsule_revision'],
+            'payload_id' => $payload['payload_id'],
+            'broker' => $payload['broker'],
+            'release_handle' => $payload['release_handle'],
+            'policy_sha256' => $payload['policy_sha256'],
+            'policy' => $policy,
+            'status' => CapsuleLifecycleStatus::Active,
+            'pending_expires_at' => now(),
+            'finalized_at' => now(),
+        ]);
+    }
+
+    private function recordHighAutomationRisk(
+        User $viewer,
+        ViewerDevice $device,
+        string $capsuleId,
+        int $capsuleRevision,
+    ): void {
+        for ($index = 0; $index < V1AutomationRiskRules::TICKET_REJECTION_LIMIT; $index++) {
+            CtxAutomationRiskActivity::query()->create([
+                'event_id' => sodium_bin2base64(
+                    hash('sha256', 'static-host-trust-rejection-'.$index, true),
+                    SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING,
+                ),
+                'user_id' => $viewer->getKey(),
+                'viewer_device_id' => $device->getKey(),
+                'activity_type' => AutomationRiskActivityType::TicketRejected,
+                'capsule_id' => $capsuleId,
+                'capsule_revision' => $capsuleRevision,
+                'occurred_at' => now(),
+            ]);
+        }
     }
 }

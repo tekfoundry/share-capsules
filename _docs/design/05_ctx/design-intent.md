@@ -1,7 +1,7 @@
 # Capsule Trust Exchange Design Intent
 
 Status: Draft
-Last updated: 2026-06-19
+Last updated: 2026-06-25
 
 ## Purpose
 
@@ -57,6 +57,18 @@ Product language groups these optional policy gates into creator-facing Capsule 
 - **Trust Capsules** use trust, risk, or evidence gates to control whether a specific viewer/session should be allowed.
 
 These are not separate container formats. They are human-readable patterns over the signed CTX policy, and a single Capsule may combine Time, Limit, and Trust gates.
+
+Trust Capsules should remain a simple creator-facing control even as the provider-side evaluation grows more nuanced. The reference product may expose one "Trust Capsule" choice while internally combining independent, versioned signals such as recent usage confidence and recent challenge evidence. The exact scoring model is provider-private and versioned, but it must preserve the public meaning of the signed policy predicate and the viewer's explanation rights.
+
+The intended Trust Capsule direction is:
+
+- A recent usage score, from `0` to `100`, reflects whether the viewer account's recent CTX authorization and committed-release behavior shows high automation or abuse risk. `100` means no negative recent usage evidence was detected; it does not mean the viewer is proven trustworthy. A no-data account defaults to `100` with `zero` usage confidence so a clean slate is not treated as bad history.
+- A usage-confidence rating, such as `zero`, `low`, `medium`, or `high`, describes the amount and freshness of usage evidence behind the usage score.
+- A challenge score, from `0` to `100`, reflects recent step-up challenge performance. A viewer with no current completed challenge has a challenge score of `0`.
+- Challenge evidence is represented by timestamps and scope, such as `last_challenged_at`, `challenge_expires_at`, and the account, device, site, policy, or Capsule context to which the result is bound. A separate stored challenge-confidence field is unnecessary; the current, expired, or absent state is derived from those timestamps.
+- A final Trust Capsule outcome combines the independent scores into an allow, challenge-required, deny, or temporarily-unavailable result. Recent severe usage risk cannot be overridden by a high challenge score, because a human solver, rented account, compromised account, or paid operator may still satisfy a challenge while harvesting content.
+
+Trust Capsule language should describe this as current access confidence, risk reduction, or step-up verification. It must not claim that a viewer is a unique person, benign actor, or generally trustworthy in all contexts.
 
 The embedded policy is immutable within its signed Capsule revision. CTX evaluates that policy as written. A provider may deny, suspend, or revoke access, but it must not authorize access under requirements weaker than the signed policy.
 

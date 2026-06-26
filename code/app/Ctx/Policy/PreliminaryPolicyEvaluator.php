@@ -2,6 +2,11 @@
 
 namespace App\Ctx\Policy;
 
+use App\Ctx\Challenges\ChallengeAttemptContext;
+use App\Ctx\Challenges\ChallengeEvidenceRepository;
+use App\Ctx\Trust\TrustCapsuleOutcome;
+use App\Ctx\Trust\TrustCapsuleOutcomeCombiner;
+use App\Ctx\Trust\TrustScore;
 use App\Models\User;
 use App\Models\ViewerDevice;
 use App\ViewerDevices\ViewerDeviceStatus;
@@ -12,6 +17,8 @@ final readonly class PreliminaryPolicyEvaluator
     public function __construct(
         private CommittedReleaseCounter $releases,
         private AutomationRiskEvaluator $automationRisk,
+        private TrustCapsuleOutcomeCombiner $trustOutcomes,
+        private ChallengeEvidenceRepository $challengeEvidence,
     ) {}
 
     public function evaluate(
@@ -21,6 +28,7 @@ final readonly class PreliminaryPolicyEvaluator
         string $capsuleId,
         int $capsuleRevision,
         bool $viewEventConsent,
+        ?ChallengeAttemptContext $challengeContext = null,
         ?CarbonImmutable $now = null,
     ): PreliminaryPolicyDecision {
         $now ??= CarbonImmutable::now();
@@ -52,11 +60,33 @@ final readonly class PreliminaryPolicyEvaluator
             return $this->decision(PolicyDecisionCode::AccountCapsuleLimitReached);
         }
         if ($policy->automationRiskIssuer !== null) {
-            $risk = $this->automationRisk->evaluate($user, $policy->automationRiskIssuer);
-            if ($risk === AutomationRiskDecision::High) {
+            $risk = $this->automationRisk->assessUsage($user, $policy->automationRiskIssuer);
+            if ($risk->severeUsageRisk()) {
+                if ($challengeContext !== null) {
+                    $this->challengeEvidence->resetFor($user, $device, $challengeContext, 'high_automation_risk', $now);
+                }
+
                 return $this->decision(PolicyDecisionCode::AutomationRiskHigh);
             }
-            if ($risk === AutomationRiskDecision::Unavailable) {
+            if ($risk->unavailable()) {
+                return $this->decision(PolicyDecisionCode::PolicyUnsatisfied);
+            }
+            $challenge = $challengeContext === null
+                ? null
+                : $this->challengeEvidence->currentFor($user, $device, $challengeContext, $now);
+            $trust = $this->trustOutcomes->assess(
+                usageScore: $risk->usageScore,
+                usageConfidence: $risk->usageConfidence,
+                challengeScore: $challenge?->score ?? TrustScore::zero(),
+                lastChallengedAt: $challenge?->lastChallengedAt,
+                challengeExpiresAt: $challenge?->expiresAt,
+                now: $now,
+            );
+
+            if ($trust->finalOutcome === TrustCapsuleOutcome::ChallengeRequired) {
+                return $this->decision(PolicyDecisionCode::ChallengeRequired);
+            }
+            if ($trust->finalOutcome !== TrustCapsuleOutcome::Allow) {
                 return $this->decision(PolicyDecisionCode::PolicyUnsatisfied);
             }
         }

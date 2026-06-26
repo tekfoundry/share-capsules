@@ -1,7 +1,7 @@
 # Reputation and Signals
 
 Status: Draft
-Last updated: 2026-06-18
+Last updated: 2026-06-25
 
 ## Purpose
 
@@ -26,6 +26,26 @@ automation_risk: low
 Names, scales, and calculations remain provisional.
 
 The implemented V1 storage and disclosure boundary is defined in [V1 trust profile and retained state](trust-profile-v1.md). Internal schema details may evolve, but new collection, enforcement, retention, or disclosure does not qualify as a mere implementation adjustment.
+
+For Trust Capsules, the reference direction is to compute independent score components and combine them into a final access outcome rather than treating any one signal as universal trust:
+
+```text
+usage_score: 0-100
+usage_confidence: zero | low | medium | high
+challenge_score: 0-100
+last_challenged_at: timestamp | null
+challenge_expires_at: timestamp | null
+final_trust_score: 0-100
+final_outcome: allow | challenge_required | deny | temporarily_unavailable
+```
+
+The `usage_score` is recent and negative-evidence oriented. A score of `100` means no high-risk recent CTX usage pattern was detected, not that the account is proven trustworthy. An account with no usage evidence defaults to `usage_score: 100` and `usage_confidence: zero`.
+
+The `challenge_score` is recent step-up evidence. A viewer with no current completed challenge defaults to `challenge_score: 0`. Challenge currency is derived from `last_challenged_at`, `challenge_expires_at`, and the binding context rather than a separate stored challenge-confidence value.
+
+Challenge refresh can use a provider-private progressive cadence. New or unproven viewers should be retested on a standard window, such as every 7 days. Viewers with repeated clean successful challenge windows may earn a longer window, such as 30 days after five consecutive clean successes. This cadence changes only when a challenge result is considered fresh; it does not change the meaning of `challenge_score`, create a creator-visible trust score, or expose additional creator controls. Low scores, failed checks, suspicious usage, or high automation risk reset the cadence to the standard window.
+
+The final outcome may average eligible score components for ordinary low-confidence cases, but active severe usage risk is a hard safety boundary. A strong challenge score must not convert an account currently showing high automation or abuse risk into an allowed result.
 
 ## Candidate dimensions
 
@@ -78,9 +98,15 @@ V1 limits this dimension to CTX-side authorization and committed-release metadat
 
 Only high-confidence deterministic rules affect V1 access. Experimental signals may be observed within consent boundaries but remain non-authoritative until calibration, false-positive review, privacy review, and an accepted versioned-policy decision.
 
+In the Trust Capsule scoring direction, this dimension produces a numerical `usage_score` and an evidence-volume `usage_confidence`. Current V1 automation-risk rules are recent by design; old behavior should stop affecting the score after the relevant windows and retained rolling data expire.
+
 ### Human confidence
 
 An assessment combining persistent history, session evidence, credentials, and optional step-up verification. See [Human confidence](human-confidence.md).
+
+In the Trust Capsule scoring direction, recent step-up verification produces a numerical `challenge_score` that expires. It supports low-history or ambiguous accounts but remains distinct from usage risk, account continuity, identity, personhood, and benign intent.
+
+Challenge retesting may become less frequent for viewers who repeatedly pass fresh checks without suspicious usage. That progression is aggregate trust-tuning state, not proof of personhood or a public reputation tier.
 
 ## Signal sources
 

@@ -4910,6 +4910,7 @@ const schema68 = {
                 'capsule_limit_reached',
                 'account_capsule_limit_reached',
                 'automation_risk_high',
+                'challenge_required',
                 'unsupported_contract',
                 'invalid_proof',
                 'invalid_ticket',
@@ -5076,6 +5077,7 @@ function validate36(
                     data2 === 'capsule_limit_reached' ||
                     data2 === 'account_capsule_limit_reached' ||
                     data2 === 'automation_risk_high' ||
+                    data2 === 'challenge_required' ||
                     data2 === 'unsupported_contract' ||
                     data2 === 'invalid_proof' ||
                     data2 === 'invalid_ticket' ||

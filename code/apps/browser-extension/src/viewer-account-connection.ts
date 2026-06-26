@@ -7,6 +7,7 @@ import type {
 } from './viewer-device.js';
 
 export const VIEWER_CREDENTIAL_STORAGE_KEYS = Object.freeze(['viewer_token', 'viewer_device_id']);
+const VIEWER_TOKEN_REFRESH_BUFFER_MS = 60_000;
 
 export class ViewerCredentialStore {
     public constructor(
@@ -40,7 +41,8 @@ export class ViewerCredentialStore {
         { readonly token: OAuthTokenSet; readonly device: StoredViewerDeviceKeys } | undefined
     > {
         const stored = await this.stored();
-        return stored === undefined || stored.expiresAt <= this.now()
+        return stored === undefined ||
+            stored.expiresAt <= this.now() + VIEWER_TOKEN_REFRESH_BUFFER_MS
             ? undefined
             : { token: stored.token, device: stored.device };
     }

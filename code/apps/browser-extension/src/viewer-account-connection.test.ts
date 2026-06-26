@@ -100,6 +100,49 @@ describe('Viewer account connection', () => {
         });
     });
 
+    it('refreshes a Viewer session before it is close enough to expire on the server', async () => {
+        let now = 1_000;
+        const storage = new MemoryStorage();
+        const keys = new MemoryDeviceKeys();
+        keys.value = { deviceId: 'viewer-device-1' } as StoredViewerDeviceKeys;
+        const credentials = new ViewerCredentialStore(storage, keys, () => now);
+        await credentials.save('viewer-device-1', token('DPoP', ['ctx:authorize']));
+        now = 550_500;
+        const calls: string[] = [];
+        const connector = new ViewerAccountConnector(
+            {
+                connect: async () => {
+                    throw new Error('new connection should not run');
+                },
+                authorizeDevice: async () => {
+                    throw new Error('interactive authorization should not run');
+                },
+                refresh: async (refreshToken, device) => {
+                    calls.push(`${refreshToken}:${device.deviceId}`);
+                    return {
+                        ...token('DPoP', ['ctx:authorize']),
+                        accessToken: 'buffer-refreshed-viewer-token',
+                    };
+                },
+            },
+            {
+                register: async () => {
+                    throw new Error('new registration should not run');
+                },
+            },
+            keys,
+            credentials,
+        );
+
+        await connector.ensureConnected('Viewer browser');
+
+        expect(calls).toEqual(['refresh:viewer-device-1']);
+        await expect(credentials.active()).resolves.toMatchObject({
+            token: { accessToken: 'buffer-refreshed-viewer-token', scopes: ['ctx:authorize'] },
+            device: { deviceId: 'viewer-device-1' },
+        });
+    });
+
     it('ignores malformed, expired, missing-device, and creator-scoped stored credentials', async () => {
         const storage = new MemoryStorage();
         const keys = new MemoryDeviceKeys();

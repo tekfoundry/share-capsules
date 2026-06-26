@@ -3,13 +3,17 @@
 namespace App\Ctx\Tickets;
 
 use App\Capsules\Registry\CapsuleLifecycleStatus;
+use App\Ctx\Challenges\ChallengeAttemptContext;
+use App\Ctx\Challenges\ChallengeEvidenceRepository;
 use App\Ctx\Metrics\CtxMetricEvent;
 use App\Ctx\Metrics\CtxMetricEventType;
 use App\Ctx\Metrics\CtxMetricRecorder;
-use App\Ctx\Policy\AutomationRiskDecision;
 use App\Ctx\Policy\AutomationRiskEvaluator;
 use App\Ctx\Risk\AutomationRiskActivityRecorder;
 use App\Ctx\Risk\AutomationRiskActivityType;
+use App\Ctx\Trust\TrustCapsuleOutcome;
+use App\Ctx\Trust\TrustCapsuleOutcomeCombiner;
+use App\Ctx\Trust\TrustScore;
 use App\Models\CreatorCapsule;
 use App\Models\CtxAccountCapsuleReleaseCounter;
 use App\Models\CtxAuthorizationTicket;
@@ -24,6 +28,8 @@ final readonly class CtxTicketRedemptionService
 {
     public function __construct(
         private AutomationRiskEvaluator $automationRisk,
+        private TrustCapsuleOutcomeCombiner $trustOutcomes,
+        private ChallengeEvidenceRepository $challengeEvidence,
         private CtxMetricRecorder $metrics,
         private AutomationRiskActivityRecorder $riskActivity,
     ) {}
@@ -127,13 +133,64 @@ final readonly class CtxTicketRedemptionService
                 return $this->result(TicketRedemptionCode::AccountCapsuleLimitReached);
             }
             if ($ticket->automation_risk_issuer !== null) {
-                $risk = $this->automationRisk->evaluate($user, $ticket->automation_risk_issuer);
-                if ($risk === AutomationRiskDecision::High) {
+                $risk = $this->automationRisk->assessUsage($user, $ticket->automation_risk_issuer);
+                if ($risk->severeUsageRisk()) {
+                    if (is_string($ticket->host_origin) && is_string($ticket->action)) {
+                        $this->challengeEvidence->resetFor(
+                            $user,
+                            $device,
+                            new ChallengeAttemptContext(
+                                hostOrigin: $ticket->host_origin,
+                                broker: $ticket->broker,
+                                capsuleId: $ticket->capsule_id,
+                                capsuleRevision: $ticket->capsule_revision,
+                                policySha256: $ticket->policy_sha256,
+                                payloadId: $ticket->payload_id,
+                                releaseHandle: $ticket->release_handle,
+                                action: $ticket->action,
+                            ),
+                            'high_automation_risk',
+                            $now,
+                        );
+                    }
                     $this->recordRejection($ticket, TicketRedemptionCode::AutomationRiskHigh, $now);
 
                     return $this->result(TicketRedemptionCode::AutomationRiskHigh);
                 }
-                if ($risk === AutomationRiskDecision::Unavailable) {
+                if ($risk->unavailable()) {
+                    $this->recordRejection($ticket, TicketRedemptionCode::PolicyUnsatisfied, $now);
+
+                    return $this->result(TicketRedemptionCode::PolicyUnsatisfied);
+                }
+                if (! is_string($ticket->host_origin) || ! is_string($ticket->action)) {
+                    $this->recordRejection($ticket, TicketRedemptionCode::PolicyUnsatisfied, $now);
+
+                    return $this->result(TicketRedemptionCode::PolicyUnsatisfied);
+                }
+                $challenge = $this->challengeEvidence->currentFor(
+                    $user,
+                    $device,
+                    new ChallengeAttemptContext(
+                        hostOrigin: $ticket->host_origin,
+                        broker: $ticket->broker,
+                        capsuleId: $ticket->capsule_id,
+                        capsuleRevision: $ticket->capsule_revision,
+                        policySha256: $ticket->policy_sha256,
+                        payloadId: $ticket->payload_id,
+                        releaseHandle: $ticket->release_handle,
+                        action: $ticket->action,
+                    ),
+                    $now,
+                );
+                $trust = $this->trustOutcomes->assess(
+                    usageScore: $risk->usageScore,
+                    usageConfidence: $risk->usageConfidence,
+                    challengeScore: $challenge?->score ?? TrustScore::zero(),
+                    lastChallengedAt: $challenge?->lastChallengedAt,
+                    challengeExpiresAt: $challenge?->expiresAt,
+                    now: $now,
+                );
+                if ($trust->finalOutcome !== TrustCapsuleOutcome::Allow) {
                     $this->recordRejection($ticket, TicketRedemptionCode::PolicyUnsatisfied, $now);
 
                     return $this->result(TicketRedemptionCode::PolicyUnsatisfied);

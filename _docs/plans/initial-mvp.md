@@ -586,17 +586,34 @@ Success goals:
 
 Objective: evolve Trust Capsules beyond "no known bad history" by adding an accessible, privacy-aware challenge path for viewers who have too little history to evaluate confidently.
 
-- ⬜️ Define the Trust Capsule decision model for `not_high`, `high`, and `unknown_or_low_confidence` viewer states, including how the Viewer should explain each state without claiming personhood certainty.
-- ⬜️ Design the human challenge contract: when it is required, how long a successful result lasts, how it is bound to account/device/site/Capsule context, and how it interacts with standing consent.
-- ⬜️ Build the challenge page shell with multiple accessible mini-challenge patterns rather than one brittle CAPTCHA-style puzzle.
-- ⬜️ Capture safe challenge interaction events and derive a bounded `challenge_score` without storing plaintext content, secrets, raw pointer traces longer than needed, or unnecessary biometric-style data.
-- ⬜️ Add challenge result storage, retention, pruning, and audit fields that keep successful challenge evidence temporary and explainable.
-- ⬜️ Integrate challenge requirements into CTX authorization so an eligible but low-confidence viewer receives a challenge-required response instead of a generic Trust Capsule denial.
-- ⬜️ Update the Viewer extension to launch or navigate to the challenge flow, resume the original Capsule opening after success, and show safe retry/failure messages.
-- ⬜️ Add creator-facing language that explains Trust Capsules as risk-reduction gates using activity history and optional human checks, not as proof of identity, personhood, or one-human-one-account.
-- ⬜️ Add automated tests for challenge scoring, expiry, replay resistance, account/device binding, accessibility fallbacks, and safe error handling.
-- ⬜️ Add a static-host challenge fixture that verifies a new/low-history viewer is challenged, a successful challenge opens the Capsule, and high automation risk still blocks.
-- ⬜️ Document operational tuning knobs for challenge thresholds, score expiry, abuse limits, and emergency disablement.
+- ✅ Define the Trust Capsule scoring contract: `usage_score`, `usage_confidence`, `challenge_score`, `last_challenged_at`, `challenge_expires_at`, `final_trust_score`, and `final_outcome`, including how the Viewer should explain each result without claiming personhood certainty.
+- ✅ Convert the existing recent automation-risk evaluation into a bounded `usage_score` from `0` to `100` and a `usage_confidence` rating where no retained usage evidence defaults to `usage_score: 100` and `usage_confidence: zero`.
+- ✅ Define the final Trust Capsule outcome combiner so low-confidence eligible viewers receive `challenge_required`, ordinary eligible viewers can be allowed, active severe usage risk cannot be overridden by challenge success, and temporary provider failures remain distinguishable.
+- ✅ Design the provider-hosted human challenge contract: when it is required, how long a successful result lasts, how it is bound to account/device/site/policy/Capsule context, how the extension launches/resumes it, and how it interacts with standing consent.
+- ✅ Design an extensible provider-side challenge registry so challenge modules can be added, retired, disabled, versioned, selected, and scored without hard-coding the active challenge pool or requiring extension releases.
+- ✅ Build the provider-hosted challenge orchestration flow that randomly selects the required challenge set from the active registry, records challenge identifiers and versions, and averages completed challenge module scores into the bounded `challenge_score`.
+- ✅ Build the first end-to-end Trust Capsule challenge slice with one active provider-hosted challenge module before enabling the full challenge pool: scoring, challenge result storage, CTX `challenge_required`, extension launch, challenge completion, original Capsule resume, and redemption recheck.
+- ✅ Use Circuit Trace as the first active challenge module to prove input handling, accessibility alternatives, safe scoring, storage, authorization resume, and redemption recheck before broadening the challenge pool.
+- ✅ Keep additional challenge modules behind registry flags until each has accessibility, scoring, replay, safe-retention, and safe-error tests.
+- ✅ Add challenge calibration fixtures for normal human-like, impossible-fast, replayed, failed, alternate-input, and expired completions before enabling a challenge module by default.
+- ✅ Add local challenge playground regression coverage for score display, automatic fresh-attempt restart, expired signed-link recovery, and per-attempt path stability.
+- ✅ Build the provider-hosted challenge page shell with multiple accessible mini-challenge patterns rather than one brittle CAPTCHA-style puzzle, including retry, alternate-path, reduced-motion, keyboard, touch, and screen-reader states.
+- ✅ Build the Circuit Trace challenge: connect power from start to finish through a small randomized circuit, with accessible pointer, touch, keyboard, and reduced-motion paths.
+- ✅ Build the Signal Tune challenge: adjust two or three controls until a waveform or signal visually locks in, with nonvisual and keyboard-operable feedback.
+- ✅ Build the Cargo Sort challenge: sort abstract objects into matching bins under a simple changing rule, with clear labels and tolerant correction behavior.
+- ✅ Build the Memory Path challenge: show a short randomized path and ask the viewer to reproduce it, with equivalent accessible sequence prompts.
+- ✅ Build the Balance Beam challenge: keep a marker inside a safe zone while gentle forces change, without treating ordinary motor variation as failure.
+- ✅ Build the Pattern Repair challenge: identify and fix one broken tile in a simple generated pattern, with visual and text-based variants.
+- ✅ Capture safe per-module challenge interaction events and derived scores without storing plaintext content, secrets, raw pointer traces longer than needed, complete session replay, or unnecessary biometric-style data.
+- ✅ Add challenge result storage, retention, pruning, and audit fields that keep successful challenge evidence temporary and explainable.
+- ✅ Implement progressive Trust Capsule challenge refresh cadence using aggregate per-viewer cadence state: standard 7-day validity by default, extended 30-day validity after five consecutive clean successful challenge windows, and reset to standard cadence on low challenge scores, failed or abandoned checks, suspicious usage, or high automation-risk override.
+- ✅ Integrate Trust Capsule scoring into CTX authorization so an eligible but low-confidence viewer receives a challenge-required response instead of a generic Trust Capsule denial.
+- ✅ Recheck the final Trust Capsule outcome during ticket redemption when the policy requires it, so stale challenge results, expired bindings, concurrent tickets, or newly severe usage risk cannot bypass enforcement.
+- ✅ Update the Viewer extension to launch or navigate to the challenge flow, resume the original Capsule opening after success, and show safe retry/failure messages.
+- ✅ Add creator-facing language that explains Trust Capsules as risk-reduction gates using activity history and optional human checks, not as proof of identity, personhood, or one-human-one-account.
+- ✅ Add automated tests for usage scoring, challenge selection, challenge scoring, expiry, replay resistance, account/device/site/policy binding, registry versioning, accessibility fallbacks, high-usage-risk override prevention, and safe error handling.
+- ✅ Add a static-host challenge fixture that verifies a new/low-history viewer is challenged, a successful challenge opens the Capsule, and high automation risk still blocks.
+- ✅ Document operational tuning knobs for challenge thresholds, score expiry, abuse limits, and emergency disablement.
 
 Success goals:
 

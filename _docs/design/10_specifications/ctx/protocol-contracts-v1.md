@@ -1,7 +1,7 @@
 # CTX Protocol Contracts V1
 
 Status: Experimental normative contract
-Last updated: 2026-06-20
+Last updated: 2026-06-25
 
 ## Scope
 
@@ -224,7 +224,7 @@ Protocol APIs return only this machine-readable shape:
 }
 ```
 
-V1 codes are `invalid_request`, `authentication_required`, `email_verification_required`, `account_unavailable`, `device_registration_required`, `consent_required`, `policy_unsatisfied`, `capsule_limit_reached`, `account_capsule_limit_reached`, `automation_risk_high`, `unsupported_contract`, `invalid_proof`, `invalid_ticket`, `ticket_expired`, `ticket_replayed`, `release_unavailable`, and `temporarily_unavailable`.
+V1 codes are `invalid_request`, `authentication_required`, `email_verification_required`, `account_unavailable`, `device_registration_required`, `consent_required`, `policy_unsatisfied`, `capsule_limit_reached`, `account_capsule_limit_reached`, `automation_risk_high`, `challenge_required`, `unsupported_contract`, `invalid_proof`, `invalid_ticket`, `ticket_expired`, `ticket_replayed`, `release_unavailable`, and `temporarily_unavailable`.
 
 The envelope contains no free-form detail, account identifier, score, threshold, history, token, key, Capsule plaintext, or internal exception. The trusted Viewer maps codes to reviewed localized explanations. The Host receives only a generic locked, unavailable, or unsupported lifecycle state and MUST NOT receive the protocol error body.
 

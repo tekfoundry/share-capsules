@@ -14,6 +14,7 @@ enum CtxErrorCode: string
     case CapsuleLimitReached = 'capsule_limit_reached';
     case AccountCapsuleLimitReached = 'account_capsule_limit_reached';
     case AutomationRiskHigh = 'automation_risk_high';
+    case ChallengeRequired = 'challenge_required';
     case UnsupportedContract = 'unsupported_contract';
     case InvalidProof = 'invalid_proof';
     case InvalidTicket = 'invalid_ticket';

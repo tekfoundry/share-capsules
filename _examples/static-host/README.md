@@ -118,6 +118,8 @@ The automated extension tests lock the same rule at the fetch boundary so a sepa
 
 The policy-fixture page should collect behavior-oriented test cases. Keep polished markup examples on `index.html`; add gate-specific test Capsules to `test.html` so each fixture can document its expected locked or opened state.
 
+The Trust Capsule fixture is also covered by the Phase 9 static-host regression path: a new or low-history eligible viewer receives `challenge_required`, a successful provider-hosted challenge allows the original Capsule to open, and newly high automation-risk activity blocks both fresh authorization and pending ticket redemption.
+
 Each fallback example includes a local development install/onboarding link:
 
 `http://localhost:3003/viewer/install?return_to=http%3A%2F%2Flocalhost%3A8088%2F`

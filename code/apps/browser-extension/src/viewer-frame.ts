@@ -90,6 +90,7 @@ declare const chrome: {
 const CONTROL_PLANE = 'http://localhost:3003';
 const DEVELOPMENT_EXTENSION_ID = 'dhconceamghcnndjodjhjikknblhkmej';
 const OAUTH_CLIENT_ID = '01977ac8-793e-72d4-a234-bd581e773e7e';
+const CHALLENGE_REDIRECT_URI = `https://${DEVELOPMENT_EXTENSION_ID}.chromiumapp.org/challenge/callback`;
 
 const frameParameters = new URL(location.href).searchParams;
 const capsuleUrl = frameParameters.get('capsule');
@@ -132,8 +133,12 @@ async function initializeViewerFrame(): Promise<void> {
         urlElement.textContent = capsuleUrl;
         return;
     }
+    const verifiedSiteOrigin = siteOrigin;
 
-    debugLog('frame_initialized', { siteOrigin, capsuleOrigin: safeOrigin(capsuleUrl) });
+    debugLog('frame_initialized', {
+        siteOrigin: verifiedSiteOrigin,
+        capsuleOrigin: safeOrigin(capsuleUrl),
+    });
     setViewerFrameState('loading', 'Fetching this Capsule safely before verification.');
     urlElement.textContent = capsuleUrl;
 
@@ -187,7 +192,7 @@ async function initializeViewerFrame(): Promise<void> {
     await renderAuthorizationGate(
         statusElement,
         actionsElement,
-        siteOrigin,
+        verifiedSiteOrigin,
         verificationResult.summary,
         verificationResult.encryptedPayload,
     );
@@ -321,6 +326,7 @@ async function renderAuthorizationGate(
         await authorizeVerifiedCapsule(
             status,
             runtime,
+            currentSiteOrigin,
             summary,
             encryptedPayload,
             active.token,
@@ -346,6 +352,7 @@ async function renderAuthorizationGate(
             await authorizeVerifiedCapsule(
                 status,
                 runtime,
+                currentSiteOrigin,
                 summary,
                 encryptedPayload,
                 active.token,
@@ -408,6 +415,7 @@ function viewerRuntime(): {
 async function authorizeVerifiedCapsule(
     status: HTMLElement,
     runtime: ReturnType<typeof viewerRuntime>,
+    currentSiteOrigin: string,
     summary: VerifiedViewerCapsuleSummary,
     encryptedPayload: Uint8Array,
     token: OAuthTokenSet,
@@ -419,6 +427,7 @@ async function authorizeVerifiedCapsule(
     activeOpenAttempt = authorizeVerifiedCapsuleOnce(
         status,
         runtime,
+        currentSiteOrigin,
         summary,
         encryptedPayload,
         token,
@@ -433,6 +442,7 @@ async function authorizeVerifiedCapsule(
 async function authorizeVerifiedCapsuleOnce(
     status: HTMLElement,
     runtime: ReturnType<typeof viewerRuntime>,
+    currentSiteOrigin: string,
     summary: VerifiedViewerCapsuleSummary,
     encryptedPayload: Uint8Array,
     token: OAuthTokenSet,
@@ -444,6 +454,7 @@ async function authorizeVerifiedCapsuleOnce(
         await authorizeAndOpenVerifiedCapsule(
             status,
             runtime,
+            currentSiteOrigin,
             summary,
             encryptedPayload,
             token,
@@ -457,14 +468,31 @@ async function authorizeVerifiedCapsuleOnce(
 async function authorizeAndOpenVerifiedCapsule(
     status: HTMLElement,
     runtime: ReturnType<typeof viewerRuntime>,
+    currentSiteOrigin: string,
     summary: VerifiedViewerCapsuleSummary,
     encryptedPayload: Uint8Array,
     token: OAuthTokenSet,
     device: StoredViewerDeviceKeys,
 ): Promise<void> {
     setViewerFrameState('loading', `Requesting authorization for “${summary.title ?? 'Capsule'}”.`);
-    const authorization = await runtime.authorization.authorize(summary, token, device, true);
+    const authorization = await runtime.authorization.authorize(
+        summary,
+        token,
+        device,
+        currentSiteOrigin,
+        true,
+    );
     if (!authorization.ok) {
+        if (authorization.code === 'challenge_required') {
+            await showChallengeRequired(
+                status,
+                runtime,
+                currentSiteOrigin,
+                summary,
+                encryptedPayload,
+            );
+            return;
+        }
         debugLog('authorization_failed', { code: authorization.code, ...debugSummary(summary) });
         showBlocker(
             status,
@@ -475,6 +503,7 @@ async function authorizeAndOpenVerifiedCapsule(
                 await authorizeVerifiedCapsule(
                     status,
                     runtime,
+                    currentSiteOrigin,
                     summary,
                     encryptedPayload,
                     token,
@@ -513,6 +542,7 @@ async function authorizeAndOpenVerifiedCapsule(
                 await authorizeVerifiedCapsule(
                     status,
                     runtime,
+                    currentSiteOrigin,
                     summary,
                     encryptedPayload,
                     token,
@@ -559,6 +589,64 @@ async function authorizeAndOpenVerifiedCapsule(
         mediaType: rendered.mediaType,
         plaintextBytes: summary.payloadPlaintextBytes,
     });
+}
+
+async function showChallengeRequired(
+    status: HTMLElement,
+    runtime: ReturnType<typeof viewerRuntime>,
+    currentSiteOrigin: string,
+    summary: VerifiedViewerCapsuleSummary,
+    encryptedPayload: Uint8Array,
+): Promise<void> {
+    const actions = document.querySelector('[data-viewer-actions]');
+    const message = 'This Trust Capsule needs a quick access-confidence check before opening.';
+    if (!(actions instanceof HTMLElement)) {
+        setViewerFrameState('error', message);
+        postViewerState('error', { ...metadataFromSummary(summary), errorMessage: message });
+        return;
+    }
+
+    actions.replaceChildren();
+    setViewerFrameState('action_required', message);
+    postViewerState('action_required', { ...metadataFromSummary(summary), errorMessage: message });
+
+    const start = button('Start quick check');
+    start.addEventListener('click', () => {
+        void withDisabledButton(start, async () => {
+            await runtime.connector.ensureConnected('Viewer extension');
+            const challengeSession = await runtime.credentials.active();
+            if (challengeSession === undefined)
+                throw new Error('The Viewer session is unavailable.');
+            const challenge = await runtime.authorization.createChallengeAttempt(
+                summary,
+                challengeSession.token,
+                challengeSession.device,
+                currentSiteOrigin,
+                CHALLENGE_REDIRECT_URI,
+            );
+            const callback = await new ChromeIdentityFlow().launchWebAuthFlow(
+                challenge.challengeUrl,
+            );
+            const statusValue = new URL(callback).searchParams.get('status');
+            if (statusValue !== 'completed') {
+                throw new Error('The challenge was not completed.');
+            }
+            await runtime.connector.ensureConnected('Viewer extension');
+            const active = await runtime.credentials.active();
+            if (active === undefined) throw new Error('The Viewer session is unavailable.');
+            actions.replaceChildren();
+            await authorizeAndOpenVerifiedCapsule(
+                status,
+                runtime,
+                currentSiteOrigin,
+                summary,
+                encryptedPayload,
+                active.token,
+                active.device,
+            );
+        });
+    });
+    actions.append(start);
 }
 
 function postViewerState(

@@ -16,6 +16,10 @@ use App\Broker\Lifecycle\BrokerContentKeyLifecycle;
 use App\Broker\Lifecycle\HttpBrokerContentKeyLifecycle;
 use App\Broker\Registration\GrantSecretSource;
 use App\Broker\Registration\NativeGrantSecretSource;
+use App\Ctx\Challenges\ChallengeEvidenceRepository;
+use App\Ctx\Challenges\ChallengeRegistry;
+use App\Ctx\Challenges\DatabaseChallengeEvidenceRepository;
+use App\Ctx\Challenges\StaticChallengeRegistry;
 use App\Ctx\Metrics\MetricEventIdentifierSource;
 use App\Ctx\Metrics\NativeMetricEventIdentifierSource;
 use App\Ctx\Policy\AutomationRiskEvaluator;
@@ -62,6 +66,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(TicketSigningKeyGenerator::class, SodiumTicketSigningKeyGenerator::class);
         $this->app->bind(TicketIdentifierSource::class, NativeTicketIdentifierSource::class);
         $this->app->bind(MetricEventIdentifierSource::class, NativeMetricEventIdentifierSource::class);
+        $this->app->bind(ChallengeRegistry::class, StaticChallengeRegistry::class);
+        $this->app->bind(ChallengeEvidenceRepository::class, DatabaseChallengeEvidenceRepository::class);
         $this->app->bind(CommittedReleaseCounter::class, DatabaseCommittedReleaseCounter::class);
         $this->app->bind(AutomationRiskEvaluator::class, V1AutomationRiskEvaluator::class);
         $this->app->bind(

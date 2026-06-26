@@ -57,6 +57,10 @@ final class CapsuleCreationPageTest extends TestCase
             ->assertSee('placeholder="No total limit"', false)
             ->assertSee('placeholder="No per-account limit"', false)
             ->assertSee('total limit must be greater than or equal to the per-account limit')
+            ->assertSee('Trust Capsule rule: require current access confidence')
+            ->assertSee('Reduce automated opening risk using recent Share Capsules activity')
+            ->assertSee('when confidence is low, a temporary human check')
+            ->assertSee('does not verify identity, unique personhood, benign intent, or one-human-one-account')
             ->assertDontSee('name="global_limit_enabled"', false)
             ->assertDontSee('name="account_limit_enabled"', false);
     }
@@ -97,7 +101,7 @@ final class CapsuleCreationPageTest extends TestCase
             ->assertSee('40 million total pixels')
             ->assertSee('What counts as an opening')
             ->assertSee('unusual case that the connection fails after the key is released')
-            ->assertSee('does not verify someone’s identity or intentions')
+            ->assertSee('does not verify identity, unique personhood, benign intent, or one-human-one-account')
             ->assertSee('Why the extension is required')
             ->assertSee('Your original image stays on your computer')
             ->assertSee('never uploaded to Share Capsules servers')

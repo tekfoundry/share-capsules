@@ -12,5 +12,6 @@ enum PolicyDecisionCode: string
     case CapsuleLimitReached = 'capsule_limit_reached';
     case AccountCapsuleLimitReached = 'account_capsule_limit_reached';
     case AutomationRiskHigh = 'automation_risk_high';
+    case ChallengeRequired = 'challenge_required';
     case PolicyUnsatisfied = 'policy_unsatisfied';
 }

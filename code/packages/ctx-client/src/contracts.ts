@@ -139,6 +139,7 @@ export const CTX_ERROR_CODES = Object.freeze([
     'capsule_limit_reached',
     'account_capsule_limit_reached',
     'automation_risk_high',
+    'challenge_required',
     'unsupported_contract',
     'invalid_proof',
     'invalid_ticket',

@@ -3,6 +3,7 @@
 namespace Tests\Unit\Ctx;
 
 use App\Capsules\Registry\CapsuleLifecycleStatus;
+use App\Ctx\Challenges\ChallengeAttemptContext;
 use App\Ctx\Risk\AutomationRiskActivityType;
 use App\Ctx\Risk\AutomationRiskReason;
 use App\Ctx\Risk\V1AutomationRiskRules;
@@ -16,12 +17,15 @@ use App\Models\CtxAutomationRiskActivity;
 use App\Models\CtxAutomationRiskAssessment;
 use App\Models\CtxCapsuleMetricProjection;
 use App\Models\CtxCapsuleReleaseCounter;
+use App\Models\CtxChallengeAttempt;
+use App\Models\CtxChallengeCadence;
 use App\Models\CtxMetricEventRecord;
 use App\Models\User;
 use App\Models\ViewerDevice;
 use App\ViewerDevices\ViewerDeviceStatus;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -136,6 +140,59 @@ final class CtxTicketRedemptionServiceTest extends TestCase
         $this->assertSame(V1AutomationRiskRules::TICKET_REJECTION_LIMIT, CtxAutomationRiskActivity::query()->count());
     }
 
+    public function test_current_trust_capsule_challenge_evidence_is_rechecked_at_redemption(): void
+    {
+        [$user, $device, $kid] = $this->identity();
+        $ticket = $this->ticket(
+            $user,
+            $device,
+            $kid,
+            'ticket-redemption-challenge',
+            null,
+            null,
+            riskIssuer: (string) config('sharecapsules.ctx.issuer'),
+        );
+        $service = app(CtxTicketRedemptionService::class);
+
+        $this->assertSame(
+            TicketRedemptionCode::PolicyUnsatisfied,
+            $service->redeem($ticket->jti, $ticket->ticket_sha256)->code,
+        );
+        $this->assertSame('pending', $ticket->fresh()->status);
+        $this->assertSame(0, CtxCapsuleReleaseCounter::query()->value('committed_releases'));
+
+        $this->challengeAttempt($ticket, $user, $device, now()->addMinutes(10));
+
+        $this->assertSame(
+            TicketRedemptionCode::Committed,
+            $service->redeem($ticket->jti, $ticket->ticket_sha256)->code,
+        );
+        $this->assertSame('redeemed', $ticket->fresh()->status);
+        $this->assertSame(1, CtxCapsuleReleaseCounter::query()->value('committed_releases'));
+    }
+
+    public function test_expired_trust_capsule_challenge_evidence_cannot_redeem_a_ticket(): void
+    {
+        [$user, $device, $kid] = $this->identity();
+        $ticket = $this->ticket(
+            $user,
+            $device,
+            $kid,
+            'ticket-redemption-expired-challenge',
+            null,
+            null,
+            riskIssuer: (string) config('sharecapsules.ctx.issuer'),
+        );
+        $this->challengeAttempt($ticket, $user, $device, now()->subMinute());
+
+        $this->assertSame(
+            TicketRedemptionCode::PolicyUnsatisfied,
+            app(CtxTicketRedemptionService::class)->redeem($ticket->jti, $ticket->ticket_sha256)->code,
+        );
+        $this->assertSame('pending', $ticket->fresh()->status);
+        $this->assertSame(0, CtxCapsuleReleaseCounter::query()->value('committed_releases'));
+    }
+
     public function test_access_window_is_rechecked_at_redemption_boundaries(): void
     {
         [$user, $device, $kid] = $this->identity();
@@ -231,12 +288,14 @@ final class CtxTicketRedemptionServiceTest extends TestCase
             'viewer_device_id' => $device->getKey(),
             'signing_kid' => $kid,
             'ticket_sha256' => hash('sha256', $jti),
+            'host_origin' => 'https://host.example.test',
             'broker' => 'https://broker.example.test',
             'capsule_id' => 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703',
             'capsule_revision' => 1,
             'policy_sha256' => $registered->policy_sha256,
             'payload_id' => 'primary-image',
             'release_handle' => $registered->release_handle,
+            'action' => 'render',
             'proof_jkt' => $device->proof_jkt,
             'agreement_jkt' => $device->agreement_jkt,
             'capsule_lifetime_limit' => $capsuleLimit,
@@ -248,6 +307,66 @@ final class CtxTicketRedemptionServiceTest extends TestCase
             'issued_at' => $referenceTime->subMinute(),
             'expires_at' => $expired ? now()->subSecond() : $referenceTime->addMinute(),
         ]);
+    }
+
+    private function challengeAttempt(
+        CtxAuthorizationTicket $ticket,
+        User $user,
+        ViewerDevice $device,
+        CarbonImmutable|Carbon $expiresAt,
+    ): CtxChallengeAttempt {
+        $attempt = CtxChallengeAttempt::query()->create([
+            'id' => (string) Str::uuid7(),
+            'user_id' => $user->getKey(),
+            'viewer_device_id' => $device->getKey(),
+            'host_origin' => $ticket->host_origin,
+            'broker' => $ticket->broker,
+            'capsule_id' => $ticket->capsule_id,
+            'capsule_revision' => $ticket->capsule_revision,
+            'policy_sha256' => $ticket->policy_sha256,
+            'payload_id' => $ticket->payload_id,
+            'release_handle' => $ticket->release_handle,
+            'action' => $ticket->action,
+            'challenge_set_version' => 'ctx-challenge-set-test',
+            'selector_version' => 'ctx-challenge-selector-test',
+            'scoring_model_version' => 'ctx-challenge-scoring-test',
+            'status' => 'completed',
+            'challenge_score' => 80,
+            'issued_at' => now()->subMinute(),
+            'expires_at' => $expiresAt,
+            'completed_at' => now()->subSecond(),
+        ]);
+
+        $context = new ChallengeAttemptContext(
+            hostOrigin: $ticket->host_origin,
+            broker: $ticket->broker,
+            capsuleId: $ticket->capsule_id,
+            capsuleRevision: $ticket->capsule_revision,
+            policySha256: $ticket->policy_sha256,
+            payloadId: $ticket->payload_id,
+            releaseHandle: $ticket->release_handle,
+            action: $ticket->action,
+        );
+        CtxChallengeCadence::query()->create([
+            'scope_sha256' => CtxChallengeCadence::scopeKey($user, $device, $context),
+            'user_id' => $user->getKey(),
+            'viewer_device_id' => $device->getKey(),
+            'host_origin' => $ticket->host_origin,
+            'broker' => $ticket->broker,
+            'capsule_id' => $ticket->capsule_id,
+            'capsule_revision' => $ticket->capsule_revision,
+            'policy_sha256' => $ticket->policy_sha256,
+            'payload_id' => $ticket->payload_id,
+            'release_handle' => $ticket->release_handle,
+            'action' => $ticket->action,
+            'challenge_success_streak' => 1,
+            'challenge_refresh_tier' => 'standard',
+            'last_challenge_score' => 80,
+            'last_challenged_at' => now()->subSecond(),
+            'challenge_expires_at' => $expiresAt,
+        ]);
+
+        return $attempt;
     }
 
     private function digest(): string

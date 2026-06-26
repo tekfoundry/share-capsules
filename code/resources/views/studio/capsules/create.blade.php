@@ -103,8 +103,8 @@
                         <label class="flex items-start gap-3 rounded-xl border border-line p-4" for="capsule-automation-risk">
                             <input id="capsule-automation-risk" name="automation_risk_required" type="checkbox" value="1" class="mt-1 size-4 rounded border-line text-brand focus:ring-brand">
                             <span>
-                                <span class="block font-semibold text-ink">Trust Capsule rule: reject high automation risk</span>
-                                <span class="mt-1 block text-sm leading-6 text-muted">Block access when Share Capsules detects opening patterns that strongly resemble automation. This does not verify someone’s identity or intentions.</span>
+                                <span class="block font-semibold text-ink">Trust Capsule rule: require current access confidence</span>
+                                <span class="mt-1 block text-sm leading-6 text-muted">Reduce automated opening risk using recent Share Capsules activity and, when confidence is low, a temporary human check. This can block high-risk patterns, but it does not verify identity, unique personhood, benign intent, or one-human-one-account.</span>
                             </span>
                         </label>
                     </div>

@@ -1,7 +1,7 @@
 # V1 Trust Profile and Retained State
 
 Status: Provisional
-Last updated: 2026-06-20
+Last updated: 2026-06-25
 
 ## Purpose
 
@@ -9,9 +9,9 @@ Define the minimum account, consent, usage, risk, and audit state needed for V1 
 
 ## Core boundary
 
-V1 does not create one universal trust score. It retains only the state required for account continuity, the accepted policy predicates, key-release replay prevention, conservative automation-risk assessment, viewer control, and security operations.
+V1 does not create one universal public trust score. It retains only the state required for account continuity, the accepted policy predicates, key-release replay prevention, conservative automation-risk assessment, challenge-based step-up verification, viewer control, and security operations.
 
-The V1 profile is multidimensional and provider-private. Creators receive only the predicates or aggregates explicitly supported by policy and approved for disclosure. Hosts receive no trust-profile state.
+The V1 profile is multidimensional and provider-private. Creators receive only the predicates or aggregates explicitly supported by policy and approved for disclosure. Hosts receive no trust-profile state. The reference provider may internally compute a final Trust Capsule outcome from independent private score components, but that does not create a creator-visible universal reputation score.
 
 ## Provisional V1 dimensions
 
@@ -65,13 +65,47 @@ Country, device class, browser family, operating-system family, and Viewer versi
 
 ### Automation-risk state
 
-- Current V1 result, such as `high` or `not_high`
+- Current V1 result, such as `high`, `not_high`, or a low-confidence state that requires step-up verification before access
+- Recent `usage_score` from `0` to `100`, where `100` means no high-risk recent usage evidence was detected rather than proven trustworthiness
+- `usage_confidence`, such as `zero`, `low`, `medium`, or `high`, describing the amount and freshness of usage evidence behind the score
 - Ruleset or model identifier and version
 - Evaluation and expiration times
 - Minimal rolling aggregates needed by enforced deterministic rules
 - Internal reason categories needed for review, correction, and abuse response
 
 Raw global viewing history is not disclosed to creators. Observation-only signals remain distinguishable from enforced signals and cannot change access decisions.
+
+An account with no retained usage evidence defaults to a clean usage score with zero confidence, such as `usage_score: 100` and `usage_confidence: zero`. This means the provider has no current negative usage signal; it is not a claim that the account is established, human, unique, or benign.
+
+### Challenge state
+
+- Current `challenge_score` from `0` to `100`, defaulting to `0` when there is no current completed challenge
+- `last_challenged_at` and `challenge_expires_at`
+- Challenge-set or scoring-model identifier and version
+- Selected challenge module identifiers, module versions, lifecycle states at attempt creation, selector version, and scoring adapter versions
+- Binding context, such as account, Viewer device, Host site, policy digest, Capsule identifier, or other documented scope
+- Aggregate challenge cadence fields, such as `challenge_success_streak`, `challenge_refresh_tier`, `last_challenge_score`, and `last_reset_reason`, when progressive retesting is enabled
+- Minimal result and audit fields needed for replay resistance, explanation, abuse response, and pruning
+
+Challenge evidence is temporary step-up evidence. It must not contain plaintext Capsule content, content keys, recovery material, raw pointer traces retained longer than needed, complete session replay, biometric templates, identity documents, or unnecessary behavioral data. A successful challenge may support a low-history or ambiguous viewer but cannot override active severe usage risk.
+
+Progressive challenge cadence is retained as aggregate provider-private state so raw challenge attempts can still expire on the ordinary retention schedule. The reference direction is a standard 7-day challenge freshness window for new or reset viewers, with an extended 30-day window after five consecutive clean successful challenge windows. Low challenge scores, failed or abandoned checks, suspicious usage, and high automation-risk outcomes reset the cadence to the standard window. The cadence determines freshness only; it is not disclosed to creators as a separate policy control.
+
+### Trust Capsule outcome state
+
+The provider may combine independent usage and challenge components into a private, versioned Trust Capsule decision:
+
+```text
+usage_score: 0-100
+usage_confidence: zero | low | medium | high
+challenge_score: 0-100
+last_challenged_at: timestamp | null
+challenge_expires_at: timestamp | null
+final_trust_score: 0-100
+final_outcome: allow | challenge_required | deny | temporarily_unavailable
+```
+
+The final score is an implementation detail used to reach the policy outcome. Public and creator-facing language should describe current access confidence or trust-gate satisfaction, not a universal measure of the viewer's trustworthiness.
 
 ### Authorization and replay state
 
@@ -105,6 +139,8 @@ Identifiable CTX access-event detail and the rolling data used by V1 automation-
 | Per-account Capsule count | Required | Relevant limit status | Requirement satisfied or denied; no global identity | Never |
 | Capsule metrics projection | Aggregate source events only as retained | Relevant activity controls where defined | Privacy-safe aggregate for creator-owned Capsules | Never |
 | Automation-risk state | Required | Current status and useful explanation | Accepted predicate only | Never |
+| Challenge state | Required when a challenge is attempted | Current or expired status, useful explanation, and applicable retry path | Accepted predicate or challenge-required outcome only | Never |
+| Trust Capsule score components | Required internally when the Trust Capsule predicate is evaluated | Useful explanation without exposing abuse thresholds or sensitive raw evidence | Final predicate or safe denial category only | Never |
 | Raw ecosystem activity | Minimized internal use | Activity/account controls as defined | Never | Never |
 | Ticket and replay state | Required temporarily | Recent access event where useful | Never | Never |
 | Security audit state | Restricted internal use | Applicable account activity and appeal information | Only creator-owned administrative events where defined | Never |
@@ -142,6 +178,7 @@ Account deletion is not a one-human-one-account control. A user can abandon an e
 |---|---|
 | Account pending deletion | 30-day recovery period |
 | Expired ticket and replay artifacts | No more than 24 hours |
+| Expired challenge attempts and module result evidence | No more than 24 hours after the attempt expires |
 | Identifiable CTX access-event detail | No more than 30 days |
 | Automation-risk rolling data | No more than 30 days |
 | Authentication, recovery, administrative, and broker security audits | No more than 90 days |

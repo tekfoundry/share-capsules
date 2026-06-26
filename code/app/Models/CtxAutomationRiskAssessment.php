@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Ctx\Policy\AutomationRiskDecision;
 use App\Ctx\Risk\AutomationRiskReason;
+use App\Ctx\Trust\UsageConfidence;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
@@ -25,6 +26,8 @@ final class CtxAutomationRiskAssessment extends Model
         return [
             'decision' => AutomationRiskDecision::class,
             'reason' => AutomationRiskReason::class,
+            'usage_score' => 'integer',
+            'usage_confidence' => UsageConfidence::class,
             'evaluated_at' => 'immutable_datetime',
             'expires_at' => 'immutable_datetime',
         ];

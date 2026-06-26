@@ -2,6 +2,7 @@
 
 namespace App\Ctx\Tickets;
 
+use App\Ctx\Challenges\ChallengeAttemptContext;
 use App\Ctx\Policy\CtxPolicyDigest;
 use App\Ctx\Policy\CtxPolicyV1;
 use App\Ctx\Policy\PolicyDecisionCode;
@@ -25,6 +26,7 @@ final readonly class CtxAuthorizationService
         ViewerDevice $device,
         array $policyValue,
         string $presentedPolicySha256,
+        string $hostOrigin,
         string $broker,
         string $capsuleId,
         int $capsuleRevision,
@@ -50,6 +52,8 @@ final readonly class CtxAuthorizationService
             capsuleLifetimeLimit: $policy->capsuleLifetimeLimit,
             accountCapsuleLifetimeLimit: $policy->accountCapsuleLifetimeLimit,
             automationRiskIssuer: $policy->automationRiskIssuer,
+            hostOrigin: $hostOrigin,
+            action: 'render',
         );
         if (! hash_equals((string) config('sharecapsules.broker.base_url'), $broker)
             || ! $this->releaseBindings->valid($bindings)) {
@@ -62,6 +66,16 @@ final readonly class CtxAuthorizationService
             $capsuleId,
             $capsuleRevision,
             $viewEventConsent,
+            new ChallengeAttemptContext(
+                hostOrigin: $hostOrigin,
+                broker: $broker,
+                capsuleId: $capsuleId,
+                capsuleRevision: $capsuleRevision,
+                policySha256: $presentedPolicySha256,
+                payloadId: $payloadId,
+                releaseHandle: $releaseHandle,
+                action: 'render',
+            ),
         );
         if (! $decision->allowed()) {
             throw new CtxAuthorizationDenied($decision->code);

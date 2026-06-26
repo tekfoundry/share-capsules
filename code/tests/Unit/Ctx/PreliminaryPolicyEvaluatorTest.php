@@ -2,12 +2,21 @@
 
 namespace Tests\Unit\Ctx;
 
+use App\Ctx\Challenges\ChallengeAttemptContext;
+use App\Ctx\Challenges\ChallengeEvidenceRepository;
+use App\Ctx\Challenges\CurrentChallengeEvidence;
 use App\Ctx\Policy\AutomationRiskDecision;
 use App\Ctx\Policy\AutomationRiskEvaluator;
+use App\Ctx\Policy\AutomationUsageAssessment;
 use App\Ctx\Policy\CommittedReleaseCounter;
 use App\Ctx\Policy\CtxPolicyV1;
 use App\Ctx\Policy\PolicyDecisionCode;
 use App\Ctx\Policy\PreliminaryPolicyEvaluator;
+use App\Ctx\Risk\AutomationRiskReason;
+use App\Ctx\Risk\V1AutomationRiskRules;
+use App\Ctx\Trust\TrustCapsuleOutcomeCombiner;
+use App\Ctx\Trust\TrustScore;
+use App\Ctx\Trust\UsageConfidence;
 use App\Models\User;
 use App\Models\ViewerDevice;
 use App\ViewerDevices\ViewerDeviceStatus;
@@ -110,7 +119,7 @@ final class PreliminaryPolicyEvaluatorTest extends TestCase
             'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703',
             1,
             true,
-            CarbonImmutable::parse($now),
+            now: CarbonImmutable::parse($now),
         )->code;
 
         $this->assertSame(PolicyDecisionCode::PolicyUnsatisfied, $evaluate('2026-07-01T04:59:59Z'));
@@ -144,10 +153,84 @@ final class PreliminaryPolicyEvaluatorTest extends TestCase
         $this->assertSame(PolicyDecisionCode::PolicyUnsatisfied, $unavailable->code);
     }
 
+    public function test_low_confidence_trust_capsule_access_requires_a_challenge(): void
+    {
+        $user = $this->user();
+        $device = $this->device($user);
+
+        $decision = $this->evaluator(
+            risk: AutomationRiskDecision::NotHigh,
+            usageScore: 100,
+            usageConfidence: UsageConfidence::Zero,
+        )->evaluate(
+            $this->policy(riskIssuer: 'https://trust.example'),
+            $user,
+            $device,
+            'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703',
+            1,
+            true,
+        );
+
+        $this->assertSame(PolicyDecisionCode::ChallengeRequired, $decision->code);
+    }
+
+    public function test_current_passing_challenge_evidence_allows_low_confidence_trust_capsule_access(): void
+    {
+        $user = $this->user();
+        $device = $this->device($user);
+        $now = CarbonImmutable::parse('2026-06-25T12:00:00Z');
+
+        $decision = $this->evaluator(
+            risk: AutomationRiskDecision::NotHigh,
+            usageScore: 100,
+            usageConfidence: UsageConfidence::Zero,
+            challengeEvidence: new CurrentChallengeEvidence(
+                score: TrustScore::fromInt(80),
+                lastChallengedAt: $now->subMinute(),
+                expiresAt: $now->addMinutes(10),
+            ),
+        )->evaluate(
+            $this->policy(riskIssuer: 'https://trust.example'),
+            $user,
+            $device,
+            'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703',
+            1,
+            true,
+            $this->challengeContext(),
+            $now,
+        );
+
+        $this->assertSame(PolicyDecisionCode::Allowed, $decision->code);
+    }
+
+    public function test_medium_or_high_confidence_trust_capsule_access_uses_the_scaled_score(): void
+    {
+        $user = $this->user();
+        $device = $this->device($user);
+        $policy = $this->policy(riskIssuer: 'https://trust.example');
+
+        $allowed = $this->evaluator(
+            risk: AutomationRiskDecision::NotHigh,
+            usageScore: 70,
+            usageConfidence: UsageConfidence::Medium,
+        )->evaluate($policy, $user, $device, 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703', 1, true);
+        $denied = $this->evaluator(
+            risk: AutomationRiskDecision::NotHigh,
+            usageScore: 69,
+            usageConfidence: UsageConfidence::High,
+        )->evaluate($policy, $user, $device, 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703', 1, true);
+
+        $this->assertSame(PolicyDecisionCode::Allowed, $allowed->code);
+        $this->assertSame(PolicyDecisionCode::PolicyUnsatisfied, $denied->code);
+    }
+
     private function evaluator(
         int $capsule = 0,
         int $account = 0,
         AutomationRiskDecision $risk = AutomationRiskDecision::NotHigh,
+        int $usageScore = 100,
+        UsageConfidence $usageConfidence = UsageConfidence::High,
+        ?CurrentChallengeEvidence $challengeEvidence = null,
     ): PreliminaryPolicyEvaluator {
         $counters = new class($capsule, $account) implements CommittedReleaseCounter
         {
@@ -163,17 +246,64 @@ final class PreliminaryPolicyEvaluatorTest extends TestCase
                 return $this->account;
             }
         };
-        $automation = new class($risk) implements AutomationRiskEvaluator
+        $automation = new class($risk, $usageScore, $usageConfidence) implements AutomationRiskEvaluator
         {
-            public function __construct(private readonly AutomationRiskDecision $decision) {}
+            public function __construct(
+                private readonly AutomationRiskDecision $decision,
+                private readonly int $usageScore,
+                private readonly UsageConfidence $usageConfidence,
+            ) {}
 
             public function evaluate(User $user, string $issuer): AutomationRiskDecision
             {
                 return $this->decision;
             }
+
+            public function assessUsage(User $user, string $issuer): AutomationUsageAssessment
+            {
+                $now = CarbonImmutable::now();
+
+                return new AutomationUsageAssessment(
+                    decision: $this->decision,
+                    reason: $this->decision === AutomationRiskDecision::High
+                        ? AutomationRiskReason::AuthorizationVelocity
+                        : AutomationRiskReason::None,
+                    usageScore: $this->decision === AutomationRiskDecision::High
+                        ? TrustScore::zero()
+                        : TrustScore::fromInt($this->usageScore),
+                    usageConfidence: $this->decision === AutomationRiskDecision::Unavailable
+                        ? UsageConfidence::Zero
+                        : $this->usageConfidence,
+                    ruleset: V1AutomationRiskRules::RULESET,
+                    evaluatedAt: $now,
+                    expiresAt: $now->addMinute(),
+                );
+            }
         };
 
-        return new PreliminaryPolicyEvaluator($counters, $automation);
+        $challenges = new class($challengeEvidence) implements ChallengeEvidenceRepository
+        {
+            public function __construct(private readonly ?CurrentChallengeEvidence $evidence) {}
+
+            public function currentFor(
+                User $user,
+                ViewerDevice $device,
+                ChallengeAttemptContext $context,
+                ?CarbonImmutable $now = null,
+            ): ?CurrentChallengeEvidence {
+                return $this->evidence;
+            }
+
+            public function resetFor(
+                User $user,
+                ViewerDevice $device,
+                ChallengeAttemptContext $context,
+                string $reason,
+                ?CarbonImmutable $now = null,
+            ): void {}
+        };
+
+        return new PreliminaryPolicyEvaluator($counters, $automation, new TrustCapsuleOutcomeCombiner, $challenges);
     }
 
     private function user(): User
@@ -191,6 +321,20 @@ final class PreliminaryPolicyEvaluatorTest extends TestCase
             'user_id' => $user->getKey(),
             'status' => ViewerDeviceStatus::Active,
         ]);
+    }
+
+    private function challengeContext(): ChallengeAttemptContext
+    {
+        return new ChallengeAttemptContext(
+            hostOrigin: 'https://host.example.test',
+            broker: 'https://broker.example.test',
+            capsuleId: 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703',
+            capsuleRevision: 1,
+            policySha256: str_repeat('a', 43),
+            payloadId: 'primary-image',
+            releaseHandle: 'opaque-release-handle-0001',
+            action: 'render',
+        );
     }
 
     private function policy(

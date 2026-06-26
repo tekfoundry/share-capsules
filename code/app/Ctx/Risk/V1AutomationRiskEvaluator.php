@@ -4,6 +4,9 @@ namespace App\Ctx\Risk;
 
 use App\Ctx\Policy\AutomationRiskDecision;
 use App\Ctx\Policy\AutomationRiskEvaluator;
+use App\Ctx\Policy\AutomationUsageAssessment;
+use App\Ctx\Trust\TrustScore;
+use App\Ctx\Trust\UsageConfidence;
 use App\Models\CtxAuthorizationTicket;
 use App\Models\CtxAutomationRiskActivity;
 use App\Models\CtxAutomationRiskAssessment;
@@ -14,15 +17,34 @@ final class V1AutomationRiskEvaluator implements AutomationRiskEvaluator
 {
     public function evaluate(User $user, string $issuer): AutomationRiskDecision
     {
+        return $this->assessUsage($user, $issuer)->decision;
+    }
+
+    public function assessUsage(User $user, string $issuer): AutomationUsageAssessment
+    {
         if (! hash_equals((string) config('sharecapsules.ctx.issuer'), $issuer)) {
-            return AutomationRiskDecision::Unavailable;
+            $now = CarbonImmutable::now();
+
+            return new AutomationUsageAssessment(
+                decision: AutomationRiskDecision::Unavailable,
+                reason: AutomationRiskReason::None,
+                usageScore: TrustScore::zero(),
+                usageConfidence: UsageConfidence::Zero,
+                ruleset: V1AutomationRiskRules::RULESET,
+                evaluatedAt: $now,
+                expiresAt: $now,
+            );
         }
 
         $now = CarbonImmutable::now();
-        $reason = $this->reason($user, $now);
+        $summary = $this->usageSummary($user, $now);
+        $reason = $summary->reason;
         $decision = $reason === AutomationRiskReason::None
             ? AutomationRiskDecision::NotHigh
             : AutomationRiskDecision::High;
+        $usageScore = $decision === AutomationRiskDecision::High
+            ? TrustScore::zero()
+            : TrustScore::fromInt(100 - min(99, (int) floor($summary->worstUtilization * 100)));
 
         CtxAutomationRiskAssessment::query()->updateOrCreate(
             [
@@ -34,53 +56,95 @@ final class V1AutomationRiskEvaluator implements AutomationRiskEvaluator
                 'ruleset' => V1AutomationRiskRules::RULESET,
                 'decision' => $decision,
                 'reason' => $reason,
+                'usage_score' => $usageScore->value,
+                'usage_confidence' => $summary->usageConfidence,
                 'evaluated_at' => $now,
                 'expires_at' => $now->addSeconds(V1AutomationRiskRules::ASSESSMENT_LIFETIME_SECONDS),
             ],
         );
 
-        return $decision;
+        return new AutomationUsageAssessment(
+            decision: $decision,
+            reason: $reason,
+            usageScore: $usageScore,
+            usageConfidence: $summary->usageConfidence,
+            ruleset: V1AutomationRiskRules::RULESET,
+            evaluatedAt: $now,
+            expiresAt: $now->addSeconds(V1AutomationRiskRules::ASSESSMENT_LIFETIME_SECONDS),
+        );
     }
 
-    private function reason(User $user, CarbonImmutable $now): AutomationRiskReason
+    private function usageSummary(User $user, CarbonImmutable $now): AutomationUsageSummary
     {
         $activities = CtxAutomationRiskActivity::query()
             ->where('user_id', $user->getKey())
             ->where('occurred_at', '<=', $now);
 
-        if ((clone $activities)
+        $authorizationAttempts = (clone $activities)
             ->where('activity_type', AutomationRiskActivityType::AuthorizationAttempted->value)
             ->where('occurred_at', '>=', $now->subSeconds(V1AutomationRiskRules::AUTHORIZATION_WINDOW_SECONDS))
-            ->count() >= V1AutomationRiskRules::AUTHORIZATION_ATTEMPT_LIMIT) {
-            return AutomationRiskReason::AuthorizationVelocity;
+            ->count();
+        if ($authorizationAttempts >= V1AutomationRiskRules::AUTHORIZATION_ATTEMPT_LIMIT) {
+            return $this->summary(AutomationRiskReason::AuthorizationVelocity, 1, $authorizationAttempts);
         }
 
         $recentReleases = (clone $activities)
             ->where('activity_type', AutomationRiskActivityType::RedemptionCommitted->value)
             ->where('occurred_at', '>=', $now->subSeconds(V1AutomationRiskRules::RELEASE_WINDOW_SECONDS));
-        if ((clone $recentReleases)->count() >= V1AutomationRiskRules::COMMITTED_RELEASE_LIMIT) {
-            return AutomationRiskReason::CommittedReleaseVelocity;
+        $committedReleases = (clone $recentReleases)->count();
+        if ($committedReleases >= V1AutomationRiskRules::COMMITTED_RELEASE_LIMIT) {
+            return $this->summary(AutomationRiskReason::CommittedReleaseVelocity, 1, $committedReleases);
         }
-        if ((clone $recentReleases)->distinct()->count('capsule_id') >= V1AutomationRiskRules::DISTINCT_CAPSULE_LIMIT) {
-            return AutomationRiskReason::CapsuleSpread;
+        $distinctCapsules = (clone $recentReleases)->distinct()->count('capsule_id');
+        if ($distinctCapsules >= V1AutomationRiskRules::DISTINCT_CAPSULE_LIMIT) {
+            return $this->summary(AutomationRiskReason::CapsuleSpread, 1, $distinctCapsules);
         }
 
-        if ((clone $activities)
+        $ticketRejections = (clone $activities)
             ->where('activity_type', AutomationRiskActivityType::TicketRejected->value)
             ->where('occurred_at', '>=', $now->subSeconds(V1AutomationRiskRules::REJECTION_WINDOW_SECONDS))
-            ->count() >= V1AutomationRiskRules::TICKET_REJECTION_LIMIT) {
-            return AutomationRiskReason::TicketMisuse;
+            ->count();
+        if ($ticketRejections >= V1AutomationRiskRules::TICKET_REJECTION_LIMIT) {
+            return $this->summary(AutomationRiskReason::TicketMisuse, 1, $ticketRejections);
         }
 
-        if (CtxAuthorizationTicket::query()
+        $pendingTickets = CtxAuthorizationTicket::query()
             ->where('user_id', $user->getKey())
             ->where('status', 'pending')
             ->where('expires_at', '>=', $now)
-            ->count() >= V1AutomationRiskRules::PENDING_TICKET_LIMIT) {
-            return AutomationRiskReason::PendingTicketConcurrency;
+            ->count();
+        if ($pendingTickets >= V1AutomationRiskRules::PENDING_TICKET_LIMIT) {
+            return $this->summary(AutomationRiskReason::PendingTicketConcurrency, 1, $pendingTickets);
         }
 
-        return AutomationRiskReason::None;
+        $signals = [
+            $authorizationAttempts / V1AutomationRiskRules::AUTHORIZATION_ATTEMPT_LIMIT,
+            $committedReleases / V1AutomationRiskRules::COMMITTED_RELEASE_LIMIT,
+            $distinctCapsules / V1AutomationRiskRules::DISTINCT_CAPSULE_LIMIT,
+            $ticketRejections / V1AutomationRiskRules::TICKET_REJECTION_LIMIT,
+            $pendingTickets / V1AutomationRiskRules::PENDING_TICKET_LIMIT,
+        ];
+        $evidence = max($authorizationAttempts, $committedReleases, $distinctCapsules, $ticketRejections, $pendingTickets);
+
+        return $this->summary(AutomationRiskReason::None, max($signals), $evidence);
+    }
+
+    private function summary(
+        AutomationRiskReason $reason,
+        float $worstUtilization,
+        int $currentEvidence,
+    ): AutomationUsageSummary {
+        return new AutomationUsageSummary(
+            reason: $reason,
+            worstUtilization: min(1, $worstUtilization),
+            usageConfidence: match (true) {
+                $reason !== AutomationRiskReason::None => UsageConfidence::High,
+                $currentEvidence === 0 => UsageConfidence::Zero,
+                $currentEvidence < 10 => UsageConfidence::Low,
+                $currentEvidence < 50 => UsageConfidence::Medium,
+                default => UsageConfidence::High,
+            },
+        );
     }
 
     private function issuerKey(string $issuer): string
@@ -90,4 +154,13 @@ final class V1AutomationRiskEvaluator implements AutomationRiskEvaluator
             SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING,
         );
     }
+}
+
+final readonly class AutomationUsageSummary
+{
+    public function __construct(
+        public AutomationRiskReason $reason,
+        public float $worstUtilization,
+        public UsageConfidence $usageConfidence,
+    ) {}
 }

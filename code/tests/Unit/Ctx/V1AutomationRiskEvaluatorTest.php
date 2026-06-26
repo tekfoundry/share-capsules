@@ -8,6 +8,7 @@ use App\Ctx\Risk\AutomationRiskReason;
 use App\Ctx\Risk\V1AutomationRiskEvaluator;
 use App\Ctx\Risk\V1AutomationRiskRules;
 use App\Ctx\SigningKeys\TicketSigningKeyLifecycle;
+use App\Ctx\Trust\UsageConfidence;
 use App\Models\CtxAuthorizationTicket;
 use App\Models\CtxAutomationRiskActivity;
 use App\Models\CtxAutomationRiskAssessment;
@@ -44,14 +45,47 @@ final class V1AutomationRiskEvaluatorTest extends TestCase
         $this->assertSame(V1AutomationRiskRules::RULESET, $assessment->ruleset);
         $this->assertSame(AutomationRiskDecision::NotHigh, $assessment->decision);
         $this->assertSame(AutomationRiskReason::None, $assessment->reason);
+        $this->assertSame(100, $assessment->usage_score);
+        $this->assertSame(UsageConfidence::Zero, $assessment->usage_confidence);
         $this->assertTrue($assessment->evaluated_at->isSameSecond(now()));
         $this->assertTrue($assessment->expires_at->isSameSecond(now()->addSeconds(60)));
 
-        $this->assertSame(
-            AutomationRiskDecision::Unavailable,
-            $evaluator->evaluate($user, 'https://unaccepted.example.test'),
-        );
+        $unavailable = $evaluator->assessUsage($user, 'https://unaccepted.example.test');
+        $this->assertSame(AutomationRiskDecision::Unavailable, $unavailable->decision);
+        $this->assertTrue($unavailable->unavailable());
+        $this->assertSame(0, $unavailable->usageScore->value);
+        $this->assertSame(UsageConfidence::Zero, $unavailable->usageConfidence);
         $this->assertDatabaseCount('ctx_automation_risk_assessments', 1);
+    }
+
+    public function test_usage_score_scales_by_worst_current_threshold_utilization(): void
+    {
+        [$user, $device] = $this->identity();
+        $this->activities($user, $device, AutomationRiskActivityType::AuthorizationAttempted, 150);
+
+        $assessment = app(V1AutomationRiskEvaluator::class)->assessUsage($user, self::ISSUER);
+
+        $this->assertSame(AutomationRiskDecision::NotHigh, $assessment->decision);
+        $this->assertSame(50, $assessment->usageScore->value);
+        $this->assertSame(UsageConfidence::High, $assessment->usageConfidence);
+        $this->assertFalse($assessment->severeUsageRisk());
+
+        $stored = CtxAutomationRiskAssessment::query()->sole();
+        $this->assertSame(50, $stored->usage_score);
+        $this->assertSame(UsageConfidence::High, $stored->usage_confidence);
+    }
+
+    public function test_usage_confidence_reflects_current_evidence_volume(): void
+    {
+        [$lowUser, $lowDevice] = $this->identity('low-confidence@example.test');
+        $this->activities($lowUser, $lowDevice, AutomationRiskActivityType::AuthorizationAttempted, 1);
+        [$mediumUser, $mediumDevice] = $this->identity('medium-confidence@example.test');
+        $this->activities($mediumUser, $mediumDevice, AutomationRiskActivityType::AuthorizationAttempted, 10);
+
+        $evaluator = app(V1AutomationRiskEvaluator::class);
+
+        $this->assertSame(UsageConfidence::Low, $evaluator->assessUsage($lowUser, self::ISSUER)->usageConfidence);
+        $this->assertSame(UsageConfidence::Medium, $evaluator->assessUsage($mediumUser, self::ISSUER)->usageConfidence);
     }
 
     public function test_authorization_velocity_uses_the_exact_rolling_boundary_and_account_scope(): void
@@ -67,8 +101,11 @@ final class V1AutomationRiskEvaluatorTest extends TestCase
         $this->activities($user, $device, AutomationRiskActivityType::AuthorizationAttempted, 1);
 
         $this->assertSame(AutomationRiskDecision::High, $evaluator->evaluate($user, self::ISSUER));
-        $this->assertSame(AutomationRiskReason::AuthorizationVelocity, CtxAutomationRiskAssessment::query()
-            ->where('user_id', $user->getKey())->sole()->reason);
+        $stored = CtxAutomationRiskAssessment::query()
+            ->where('user_id', $user->getKey())->sole();
+        $this->assertSame(AutomationRiskReason::AuthorizationVelocity, $stored->reason);
+        $this->assertSame(0, $stored->usage_score);
+        $this->assertSame(UsageConfidence::High, $stored->usage_confidence);
     }
 
     public function test_committed_release_velocity_and_capsule_spread_are_independent_rules(): void
@@ -167,6 +204,22 @@ final class V1AutomationRiskEvaluatorTest extends TestCase
         foreach (['ip_address', 'user_agent', 'host_origin', 'pointer_data', 'raw_evidence'] as $prohibited) {
             $this->assertNotContains($prohibited, $columns);
         }
+
+        $this->assertEqualsCanonicalizing([
+            'id',
+            'user_id',
+            'issuer',
+            'issuer_key',
+            'ruleset',
+            'decision',
+            'reason',
+            'usage_score',
+            'usage_confidence',
+            'evaluated_at',
+            'expires_at',
+            'created_at',
+            'updated_at',
+        ], Schema::getColumnListing('ctx_automation_risk_assessments'));
     }
 
     /** @return array{User, ViewerDevice} */

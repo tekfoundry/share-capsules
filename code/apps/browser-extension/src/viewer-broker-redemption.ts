@@ -23,6 +23,7 @@ export type ViewerBrokerReleaseDenialCode =
     | 'capsule_limit_reached'
     | 'account_capsule_limit_reached'
     | 'automation_risk_high'
+    | 'challenge_required'
     | 'unsupported_contract'
     | 'invalid_proof'
     | 'invalid_ticket'
@@ -302,6 +303,7 @@ function isViewerBrokerReleaseDenialCode(value: unknown): value is ViewerBrokerR
             'capsule_limit_reached',
             'account_capsule_limit_reached',
             'automation_risk_high',
+            'challenge_required',
             'unsupported_contract',
             'invalid_proof',
             'invalid_ticket',

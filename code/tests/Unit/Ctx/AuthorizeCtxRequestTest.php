@@ -32,6 +32,7 @@ final class AuthorizeCtxRequestTest extends TestCase
             'type' => 'ctx-authorization-request',
             'version' => 1,
             'broker' => 'https://broker.example',
+            'host_origin' => 'https://host.example',
             'capsule_id' => 'urn:uuid:00000000-0000-4000-8000-000000000001',
             'capsule_revision' => 1,
             'policy' => ['type' => 'ctx-policy'],

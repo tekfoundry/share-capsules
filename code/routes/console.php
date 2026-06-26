@@ -4,6 +4,7 @@ use App\Ctx\SigningKeys\TicketSigningKeyLifecycle;
 use App\Models\AccountDeletionLedgerEntry;
 use App\Models\CtxAutomationRiskActivity;
 use App\Models\CtxAutomationRiskAssessment;
+use App\Models\CtxChallengeAttempt;
 use App\Models\CtxMetricEventRecord;
 use App\Models\SanctionTombstone;
 use App\Models\ViewerDeviceChallenge;
@@ -31,6 +32,10 @@ Schedule::command('model:prune', [
 
 Schedule::command('model:prune', [
     '--model' => CtxAutomationRiskAssessment::class,
+])->daily()->onOneServer()->withoutOverlapping();
+
+Schedule::command('model:prune', [
+    '--model' => CtxChallengeAttempt::class,
 ])->daily()->onOneServer()->withoutOverlapping();
 
 Schedule::command('accounts:delete-expired')
