@@ -15,6 +15,7 @@ use App\Ctx\Tickets\CtxAuthorizationDenied;
 use App\Ctx\Tickets\CtxAuthorizationService;
 use App\Ctx\Tickets\IssuedCtxTicket;
 use App\Ctx\Tickets\TicketIssuanceFailed;
+use App\Ctx\ViewerCompatibility\ViewerCompatibilityPolicy;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Ctx\AuthorizeCtxRequest;
 use App\Models\User;
@@ -36,13 +37,14 @@ final class AuthorizeCtxController extends Controller
         CtxMetricRecorder $metrics,
         MetricEventIdentifierSource $metricIdentifiers,
         AutomationRiskActivityRecorder $riskActivity,
+        ViewerCompatibilityPolicy $viewerCompatibility,
     ): JsonResponse {
         $keys = array_keys($request->all());
         sort($keys);
         if ($keys !== [
             'action', 'broker', 'capsule_id', 'capsule_revision', 'cryptographic_suite', 'host_origin',
             'payload_id', 'policy', 'policy_sha256', 'release_handle', 'type', 'version',
-            'view_event_consent',
+            'view_event_consent', 'viewer',
         ]) {
             return $this->error(CtxErrorCode::InvalidRequest, 422);
         }
@@ -69,6 +71,12 @@ final class AuthorizeCtxController extends Controller
             $request,
             $occurredAt,
         );
+
+        if (! $viewerCompatibility->accepts($request->array('viewer'))) {
+            $this->recordMetric($metrics, $metricIdentifiers, CtxMetricEventType::AuthorizationDenied, $request, $occurredAt, 'unsupported_contract');
+
+            return $this->error(CtxErrorCode::UnsupportedContract, 422);
+        }
 
         try {
             $ticket = $this->authorizeWithShortWindowIdempotency(

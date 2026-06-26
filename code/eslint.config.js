@@ -35,6 +35,14 @@ export default defineConfig(
         files: ['playwright.config.ts', 'scripts/**/*.mjs'],
         languageOptions: {
             globals: {
+                Buffer: 'readonly',
+                Image: 'readonly',
+                URL: 'readonly',
+                console: 'readonly',
+                createImageBitmap: 'readonly',
+                document: 'readonly',
+                navigator: 'readonly',
+                performance: 'readonly',
                 process: 'readonly',
             },
         },

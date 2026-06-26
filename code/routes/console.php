@@ -2,6 +2,9 @@
 
 use App\Ctx\SigningKeys\TicketSigningKeyLifecycle;
 use App\Models\AccountDeletionLedgerEntry;
+use App\Models\BrokerDeviceProof;
+use App\Models\BrokerRegistrationGrant;
+use App\Models\CtxAuthorizationTicket;
 use App\Models\CtxAutomationRiskActivity;
 use App\Models\CtxAutomationRiskAssessment;
 use App\Models\CtxChallengeAttempt;
@@ -20,6 +23,18 @@ Schedule::command('model:prune', [
 
 Schedule::command('model:prune', [
     '--model' => AccountDeletionLedgerEntry::class,
+])->hourly()->onOneServer()->withoutOverlapping();
+
+Schedule::command('model:prune', [
+    '--model' => CtxAuthorizationTicket::class,
+])->hourly()->onOneServer()->withoutOverlapping();
+
+Schedule::command('model:prune', [
+    '--model' => BrokerRegistrationGrant::class,
+])->hourly()->onOneServer()->withoutOverlapping();
+
+Schedule::command('model:prune', [
+    '--model' => BrokerDeviceProof::class,
 ])->hourly()->onOneServer()->withoutOverlapping();
 
 Schedule::command('model:prune', [

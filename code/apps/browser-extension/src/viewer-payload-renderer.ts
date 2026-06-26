@@ -12,6 +12,7 @@ export type ViewerPayloadRenderFailureCode =
     | 'unsupported_profile'
     | 'invalid_plaintext'
     | 'profile_mismatch'
+    | 'render_timeout'
     | 'render_failed';
 
 export type ViewerPayloadRenderResult =
@@ -29,6 +30,7 @@ export type ViewerPayloadRenderResult =
 export interface ViewerPayloadRendererOptions {
     readonly profile?: StaticImageCreatorProfileV1;
     readonly objectUrls?: ViewerObjectUrlFactory;
+    readonly renderTimeoutMs?: number;
 }
 
 export interface ViewerObjectUrlFactory {
@@ -39,10 +41,12 @@ export interface ViewerObjectUrlFactory {
 export class ViewerPayloadRenderer {
     private readonly profile: StaticImageCreatorProfileV1;
     private readonly objectUrls: ViewerObjectUrlFactory;
+    private readonly renderTimeoutMs: number;
 
     public constructor(options: ViewerPayloadRendererOptions = {}) {
         this.profile = options.profile ?? new StaticImageCreatorProfileV1();
         this.objectUrls = options.objectUrls ?? browserObjectUrls();
+        this.renderTimeoutMs = options.renderTimeoutMs ?? 5_000;
     }
 
     public async render(
@@ -74,13 +78,16 @@ export class ViewerPayloadRenderer {
         }
 
         try {
-            const inspection = await this.profile.inspect({
-                size: plaintext.byteLength,
-                read: async () => {
-                    if (plaintext === undefined) throw new Error('Plaintext was disposed.');
-                    return plaintext;
-                },
-            });
+            const inspection = await withTimeout(
+                this.profile.inspect({
+                    size: plaintext.byteLength,
+                    read: async () => {
+                        if (plaintext === undefined) throw new Error('Plaintext was disposed.');
+                        return plaintext;
+                    },
+                }),
+                this.renderTimeoutMs,
+            );
             if (!inspection.valid) return { ok: false, code: 'invalid_plaintext' };
 
             const metadata = inspection.metadata;
@@ -101,7 +108,8 @@ export class ViewerPayloadRenderer {
                 mediaType: metadata.mediaType,
                 altText: summary.description ?? summary.title ?? 'Protected Capsule content',
             };
-        } catch {
+        } catch (error) {
+            if (error instanceof RenderTimeoutError) return { ok: false, code: 'render_timeout' };
             return { ok: false, code: 'render_failed' };
         } finally {
             plaintext?.fill(0);
@@ -118,6 +126,30 @@ function browserObjectUrls(): ViewerObjectUrlFactory {
         create: (blob) => URL.createObjectURL(blob),
         revoke: (url) => URL.revokeObjectURL(url),
     };
+}
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+    if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+        return Promise.reject(new RenderTimeoutError());
+    }
+
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+
+    return Promise.race([
+        promise,
+        new Promise<never>((_, reject) => {
+            timeout = setTimeout(() => reject(new RenderTimeoutError()), timeoutMs);
+        }),
+    ]).finally(() => {
+        if (timeout !== undefined) clearTimeout(timeout);
+    });
+}
+
+class RenderTimeoutError extends Error {
+    public constructor() {
+        super('Viewer payload render timed out.');
+        this.name = 'RenderTimeoutError';
+    }
 }
 
 function toArrayBuffer(value: Uint8Array): ArrayBuffer {

@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -21,6 +23,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 final class BrokerRegistrationGrant extends Model
 {
+    use MassPrunable;
+
+    /** @return Builder<static> */
+    public function prunable(): Builder
+    {
+        return self::query()->where('expires_at', '<=', now()->subDay());
+    }
+
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {

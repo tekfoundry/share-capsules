@@ -1,0 +1,343 @@
+{
+  "type": "share-capsules-static-image-envelope-benchmark",
+  "version": 1,
+  "generatedAt": "2026-06-26T16:20:08.653Z",
+  "benchmarkStartedAt": "2026-06-26T16:20:06.054Z",
+  "environment": {
+    "browserName": "chromium",
+    "browserVersion": "149.0.7827.200",
+    "executablePath": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.0.0 Safari/537.36",
+    "platform": "darwin",
+    "release": "25.5.0",
+    "arch": "arm64",
+    "cpuModel": "Apple M2 Max",
+    "cpuCount": 12,
+    "totalMemoryBytes": 34359738368
+  },
+  "v1Envelope": {
+    "maxEncodedBytes": 26214400,
+    "maxDimension": 16384,
+    "maxPixels": 40000000,
+    "nominalMaxDecodedRgbaBytes": 160000000
+  },
+  "thresholds": {
+    "maxTotalMsPerCase": 30000,
+    "maxDecodedPixels": 40000000,
+    "maxDimension": 16384,
+    "nominalMaxDecodedRgbaBytes": 160000000
+  },
+  "results": [
+    {
+      "name": "png-control",
+      "mediaType": "image/png",
+      "width": 1024,
+      "height": 1024,
+      "encodedBytes": 1020651,
+      "decodedPixels": 1048576,
+      "nominalDecodedRgbaBytes": 4194304,
+      "timings": {
+        "encodeMs": 197.3,
+        "decodeMs": 12,
+        "renderMs": 9.6,
+        "disposeMs": 0.8,
+        "totalMs": 222.5
+      },
+      "status": "passed",
+      "errors": [],
+      "browserMetrics": {
+        "before": {
+          "Nodes": 8,
+          "LayoutCount": 0,
+          "JSHeapUsedSize": 729816,
+          "JSHeapTotalSize": 1310720
+        },
+        "after": {
+          "Nodes": 10,
+          "LayoutCount": 2,
+          "JSHeapUsedSize": 937116,
+          "JSHeapTotalSize": 1835008
+        },
+        "delta": {
+          "Nodes": 2,
+          "LayoutCount": 2,
+          "JSHeapUsedSize": 207300,
+          "JSHeapTotalSize": 524288
+        }
+      }
+    },
+    {
+      "name": "jpeg-control",
+      "mediaType": "image/jpeg",
+      "width": 1024,
+      "height": 1024,
+      "encodedBytes": 26039,
+      "decodedPixels": 1048576,
+      "nominalDecodedRgbaBytes": 4194304,
+      "timings": {
+        "encodeMs": 7.5,
+        "decodeMs": 2,
+        "renderMs": 1.2,
+        "disposeMs": 0.1,
+        "totalMs": 10.9
+      },
+      "status": "passed",
+      "errors": [],
+      "browserMetrics": {
+        "before": {
+          "Nodes": 10,
+          "LayoutCount": 2,
+          "JSHeapUsedSize": 937116,
+          "JSHeapTotalSize": 1835008
+        },
+        "after": {
+          "Nodes": 12,
+          "LayoutCount": 4,
+          "JSHeapUsedSize": 956776,
+          "JSHeapTotalSize": 1835008
+        },
+        "delta": {
+          "Nodes": 2,
+          "LayoutCount": 2,
+          "JSHeapUsedSize": 19660,
+          "JSHeapTotalSize": 0
+        }
+      }
+    },
+    {
+      "name": "webp-control",
+      "mediaType": "image/webp",
+      "width": 1024,
+      "height": 1024,
+      "encodedBytes": 11514,
+      "decodedPixels": 1048576,
+      "nominalDecodedRgbaBytes": 4194304,
+      "timings": {
+        "encodeMs": 42.1,
+        "decodeMs": 3.3,
+        "renderMs": 0.6,
+        "disposeMs": 0.1,
+        "totalMs": 46.2
+      },
+      "status": "passed",
+      "errors": [],
+      "browserMetrics": {
+        "before": {
+          "Nodes": 12,
+          "LayoutCount": 4,
+          "JSHeapUsedSize": 956776,
+          "JSHeapTotalSize": 1835008
+        },
+        "after": {
+          "Nodes": 14,
+          "LayoutCount": 5,
+          "JSHeapUsedSize": 994624,
+          "JSHeapTotalSize": 1835008
+        },
+        "delta": {
+          "Nodes": 2,
+          "LayoutCount": 1,
+          "JSHeapUsedSize": 37848,
+          "JSHeapTotalSize": 0
+        }
+      }
+    },
+    {
+      "name": "max-width-png",
+      "mediaType": "image/png",
+      "width": 16384,
+      "height": 1,
+      "encodedBytes": 5781,
+      "decodedPixels": 16384,
+      "nominalDecodedRgbaBytes": 65536,
+      "timings": {
+        "encodeMs": 2.6,
+        "decodeMs": 0.2,
+        "renderMs": 0.7,
+        "disposeMs": 0,
+        "totalMs": 3.6
+      },
+      "status": "passed",
+      "errors": [],
+      "browserMetrics": {
+        "before": {
+          "Nodes": 14,
+          "LayoutCount": 5,
+          "JSHeapUsedSize": 994624,
+          "JSHeapTotalSize": 1835008
+        },
+        "after": {
+          "Nodes": 16,
+          "LayoutCount": 6,
+          "JSHeapUsedSize": 1014836,
+          "JSHeapTotalSize": 1835008
+        },
+        "delta": {
+          "Nodes": 2,
+          "LayoutCount": 1,
+          "JSHeapUsedSize": 20212,
+          "JSHeapTotalSize": 0
+        }
+      }
+    },
+    {
+      "name": "max-height-png",
+      "mediaType": "image/png",
+      "width": 1,
+      "height": 16384,
+      "encodedBytes": 10800,
+      "decodedPixels": 16384,
+      "nominalDecodedRgbaBytes": 65536,
+      "timings": {
+        "encodeMs": 9.2,
+        "decodeMs": 0.7,
+        "renderMs": 0.4,
+        "disposeMs": 0,
+        "totalMs": 10.3
+      },
+      "status": "passed",
+      "errors": [],
+      "browserMetrics": {
+        "before": {
+          "Nodes": 16,
+          "LayoutCount": 6,
+          "JSHeapUsedSize": 1014836,
+          "JSHeapTotalSize": 1835008
+        },
+        "after": {
+          "Nodes": 18,
+          "LayoutCount": 6,
+          "JSHeapUsedSize": 1034332,
+          "JSHeapTotalSize": 2097152
+        },
+        "delta": {
+          "Nodes": 2,
+          "LayoutCount": 0,
+          "JSHeapUsedSize": 19496,
+          "JSHeapTotalSize": 262144
+        }
+      }
+    },
+    {
+      "name": "max-pixels-png",
+      "mediaType": "image/png",
+      "width": 10000,
+      "height": 4000,
+      "encodedBytes": 755728,
+      "decodedPixels": 40000000,
+      "nominalDecodedRgbaBytes": 160000000,
+      "timings": {
+        "encodeMs": 243.3,
+        "decodeMs": 46.6,
+        "renderMs": 1,
+        "disposeMs": 3,
+        "totalMs": 293.9
+      },
+      "status": "passed",
+      "errors": [],
+      "browserMetrics": {
+        "before": {
+          "Nodes": 18,
+          "LayoutCount": 6,
+          "JSHeapUsedSize": 1034332,
+          "JSHeapTotalSize": 2097152
+        },
+        "after": {
+          "Nodes": 20,
+          "LayoutCount": 7,
+          "JSHeapUsedSize": 1054460,
+          "JSHeapTotalSize": 2097152
+        },
+        "delta": {
+          "Nodes": 2,
+          "LayoutCount": 1,
+          "JSHeapUsedSize": 20128,
+          "JSHeapTotalSize": 0
+        }
+      }
+    },
+    {
+      "name": "max-pixels-jpeg",
+      "mediaType": "image/jpeg",
+      "width": 10000,
+      "height": 4000,
+      "encodedBytes": 275032,
+      "decodedPixels": 40000000,
+      "nominalDecodedRgbaBytes": 160000000,
+      "timings": {
+        "encodeMs": 183.9,
+        "decodeMs": 49.1,
+        "renderMs": 0.9,
+        "disposeMs": 3,
+        "totalMs": 236.9
+      },
+      "status": "passed",
+      "errors": [],
+      "browserMetrics": {
+        "before": {
+          "Nodes": 20,
+          "LayoutCount": 7,
+          "JSHeapUsedSize": 1054460,
+          "JSHeapTotalSize": 2097152
+        },
+        "after": {
+          "Nodes": 22,
+          "LayoutCount": 9,
+          "JSHeapUsedSize": 1073844,
+          "JSHeapTotalSize": 2097152
+        },
+        "delta": {
+          "Nodes": 2,
+          "LayoutCount": 2,
+          "JSHeapUsedSize": 19384,
+          "JSHeapTotalSize": 0
+        }
+      }
+    },
+    {
+      "name": "max-pixels-webp",
+      "mediaType": "image/webp",
+      "width": 10000,
+      "height": 4000,
+      "encodedBytes": 122266,
+      "decodedPixels": 40000000,
+      "nominalDecodedRgbaBytes": 160000000,
+      "timings": {
+        "encodeMs": 1668.6,
+        "decodeMs": 81.9,
+        "renderMs": 0.8,
+        "disposeMs": 2.9,
+        "totalMs": 1754.3
+      },
+      "status": "passed",
+      "errors": [],
+      "browserMetrics": {
+        "before": {
+          "Nodes": 22,
+          "LayoutCount": 9,
+          "JSHeapUsedSize": 1073844,
+          "JSHeapTotalSize": 2097152
+        },
+        "after": {
+          "Nodes": 24,
+          "LayoutCount": 11,
+          "JSHeapUsedSize": 1099456,
+          "JSHeapTotalSize": 2097152
+        },
+        "delta": {
+          "Nodes": 2,
+          "LayoutCount": 2,
+          "JSHeapUsedSize": 25612,
+          "JSHeapTotalSize": 0
+        }
+      }
+    }
+  ],
+  "summary": {
+    "totalCases": 8,
+    "passed": 8,
+    "failed": 0,
+    "totalMs": 2578.6,
+    "slowestCase": "max-pixels-webp"
+  }
+}

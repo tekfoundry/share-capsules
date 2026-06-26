@@ -4,6 +4,7 @@ import { DpopProofFactory } from './dpop.js';
 import type { OAuthTokenSet } from './oauth.js';
 import type { VerifiedViewerCapsuleSummary } from './viewer-capsule-verifier.js';
 import type { StoredViewerDeviceKeys } from './viewer-device.js';
+import { VIEWER_RELEASE } from './viewer-release.js';
 
 export interface ViewerCtxAuthorizationTicket {
     readonly ticket: string;
@@ -154,6 +155,12 @@ function authorizationRequest(
         action: 'render',
         cryptographic_suite: CAPSULE_SUITE_ID,
         view_event_consent: viewEventConsent,
+        viewer: {
+            name: VIEWER_RELEASE.name,
+            version: VIEWER_RELEASE.version,
+            browser_family: VIEWER_RELEASE.browserFamily,
+            browser_major: VIEWER_RELEASE.browserMajor,
+        },
     };
 }
 

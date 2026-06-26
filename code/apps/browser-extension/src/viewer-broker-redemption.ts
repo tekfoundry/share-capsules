@@ -276,8 +276,10 @@ function parseCtxError(value: unknown): {
     readonly code: ViewerBrokerReleaseDenialCode;
     readonly retryable: boolean;
 } {
+    const keys = isRecord(value) ? Object.keys(value).sort().join(',') : '';
     if (
         !isRecord(value) ||
+        keys !== 'code,retryable,type,version' ||
         value.type !== 'ctx-error' ||
         value.version !== 1 ||
         !isViewerBrokerReleaseDenialCode(value.code) ||

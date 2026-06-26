@@ -177,6 +177,109 @@ describe('Viewer broker redemption client', () => {
             }).redeem(summary(), await ticketFor(summary(), device), device),
         ).resolves.toEqual({ ok: false, code: 'unwrap_failed', retryable: false });
     });
+
+    it.each([
+        null,
+        true,
+        false,
+        0,
+        '',
+        [],
+        {},
+        { type: 'ctx-key-release', version: 1 },
+        {
+            type: 'ctx-key-release',
+            version: 1,
+            ticket_jti: ticketIdentifier,
+            cryptographic_suite: 'ctx-capsule-v1',
+            enc: encodeBase64Url(new Uint8Array(31)),
+            ciphertext: encodeBase64Url(new Uint8Array(48)),
+        },
+        {
+            type: 'ctx-key-release',
+            version: 1,
+            ticket_jti: ticketIdentifier,
+            cryptographic_suite: 'ctx-capsule-v1',
+            enc: encodeBase64Url(new Uint8Array(32)),
+            ciphertext: encodeBase64Url(new Uint8Array(48)),
+            plaintext_key: 'secret',
+        },
+        {
+            type: 'ctx-key-release',
+            version: 1,
+            ticket_jti: 'other-ticket',
+            cryptographic_suite: 'ctx-capsule-v1',
+            enc: encodeBase64Url(new Uint8Array(32)),
+            ciphertext: encodeBase64Url(new Uint8Array(48)),
+        },
+        {
+            type: 'ctx-key-release',
+            version: 1,
+            ticket_jti: ticketIdentifier,
+            cryptographic_suite: 'ctx-capsule-v2',
+            enc: encodeBase64Url(new Uint8Array(32)),
+            ciphertext: encodeBase64Url(new Uint8Array(48)),
+        },
+    ])('property-style key-release envelope parser fails closed for %#', async (payload) => {
+        const device = mockDevice();
+
+        await expect(
+            new ViewerBrokerRedemptionClient({
+                proofFactory: proofFactory(),
+                now: () => 1_800_000_000_000,
+                fetch: async () => jsonResponse(payload),
+            }).redeem(summary(), await ticketFor(summary(), device), device),
+        ).resolves.toEqual({ ok: false, code: 'invalid_response', retryable: false });
+    });
+
+    it.each([
+        null,
+        true,
+        false,
+        0,
+        '',
+        [],
+        {},
+        { type: 'ctx-error', version: 1 },
+        { type: 'ctx-error', version: 1, code: 'raw_internal_score', retryable: false },
+        { type: 'ctx-error', version: 1, code: 'release_unavailable', retryable: 'false' },
+        {
+            type: 'ctx-error',
+            version: 1,
+            code: 'release_unavailable',
+            retryable: false,
+            raw_evidence: 'private',
+        },
+    ])('property-style error-envelope parser fails closed for %#', async (payload) => {
+        const device = mockDevice();
+
+        await expect(
+            new ViewerBrokerRedemptionClient({
+                proofFactory: proofFactory(),
+                now: () => 1_800_000_000_000,
+                fetch: async () => jsonResponse(payload, 400),
+            }).redeem(summary(), await ticketFor(summary(), device), device),
+        ).resolves.toEqual({ ok: false, code: 'invalid_response', retryable: false });
+    });
+
+    it.each(['', '.', 'a', 'a.b', 'a.b.c.d', '!!!!.!!!!.!!!!', `${'x'.repeat(2048)}.b.c`])(
+        'property-style ticket parser rejects malformed compact JWT %s without network',
+        async (ticket) => {
+            const calls: string[] = [];
+
+            await expect(
+                new ViewerBrokerRedemptionClient({
+                    proofFactory: proofFactory(),
+                    now: () => 1_800_000_000_000,
+                    fetch: async () => {
+                        calls.push('fetch');
+                        return jsonResponse({});
+                    },
+                }).redeem(summary(), ticket, mockDevice()),
+            ).resolves.toEqual({ ok: false, code: 'invalid_ticket', retryable: false });
+            expect(calls).toEqual([]);
+        },
+    );
 });
 
 const otherCapsuleId = 'urn:uuid:00000000-0000-4000-8000-000000000002';

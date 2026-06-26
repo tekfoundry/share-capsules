@@ -1,0 +1,98 @@
+{
+  "type": "share-capsules-supply-chain-release-check",
+  "version": 1,
+  "generated_at": "2026-06-26T16:30:55.770Z",
+  "completed_at": "2026-06-26T16:30:56.820Z",
+  "status": "passed",
+  "checks": {
+    "reproducible_extension_build": {
+      "status": "passed",
+      "file_count": 15,
+      "aggregate_sha256": "b80e70ba33c66def4ded9c21694040254194facaa417b67abecc8110461319d5",
+      "files": [
+        {
+          "path": "creator-handoff.js",
+          "bytes": 3046,
+          "sha256": "f4d3fcd4e8fdf08ea35b397394adad3e6d79b3fad6ff86ec5a7c17381540bfaf"
+        },
+        {
+          "path": "creator-handoff.js.map",
+          "bytes": 6672,
+          "sha256": "013ae073a31bdf2b9a55be783f22a1cbf2b6187ba93da206aaf027260a67b56c"
+        },
+        {
+          "path": "creator-studio.css",
+          "bytes": 7451,
+          "sha256": "7f981955b8858b4240433cef08d05f3086b15cd01be25d710369f163a0549f66"
+        },
+        {
+          "path": "creator-studio.html",
+          "bytes": 12692,
+          "sha256": "cf7ae948e0d22abee2c8e98881d1caaf4863e2cc4be6f0db8c81a313a54ea7ba"
+        },
+        {
+          "path": "manifest.json",
+          "bytes": 1536,
+          "sha256": "161b1b10ab1edf90faa37ee58034bdfd7315411ae217823cd43f3caf93eefc26"
+        },
+        {
+          "path": "service-worker.js",
+          "bytes": 7290,
+          "sha256": "9e33e7ad4fff74d0a2153def33fad4478eabb004e4aed245cdbee58bf01a54fc"
+        },
+        {
+          "path": "service-worker.js.map",
+          "bytes": 17828,
+          "sha256": "774960401f9885a37dd8af7384a131fda76bca217e51ba39cab49d4e91590257"
+        },
+        {
+          "path": "studio.js",
+          "bytes": 301251,
+          "sha256": "0076ce610d1d7ff172f0a13630195fc217bb9510a0e5a283e62f80e68ab1cf9b"
+        },
+        {
+          "path": "studio.js.map",
+          "bytes": 687288,
+          "sha256": "0bce136579bdd9810cf9e3081dae8f5cfc3002ad3eb0036c30675269b11d1c89"
+        },
+        {
+          "path": "viewer-discovery.js",
+          "bytes": 9495,
+          "sha256": "38f8565e8d64d481d122fd1dc4bd427aafd8dd70f78df4f8de70b3099f59a35d"
+        },
+        {
+          "path": "viewer-discovery.js.map",
+          "bytes": 18579,
+          "sha256": "1fefee0cb838e3f84b978282921b2f6fbee445101a0b158f2f71bf0919a94dd6"
+        },
+        {
+          "path": "viewer-frame.css",
+          "bytes": 3191,
+          "sha256": "13d6c9de080c05e3cd7387d6dca89af287b68be06906a295485e33ec62f5077c"
+        },
+        {
+          "path": "viewer-frame.html",
+          "bytes": 1198,
+          "sha256": "c9d25c30c8a36a1a47786abd7a048cdae2bcc986831f5a6a370f709c63b28df5"
+        },
+        {
+          "path": "viewer-frame.js",
+          "bytes": 264633,
+          "sha256": "cbf91443fc255ef3f85f906025589b4dafbce30b525e9f23fc5a45c38f0eec86"
+        },
+        {
+          "path": "viewer-frame.js.map",
+          "bytes": 620459,
+          "sha256": "d1256ed2f047ec8d3b5f0bbcec027c54046e7a1a9ac9010d50ceaf6e087a7593"
+        }
+      ]
+    },
+    "built_extension_remote_code_scan": {
+      "status": "passed"
+    },
+    "tracked_source_secret_scan": {
+      "status": "passed"
+    }
+  },
+  "findings": []
+}

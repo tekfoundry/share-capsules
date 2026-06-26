@@ -42,6 +42,12 @@ final class AuthorizeCtxRequestTest extends TestCase
             'action' => 'render',
             'cryptographic_suite' => 'ctx-capsule-v1',
             'view_event_consent' => true,
+            'viewer' => [
+                'name' => 'share-capsules-chromium-extension',
+                'version' => '0.1.0',
+                'browser_family' => 'Chrome',
+                'browser_major' => 149,
+            ],
             ...$overrides,
         ], $request->rules());
     }

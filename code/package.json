@@ -13,11 +13,13 @@
     "scripts": {
         "build": "npm run generate:schema-validators && npm run typecheck && vite build && node scripts/build-extension.mjs",
         "build:extension": "npm run generate:schema-validators && npm run typecheck && node scripts/build-extension.mjs",
+        "benchmark:image-envelope": "node scripts/static-image-envelope-benchmark.mjs",
         "dev": "vite",
         "format": "prettier --write .",
         "format:check": "prettier --check .",
         "generate:schema-validators": "node scripts/generate-schema-validators.mjs",
         "lint": "eslint apps packages resources/js scripts tests/Browser playwright.config.ts vite.config.js",
+        "release:supply-chain-check": "node scripts/release-supply-chain-check.mjs",
         "test:browser": "playwright test",
         "test:ts": "vitest run --passWithNoTests",
         "typecheck": "tsc --build --pretty false"

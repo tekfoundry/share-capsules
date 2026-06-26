@@ -189,6 +189,23 @@ describe('Viewer Capsule fetcher', () => {
             }),
         ).resolves.toEqual({ ok: false, code: 'too_large' });
     });
+
+    it.each([
+        'javascript:alert(1)',
+        'data:text/plain,secret',
+        'ftp://example.com/a.capsule',
+        'http://example.com/insecure.capsule',
+        'https://user:pass@example.com/a.capsule',
+        'https://127.0.0.1/a.capsule',
+        'https://192.168.1.10/a.capsule',
+        '//127.0.0.1/a.capsule',
+    ])('property-style redirect parser rejects unsafe Location %s', async (location) => {
+        await expect(
+            fetchViewerCapsule('https://example.com/start.capsule', {
+                fetch: async () => redirectResponse(location),
+            }),
+        ).resolves.toEqual({ ok: false, code: 'unsupported_url' });
+    });
 });
 
 function redirectResponse(location: string): Response {

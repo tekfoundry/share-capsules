@@ -46,6 +46,11 @@ final class AuthorizeCtxRequest extends FormRequest
             'action' => ['required', 'in:render'],
             'cryptographic_suite' => ['required', 'in:ctx-capsule-v1'],
             'view_event_consent' => ['required', 'boolean'],
+            'viewer' => ['required', 'array:name,version,browser_family,browser_major'],
+            'viewer.name' => ['required', 'string', 'max:96', 'regex:/\A[a-z][a-z0-9]*(?:-[a-z0-9]+)*\z/'],
+            'viewer.version' => ['required', 'string', 'max:32', 'regex:/\A\d+\.\d+\.\d+\z/'],
+            'viewer.browser_family' => ['required', 'string', 'in:Chrome,Chromium'],
+            'viewer.browser_major' => ['required', 'integer', 'min:1', 'max:999'],
         ];
     }
 

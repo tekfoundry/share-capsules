@@ -15,6 +15,14 @@ export interface ViewerDisclosureConsentRecord extends ViewerConsentScope {
     readonly grantedAt: string;
 }
 
+export interface ViewerDisclosureConsentInspection extends ViewerDisclosureConsentRecord {
+    readonly automaticOpening: 'enabled-for-matching-site-issuer-and-policy';
+    readonly ctxDisclosureScope: 'account-device-policy-limits-and-key-release';
+    readonly measurementScope: 'view-event-accounting-on-successful-key-release';
+    readonly retentionScope: 'provider-retention-policy';
+    readonly sitePermissionPattern: string;
+}
+
 export const VIEWER_DISCLOSURE_CONSENT_STORAGE_KEY = 'viewer_disclosure_consents_v1';
 
 export class ViewerDisclosureConsentStore {
@@ -26,6 +34,21 @@ export class ViewerDisclosureConsentStore {
     public async hasStandingConsent(scope: ViewerConsentScope): Promise<boolean> {
         const records = await this.records();
         return records.some((record) => consentKey(record) === consentKey(scope));
+    }
+
+    public async listStandingConsents(): Promise<readonly ViewerDisclosureConsentInspection[]> {
+        return Object.freeze(
+            (await this.records()).map((record) =>
+                Object.freeze({
+                    ...record,
+                    automaticOpening: 'enabled-for-matching-site-issuer-and-policy',
+                    ctxDisclosureScope: 'account-device-policy-limits-and-key-release',
+                    measurementScope: 'view-event-accounting-on-successful-key-release',
+                    retentionScope: 'provider-retention-policy',
+                    sitePermissionPattern: `${record.siteOrigin}/*`,
+                }),
+            ),
+        );
     }
 
     public async grantStandingConsent(
@@ -44,6 +67,34 @@ export class ViewerDisclosureConsentStore {
         );
         await this.storage.set({ [VIEWER_DISCLOSURE_CONSENT_STORAGE_KEY]: [...records, record] });
         return record;
+    }
+
+    public async revokeStandingConsent(scope: ViewerConsentScope): Promise<boolean> {
+        const key = consentKey(scope);
+        const records = await this.records();
+        const remaining = records.filter((record) => consentKey(record) !== key);
+
+        await this.storage.set({ [VIEWER_DISCLOSURE_CONSENT_STORAGE_KEY]: remaining });
+
+        return remaining.length !== records.length;
+    }
+
+    public async revokeSiteConsents(siteOrigin: string): Promise<number> {
+        const normalized = normalizedSiteOrigin(siteOrigin);
+        const records = await this.records();
+        const remaining = records.filter((record) => record.siteOrigin !== normalized);
+
+        await this.storage.set({ [VIEWER_DISCLOSURE_CONSENT_STORAGE_KEY]: remaining });
+
+        return records.length - remaining.length;
+    }
+
+    public async clearStandingConsents(): Promise<number> {
+        const records = await this.records();
+
+        await this.storage.set({ [VIEWER_DISCLOSURE_CONSENT_STORAGE_KEY]: [] });
+
+        return records.length;
     }
 
     private async records(): Promise<readonly ViewerDisclosureConsentRecord[]> {

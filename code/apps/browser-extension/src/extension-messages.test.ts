@@ -50,4 +50,38 @@ describe('extension runtime messages', () => {
     ])('rejects malformed or expanded draft requests %#', (value) => {
         expect(() => parseCreatorDraftMessage(value)).toThrow();
     });
+
+    it.each(malformedMessageValues())(
+        'property-style handoff parser rejects bounded message value %#',
+        (value) => {
+            expect(() => parseCreatorHandoffMessage(value)).toThrow();
+        },
+    );
+
+    it.each(malformedMessageValues())(
+        'property-style draft parser rejects bounded message value %#',
+        (value) => {
+            expect(() => parseCreatorDraftMessage(value)).toThrow();
+        },
+    );
 });
+
+function malformedMessageValues(): readonly unknown[] {
+    return Object.freeze([
+        undefined,
+        null,
+        true,
+        false,
+        0,
+        '',
+        [],
+        {},
+        { type: CREATOR_HANDOFF_MESSAGE },
+        { type: CREATOR_DRAFT_MESSAGE },
+        { type: CREATOR_HANDOFF_MESSAGE, draft: '{}', accountLabel: 'a@b.co', token: 'secret' },
+        { type: CREATOR_HANDOFF_MESSAGE, draft: 'x'.repeat(16_385), accountLabel: 'a@b.co' },
+        { type: CREATOR_DRAFT_MESSAGE, requestId: `draft_${'a'.repeat(31)}` },
+        { type: CREATOR_DRAFT_MESSAGE, requestId: `draft_${'a'.repeat(33)}` },
+        { type: CREATOR_DRAFT_MESSAGE, requestId: `draft_${'A'.repeat(32)}` },
+    ]);
+}

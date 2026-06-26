@@ -634,20 +634,27 @@ Success goals:
 
 Objective: satisfy the documented threat model and prove that privacy promises are implemented rather than aspirational.
 
-- ⬜️ Convert every applicable V1 threat-model release gate into an automated test, operational check, or documented manual review.
-- ⬜️ Fuzz ZIP, JSON, manifest, policy, image metadata, JWT, DPoP, HPKE, redirect, and error parsers.
-- ⬜️ Test path traversal, duplicate entries, ZIP bombs, decompression limits, integer boundaries, malformed images, animation, and decoder failures.
-- ⬜️ Test OAuth mix-up, callback mismatch, token theft, replay, device revocation, recovery abuse, and concurrent redemption.
-- ⬜️ Verify logs and error responses contain no plaintext, secret keys, recovery codes, content keys, reusable credentials, or raw trust histories.
-- ⬜️ Test Capsule metric idempotency, committed-release semantics, low-volume suppression, creator ownership checks, aggregate retention, and the absence of viewer identifiers or deferred audience dimensions from creator projections.
-- ⬜️ Implement automated retention jobs for 24-hour replay artifacts, 30-day CTX/risk detail, 90-day security audits, 90-day maximum sanction tombstones, and 30-day backup expiration.
-- ⬜️ Test account closure, permanent deletion, broker-key destruction, counter disposal, backup restoration, and deletion-ledger replay.
-- ⬜️ Produce privacy controls for consent inspection, revocation, data export, correction, and appeal.
-- ⬜️ Run the provisional image envelope on representative supported Chrome/Chromium desktops and finalize or reduce it before freezing the V1 profile.
-- ⬜️ Define browser/version support and reject known vulnerable Viewer releases through provider policy.
-- ⬜️ Run dependency, secret, static-analysis, and reproducible-extension-build checks.
-- ⬜️ Enable private vulnerability reporting and configure dependency updates, secret scanning, dependency review, and appropriate code scanning for the public repository.
-- ⬜️ Perform an independent security review of cryptographic bindings, broker isolation, extension boundaries, and privacy lifecycle before public release.
+Status legend: ✅ complete, ◐ partially implemented or evidence exists but needs Phase 10 closure, ⬜️ not started.
+
+- ✅ Create the Phase 10 evidence matrix that maps every applicable V1 threat-model release gate to an automated test, operational check, documented manual review, or external-review owner. See [_docs/operations/phase10-security-privacy-evidence.md](../operations/phase10-security-privacy-evidence.md).
+- ✅ Inventory existing Phase 1-9 security and privacy evidence, link it into the matrix, and mark only the proven gates complete. Current overlap includes OAuth/DPoP/device-revocation tests, ticket-redemption concurrency tests, metrics privacy tests, account deletion and deletion-ledger replay tests, challenge retention tests, extension Manifest V3 boundary tests, log-redaction unit coverage, and the repository security policy.
+- ✅ Close the automated retention baseline: scheduled pruning or explicit lifecycle jobs cover 24-hour replay artifacts, expired challenge evidence, 30-day CTX/risk detail, 90-day maximum sanction tombstones, 30-day backup/deletion-ledger expiration, pending Capsule registrations, and expired device-registration artifacts. Broker security audits are log-channel evidence rather than database state and remain tracked under operational retention checks.
+- ✅ Finish deletion and restore proof: verify account closure, permanent deletion, broker-key destruction, account-linked counter disposal, Capsule counter retention semantics, backup restoration fail-closed behavior, deletion-ledger replay, and retry behavior when a deletion participant or broker lifecycle call fails.
+- ✅ Finish authorization and account-abuse proof: verify OAuth mix-up, callback mismatch, state and issuer validation, PKCE failure, DPoP proof replay, token theft/reuse, refresh-token replay, device revocation, account recovery abuse, suspended or closed accounts, concurrent ticket redemption, and failure-after-redemption counting behavior.
+- ✅ Build a malicious Capsule/package corpus for path traversal, duplicate entries, undeclared entries, ZIP bombs, decompression limits, integer boundaries, canonical JSON mismatches, malformed manifests, malformed policies, malformed signatures, malformed payload commitments, and unsupported versions.
+- ✅ Add fuzz or property-style parser tests for ZIP, JSON, manifest, policy, image metadata, JWT, DPoP, HPKE/key-release envelopes, redirects, extension messages, and error envelopes, with crash-free fail-closed assertions and bounded input sizes.
+- ✅ Add image-renderer hardening tests for malformed images, metadata mismatch, animation, dimension and decoded-memory limits, object URL disposal, decoder failures, timeout behavior, and absence of remote subresource loading.
+- ✅ Verify logs and error responses contain no plaintext, secret keys, recovery codes, content keys, reusable credentials, raw trust histories, raw challenge telemetry, OAuth tokens, DPoP proofs, authorization tickets, or release handles; extend redaction and response tests where gaps remain.
+- ✅ Test Capsule metric idempotency, committed-release semantics, creator ownership checks, safe denial groups, privacy-suppressed pressure metrics, aggregate-only presentation, and absence of viewer identifiers or deferred audience dimensions from creator metric event storage and projections.
+- ✅ Produce viewer privacy controls for consent inspection and revocation, including site permission, automatic opening, measurement, retention, and CTX disclosure scopes.
+- ✅ Produce account privacy controls for data export, correction request, appeal path, retained trust/challenge status inspection, and clear consequences when consent or retained evidence is revoked.
+- ✅ Build an automated, repeatable static-image envelope benchmark for supported Chrome/Chromium that records browser version, platform, V1 boundary cases, decode/render/disposal timings, and available memory metrics as sanitized JSON evidence.
+- ✅ Run the static-image envelope benchmark on representative supported Chrome/Chromium desktops, record the evidence artifact, and finalize or reduce the V1 static-image limits before freezing the profile.
+- ✅ Define supported browser and Viewer-version policy, publish the minimum supported Chrome/Chromium version, and reject known vulnerable or suspended Viewer releases through provider policy.
+- ✅ Run dependency, secret, static-analysis, extension-permission, no-remotely-hosted-code, and reproducible-extension-build checks; document commands, expected artifacts, release hashes, and owners.
+- ✅ Add repo-side public-repository security automation: Dependabot dependency updates, dependency review, CodeQL code scanning workflow, required CI workflow, and the vulnerability-reporting security policy.
+- ✅ Record platform-level public-repository security settings: private vulnerability reporting, secret scanning and push protection, Dependabot alerts, dependency graph, code scanning alerts, branch protection, required CI checks, and repository access review.
+- ✅ Perform and record an independent security review of cryptographic bindings, broker isolation, extension boundaries, parser hardening, retention/deletion lifecycle, privacy controls, and supply-chain release controls before public release.
 
 Success goals:
 

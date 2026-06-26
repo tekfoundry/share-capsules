@@ -49,6 +49,8 @@ The resume mechanism carries only the Capsule or return location and short-lived
 
 Unsupported browsers receive an honest compatibility explanation and retain access to public fallback content. V1 does not claim protected-content support where the trusted Viewer is unavailable.
 
+The Phase 10 baseline supports Chrome/Chromium major version 149 or newer with Share Capsules Viewer version `0.1.0` or newer. The CTX provider may reject older, unsupported, or emergency-suspended Viewer releases before ticket issuance. The operational policy is tracked in [Viewer Compatibility Policy](../../operations/viewer-compatibility-policy.md).
+
 ## No-extension creator experience
 
 The Laravel Creator Studio may allow a signed-in creator to view documentation or prepare a draft policy without the extension. It must not claim to create a production Capsule without trusted local creator tooling.

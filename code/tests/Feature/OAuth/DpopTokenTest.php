@@ -116,6 +116,12 @@ final class DpopTokenTest extends TestCase
             $this->proof('https://attacker.example/oauth/token'),
             $this->proof(overrides: ['iat' => now()->subMinutes(2)->timestamp]),
             $this->proof(overrides: ['unexpected' => 'claim']),
+            '',
+            '.',
+            'a.b',
+            'a.b.c.d',
+            '!!!!.!!!!.!!!!',
+            str_repeat('x', 2048).'.b.c',
         ] as $invalidProof) {
             $this->withHeader('DPoP', $invalidProof)
                 ->postJson(route('passport.token'), $parameters)
@@ -201,6 +207,19 @@ final class DpopTokenTest extends TestCase
         $this->withHeaders([
             'Authorization' => 'DPoP '.$accessToken,
             'DPoP' => $this->proof($resourceUrl, 'wrong-token'),
+        ])->postJson($resourceUrl)
+            ->assertUnauthorized()
+            ->assertJsonPath('error', 'invalid_dpop_proof');
+
+        $attackerKeypair = sodium_crypto_sign_seed_keypair(str_repeat("\x22", SODIUM_CRYPTO_SIGN_SEEDBYTES));
+        $this->withHeaders([
+            'Authorization' => 'DPoP '.$accessToken,
+            'DPoP' => $this->proof(
+                $resourceUrl,
+                $accessToken,
+                privateKey: sodium_crypto_sign_secretkey($attackerKeypair),
+                publicKey: sodium_crypto_sign_publickey($attackerKeypair),
+            ),
         ])->postJson($resourceUrl)
             ->assertUnauthorized()
             ->assertJsonPath('error', 'invalid_dpop_proof');
@@ -360,6 +379,7 @@ final class DpopTokenTest extends TestCase
             'action' => 'render',
             'cryptographic_suite' => 'ctx-capsule-v1',
             'view_event_consent' => true,
+            'viewer' => $this->viewerRelease(),
         ])->assertCreated()
             ->assertJsonPath('type', 'ctx-authorization')
             ->assertJsonPath('version', 1)
@@ -386,6 +406,7 @@ final class DpopTokenTest extends TestCase
             'action' => 'render',
             'cryptographic_suite' => 'ctx-capsule-v1',
             'view_event_consent' => false,
+            'viewer' => $this->viewerRelease(),
         ])->assertForbidden()->assertJsonPath('code', 'consent_required');
 
         $metrics = CtxCapsuleMetricProjection::query()->sole();
@@ -398,6 +419,55 @@ final class DpopTokenTest extends TestCase
         $this->assertSame(2, CtxAutomationRiskActivity::query()->count());
         $this->assertFalse(Schema::hasColumn('ctx_metric_event_records', 'user_id'));
         $this->assertFalse(Schema::hasColumn('ctx_metric_event_records', 'viewer_device_id'));
+    }
+
+    #[Test]
+    public function provider_policy_rejects_a_suspended_viewer_release_before_ticket_issuance(): void
+    {
+        config()->set('sharecapsules.extension.viewer.suspended_versions', ['0.1.0']);
+        [$user, $device] = $this->userAndDevice();
+        $code = $this->approveAndExtractCode($user, 'ctx:authorize');
+        $issued = $this->withHeader('DPoP', $this->proof())
+            ->postJson(route('passport.token'), $this->tokenParameters($code, $device))
+            ->assertOk();
+        $accessToken = $issued->json('access_token');
+        $resourceUrl = route('ctx.authorize');
+        $policy = [
+            'type' => 'ctx-policy',
+            'version' => 1,
+            'combiner' => 'all',
+            'requirements' => [
+                ['predicate' => 'ctx.account.email-verified', 'equals' => true],
+                ['predicate' => 'ctx.account.active', 'equals' => true],
+                ['predicate' => 'ctx.viewer.device-registered', 'equals' => true],
+                ['predicate' => 'ctx.consent.capsule-view-event', 'equals' => true],
+            ],
+        ];
+
+        $this->withHeaders([
+            'Authorization' => 'DPoP '.$accessToken,
+            'DPoP' => $this->proof($resourceUrl, $accessToken),
+        ])->postJson($resourceUrl, [
+            'type' => 'ctx-authorization-request',
+            'version' => 1,
+            'broker' => 'https://broker.example.test',
+            'host_origin' => 'https://host.example.test',
+            'capsule_id' => 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703',
+            'capsule_revision' => 1,
+            'policy' => $policy,
+            'policy_sha256' => app(CtxPolicyDigest::class)->calculate($policy),
+            'payload_id' => 'primary-image',
+            'release_handle' => 'opaque-release-handle-0001',
+            'action' => 'render',
+            'cryptographic_suite' => 'ctx-capsule-v1',
+            'view_event_consent' => true,
+            'viewer' => $this->viewerRelease(),
+        ])->assertUnprocessable()
+            ->assertJsonPath('code', 'unsupported_contract');
+
+        $this->assertDatabaseCount('ctx_authorization_tickets', 0);
+        $this->assertSame(2, CtxMetricEventRecord::query()->count());
+        $this->assertSame('policy', CtxMetricEventRecord::query()->latest('created_at')->first()?->denial_category);
     }
 
     #[Test]
@@ -538,6 +608,7 @@ final class DpopTokenTest extends TestCase
             'action' => 'render',
             'cryptographic_suite' => 'ctx-capsule-v1',
             'view_event_consent' => true,
+            'viewer' => $this->viewerRelease(),
         ];
 
         $this->withHeaders([
@@ -627,6 +698,7 @@ final class DpopTokenTest extends TestCase
             'action' => 'render',
             'cryptographic_suite' => 'ctx-capsule-v1',
             'view_event_consent' => true,
+            'viewer' => $this->viewerRelease(),
         ];
 
         $first = $this->withHeaders([
@@ -688,6 +760,7 @@ final class DpopTokenTest extends TestCase
             'action' => 'render',
             'cryptographic_suite' => 'ctx-capsule-v1',
             'view_event_consent' => true,
+            'viewer' => $this->viewerRelease(),
         ];
 
         $first = $this->withHeaders([
@@ -754,6 +827,17 @@ final class DpopTokenTest extends TestCase
         return $query['code'];
     }
 
+    /** @return array{name: string, version: string, browser_family: string, browser_major: int} */
+    private function viewerRelease(): array
+    {
+        return [
+            'name' => 'share-capsules-chromium-extension',
+            'version' => '0.1.0',
+            'browser_family' => 'Chrome',
+            'browser_major' => 149,
+        ];
+    }
+
     /** @return array<string, string> */
     private function tokenParameters(string $code, ViewerDevice $device): array
     {
@@ -782,14 +866,18 @@ final class DpopTokenTest extends TestCase
         ?string $target = null,
         ?string $accessToken = null,
         array $overrides = [],
+        ?string $privateKey = null,
+        ?string $publicKey = null,
     ): string {
+        $privateKey ??= $this->privateKey;
+        $publicKey ??= $this->publicKey;
         $header = $this->base64Url(json_encode([
             'typ' => 'dpop+jwt',
             'alg' => 'EdDSA',
             'jwk' => [
                 'kty' => 'OKP',
                 'crv' => 'Ed25519',
-                'x' => $this->base64Url($this->publicKey),
+                'x' => $this->base64Url($publicKey),
             ],
         ], JSON_THROW_ON_ERROR));
         $claims = [
@@ -803,7 +891,7 @@ final class DpopTokenTest extends TestCase
         }
         $claims = array_merge($claims, $overrides);
         $payload = $this->base64Url(json_encode($claims, JSON_THROW_ON_ERROR));
-        $signature = sodium_crypto_sign_detached($header.'.'.$payload, $this->privateKey);
+        $signature = sodium_crypto_sign_detached($header.'.'.$payload, $privateKey);
 
         return $header.'.'.$payload.'.'.$this->base64Url($signature);
     }

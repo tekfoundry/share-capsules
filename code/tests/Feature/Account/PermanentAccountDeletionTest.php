@@ -9,6 +9,8 @@ use App\Broker\Lifecycle\BrokerContentKeyLifecycle;
 use App\Broker\Lifecycle\BrokerContentKeyLifecycleFailed;
 use App\Capsules\Registry\CapsuleLifecycleStatus;
 use App\Models\CreatorCapsule;
+use App\Models\CtxAccountCapsuleReleaseCounter;
+use App\Models\CtxCapsuleReleaseCounter;
 use App\Models\User;
 use App\Models\ViewerDevice;
 use App\OAuth\ExtensionOAuthClientConfiguration;
@@ -126,6 +128,34 @@ final class PermanentAccountDeletionTest extends TestCase
         $this->assertCount(0, $replacement->viewerDevices);
         $this->assertArrayNotHasKey($oldAccountId, $profiles->profiles);
         $this->assertArrayNotHasKey($replacement->getKey(), $profiles->profiles);
+    }
+
+    public function test_permanent_deletion_removes_account_counters_without_decrementing_capsule_global_counters(): void
+    {
+        $user = $this->closedUser(now()->subDay());
+        $capsuleId = 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703';
+        CtxCapsuleReleaseCounter::query()->create([
+            'capsule_id' => $capsuleId,
+            'capsule_revision' => 1,
+            'committed_releases' => 5,
+        ]);
+        CtxAccountCapsuleReleaseCounter::query()->create([
+            'user_id' => $user->getKey(),
+            'capsule_id' => $capsuleId,
+            'capsule_revision' => 1,
+            'committed_releases' => 3,
+        ]);
+
+        $this->assertTrue(app(AccountDeletionService::class)->deleteAccount((int) $user->getKey()));
+
+        $this->assertDatabaseMissing('ctx_account_capsule_release_counters', [
+            'user_id' => $user->getKey(),
+        ]);
+        $this->assertDatabaseHas('ctx_capsule_release_counters', [
+            'capsule_id' => $capsuleId,
+            'capsule_revision' => 1,
+            'committed_releases' => 5,
+        ]);
     }
 
     public function test_a_failed_deletion_participant_rolls_back_and_is_reported_for_retry(): void

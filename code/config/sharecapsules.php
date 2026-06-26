@@ -17,6 +17,16 @@ return [
     'extension' => [
         'channel' => env('SHARECAPSULES_EXTENSION_CHANNEL', 'development'),
         'id' => env('SHARECAPSULES_EXTENSION_ID', 'development-not-configured'),
+        'viewer' => [
+            'name' => 'share-capsules-chromium-extension',
+            'minimum_version' => env('SHARECAPSULES_VIEWER_MINIMUM_VERSION', '0.1.0'),
+            'supported_browser_families' => ['Chrome', 'Chromium'],
+            'minimum_chromium_major' => (int) env('SHARECAPSULES_VIEWER_MINIMUM_CHROMIUM_MAJOR', 149),
+            'suspended_versions' => array_values(array_filter(array_map(
+                static fn (string $version): string => trim($version),
+                explode(',', (string) env('SHARECAPSULES_VIEWER_SUSPENDED_VERSIONS', '')),
+            ))),
+        ],
     ],
 
     'oauth' => [

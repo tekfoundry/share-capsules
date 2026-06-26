@@ -43,7 +43,7 @@ final class RedactSensitiveContext implements ProcessorInterface
     private function isSensitiveKey(string $key): bool
     {
         return preg_match(
-            '/password|secret|token|authorization|cookie|private[_-]?key|content[_-]?key|recovery[_-]?code/i',
+            '/password|secret|token|authorization|cookie|credential|private[_-]?key|signing[_-]?key|content[_-]?key|recovery[_-]?code|plaintext|plain[_-]?text|dpop|proof|ticket|release[_-]?handle|raw[_-]?trust|trust[_-]?history|challenge[_-]?telemetry|interaction[_-]?summary/i',
             $key,
         ) === 1;
     }
@@ -52,9 +52,11 @@ final class RedactSensitiveContext implements ProcessorInterface
     {
         $value = preg_replace('/\bBearer\s+[^\s,;]+/i', 'Bearer '.self::REDACTED, $value)
             ?? $value;
+        $value = preg_replace('/\bDPoP\s+[^\s,;]+/i', 'DPoP '.self::REDACTED, $value)
+            ?? $value;
 
         return preg_replace(
-            '/\b(password|secret|token|authorization|recovery[_-]?code)\s*[:=]\s*[^\s,;]+/i',
+            '/\b(password|secret|token|authorization|credential|recovery[_-]?code|content[_-]?key|plaintext|plain[_-]?text|proof|ticket|release[_-]?handle)\s*[:=]\s*[^\s,;]+/i',
             '$1='.self::REDACTED,
             $value,
         ) ?? $value;

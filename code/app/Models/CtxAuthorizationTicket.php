@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
 
 #[Fillable([
@@ -33,11 +35,19 @@ use Illuminate\Database\Eloquent\Model;
 ])]
 final class CtxAuthorizationTicket extends Model
 {
+    use MassPrunable;
+
     protected $primaryKey = 'jti';
 
     public $incrementing = false;
 
     protected $keyType = 'string';
+
+    /** @return Builder<static> */
+    public function prunable(): Builder
+    {
+        return self::query()->where('expires_at', '<=', now()->subDay());
+    }
 
     /** @return array<string, string> */
     protected function casts(): array

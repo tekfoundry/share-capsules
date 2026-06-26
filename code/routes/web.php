@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Account\AccountClosureController;
 use App\Http\Controllers\Account\AccountPasskeyController;
+use App\Http\Controllers\Account\AccountPrivacyController;
 use App\Http\Controllers\Account\AccountSecurityController;
 use App\Http\Controllers\Account\AccountViewerDeviceController;
 use App\Http\Controllers\Auth\AccountRecoveryController;
@@ -87,6 +88,18 @@ Route::middleware(['auth', 'account.active'])->group(function (): void {
         Route::post('/closure', [AccountClosureController::class, 'store'])
             ->middleware(['password.confirm', 'throttle:account-closure'])
             ->name('closure.store');
+        Route::get('/privacy/export', [AccountPrivacyController::class, 'export'])
+            ->middleware('password.confirm')
+            ->name('privacy.export');
+        Route::post('/privacy/correction', [AccountPrivacyController::class, 'correction'])
+            ->middleware('throttle:6,1')
+            ->name('privacy.correction');
+        Route::post('/privacy/appeal', [AccountPrivacyController::class, 'appeal'])
+            ->middleware('throttle:6,1')
+            ->name('privacy.appeal');
+        Route::delete('/privacy/challenge-evidence', [AccountPrivacyController::class, 'destroyChallengeEvidence'])
+            ->middleware(['password.confirm', 'throttle:6,1'])
+            ->name('privacy.challenge-evidence.destroy');
         Route::get('/passkeys', [AccountPasskeyController::class, 'show'])
             ->middleware('password.confirm')
             ->name('passkeys');

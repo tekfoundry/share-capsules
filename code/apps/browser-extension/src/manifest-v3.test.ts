@@ -3,6 +3,8 @@ import { readFile } from 'node:fs/promises';
 
 import { describe, expect, it } from 'vitest';
 
+import { VIEWER_RELEASE } from './viewer-release.js';
+
 const DEVELOPMENT_EXTENSION_ID = 'dhconceamghcnndjodjhjikknblhkmej';
 
 describe('development Manifest V3 shell', () => {
@@ -10,6 +12,7 @@ describe('development Manifest V3 shell', () => {
         const manifest = await readManifest();
 
         expect(manifest.manifest_version).toBe(3);
+        expect(manifest.version).toBe(VIEWER_RELEASE.version);
         expect(extensionId(manifest.key)).toBe(DEVELOPMENT_EXTENSION_ID);
         expect(manifest.permissions).toEqual(['identity', 'scripting', 'storage']);
         expect(manifest.host_permissions).toEqual([
@@ -57,6 +60,7 @@ describe('development Manifest V3 shell', () => {
 
 interface ExtensionManifest {
     readonly manifest_version: number;
+    readonly version: string;
     readonly key: string;
     readonly permissions: readonly string[];
     readonly host_permissions: readonly string[];

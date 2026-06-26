@@ -100,6 +100,68 @@ describe('CTX embedded Policy V1', () => {
         expect(() => parseCtxPolicyV1(value)).toThrow(PolicyValidationError);
     });
 
+    it.each(malformedJsonishValues())(
+        'property-style policy root parser rejects bounded JSON value %#',
+        (value) => {
+            expect(() => parseCtxPolicyV1(value)).toThrow(PolicyValidationError);
+        },
+    );
+
+    it.each([
+        [
+            'type',
+            (value: MutablePolicyRoot, replacement: unknown) => {
+                value.type = replacement;
+            },
+            malformedJsonishValues(),
+        ],
+        [
+            'version',
+            (value: MutablePolicyRoot, replacement: unknown) => {
+                value.version = replacement;
+            },
+            malformedJsonishValues(),
+        ],
+        [
+            'combiner',
+            (value: MutablePolicyRoot, replacement: unknown) => {
+                value.combiner = replacement;
+            },
+            malformedJsonishValues(),
+        ],
+        [
+            'requirements',
+            (value: MutablePolicyRoot, replacement: unknown) => {
+                value.requirements = replacement as MutableRequirement[];
+            },
+            malformedJsonishValues(),
+        ],
+        [
+            'requirement predicate',
+            (value: MutablePolicyRoot, replacement: unknown) => {
+                value.requirements[0]!.predicate = replacement;
+            },
+            malformedJsonishValues(),
+        ],
+        [
+            'requirement operator',
+            (value: MutablePolicyRoot, replacement: unknown) => {
+                value.requirements[0]!.equals = replacement;
+            },
+            malformedJsonishValues().filter((value) => value !== true),
+        ],
+    ] as const)(
+        'property-style policy parser rejects malformed %s values',
+        (_, mutate, replacements) => {
+            for (const replacement of replacements) {
+                const value = structuredClone(baselinePolicy());
+                mutate(value, replacement);
+
+                expect(() => parseCtxPolicyV1(value)).toThrow(PolicyValidationError);
+            }
+        },
+    );
+
     it.each(['ctx.account.age', 'ctx.score.trust', '', 'CTX.ACCOUNT.ACTIVE'])(
         'rejects unknown predicate %s',
         (predicate) => {
@@ -281,9 +343,9 @@ describe('CTX embedded Policy V1', () => {
     });
 });
 
-interface MutableRequirement {
-    predicate: string;
-    equals?: boolean;
+interface MutableRequirement extends Record<string, unknown> {
+    predicate: unknown;
+    equals?: unknown;
     score?: number;
 }
 
@@ -291,25 +353,52 @@ interface MutablePolicy {
     requirements: MutableRequirement[];
 }
 
-function baselinePolicy() {
+interface MutablePolicyRoot {
+    type: unknown;
+    version: unknown;
+    combiner: unknown;
+    requirements: MutableRequirement[];
+}
+
+function baselinePolicy(): MutablePolicyRoot {
     return {
-        type: 'ctx-policy' as const,
-        version: 1 as const,
-        combiner: 'all' as const,
+        type: 'ctx-policy',
+        version: 1,
+        combiner: 'all',
         requirements: [
-            { predicate: EMAIL_VERIFIED_PREDICATE, equals: true as const },
-            { predicate: ACCOUNT_ACTIVE_PREDICATE, equals: true as const },
-            { predicate: DEVICE_REGISTERED_PREDICATE, equals: true as const },
-            { predicate: VIEW_EVENT_CONSENT_PREDICATE, equals: true as const },
-        ] as CtxPolicyV1['requirements'] extends readonly (infer T)[] ? T[] : never,
+            { predicate: EMAIL_VERIFIED_PREDICATE, equals: true },
+            { predicate: ACCOUNT_ACTIVE_PREDICATE, equals: true },
+            { predicate: DEVICE_REGISTERED_PREDICATE, equals: true },
+            { predicate: VIEW_EVENT_CONSENT_PREDICATE, equals: true },
+        ],
     };
 }
 
 function policyWithOptionalRequirements(
     ...optionalRequirements: CtxPolicyV1['requirements']
-): CtxPolicyV1 {
+): MutablePolicyRoot {
     return {
         ...baselinePolicy(),
-        requirements: [...baselinePolicy().requirements, ...optionalRequirements],
+        requirements: [
+            ...(baselinePolicy().requirements as MutableRequirement[]),
+            ...(optionalRequirements as MutableRequirement[]),
+        ],
     };
+}
+
+function malformedJsonishValues(): readonly unknown[] {
+    return Object.freeze([
+        null,
+        true,
+        false,
+        0,
+        -1,
+        1.5,
+        Number.MAX_SAFE_INTEGER + 1,
+        '',
+        ' '.repeat(256),
+        [],
+        {},
+        { predicate: EMAIL_VERIFIED_PREDICATE, equals: true },
+    ]);
 }

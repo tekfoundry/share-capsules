@@ -44,6 +44,115 @@ describe('Capsule Manifest V1', () => {
     });
 
     it.each([
+        [
+            'unsupported manifest version',
+            (value: MutableManifest) => {
+                value.format_version = '2.0';
+            },
+        ],
+        [
+            'unsupported cryptographic suite',
+            (value: MutableManifest) => {
+                value.cryptographic_suite = 'ctx-capsule-v0';
+            },
+        ],
+        [
+            'integer boundary for plaintext size',
+            (value: MutableManifest) => {
+                value.payloads[0]!.plaintext_size = Number.MAX_SAFE_INTEGER + 1;
+            },
+        ],
+        [
+            'integer boundary for capsule revision',
+            (value: MutableManifest) => {
+                value.capsule.revision = Number.MAX_SAFE_INTEGER + 1;
+            },
+        ],
+        [
+            'malformed payload commitment',
+            (value: MutableManifest) => {
+                value.payloads[0]!.ciphertext_sha256 = 'not-base64url!';
+            },
+        ],
+        [
+            'malformed policy predicate',
+            (value: MutableManifest) => {
+                mutablePolicy(value).requirements[0]!.predicate = 'ctx.account.email-verified-v2';
+            },
+        ],
+        [
+            'unsupported policy version',
+            (value: MutableManifest) => {
+                mutablePolicy(value).version = 2;
+            },
+        ],
+    ])('malicious manifest corpus rejects %s', (_, mutate) => {
+        const value = structuredClone(validManifestV1) as unknown as MutableManifest;
+        mutate(value);
+
+        expect(() => parseCapsuleManifest(value)).toThrow(ManifestValidationError);
+    });
+
+    it.each(malformedJsonishValues())(
+        'property-style manifest root parser rejects bounded JSON value %#',
+        (value) => {
+            expect(() => parseCapsuleManifest(value)).toThrow(ManifestValidationError);
+        },
+    );
+
+    it.each([
+        [
+            'ctx issuer',
+            (value: MutableManifest, replacement: unknown) => {
+                value.ctx.issuer = replacement;
+            },
+        ],
+        [
+            'policy object',
+            (value: MutableManifest, replacement: unknown) => {
+                value.policy = replacement;
+            },
+        ],
+        [
+            'content profile object',
+            (value: MutableManifest, replacement: unknown) => {
+                value.content_profile = replacement;
+            },
+        ],
+        [
+            'payload media type',
+            (value: MutableManifest, replacement: unknown) => {
+                value.payloads[0].media_type = replacement;
+            },
+        ],
+        [
+            'image width metadata',
+            (value: MutableManifest, replacement: unknown) => {
+                value.payloads[0].profile_metadata.width = replacement;
+            },
+        ],
+        [
+            'image pixel-count metadata',
+            (value: MutableManifest, replacement: unknown) => {
+                value.payloads[0].profile_metadata.pixel_count = replacement;
+            },
+        ],
+        [
+            'key-release broker identity',
+            (value: MutableManifest, replacement: unknown) => {
+                value.payloads[0].key_release.broker = replacement;
+            },
+        ],
+    ])('property-style manifest parser rejects malformed %s values', (_, mutate) => {
+        for (const replacement of malformedJsonishValues()) {
+            const value = structuredClone(validManifestV1) as unknown as MutableManifest;
+            mutate(value, replacement);
+
+            expect(() => parseCapsuleManifest(value)).toThrow(ManifestValidationError);
+        }
+    });
+
+    it.each([
         'http://trust.example',
         'https://user:secret@trust.example',
         'https://trust.example?tenant=1',
@@ -101,3 +210,56 @@ describe('Capsule Manifest V1', () => {
         ).toThrow(ManifestValidationError);
     });
 });
+
+interface MutableManifest {
+    format_version: unknown;
+    cryptographic_suite: unknown;
+    capsule: {
+        revision: unknown;
+    };
+    ctx: { issuer: unknown };
+    policy: unknown;
+    content_profile: unknown;
+    payloads: [
+        {
+            plaintext_size: unknown;
+            ciphertext_sha256: unknown;
+            media_type: unknown;
+            profile_metadata: {
+                width: unknown;
+                pixel_count: unknown;
+            };
+            key_release: {
+                broker: unknown;
+            };
+        },
+    ];
+}
+
+function mutablePolicy(value: MutableManifest): {
+    version: unknown;
+    requirements: Array<{ predicate: unknown }>;
+} {
+    return value.policy as {
+        version: unknown;
+        requirements: Array<{ predicate: unknown }>;
+    };
+}
+
+function malformedJsonishValues(): readonly unknown[] {
+    return Object.freeze([
+        null,
+        true,
+        false,
+        0,
+        -1,
+        1.5,
+        Number.MAX_SAFE_INTEGER + 1,
+        '',
+        ' '.repeat(256),
+        [],
+        {},
+        { type: 'future-v2' },
+        { type: 'ctx-policy', version: 1, combiner: 'all', requirements: [] },
+    ]);
+}
