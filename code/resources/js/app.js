@@ -7,6 +7,7 @@ import {
 } from '@laravel/passkeys';
 import { initializeCapsuleCreatorHandoff } from './creator-studio.js';
 import { initializeConfirmationDialogs } from './confirmation-dialog.js';
+import { initializeDisclosurePopovers } from './disclosure-popovers.js';
 
 const messageFor = (error) => {
     if (error instanceof NotSupportedError) return 'This browser does not support passkeys.';
@@ -143,3 +144,4 @@ initializePasskeyConfirmation();
 initializePasskeyRegistration();
 initializeCapsuleCreatorHandoff();
 initializeConfirmationDialogs();
+initializeDisclosurePopovers();

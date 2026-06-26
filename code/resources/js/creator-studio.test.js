@@ -4,6 +4,7 @@ import {
     CreatorDraftValidationError,
     buildCreatorHandoffDetail,
     buildCreatorDraft,
+    buildPolicySummary,
     calendarDateBoundary,
 } from './creator-studio.js';
 
@@ -137,5 +138,37 @@ describe('Creator Studio draft handoff', () => {
         expect(() => buildCreatorDraft(validInput({ description: 'x'.repeat(1001) }))).toThrow(
             CreatorDraftValidationError,
         );
+    });
+
+    it('summarizes configured access policies without exposing trust internals', () => {
+        expect(
+            buildPolicySummary({
+                accessFromDate: '2026-07-01',
+                accessThroughDate: '2026-08-01',
+                globalLimit: '1000',
+                accountLimit: '5',
+                automationRiskRequired: true,
+            }),
+        ).toEqual({
+            baseline:
+                'Active account, verified email, connected extension, and counted approved openings.',
+            time: 'Opens from 07/01/2026 through 08/01/2026.',
+            limit: 'Up to 1,000 total views and 5 views per viewer account.',
+            trust: 'Viewer trust check required. The trust score considers recent usage patterns and quick human challenges before content opens.',
+        });
+
+        expect(
+            buildPolicySummary({
+                accessFromDate: '',
+                accessThroughDate: '',
+                globalLimit: '',
+                accountLimit: '',
+                automationRiskRequired: false,
+            }),
+        ).toMatchObject({
+            time: 'No opening dates configured.',
+            limit: 'No opening limits configured.',
+            trust: 'No viewer trust check configured.',
+        });
     });
 });

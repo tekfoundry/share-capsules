@@ -45,5 +45,23 @@
                 </a>
             </aside>
         </div>
+
+        <section class="mt-6 rounded-2xl border border-line bg-white p-6 shadow-card sm:p-8" aria-labelledby="viewer-outcomes-heading">
+            <h2 id="viewer-outcomes-heading" class="text-xl font-semibold tracking-[-0.025em] text-ink">What may happen when you return</h2>
+            <div class="mt-5 grid gap-4 text-sm leading-6 text-muted sm:grid-cols-2">
+                <div class="rounded-xl bg-canvas p-4">
+                    <p class="font-semibold text-ink">The Capsule opens</p>
+                    <p class="mt-1">The Viewer confirms the signed policies and decrypts the protected content locally.</p>
+                </div>
+                <div class="rounded-xl bg-canvas p-4">
+                    <p class="font-semibold text-ink">The Capsule stays locked</p>
+                    <p class="mt-1">The Capsule may be outside its time window, out of configured views, or blocked by current automation risk.</p>
+                </div>
+                <div class="rounded-xl bg-canvas p-4 sm:col-span-2">
+                    <p class="font-semibold text-ink">A quick human challenge may appear</p>
+                    <p class="mt-1">Some Trust Capsules ask for a short human check when the viewer is otherwise eligible but more confidence is needed before releasing the key.</p>
+                </div>
+            </div>
+        </section>
     </section>
 @endsection

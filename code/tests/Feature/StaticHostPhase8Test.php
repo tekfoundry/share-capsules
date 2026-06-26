@@ -232,6 +232,22 @@ final class StaticHostPhase8Test extends TestCase
         $this->assertStringContainsString('Only a successful broker key release counts as an opening', $readme);
     }
 
+    public function test_static_host_index_includes_policy_feature_tour(): void
+    {
+        $page = file_get_contents(base_path('../_examples/static-host/index.html'));
+
+        $this->assertStringContainsString('Capsule policy feature tour', $page);
+        $this->assertStringContainsString('One Capsule format, configurable access policies.', $page);
+        $this->assertStringContainsString('Time Capsule', $page);
+        $this->assertStringContainsString('Limit Capsule', $page);
+        $this->assertStringContainsString('Trust Capsule', $page);
+        $this->assertStringContainsString('Combined Capsule', $page);
+        $this->assertStringContainsString('./test.html#time-capsule-in-between-before-and-after', $page);
+        $this->assertStringContainsString('./test.html#limit-capsule-global-limit-of-15', $page);
+        $this->assertStringContainsString('./test.html#trust-capsule', $page);
+        $this->assertStringContainsString('./test.html#combined-capsule', $page);
+    }
+
     public function test_static_host_cross_origin_permission_fixture_documents_distinct_origin_grants(): void
     {
         $page = file_get_contents(base_path('../_examples/static-host/cross-origin-permissions.html'));

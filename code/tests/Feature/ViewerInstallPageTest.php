@@ -13,7 +13,12 @@ final class ViewerInstallPageTest extends TestCase
             ->assertSee('Install or enable the Share Capsules Viewer.')
             ->assertSee('The public store listing will be linked here when the V1 extension is published.')
             ->assertSee('go back to the website where you found the Capsule and reload the page')
-            ->assertSee('does not provide a browser-only fallback decryption path');
+            ->assertSee('does not provide a browser-only fallback decryption path')
+            ->assertSee('What may happen when you return')
+            ->assertSee('The Capsule opens')
+            ->assertSee('The Capsule stays locked')
+            ->assertSee('A quick human challenge may appear')
+            ->assertSee('outside its time window, out of configured views, or blocked by current automation risk');
     }
 
     public function test_a_safe_public_return_url_can_be_shown(): void

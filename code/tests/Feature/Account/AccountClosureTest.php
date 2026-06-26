@@ -45,6 +45,14 @@ final class AccountClosureTest extends TestCase
 
         $this->actingAs($user)
             ->withSession(['auth.password_confirmed_at' => now()->timestamp])
+            ->get(route('account.closure.show'))
+            ->assertOk()
+            ->assertSee('Capsule access impact')
+            ->assertSee('Closing your account pauses access during the recovery period')
+            ->assertSee('Permanent deletion destroys the broker-held content keys');
+
+        $this->actingAs($user)
+            ->withSession(['auth.password_confirmed_at' => now()->timestamp])
             ->post(route('account.closure.store'))
             ->assertSessionHasErrors('acknowledge');
         $this->assertFalse($user->fresh()->isClosed());

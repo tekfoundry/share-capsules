@@ -5,9 +5,11 @@ namespace Tests\Feature\Studio;
 use App\Broker\Lifecycle\BrokerContentKeyLifecycle;
 use App\Capsules\Registry\CapsuleLifecycleStatus;
 use App\Models\CreatorCapsule;
+use App\Models\CtxCapsuleMetricDenial;
 use App\Models\CtxCapsuleReleaseCounter;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\Support\FakeBrokerContentKeyLifecycle;
 use Tests\TestCase;
 
@@ -20,7 +22,12 @@ final class CapsuleInventoryTest extends TestCase
         $owner = User::factory()->create(['email_verified_at' => now()]);
         $other = User::factory()->create(['email_verified_at' => now()]);
         $capsuleId = 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703';
-        $this->grant($owner, $capsuleId, true);
+        $this->grant($owner, $capsuleId, true, [
+            'not_before' => now()->subDay(),
+            'capsule_lifetime_limit' => 15,
+            'account_capsule_lifetime_limit' => 5,
+            'automation_risk_issuer' => 'https://provider.example.test',
+        ]);
         $this->grant($other, 'urn:uuid:028f61fe-729b-4f87-8865-2e1f9d8db704', true);
         $this->grant($owner, 'urn:uuid:038f61fe-729b-4f87-8865-2e1f9d8db705', false);
         CtxCapsuleReleaseCounter::query()->create([
@@ -37,17 +44,49 @@ final class CapsuleInventoryTest extends TestCase
             ->assertSee('Protected landscape')
             ->assertSee('Image')
             ->assertSee('PNG')
-            ->assertSee('Edit the name shown in your account')
+            ->assertSee('Registered Capsules')
+            ->assertSee('Policy icons are privacy-safe summaries')
+            ->assertSee('Time')
+            ->assertSee('Limit')
+            ->assertSee('Trust')
+            ->assertSee('Time policy: opens starting')
+            ->assertSee('Limit policy: up to 15 total views and 5 views per viewer account.')
+            ->assertSee('Trust policy: viewer trust check required before content opens.')
+            ->assertDontSee('Basic')
+            ->assertSee(route('studio.capsules.metrics', [$capsuleId, 1]), false)
+            ->assertSee('aria-label="Manage Capsule"', false)
+            ->assertSee('data-disclosure-popover', false)
+            ->assertSee('Name shown in your account')
             ->assertDontSee('Rename for your account')
             ->assertSee('Delete Capsule')
             ->assertSee(route('studio.capsules.destroy', [$capsuleId, 1]), false)
             ->assertSee('data-confirm-title="Permanently revoke access?"', false)
             ->assertSee('data-confirm-title="Delete this Capsule?"', false)
             ->assertSee('7')
-            ->assertSee('Policy identifier')
-            ->assertSee('Account deletion impact')
+            ->assertDontSee('Account deletion impact')
+            ->assertDontSee('Closing your account pauses access during the recovery period')
+            ->assertDontSee('Policy identifier')
             ->assertDontSee('028f61fe')
             ->assertDontSee('038f61fe');
+    }
+
+    public function test_capsule_inventory_is_paginated(): void
+    {
+        $owner = User::factory()->create(['email_verified_at' => now()]);
+        for ($index = 0; $index < 12; $index++) {
+            $this->grant($owner, 'urn:uuid:'.Str::uuid(), true, [
+                'title' => 'Capsule '.$index,
+                'finalized_at' => now()->subMinutes($index),
+            ]);
+        }
+
+        $this->actingAs($owner)->get(route('studio.capsules.index'))
+            ->assertOk()
+            ->assertSee('12 total')
+            ->assertSee('Capsule 0')
+            ->assertSee('Capsule 9')
+            ->assertDontSee('Capsule 10')
+            ->assertSee('page=2', false);
     }
 
     public function test_a_creator_can_set_a_private_management_label_without_changing_the_signed_title(): void
@@ -145,18 +184,44 @@ final class CapsuleInventoryTest extends TestCase
         $other = User::factory()->create(['email_verified_at' => now()]);
         $capsuleId = 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703';
         $this->grant($owner, $capsuleId, true);
+        $provider = (string) config('sharecapsules.ctx.issuer');
+        $providerKey = sodium_bin2base64(hash('sha256', $provider, true), SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING);
+        CtxCapsuleMetricDenial::query()->create([
+            'provider' => $provider,
+            'provider_key' => $providerKey,
+            'capsule_id' => $capsuleId,
+            'capsule_revision' => 1,
+            'category' => 'risk',
+            'occurrences' => 4,
+        ]);
+        CtxCapsuleMetricDenial::query()->create([
+            'provider' => $provider,
+            'provider_key' => $providerKey,
+            'capsule_id' => $capsuleId,
+            'capsule_revision' => 1,
+            'category' => 'policy',
+            'occurrences' => 2,
+        ]);
 
         $this->actingAs($owner)->get(route('studio.capsules.metrics', [$capsuleId, 1]))
             ->assertOk()->assertSee('Completed openings')->assertSee('Safe denial groups')
+            ->assertSee('These are reviewed aggregate categories')
+            ->assertSee('Risk')
+            ->assertSee('A viewer trust check was needed or current automation risk was too high')
+            ->assertSee('Policy')
+            ->assertSee('such as an access window mismatch or unsupported rule')
+            ->assertSee('4')
+            ->assertSee('2')
             ->assertSee('Unavailable while we complete the privacy review')
             ->assertSee('User identifiers and individual histories are never included');
         $this->actingAs($other)->get(route('studio.capsules.metrics', [$capsuleId, 1]))
             ->assertNotFound();
     }
 
-    private function grant(User $user, string $capsuleId, bool $redeemed): void
+    /** @param array<string, mixed> $overrides */
+    private function grant(User $user, string $capsuleId, bool $redeemed, array $overrides = []): void
     {
-        CreatorCapsule::query()->create([
+        CreatorCapsule::query()->create(array_merge([
             'user_id' => $user->getKey(),
             'registration_id' => 'registration_'.bin2hex(random_bytes(16)),
             'capsule_id' => $capsuleId, 'capsule_revision' => 1, 'payload_id' => 'primary',
@@ -171,6 +236,6 @@ final class CapsuleInventoryTest extends TestCase
             'status' => $redeemed ? CapsuleLifecycleStatus::Active : CapsuleLifecycleStatus::Pending,
             'pending_expires_at' => now()->addMinutes(15),
             'finalized_at' => $redeemed ? now() : null,
-        ]);
+        ], $overrides));
     }
 }

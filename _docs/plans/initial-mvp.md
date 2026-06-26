@@ -614,6 +614,14 @@ Objective: evolve Trust Capsules beyond "no known bad history" by adding an acce
 - ✅ Add automated tests for usage scoring, challenge selection, challenge scoring, expiry, replay resistance, account/device/site/policy binding, registry versioning, accessibility fallbacks, high-usage-risk override prevention, and safe error handling.
 - ✅ Add a static-host challenge fixture that verifies a new/low-history viewer is challenged, a successful challenge opens the Capsule, and high automation risk still blocks.
 - ✅ Document operational tuning knobs for challenge thresholds, score expiry, abuse limits, and emergency disablement.
+- ✅ Add public-facing Time Capsule, Limit Capsule, Trust Capsule, and Combined Capsule explainers to the home and how-it-works pages, making clear that these are ordinary Capsules with signed access rules rather than separate container formats.
+- ✅ Refine Creator Studio policy copy and summaries so creators can quickly understand which Time, Limit, and Trust rules are active before exporting, while keeping Trust Capsule scoring internals private.
+- ✅ Update the Capsule inventory page to surface privacy-safe rule badges or summaries for active Time, Limit, Trust, and Combined Capsule policies without exposing raw trust evidence.
+- ✅ Update Capsule metrics to describe safe denial groups such as time-window mismatch, limit reached, challenge required, automation risk high, and service unavailable without exposing viewer identifiers or score components.
+- ✅ Update viewer-facing instructions and install guidance to explain the possible viewing outcomes: opens normally, locked by time or limits, quick check required, or blocked by high automation risk.
+- ✅ Add a polished static-host feature tour for Time, Limit, Trust, and Combined Capsules alongside the existing dense fixture/debug page.
+- ✅ Update privacy and legal-facing language for human-confidence checks, including bounded derived challenge results, temporary retention, and the fact that creators do not receive raw challenge telemetry.
+- ✅ Add regression coverage for the new user-facing Capsule gate language and responsive UI sections.
 
 Success goals:
 

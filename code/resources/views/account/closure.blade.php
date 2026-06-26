@@ -22,6 +22,11 @@
                 <a class="mt-3 inline-flex min-h-10 items-center justify-center rounded-xl border border-line bg-white px-4 text-sm font-semibold text-brand shadow-sm hover:border-brand/30" href="{{ route('account.closure.inventory') }}">Download Capsule inventory</a>
             </div>
 
+            <div class="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
+                <p class="font-semibold">Capsule access impact</p>
+                <p class="mt-1">Closing your account pauses access during the recovery period. Permanent deletion destroys the broker-held content keys, so these Capsules can no longer be opened. Keep your downloaded Capsule files and signing-key recovery kit separately.</p>
+            </div>
+
             <form class="mt-8" method="POST" action="{{ route('account.closure.store') }}" data-confirm data-confirm-title="Close your account?" data-confirm-message="Access will stop immediately, all sessions will be signed out, and permanent deletion will follow after the recovery period unless you restore the account." data-confirm-action="Close account">
                 @csrf
                 <label class="flex items-start gap-3 text-sm leading-6 text-ink">

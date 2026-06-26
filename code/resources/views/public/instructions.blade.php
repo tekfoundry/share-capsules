@@ -114,6 +114,27 @@
                     <li>The viewer approves the requested access check when needed.</li>
                     <li>The extension decrypts and displays the content locally if authorized.</li>
                 </ol>
+                <div class="mt-6 rounded-xl border border-line bg-white p-4">
+                    <h3 class="font-semibold text-ink">What viewers may see</h3>
+                    <div class="mt-4 grid gap-3 text-sm leading-6 text-muted sm:grid-cols-2">
+                        <div class="rounded-lg bg-surface p-3">
+                            <p class="font-semibold text-ink">Capsule opens</p>
+                            <p class="mt-1">The time, limit, account, device, and trust policies are satisfied, so the extension decrypts locally.</p>
+                        </div>
+                        <div class="rounded-lg bg-surface p-3">
+                            <p class="font-semibold text-ink">Capsule locked by rule</p>
+                            <p class="mt-1">A Time Capsule may be outside its date window, or a Limit Capsule may have reached a configured view limit.</p>
+                        </div>
+                        <div class="rounded-lg bg-surface p-3">
+                            <p class="font-semibold text-ink">Quick human challenge</p>
+                            <p class="mt-1">A Trust Capsule may ask an otherwise eligible viewer to complete a short check before access is retried.</p>
+                        </div>
+                        <div class="rounded-lg bg-surface p-3">
+                            <p class="font-semibold text-ink">Blocked for automation risk</p>
+                            <p class="mt-1">Recent high-risk usage patterns can keep access blocked even when a human challenge is attempted.</p>
+                        </div>
+                    </div>
+                </div>
             </article>
         </div>
     </section>

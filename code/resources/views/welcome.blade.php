@@ -140,6 +140,8 @@
 
     <x-public.lifecycle-section />
 
+    <x-public.capsule-gate-explainer surface-class="bg-white" />
+
     <section class="border-b border-line bg-white py-16 sm:py-20">
         <div class="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
             <div class="rounded-2xl border border-line bg-canvas p-6 sm:p-7">

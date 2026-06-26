@@ -43,6 +43,25 @@ final class PublicMetadataTest extends TestCase
             ->assertSee('<meta name="robots" content="noindex, nofollow">', false);
     }
 
+    public function test_legal_pages_explain_human_challenge_privacy_boundaries(): void
+    {
+        $this->get(route('privacy'))
+            ->assertOk()
+            ->assertSee('Trust Capsules may ask eligible viewers to complete quick human challenges')
+            ->assertSee('bounded derived results')
+            ->assertSee('Challenge results are temporary access evidence')
+            ->assertSee('Capsule creators and Host websites do not receive raw challenge telemetry')
+            ->assertSee('raw trust scores')
+            ->assertSee('complete session replay');
+
+        $this->get(route('terms'))
+            ->assertOk()
+            ->assertSee('Trust Capsules may require quick human challenges')
+            ->assertSee('temporary evidence for access confidence')
+            ->assertSee('not proof of identity, unique personhood, or trustworthy behavior')
+            ->assertSee('High automation-risk activity may still block access');
+    }
+
     public function test_the_social_image_has_the_declared_dimensions(): void
     {
         $path = public_path('images/share-capsules-social.png');

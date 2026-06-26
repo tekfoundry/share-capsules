@@ -12,6 +12,7 @@
             <p>Share Capsules is experimental software under active development. Do not rely on it yet to protect sensitive or irreplaceable content.</p>
             <p>You are responsible for your account credentials, content, hosting choices, and compliance with laws and third-party rights. Do not use the service to distribute unlawful or harmful material or to interfere with the service or other users.</p>
             <p>Capsule and CTX reduce specific access risks; they cannot prevent screenshots, external capture, authorized-user misuse, or modified client software.</p>
+            <p>Trust Capsules may require quick human challenges before content opens. A successful challenge is temporary evidence for access confidence, not proof of identity, unique personhood, or trustworthy behavior. High automation-risk activity may still block access.</p>
             <p>Questions about these working terms may be sent to <a class="font-semibold text-brand" href="mailto:info@tekfoundry.com">info@tekfoundry.com</a>.</p>
         </div>
     </article>

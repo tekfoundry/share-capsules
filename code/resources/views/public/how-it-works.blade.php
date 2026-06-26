@@ -20,6 +20,8 @@
         <x-public.lifecycle-section :show-header="false" surface-class="bg-transparent" class="pt-0 sm:pt-0" />
     </div>
 
+    <x-public.capsule-gate-explainer surface-class="bg-white" />
+
     <section class="border-y border-line bg-white py-20 sm:py-24">
         <div class="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
             <div class="max-w-3xl">

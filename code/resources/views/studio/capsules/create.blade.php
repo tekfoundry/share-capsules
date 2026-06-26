@@ -59,7 +59,7 @@
                 <section aria-labelledby="capsule-policy-heading" class="mt-10 border-t border-line pt-8">
                     <p class="text-xs font-bold tracking-[0.14em] text-brand uppercase">Step 2</p>
                     <h2 id="capsule-policy-heading" class="mt-2 text-xl font-semibold text-ink">Choose access rules</h2>
-                    <p class="mt-2 text-sm leading-6 text-muted">A viewer must have an active account, a verified email address, and a connected Share Capsules extension. They must also agree that each approved opening will be counted. You can add optional Time Capsule, Limit Capsule, and Trust Capsule rules below, and future Capsules may combine these patterns.</p>
+                    <p class="mt-2 text-sm leading-6 text-muted">A viewer must have an active account, a verified email address, and a connected Share Capsules extension. They must also agree that each approved opening will be counted. You can add optional Time Capsule, Limit Capsule, and Trust Capsule policies below, and these policies can be combined.</p>
 
                     <div class="mt-6 space-y-4">
                         <div class="rounded-xl border border-line p-4">
@@ -103,11 +103,34 @@
                         <label class="flex items-start gap-3 rounded-xl border border-line p-4" for="capsule-automation-risk">
                             <input id="capsule-automation-risk" name="automation_risk_required" type="checkbox" value="1" class="mt-1 size-4 rounded border-line text-brand focus:ring-brand">
                             <span>
-                                <span class="block font-semibold text-ink">Trust Capsule rule: require current access confidence</span>
-                                <span class="mt-1 block text-sm leading-6 text-muted">Reduce automated opening risk using recent Share Capsules activity and, when confidence is low, a temporary human check. This can block high-risk patterns, but it does not verify identity, unique personhood, benign intent, or one-human-one-account.</span>
+                                <span class="block font-semibold text-ink">Trust Capsule policy: require a viewer trust check</span>
+                                <span class="mt-1 block text-sm leading-6 text-muted">Use a viewer trust score to help decide whether protected content can open. The score considers recent usage patterns and quick human challenges that help distinguish people from bots. This can block high-risk patterns, but it does not verify identity, unique personhood, benign intent, or one-human-one-account.</span>
                             </span>
                         </label>
                     </div>
+
+                    <aside class="mt-5 rounded-xl border border-brand/20 bg-blue-50/70 p-4" aria-labelledby="capsule-policy-summary-heading">
+                        <h3 id="capsule-policy-summary-heading" class="font-semibold text-ink">Current access summary</h3>
+                        <p class="mt-1 text-sm leading-6 text-muted">This summary updates as you configure the policies that will be signed into the Capsule.</p>
+                        <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+                            <div class="rounded-xl bg-white/75 p-4">
+                                <dt class="font-semibold text-ink">Always required</dt>
+                                <dd data-capsule-policy-summary="baseline" class="mt-1 leading-6 text-muted">Active account, verified email, connected extension, and counted approved openings.</dd>
+                            </div>
+                            <div class="rounded-xl bg-white/75 p-4">
+                                <dt class="font-semibold text-ink">Time policy</dt>
+                                <dd data-capsule-policy-summary="time" class="mt-1 leading-6 text-muted">No opening dates configured.</dd>
+                            </div>
+                            <div class="rounded-xl bg-white/75 p-4">
+                                <dt class="font-semibold text-ink">Limit policy</dt>
+                                <dd data-capsule-policy-summary="limit" class="mt-1 leading-6 text-muted">No opening limits configured.</dd>
+                            </div>
+                            <div class="rounded-xl bg-white/75 p-4">
+                                <dt class="font-semibold text-ink">Trust policy</dt>
+                                <dd data-capsule-policy-summary="trust" class="mt-1 leading-6 text-muted">No viewer trust check configured.</dd>
+                            </div>
+                        </dl>
+                    </aside>
 
                     <div class="mt-5 rounded-xl bg-surface p-4 text-sm leading-6 text-muted">
                         <p><span class="font-semibold text-ink">What counts as an opening:</span> Share Capsules has approved access and released the decryption key. Simply loading the page or being denied does not count. In the unusual case that the connection fails after the key is released, it still counts even if the image never appears.</p>

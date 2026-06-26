@@ -60,6 +60,7 @@ export const initializeCapsuleCreatorHandoff = () => {
     if (!(button instanceof HTMLButtonElement) || !(status instanceof HTMLElement)) return;
 
     showCreatorTimeZone(container);
+    initializePolicySummary(container);
     let responseTimer;
 
     button.addEventListener('click', () => {
@@ -109,6 +110,89 @@ const readDraftInput = (container) => ({
     accountLimit: readText(container, 'account_limit'),
     automationRiskRequired: readChecked(container, 'automation_risk_required'),
 });
+
+export const buildPolicySummary = (input) =>
+    Object.freeze({
+        baseline:
+            'Active account, verified email, connected extension, and counted approved openings.',
+        time: summarizeTimePolicy(input.accessFromDate, input.accessThroughDate),
+        limit: summarizeLimitPolicy(input.globalLimit, input.accountLimit),
+        trust: input.automationRiskRequired
+            ? 'Viewer trust check required. The trust score considers recent usage patterns and quick human challenges before content opens.'
+            : 'No viewer trust check configured.',
+    });
+
+const initializePolicySummary = (container) => {
+    const outputs = {
+        baseline: container.querySelector('[data-capsule-policy-summary="baseline"]'),
+        time: container.querySelector('[data-capsule-policy-summary="time"]'),
+        limit: container.querySelector('[data-capsule-policy-summary="limit"]'),
+        trust: container.querySelector('[data-capsule-policy-summary="trust"]'),
+    };
+    if (!Object.values(outputs).every((output) => output instanceof HTMLElement)) return;
+
+    const update = () => {
+        const summary = buildPolicySummary({
+            accessFromDate: readText(container, 'access_from_date'),
+            accessThroughDate: readText(container, 'access_through_date'),
+            globalLimit: readText(container, 'global_limit'),
+            accountLimit: readText(container, 'account_limit'),
+            automationRiskRequired: readChecked(container, 'automation_risk_required'),
+        });
+
+        for (const [key, value] of Object.entries(summary)) {
+            outputs[key].textContent = value;
+        }
+    };
+
+    for (const name of [
+        'access_from_date',
+        'access_through_date',
+        'global_limit',
+        'account_limit',
+        'automation_risk_required',
+    ]) {
+        const input = container.querySelector(`[name="${name}"]`);
+        if (input instanceof HTMLInputElement) input.addEventListener('input', update);
+        if (input instanceof HTMLInputElement) input.addEventListener('change', update);
+    }
+
+    update();
+};
+
+const summarizeTimePolicy = (accessFromDate, accessThroughDate) => {
+    if (!accessFromDate && !accessThroughDate) return 'No opening dates configured.';
+    if (accessFromDate && accessThroughDate) {
+        return `Opens from ${formatCalendarDate(accessFromDate)} through ${formatCalendarDate(accessThroughDate)}.`;
+    }
+    if (accessFromDate) return `Opens starting ${formatCalendarDate(accessFromDate)}.`;
+
+    return `Opens through ${formatCalendarDate(accessThroughDate)}.`;
+};
+
+const summarizeLimitPolicy = (globalLimit, accountLimit) => {
+    if (!globalLimit && !accountLimit) return 'No opening limits configured.';
+    if (globalLimit && accountLimit) {
+        return `Up to ${formatLimit(globalLimit)} total views and ${formatLimit(accountLimit)} views per viewer account.`;
+    }
+    if (globalLimit)
+        return `Up to ${formatLimit(globalLimit)} total views across all viewer accounts.`;
+
+    return `Up to ${formatLimit(accountLimit)} views per viewer account.`;
+};
+
+const formatCalendarDate = (value) => {
+    const [year, month, day] = value.split('-');
+    if (!year || !month || !day) return value;
+
+    return `${month}/${day}/${year}`;
+};
+
+const formatLimit = (value) => {
+    if (!/^\d+$/.test(value)) return value;
+
+    return Number(value).toLocaleString();
+};
 
 const readAccountLabel = (container) => {
     const label = container.dataset.capsuleAccountLabel;
