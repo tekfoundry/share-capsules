@@ -467,7 +467,10 @@ final class DpopTokenTest extends TestCase
 
         $this->assertDatabaseCount('ctx_authorization_tickets', 0);
         $this->assertSame(2, CtxMetricEventRecord::query()->count());
-        $this->assertSame('policy', CtxMetricEventRecord::query()->latest('created_at')->first()?->denial_category);
+        $this->assertDatabaseHas('ctx_metric_event_records', [
+            'event_type' => 'authorization_denied',
+            'denial_category' => 'policy',
+        ]);
     }
 
     #[Test]

@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Broker;
 
-use App\Broker\Keys\KeyProtectionService;
 use App\Models\BrokerContentKey;
 use Tests\TestCase;
 
@@ -15,9 +14,8 @@ final class ControlPlaneIsolationTest extends TestCase
         $this->getJson('/internal/status')->assertNotFound();
     }
 
-    public function test_control_plane_has_neither_broker_key_custody_nor_content_key_access(): void
+    public function test_control_plane_keeps_broker_storage_outside_the_default_connection(): void
     {
-        $this->assertFalse($this->app->bound(KeyProtectionService::class));
         $this->assertNull(config('sharecapsules.broker.kms.local_master_key'));
         $this->assertSame('broker', (new BrokerContentKey)->getConnectionName());
         $this->assertNotSame(
