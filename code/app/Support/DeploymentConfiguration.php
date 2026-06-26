@@ -60,6 +60,10 @@ final class DeploymentConfiguration
                 $issues[] = 'broker_url_not_https';
             }
 
+            if ($this->sameHost($ctxIssuer, $brokerUrl)) {
+                $issues[] = 'broker_origin_not_distinct';
+            }
+
             if ($this->isPlaceholder($extensionId) || $this->isPlaceholder($oauthClientId)) {
                 $issues[] = 'production_identity_placeholder';
             }
@@ -106,6 +110,16 @@ final class DeploymentConfiguration
     private function isPlaceholder(string $value): bool
     {
         return preg_match('/replace|placeholder|development|test|local|not-configured/i', $value) === 1;
+    }
+
+    private function sameHost(string $left, string $right): bool
+    {
+        $leftHost = parse_url($left, PHP_URL_HOST);
+        $rightHost = parse_url($right, PHP_URL_HOST);
+
+        return is_string($leftHost)
+            && is_string($rightHost)
+            && hash_equals(strtolower($leftHost), strtolower($rightHost));
     }
 
     private function isValidProductionSecret(string $value): bool

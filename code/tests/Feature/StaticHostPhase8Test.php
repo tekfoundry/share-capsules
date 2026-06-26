@@ -282,7 +282,7 @@ final class StaticHostPhase8Test extends TestCase
         $this->assertStringContainsString('stable revisioned Capsule filenames or paths', $readme);
         $this->assertStringContainsString('bounded `Content-Length`', $readme);
         $this->assertStringContainsString('public noncredentialed CORS', $readme);
-        $this->assertStringContainsString('Phase 11 validation', $readme);
+        $this->assertStringContainsString('Phase 12 validation', $readme);
 
         $this->assertStringContainsString('✅ Document deployment to at least one representative static Host', $plan);
         $this->assertStringContainsString('GitHub Pages-style deployment', $plan);

@@ -12,5 +12,6 @@ if ($component === 'broker') {
 
 return [
     AppServiceProvider::class,
+    BrokerServiceProvider::class,
     FortifyServiceProvider::class,
 ];

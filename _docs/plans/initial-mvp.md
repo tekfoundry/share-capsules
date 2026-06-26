@@ -10,7 +10,7 @@ Share Capsules needs an operational proof of concept for the accepted Capsule an
 At plan approval, the repository contained design intent but no application code. The implementation uses:
 
 - Laravel with MySQL and Redis for the Share Capsules account and CTX control plane
-- A logically isolated Share Capsules Key Broker with separate APIs, credentials, data, and audit boundaries
+- A Share Capsules Key Broker with a distinct HTTPS origin, separate APIs, and a path to stronger runtime, credential, data, and audit isolation
 - TypeScript packages shared by the creator and Viewer extension surfaces
 - One Chrome/Chromium-compatible desktop extension for protected creation and viewing
 - A static reference Host with multiple `<capsule-viewer>` elements
@@ -28,7 +28,7 @@ The MVP is complete when this end-to-end path works:
 
 1. A creator creates and verifies one Share Capsules account.
 2. The creator connects the official extension through OAuth Authorization Code with PKCE and registers a device-key set.
-3. Creator tooling validates a conforming static image, creates or recovers the local creator signing key, encrypts the image locally, registers its content key with the isolated broker, builds and signs the Capsule, and downloads the `.capsule` file.
+3. Creator tooling validates a conforming static image, creates or recovers the local creator signing key, encrypts the image locally, registers its content key with the configured broker origin, builds and signs the Capsule, and downloads the `.capsule` file.
 4. The creator places the Capsule on any compatible static HTTPS Host and adds `<capsule-viewer src="...">public fallback</capsule-viewer>` to a page.
 5. A viewer grants the extension access to the Host, connects a verified account, reviews the required disclosure, and requests or automatically opens an eligible Capsule under site-scoped consent.
 6. The extension verifies the Capsule and embedded policy, obtains a device-bound OAuth credential, requests CTX authorization, presents the single-use ticket to the broker, receives an HPKE-wrapped content key, decrypts locally, validates the image profile, and renders inside an extension-controlled surface.
@@ -574,7 +574,7 @@ Phase 8 static-host evidence recorded on 2026-06-24:
 - `_examples/static-host/README.md` now documents a representative GitHub Pages-style deployment with same-origin `index.html` and `capsules/*.capsule` files. The recipe requires only public static HTTPS files, anonymous `GET`/`HEAD`, stable revisioned Capsule URLs, bounded response sizes, and ordinary no-extension return navigation; it explicitly excludes Host viewer accounts, cookies, private redirects, signed URLs, server-side code, plugins, databases, CTX logic, broker credentials, and plaintext access.
 - Phase 7 manual/browser testing has already proven the local static page can discover multiple Capsules, share Viewer account connection across frames, queue openings, authorize, redeem, decrypt, render, retry after transient rate limiting, and keep plaintext inside extension-origin iframes.
 - Local host-contract verification confirmed `200` responses for the example page and checked-in Capsule files; the Capsule files are served as `application/octet-stream` with exact `Content-Length` values matching the checked-in archives.
-- Production test gates are green after the Phase 7 commit; production static-host deployment, exact public URLs, extension distribution identity, media-type conventions, CORS behavior for split-origin deployment, and cache/header validation are deferred to Phase 11 with the rest of the release/distribution work.
+- Production test gates are green after the Phase 7 commit; production static-host deployment, exact public URLs, extension distribution identity, media-type conventions, CORS behavior for split-origin deployment, and cache/header validation are deferred to Phase 12 with the rest of the release/distribution work.
 
 Success goals:
 
@@ -656,15 +656,39 @@ Success goals:
 - The finalized image profile is stable on the published minimum desktop configuration.
 - No unresolved critical or high-severity security finding remains at release.
 
-### Phase 11 — Deployment, distribution, and MVP release
+### Phase 11 — Broker origin routing and prototype deployment simplification
+
+Objective: make the Key Broker origin a stable deployment contract while allowing that origin to point either to the same Laravel installation for prototypes or to a separately isolated runtime for stronger production posture.
+
+Status legend: ✅ complete, ◐ partially implemented or documented but needs closure, ⬜️ not started.
+
+- ✅ Require a distinct broker HTTPS origin, normally a subdomain such as `https://broker.sharecapsules.com`, for all production-like deployments.
+- ✅ Allow DNS and deployment configuration to decide whether the broker origin points to the same Laravel installation as the control plane or to a separate broker-only installation.
+- ✅ Document the same-install tradeoff: shared runtime secrets, larger blast radius, weaker KMS/HSM boundary, coarser incident response, and increased importance of route and middleware review.
+- ✅ Register control-plane and broker route surfaces so they can coexist in one Laravel installation without path conflicts, using host/origin constraints rather than a separate topology environment flag.
+- ✅ Ensure broker internal routes still require the dedicated control-plane credential when both origins resolve to the same Laravel installation.
+- ✅ Preserve separate broker audit logging, throttles, safe error envelopes, and credential redaction when broker and app origins resolve to the same installation.
+- ✅ Keep `SHARECAPSULES_BROKER_URL` as the single broker identity and verify broker metadata, ticket audiences, DPoP targets, and generated endpoints match it exactly.
+- ✅ Add automated tests proving broker routes resolve only for the configured broker host, control-plane routes resolve only for the configured app host, and broker-only mode remains restricted.
+- ✅ Update production configuration templates, Forge deployment notes, and the production change ledger to describe both DNS-to-same-install and DNS-to-isolated-install deployments.
+
+Success goals:
+
+- A prototype operator can run the complete front-end, trust provider, and Key Broker from one Laravel installation by pointing both app and broker DNS names at it.
+- The recommended isolated broker deployment remains supported by pointing the broker DNS name at a separate broker-only installation.
+- Same-install broker hosting is accurately labeled as a reduced-isolation tradeoff and does not silently weaken broker authentication, auditing, error redaction, or endpoint identity.
+
+### Phase 12 — Deployment, distribution, and MVP release
 
 Objective: operate the complete system with controlled identities, monitoring, documentation, and rollback paths.
 
 - ⬜️ Confirm that the release candidate provides a coherent user-visible capability and explicitly approve production deployment; phase completion alone does not trigger a deployment.
-- ⬜️ Reconcile the existing production environment against the production configuration template and record the sanitized baseline in the production change ledger.
-- ⬜️ Deploy Laravel, MySQL, Redis, queues, scheduler, and the isolated broker with separate production identities and least privilege.
+- ⬜️ Reconcile the existing Forge production environment against `code/.env.production.example`, including the accepted same-install broker posture, and record the sanitized baseline in the production change ledger.
+- ⬜️ Deploy one Laravel application on Forge with MySQL, Redis, queues, scheduler, and both HTTPS hostnames: `sharecapsules.com` for the control plane and `broker.sharecapsules.com` for the Key Broker origin.
+- ⬜️ Configure `broker.sharecapsules.com` to resolve to the same Forge site for the prototype, keep `SHARECAPSULES_COMPONENT=control-plane`, and verify broker routes are host-bound to the broker origin while app routes remain host-bound to the app origin.
+- ⬜️ Record the reduced-isolation broker tradeoff for this release and preserve the hardening path where `broker.sharecapsules.com` can later move to a broker-only Forge site using `code/.env.broker.production.example`.
 - ⬜️ Record every production environment-variable name, migration, infrastructure or identity change, deployment action, verification result, and rollback consideration without committing secret values.
-- ⬜️ Configure TLS, security headers, secret management, KMS/HSM-backed broker protection, backups, deletion-ledger restoration, and alerting.
+- ⬜️ Configure TLS for both hostnames, security headers, secret management, broker key-custody settings appropriate to the approved prototype posture, backups, deletion-ledger restoration, and alerting.
 - ⬜️ Publish stable provider and broker discovery metadata and controlled signing-key rotation procedures.
 - ⬜️ Build the extension without remotely hosted code, publish source/build hashes, and submit the fixed production identity to the Chrome Web Store.
 - ⬜️ Publish creator, viewer, privacy, security-limit, account-deletion, and compatible-Host documentation.
@@ -673,6 +697,7 @@ Objective: operate the complete system with controlled identities, monitoring, d
 - ⬜️ Configure the public GitHub repository, Discussions, protected primary branch, required CI, and private vulnerability-reporting path.
 - ⬜️ Publish the static reference Host and downloadable example Capsules.
 - ⬜️ Verify the production static-host contract: public noncredentialed CORS, immutable revision URLs, bounded content lengths, accepted Capsule media type, and cache/header behavior that works from a separately hosted page.
+- ⬜️ Run same-install broker smoke checks against production: app and broker `/up`, app and broker discovery metadata, broker-host `/login` returns `404`, app-host `/releases` returns `404`, and broker internal routes reject missing service credentials.
 - ⬜️ Run clean-account creator and viewer acceptance tests against production-like infrastructure.
 - ⬜️ Run load and concurrency tests for authorization, redemption, counters, and broker operations at the intended MVP scale.
 - ⬜️ Exercise incident response, signing-key rotation, extension-version suspension, Capsule revocation, backup restoration, and rollback procedures.
@@ -681,14 +706,14 @@ Objective: operate the complete system with controlled identities, monitoring, d
 Success goals:
 
 - A new creator and viewer can complete the end-to-end scenario using published instructions and the store-distributed extension.
-- Production boundaries match the tested topology; no development identity or credential is accepted.
+- Production boundaries match the tested single-install, two-hostname topology; no development identity or credential is accepted.
 - Monitoring detects authorization, broker, queue, retention, and security failures without collecting prohibited telemetry.
 
 ## MVP Release Criteria
 
 The operational MVP may be released only when:
 
-- All Phase 1–11 success goals are met and required tasks are marked complete.
+- All Phase 1–12 success goals are met and required tasks are marked complete.
 - One creator can produce, independently host, revoke, and inspect a valid static-image Capsule.
 - Multiple Capsules on one static page can be opened under individual or site-scoped standing consent.
 - Embedded policy, global/per-account limits, optional automation risk and challenge confidence, ticket replay prevention, and atomic redemption behave correctly under concurrency.

@@ -250,6 +250,28 @@ final class ContentKeyRegistrationTest extends BrokerTestCase
             ],
             sodium_crypto_sign_secretkey($proofKeys),
         );
+        $wrongTargetProof = $this->compact(
+            [
+                'typ' => 'ctx-key-release-proof+jwt',
+                'alg' => 'EdDSA',
+                'jwk' => ['kty' => 'OKP', 'crv' => 'Ed25519', 'x' => $proofX],
+            ],
+            [
+                'jti' => 'proof-wrong-target-0001',
+                'htm' => 'POST',
+                'htu' => 'https://app.example.test/releases',
+                'iat' => $now,
+                'tth' => $this->encode(hash('sha256', $ticket, true)),
+            ],
+            sodium_crypto_sign_secretkey($proofKeys),
+        );
+
+        try {
+            app(PrepareKeyRelease::class)->prepare($ticket, $wrongTargetProof, $agreementX);
+            $this->fail('Device proof targets must use the configured broker release endpoint.');
+        } catch (InvalidDeviceProof) {
+            $this->assertTrue(true);
+        }
 
         $prepared = app(PrepareKeyRelease::class)->prepare($ticket, $proof, $agreementX);
         $this->assertSame('ticket-integration-0001', $prepared->ticketJti);

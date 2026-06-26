@@ -18,12 +18,13 @@ final class BrokerDeploymentConfiguration
         $credential = (string) config('sharecapsules.broker.control_plane_token');
         $auditChannel = (string) config('sharecapsules.broker.audit_channel');
         $kmsDriver = (string) config('sharecapsules.broker.kms.driver');
+        $component = (string) config('sharecapsules.component');
 
-        if (config('sharecapsules.component') !== 'broker') {
+        if (! in_array($component, ['broker', 'control-plane'], true)) {
             $issues[] = 'broker_component_invalid';
         }
 
-        if (config('database.default') !== 'broker') {
+        if ($component === 'broker' && config('database.default') !== 'broker') {
             $issues[] = 'broker_default_connection_invalid';
         }
 

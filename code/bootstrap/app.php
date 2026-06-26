@@ -1,6 +1,8 @@
 <?php
 
 use App\Ctx\Discovery\CtxDiscoveryPath;
+use App\Http\Controllers\Broker\BrokerHealthController;
+use App\Http\Controllers\Broker\BrokerMetadataController;
 use App\Http\Controllers\Ctx\AuthorizeCtxController;
 use App\Http\Controllers\Ctx\BalanceBeamPlaygroundController;
 use App\Http\Controllers\Ctx\CargoSortPlaygroundController;
@@ -23,6 +25,8 @@ use App\Http\Controllers\Internal\RedeemBrokerRegistrationGrantController;
 use App\Http\Controllers\Internal\RedeemCtxTicketController;
 use App\Http\Middleware\AssignCorrelationId;
 use App\Http\Middleware\AuthenticateBrokerCallback;
+use App\Http\Middleware\AuthenticateBrokerControlPlane;
+use App\Http\Middleware\EnforceServiceOrigin;
 use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\RejectDeviceBoundBearerToken;
 use App\Http\Middleware\RequireDeletionLedgerReplay;
@@ -50,10 +54,34 @@ return Application::configure(basePath: dirname(__DIR__))
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         then: function (): void {
+            $ctxHost = parse_url((string) config('sharecapsules.ctx.issuer'), PHP_URL_HOST);
+            $brokerHost = parse_url((string) config('sharecapsules.broker.base_url'), PHP_URL_HOST);
+
+            $controlPlaneHost = is_string($ctxHost)
+                && is_string($brokerHost)
+                && $ctxHost !== ''
+                && $brokerHost !== ''
+                && ! hash_equals($ctxHost, $brokerHost)
+                    ? $ctxHost
+                    : null;
+
+            if ($controlPlaneHost !== null) {
+                require base_path('routes/broker-api.php');
+            }
+
+            $sameInstallBrokerHost = $controlPlaneHost !== null ? $brokerHost : null;
+
             Route::get(
                 CtxDiscoveryPath::forIssuer((string) config('sharecapsules.ctx.issuer')),
-                ProviderMetadataController::class,
+                function (Request $request) use ($sameInstallBrokerHost) {
+                    if (is_string($sameInstallBrokerHost) && hash_equals($sameInstallBrokerHost, $request->getHost())) {
+                        return app()->call([app(BrokerMetadataController::class), '__invoke']);
+                    }
+
+                    return app()->call([app(ProviderMetadataController::class), '__invoke']);
+                },
             )->name('ctx.discovery');
+
             Route::get('/ctx/jwks.json', TicketSigningJwksController::class)
                 ->name('ctx.jwks');
             Route::post('/ctx/authorize', AuthorizeCtxController::class)
@@ -111,10 +139,21 @@ return Application::configure(basePath: dirname(__DIR__))
             Route::get('/ctx/challenge-playground/pattern-repair', PatternRepairPlaygroundController::class)
                 ->middleware('throttle:ctx-authorize')
                 ->name('ctx.challenge-playground.pattern-repair');
-            Route::get('/up', HealthController::class)->name('health');
-            Route::post('/oauth/token', [AccessTokenController::class, 'issueToken'])
+            Route::get('/up', function (Request $request) use ($sameInstallBrokerHost) {
+                if (is_string($sameInstallBrokerHost) && hash_equals($sameInstallBrokerHost, $request->getHost())) {
+                    return app()->call([app(BrokerHealthController::class), '__invoke']);
+                }
+
+                return app()->call([app(HealthController::class), '__invoke']);
+            })->name('health');
+
+            $tokenRoute = Route::post('/oauth/token', [AccessTokenController::class, 'issueToken'])
                 ->middleware([ValidateTokenEndpointDpop::class, 'throttle:oauth-token'])
                 ->name('passport.token');
+            if ($controlPlaneHost !== null) {
+                $tokenRoute->domain($controlPlaneHost);
+            }
+
             Route::post(
                 '/internal/broker/registration-grants/redeem',
                 RedeemBrokerRegistrationGrantController::class,
@@ -129,12 +168,14 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'account.active' => EnsureAccountIsActive::class,
             'broker.callback' => AuthenticateBrokerCallback::class,
+            'broker.control-plane' => AuthenticateBrokerControlPlane::class,
         ]);
         $middleware->prependToPriorityList(
             AuthenticatesRequests::class,
             ValidateDpopAccessToken::class,
         );
         $middleware->append(AssignCorrelationId::class);
+        $middleware->append(EnforceServiceOrigin::class);
         $middleware->append(RequireDeletionLedgerReplay::class);
         $middleware->append(RejectDeviceBoundBearerToken::class);
     })

@@ -103,7 +103,7 @@ Deployment checklist:
 - verify after publish that the page and Capsule URLs return `200` to anonymous `GET` and `HEAD`, that the Capsule response has a bounded `Content-Length`, and that the downloaded bytes match the intended `.capsule` file
 - if the page and Capsule are split across different origins, use a static Host that allows public noncredentialed CORS for the Capsule origin and run the cross-origin Host permission check below
 
-This recipe intentionally documents only the Host boundary. A production release still needs Phase 11 validation for exact public URLs, final media-type conventions, cache headers, CORS behavior for any split-origin deployment, extension distribution identity, and production CTX/broker configuration.
+This recipe intentionally documents only the Host boundary. A production release still needs Phase 12 validation for exact public URLs, final media-type conventions, cache headers, CORS behavior for any split-origin deployment, extension distribution identity, and production CTX/broker configuration.
 
 ## Cross-origin Host permission check
 

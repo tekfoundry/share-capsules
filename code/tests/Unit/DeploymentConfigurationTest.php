@@ -56,6 +56,18 @@ final class DeploymentConfigurationTest extends TestCase
         $this->assertContains('broker_url_not_https', app(DeploymentConfiguration::class)->issues());
     }
 
+    public function test_production_requires_a_distinct_broker_origin_host(): void
+    {
+        config()->set('sharecapsules.deployment.environment', 'production');
+        config()->set('sharecapsules.ctx.issuer', 'https://sharecapsules.com');
+        config()->set('sharecapsules.broker.base_url', 'https://sharecapsules.com');
+
+        $this->assertContains(
+            'broker_origin_not_distinct',
+            app(DeploymentConfiguration::class)->issues(),
+        );
+    }
+
     public function test_extension_callback_must_exactly_match_the_configured_extension_identity(): void
     {
         config()->set('sharecapsules.extension.id', 'abcdefghijklmnop');

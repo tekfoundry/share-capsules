@@ -32,9 +32,13 @@ final class BrokerServiceProvider extends ServiceProvider
     public function register(): void
     {
         Passport::ignoreRoutes();
-        Fortify::ignoreRoutes();
-        Passkeys::ignoreRoutes();
-        config()->set('filesystems.disks.local.serve', false);
+
+        if (config('sharecapsules.component') === 'broker') {
+            Fortify::ignoreRoutes();
+            Passkeys::ignoreRoutes();
+            config()->set('filesystems.disks.local.serve', false);
+        }
+
         $this->app->bind(BrokerAuditSink::class, BrokerAuditLogger::class);
         $this->app->bind(NonceSource::class, NativeNonceSource::class);
         $this->app->bind(HpkeIkmSource::class, NativeHpkeIkmSource::class);

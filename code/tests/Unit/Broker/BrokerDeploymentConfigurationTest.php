@@ -50,6 +50,20 @@ final class BrokerDeploymentConfigurationTest extends TestCase
         $this->assertSame([], app(BrokerDeploymentConfiguration::class)->issues());
     }
 
+    public function test_same_install_control_plane_component_accepts_broker_boundaries(): void
+    {
+        config()->set('sharecapsules.component', 'control-plane');
+        config()->set('database.default', 'mysql');
+        config()->set('database.connections.mysql.database', 'application');
+        config()->set('database.connections.mysql.username', 'application_user');
+        config()->set('database.connections.broker.database', 'broker');
+        config()->set('database.connections.broker.username', 'broker_user');
+        config()->set('sharecapsules.broker.control_plane_token', 'a-dedicated-32-byte-broker-token!');
+        config()->set('sharecapsules.broker.audit_channel', 'broker_audit');
+
+        $this->assertSame([], app(BrokerDeploymentConfiguration::class)->issues());
+    }
+
     public function test_production_rejects_the_local_key_custody_driver(): void
     {
         config()->set('sharecapsules.component', 'broker');

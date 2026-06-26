@@ -37,6 +37,30 @@ final class BrokerBoundaryTest extends BrokerTestCase
             ]);
     }
 
+    public function test_release_errors_do_not_echo_credentials_tickets_or_release_handles(): void
+    {
+        $secrets = [
+            'ticket' => 'raw-authorization-ticket-that-must-not-echo',
+            'proof' => 'raw-dpop-proof-that-must-not-echo',
+            'agreement_public_key' => 'raw-agreement-key-that-must-not-echo',
+            'release_handle' => 'raw-release-handle-that-must-not-echo',
+            'content_key' => 'raw-content-key-that-must-not-echo',
+        ];
+
+        $response = $this->postJson('/releases', $secrets)
+            ->assertBadRequest()
+            ->assertExactJson([
+                'type' => 'ctx-error',
+                'version' => 1,
+                'code' => 'invalid_request',
+                'retryable' => false,
+            ]);
+
+        foreach ($secrets as $secret) {
+            $this->assertStringNotContainsString($secret, (string) $response->getContent());
+        }
+    }
+
     public function test_internal_api_requires_the_dedicated_broker_credential(): void
     {
         $this->app->instance(BrokerAuditSink::class, new class implements BrokerAuditSink

@@ -71,7 +71,9 @@ After a CTX service authorizes a Viewer, a creator-selected key-release provider
 
 V1 requires fresh online authorization for every Capsule open. The authorization is single-use at the broker. The Viewer keeps the unwrapped content key only in memory for the current Viewer session and discards it when the Viewer closes. V1 provides no offline access; reopening or reloading requires another authorization and successful key release.
 
-V1 uses a single Share Capsules key broker that is strictly isolated from the main Laravel application. It has separate APIs, credentials, data access, authorization boundaries, and audit logs. Production deployment should use a managed KMS or HSM-backed design so wrapping keys are not exposed directly to ordinary application processes.
+V1 uses a single Share Capsules key broker identified by a distinct HTTPS origin, normally a broker subdomain. The broker has a separate API surface and authorization boundary even when a prototype points that origin at the same Laravel installation as the control plane. The recommended hardened deployment points the broker origin at a broker-only runtime with separate credentials, data access, audit logs, and managed KMS or HSM-backed custody so wrapping keys are not exposed directly to ordinary application processes.
+
+Pointing the app origin and broker origin at one Laravel installation is an accepted prototype simplification, not the strongest security posture. It preserves endpoint identity and protocol separation, but it shares runtime secrets and incident-response blast radius. Operators must describe that tradeoff plainly and keep the broker origin stable so the same Capsule, ticket, and Viewer contracts can later move to an isolated broker deployment without changing the protocol.
 
 ### Creator-account deletion
 
@@ -81,7 +83,7 @@ V1 has no protocol-level ownership transfer. If a creator gives an unencrypted o
 
 At the end of the recovery period, the broker revokes every remaining release handle and destroys the associated content-key material. The externally hosted encrypted Capsule files may continue to exist, but they become undecryptable through Share Capsules. Account deletion must not silently transfer release authority to a replacement account or recreate destroyed broker material.
 
-This isolation reduces accidental access and limits compromise scope, but it is not a cryptographic zero-access guarantee: an operator controlling both policy evaluation and the broker could theoretically authorize a release. Share Capsules must describe this limitation plainly.
+Broker isolation reduces accidental access and limits compromise scope, but it is not a cryptographic zero-access guarantee: an operator controlling both policy evaluation and the broker could theoretically authorize a release. Same-install prototype hosting further increases shared-runtime blast radius. Share Capsules must describe these limitations plainly.
 
 The Capsule format and release protocol must identify the key broker rather than permanently assuming Share Capsules. They must permit later migration to an independent, creator-operated, or split-key arrangement in which no single provider can release enough material to decrypt a Capsule.
 
