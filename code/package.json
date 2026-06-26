@@ -25,7 +25,7 @@
         "typecheck": "tsc --build --pretty false"
     },
     "devDependencies": {
-        "@axe-core/playwright": "^4.11.3",
+        "@axe-core/playwright": "^4.12.1",
         "@eslint/js": "^10.0.1",
         "@playwright/test": "^1.61.0",
         "@tailwindcss/vite": "^4.0.0",
