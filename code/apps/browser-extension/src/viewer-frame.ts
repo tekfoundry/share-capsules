@@ -44,6 +44,7 @@ import {
     viewerFetchFailureMessage,
 } from './viewer-blocker-state.js';
 import { guardedViewerStorage } from './viewer-storage-policy.js';
+import { CONTROL_PLANE, EXTENSION_ID, OAUTH_CLIENT_ID } from './extension-runtime-config.js';
 
 declare const chrome: {
     readonly storage: {
@@ -87,10 +88,7 @@ declare const chrome: {
     };
 };
 
-const CONTROL_PLANE = 'http://localhost:3003';
-const DEVELOPMENT_EXTENSION_ID = 'dhconceamghcnndjodjhjikknblhkmej';
-const OAUTH_CLIENT_ID = '01977ac8-793e-72d4-a234-bd581e773e7e';
-const CHALLENGE_REDIRECT_URI = `https://${DEVELOPMENT_EXTENSION_ID}.chromiumapp.org/challenge/callback`;
+const CHALLENGE_REDIRECT_URI = `https://${EXTENSION_ID}.chromiumapp.org/challenge/callback`;
 
 const frameParameters = new URL(location.href).searchParams;
 const capsuleUrl = frameParameters.get('capsule');
@@ -386,7 +384,7 @@ function viewerRuntime(): {
             authorizationEndpoint: `${CONTROL_PLANE}/oauth/authorize`,
             tokenEndpoint: `${CONTROL_PLANE}/oauth/token`,
             clientId: OAUTH_CLIENT_ID,
-            redirectUri: `https://${DEVELOPMENT_EXTENSION_ID}.chromiumapp.org/oauth/callback`,
+            redirectUri: `https://${EXTENSION_ID}.chromiumapp.org/oauth/callback`,
             scopes: ['extension:connect'],
             deviceScopes: ['ctx:authorize'],
         },

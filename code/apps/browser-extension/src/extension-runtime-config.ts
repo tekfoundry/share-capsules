@@ -1,0 +1,9 @@
+declare const __SHARECAPSULES_CONTROL_PLANE__: string;
+declare const __SHARECAPSULES_BROKER__: string;
+declare const __SHARECAPSULES_EXTENSION_ID__: string;
+declare const __SHARECAPSULES_OAUTH_CLIENT_ID__: string;
+
+export const CONTROL_PLANE = __SHARECAPSULES_CONTROL_PLANE__;
+export const BROKER = __SHARECAPSULES_BROKER__;
+export const EXTENSION_ID = __SHARECAPSULES_EXTENSION_ID__;
+export const OAUTH_CLIENT_ID = __SHARECAPSULES_OAUTH_CLIENT_ID__;

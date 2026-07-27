@@ -13,6 +13,8 @@
     "scripts": {
         "build": "npm run generate:schema-validators && npm run typecheck && vite build && node scripts/build-extension.mjs",
         "build:extension": "npm run generate:schema-validators && npm run typecheck && node scripts/build-extension.mjs",
+        "build:extension:production": "npm run generate:schema-validators && npm run typecheck && SHARECAPSULES_EXTENSION_BUILD=production node scripts/build-extension.mjs",
+        "build:extension:reservation": "npm run generate:schema-validators && npm run typecheck && SHARECAPSULES_EXTENSION_BUILD=production-reservation node scripts/build-extension.mjs",
         "benchmark:image-envelope": "node scripts/static-image-envelope-benchmark.mjs",
         "dev": "vite",
         "format": "prettier --write .",

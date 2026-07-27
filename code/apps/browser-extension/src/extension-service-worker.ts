@@ -12,6 +12,7 @@ import {
     VIEWER_OPEN_SLOT_ACQUIRE,
     ViewerOpenSlotQueue,
 } from './viewer-open-queue.js';
+import { CONTROL_PLANE } from './extension-runtime-config.js';
 
 interface MessageSender {
     readonly url?: string;
@@ -207,8 +208,9 @@ function isCreatorPage(value: string | undefined): boolean {
     if (value === undefined) return false;
     try {
         const url = new URL(value);
+        const controlPlane = new URL(CONTROL_PLANE);
         return (
-            url.origin === 'http://localhost:3003' &&
+            url.origin === controlPlane.origin &&
             url.pathname === '/studio/capsules/create' &&
             url.search === '' &&
             url.hash === ''
