@@ -6,6 +6,8 @@ enum BrokerContentKeyOperation: string
 {
     case PauseCreator = 'pause_creator';
     case ResumeCreator = 'resume_creator';
+    case PauseCapsule = 'pause_capsule';
+    case ResumeCapsule = 'resume_capsule';
     case RevokeCapsule = 'revoke_capsule';
     case DestroyCapsule = 'destroy_capsule';
     case DestroyCreator = 'destroy_creator';

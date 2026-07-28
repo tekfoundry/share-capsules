@@ -24,6 +24,28 @@ final class FakeBrokerContentKeyLifecycle implements BrokerContentKeyLifecycle
         $this->operations[] = ['operation' => 'resume_creator', 'creator_id' => $creatorId];
     }
 
+    public function pauseCapsule(int $creatorId, string $capsuleId, int $capsuleRevision): void
+    {
+        $this->failWhenRequested('pause_capsule');
+        $this->operations[] = [
+            'operation' => 'pause_capsule',
+            'creator_id' => $creatorId,
+            'capsule_id' => $capsuleId,
+            'capsule_revision' => $capsuleRevision,
+        ];
+    }
+
+    public function resumeCapsule(int $creatorId, string $capsuleId, int $capsuleRevision): void
+    {
+        $this->failWhenRequested('resume_capsule');
+        $this->operations[] = [
+            'operation' => 'resume_capsule',
+            'creator_id' => $creatorId,
+            'capsule_id' => $capsuleId,
+            'capsule_revision' => $capsuleRevision,
+        ];
+    }
+
     public function revokeCapsule(int $creatorId, string $capsuleId, int $capsuleRevision): void
     {
         $this->failWhenRequested('revoke_capsule');

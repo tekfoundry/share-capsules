@@ -27,7 +27,12 @@ final readonly class BrokerContentKeyLifecycleManager
             $releaseHandle,
         ): int {
             $query = BrokerContentKey::query()->where('creator_id', $creatorId);
-            if (in_array($operation, [BrokerContentKeyOperation::RevokeCapsule, BrokerContentKeyOperation::DestroyCapsule], true)) {
+            if (in_array($operation, [
+                BrokerContentKeyOperation::PauseCapsule,
+                BrokerContentKeyOperation::ResumeCapsule,
+                BrokerContentKeyOperation::RevokeCapsule,
+                BrokerContentKeyOperation::DestroyCapsule,
+            ], true)) {
                 $query->where('capsule_id', $capsuleId)
                     ->where('capsule_revision', $capsuleRevision);
             }
@@ -84,6 +89,12 @@ final readonly class BrokerContentKeyLifecycleManager
                 ? ['status' => BrokerContentKeyStatus::Paused, 'paused_at' => now()]
                 : [],
             BrokerContentKeyOperation::ResumeCreator => $record->status === BrokerContentKeyStatus::Paused
+                ? ['status' => BrokerContentKeyStatus::Active, 'paused_at' => null]
+                : [],
+            BrokerContentKeyOperation::PauseCapsule => $record->status === BrokerContentKeyStatus::Active
+                ? ['status' => BrokerContentKeyStatus::Paused, 'paused_at' => now()]
+                : [],
+            BrokerContentKeyOperation::ResumeCapsule => $record->status === BrokerContentKeyStatus::Paused
                 ? ['status' => BrokerContentKeyStatus::Active, 'paused_at' => null]
                 : [],
             BrokerContentKeyOperation::RevokeCapsule => in_array($record->status, [BrokerContentKeyStatus::Active, BrokerContentKeyStatus::Paused], true)

@@ -65,6 +65,36 @@ final class ContentKeyLifecycleTest extends BrokerTestCase
         $this->assertSame(3, BrokerContentKey::query()->where('status', 'active')->count());
     }
 
+    public function test_pause_and_resume_capsule_are_idempotent_and_scoped_to_one_revision(): void
+    {
+        $record = BrokerContentKey::query()->findOrFail('record-one');
+        $this->apply([
+            'operation' => 'pause_capsule',
+            'creator_id' => '42',
+            'capsule_id' => $record->capsule_id,
+            'capsule_revision' => 1,
+        ])->assertOk()->assertJsonPath('changed_records', 1);
+        $this->apply([
+            'operation' => 'pause_capsule',
+            'creator_id' => '42',
+            'capsule_id' => $record->capsule_id,
+            'capsule_revision' => 1,
+        ])->assertOk()->assertJsonPath('changed_records', 0);
+        $this->assertSame(BrokerContentKeyStatus::Paused, $record->fresh()->status);
+        $this->assertNotNull($record->fresh()->paused_at);
+        $this->assertFalse(app(FinalContentKeyReleaseCheck::class)->active($record->record_id));
+        $this->assertSame(BrokerContentKeyStatus::Active, BrokerContentKey::query()->findOrFail('record-two')->status);
+
+        $this->apply([
+            'operation' => 'resume_capsule',
+            'creator_id' => '42',
+            'capsule_id' => $record->capsule_id,
+            'capsule_revision' => 1,
+        ])->assertOk()->assertJsonPath('changed_records', 1);
+        $this->assertSame(BrokerContentKeyStatus::Active, $record->fresh()->status);
+        $this->assertNull($record->fresh()->paused_at);
+    }
+
     public function test_pending_registration_is_non_releasable_and_finalize_or_cancel_is_idempotent(): void
     {
         $this->key('record-pending', 'registration-pending', 'handle-pending-0001', '42', $this->capsule(4), 1, 'pending');
@@ -193,6 +223,14 @@ final class ContentKeyLifecycleTest extends BrokerTestCase
         ])->assertUnprocessable();
         $this->apply([
             'operation' => 'revoke_capsule',
+            'creator_id' => '42',
+        ])->assertUnprocessable();
+        $this->apply([
+            'operation' => 'pause_capsule',
+            'creator_id' => '42',
+        ])->assertUnprocessable();
+        $this->apply([
+            'operation' => 'resume_capsule',
             'creator_id' => '42',
         ])->assertUnprocessable();
         $this->apply([

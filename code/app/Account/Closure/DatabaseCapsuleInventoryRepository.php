@@ -13,6 +13,8 @@ final class DatabaseCapsuleInventoryRepository implements CapsuleInventoryReposi
         return $user->creatorCapsules()
             ->whereIn('status', [
                 CapsuleLifecycleStatus::Active->value,
+                CapsuleLifecycleStatus::PausePending->value,
+                CapsuleLifecycleStatus::Paused->value,
                 CapsuleLifecycleStatus::RevocationPending->value,
                 CapsuleLifecycleStatus::Revoked->value,
             ])

@@ -27,7 +27,7 @@ final readonly class CapsuleRevocationService
             $record = CreatorCapsule::query()->where('user_id', $creator->getKey())
                 ->where('capsule_id', $capsuleId)->where('capsule_revision', $capsuleRevision)
                 ->lockForUpdate()->firstOrFail();
-            if ($record->status === CapsuleLifecycleStatus::Active) {
+            if (in_array($record->status, [CapsuleLifecycleStatus::Active, CapsuleLifecycleStatus::Paused], true)) {
                 $record->transitionTo(CapsuleLifecycleStatus::RevocationPending);
                 $record->forceFill(['revocation_requested_at' => $now])->save();
             }

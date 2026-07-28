@@ -19,6 +19,16 @@ final readonly class HttpBrokerContentKeyLifecycle implements BrokerContentKeyLi
         $this->apply(BrokerContentKeyOperation::ResumeCreator, $creatorId);
     }
 
+    public function pauseCapsule(int $creatorId, string $capsuleId, int $capsuleRevision): void
+    {
+        $this->apply(BrokerContentKeyOperation::PauseCapsule, $creatorId, $capsuleId, $capsuleRevision);
+    }
+
+    public function resumeCapsule(int $creatorId, string $capsuleId, int $capsuleRevision): void
+    {
+        $this->apply(BrokerContentKeyOperation::ResumeCapsule, $creatorId, $capsuleId, $capsuleRevision);
+    }
+
     public function revokeCapsule(int $creatorId, string $capsuleId, int $capsuleRevision): void
     {
         $this->apply(BrokerContentKeyOperation::RevokeCapsule, $creatorId, $capsuleId, $capsuleRevision);
@@ -56,7 +66,12 @@ final readonly class HttpBrokerContentKeyLifecycle implements BrokerContentKeyLi
             'operation' => $operation->value,
             'creator_id' => (string) $creatorId,
         ];
-        if (in_array($operation, [BrokerContentKeyOperation::RevokeCapsule, BrokerContentKeyOperation::DestroyCapsule], true)) {
+        if (in_array($operation, [
+            BrokerContentKeyOperation::PauseCapsule,
+            BrokerContentKeyOperation::ResumeCapsule,
+            BrokerContentKeyOperation::RevokeCapsule,
+            BrokerContentKeyOperation::DestroyCapsule,
+        ], true)) {
             $body['capsule_id'] = $capsuleId;
             $body['capsule_revision'] = $capsuleRevision;
         }

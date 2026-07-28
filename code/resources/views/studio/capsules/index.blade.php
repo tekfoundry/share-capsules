@@ -3,6 +3,14 @@
 @section('title', 'Your Capsules — Share Capsules')
 @section('description', 'Inspect and manage your registered Capsules.')
 
+@push('head')
+    <style>
+        .capsule-inventory-scroll:has(details[open]) {
+            padding-bottom: min(24rem, 70vh);
+        }
+    </style>
+@endpush
+
 @section('account-content')
     <div class="space-y-6">
         <header class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
@@ -18,7 +26,7 @@
             <p class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-900">{{ session('status') }}</p>
         @endif
 
-        <section class="overflow-hidden rounded-2xl border border-line bg-white shadow-sm" aria-labelledby="capsule-inventory-heading">
+        <section class="overflow-visible rounded-2xl border border-line bg-white shadow-sm" aria-labelledby="capsule-inventory-heading">
             <div class="flex flex-col gap-2 border-b border-line p-5 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                     <h2 id="capsule-inventory-heading" class="text-xl font-bold text-ink">Registered Capsules</h2>
@@ -28,7 +36,7 @@
             </div>
 
             @if ($capsules->isNotEmpty())
-                <div class="overflow-x-auto">
+                <div class="capsule-inventory-scroll overflow-x-auto">
                     <table class="w-full table-auto text-left text-sm">
                         <thead class="bg-surface text-xs font-bold tracking-[0.12em] text-muted uppercase">
                             <tr>
@@ -50,7 +58,7 @@
                                         </p>
                                     </td>
                                     <td class="whitespace-nowrap px-3 py-4">
-                                        <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-bold tracking-wide uppercase {{ $capsule['status'] === 'active' ? 'bg-emerald-50 text-emerald-700' : ($capsule['status'] === 'revocation_pending' ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700') }}">
+                                        <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-bold tracking-wide uppercase {{ $capsule['status'] === 'active' ? 'bg-emerald-50 text-emerald-700' : (in_array($capsule['status'], ['pause_pending', 'paused', 'revocation_pending'], true) ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700') }}">
                                             {{ str($capsule['status'])->replace('_', ' ') }}
                                         </span>
                                     </td>
@@ -86,7 +94,7 @@
                                             </summary>
                                             <div class="absolute right-0 z-10 mt-2 w-[min(24rem,calc(100vw-4rem))] whitespace-normal break-words rounded-xl border border-line bg-white p-4 text-left shadow-lg">
                                                 <p class="font-semibold text-ink">Manage Capsule</p>
-                                                <p class="mt-1 text-xs leading-5 text-muted">These actions change account management or key release state. The signed Capsule file is unchanged unless access is revoked or deleted.</p>
+                                                <p class="mt-1 text-xs leading-5 text-muted">These actions change account management or key release state. The signed Capsule file is unchanged unless access is deleted.</p>
 
                                                 <form class="mt-4 grid gap-3" method="POST" action="{{ route('studio.capsules.label', ['capsuleId' => $capsule['capsule_id'], 'revision' => $capsule['capsule_revision']]) }}">
                                                     @csrf
@@ -97,7 +105,25 @@
                                                 </form>
 
                                                 @if ($capsule['status'] === 'active')
-                                                    <form class="mt-4 border-t border-line pt-4" method="POST" action="{{ route('studio.capsules.revoke') }}" data-confirm data-confirm-title="Permanently revoke access?" data-confirm-message="This Capsule will stop opening immediately. Revocation cannot be undone, but the Capsule will remain in your account." data-confirm-action="Revoke access">
+                                                    <form class="mt-4 border-t border-line pt-4" method="POST" action="{{ route('studio.capsules.pause') }}" data-confirm data-confirm-title="Pause access?" data-confirm-message="This Capsule will stop opening until you resume access. The Capsule file and its registration stay in your account." data-confirm-action="Pause access">
+                                                        @csrf
+                                                        <input type="hidden" name="capsule_id" value="{{ $capsule['capsule_id'] }}">
+                                                        <input type="hidden" name="capsule_revision" value="{{ $capsule['capsule_revision'] }}">
+                                                        <p class="mb-3 text-xs leading-5 text-muted">Use this for a reversible release check. You can resume access later.</p>
+                                                        <button class="rounded-xl border border-brand/30 px-4 py-2 text-sm font-bold text-brand hover:bg-brand/5" type="submit">Pause access</button>
+                                                    </form>
+                                                @elseif ($capsule['status'] === 'paused')
+                                                    <form class="mt-4 border-t border-line pt-4" method="POST" action="{{ route('studio.capsules.resume') }}" data-confirm data-confirm-title="Resume access?" data-confirm-message="This Capsule can open again for eligible viewers after access resumes." data-confirm-action="Resume access">
+                                                        @csrf
+                                                        <input type="hidden" name="capsule_id" value="{{ $capsule['capsule_id'] }}">
+                                                        <input type="hidden" name="capsule_revision" value="{{ $capsule['capsule_revision'] }}">
+                                                        <p class="mb-3 text-xs leading-5 text-muted">Resume allows the broker to release keys again for eligible viewers.</p>
+                                                        <button class="rounded-xl border border-emerald-200 px-4 py-2 text-sm font-bold text-emerald-700 hover:bg-emerald-50" type="submit">Resume access</button>
+                                                    </form>
+                                                @endif
+
+                                                @if (in_array($capsule['status'], ['active', 'paused'], true))
+                                                    <form class="mt-4 border-t border-line pt-4" method="POST" action="{{ route('studio.capsules.revoke') }}" data-confirm data-confirm-title="Permanently revoke access?" data-confirm-message="This Capsule will stop opening immediately. Revocation cannot be undone, but the Capsule will remain in your account." data-confirm-action="Permanently revoke">
                                                         @csrf
                                                         <input type="hidden" name="capsule_id" value="{{ $capsule['capsule_id'] }}">
                                                         <input type="hidden" name="capsule_revision" value="{{ $capsule['capsule_revision'] }}">

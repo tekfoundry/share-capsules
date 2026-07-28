@@ -8,6 +8,10 @@ interface BrokerContentKeyLifecycle
 
     public function resumeCreator(int $creatorId): void;
 
+    public function pauseCapsule(int $creatorId, string $capsuleId, int $capsuleRevision): void;
+
+    public function resumeCapsule(int $creatorId, string $capsuleId, int $capsuleRevision): void;
+
     public function revokeCapsule(int $creatorId, string $capsuleId, int $capsuleRevision): void;
 
     public function destroyCapsule(int $creatorId, string $capsuleId, int $capsuleRevision): void;

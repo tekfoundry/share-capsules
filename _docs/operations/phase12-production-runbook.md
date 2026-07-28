@@ -1,7 +1,7 @@
 # Phase 12 Production Deployment Runbook
 
-Status: draft for MVP deployment review
-Last updated: 2026-06-26
+Status: in-progress MVP deployment evidence
+Last updated: 2026-07-28
 
 This runbook covers the production deployment path for the prototype topology:
 
@@ -293,6 +293,15 @@ Expected results:
 
 Record sanitized results in the production change ledger.
 
+Evidence recorded on 2026-07-28:
+
+- `https://sharecapsules.com/up` returned healthy for production deployment `production-primary`.
+- `https://broker.sharecapsules.com/up` returned healthy for the broker component with healthy configuration and storage.
+- App discovery published issuer `https://sharecapsules.com` and CTX V1 endpoints.
+- Broker discovery published broker `https://broker.sharecapsules.com` and the V1 key-release endpoint.
+- Host-bound route checks returned the expected failures: broker-host `/login` returned `404`, app-host `/releases` returned `404`, and broker internal status without credentials returned `401`.
+- `https://sharecapsules.com/ctx/jwks.json` published active Ed25519 signing key `01kyjz8e0knc0xjv7pg323ztv9`.
+
 ## 14. Acceptance, Load, And Concurrency Testing
 
 1. Create a clean production or production-like creator account.
@@ -311,6 +320,15 @@ Record sanitized results in the production change ledger.
     - per-account and global counters
     - broker lifecycle operations
 11. Record test data shape, account IDs only if safe and approved, dates, results, and any cleanup actions.
+
+Partial evidence recorded on 2026-07-28:
+
+- A production Chrome extension package using ID `jkejpdcobbbeichpodpeoiilnalepdph` connected through the fixed production OAuth client.
+- Production Passport keys were generated outside source control after an initial authorization failure exposed the missing-key condition.
+- A production-created Capsule was saved through the Creator Studio flow after broker callback configuration was completed.
+- The Capsule file was copied to a public same-application test location at `/capsules/phase12/tekfoundry-logo.capsule`.
+- The public test page at `/phase12/capsule-test` rendered the protected TekFoundry logo through the Viewer extension.
+- Remaining acceptance items: revocation, account/device revocation, cleanup, load, concurrency, and separate static-host CORS/cache/header verification.
 
 ## 15. Incident Response And Recovery Exercises
 

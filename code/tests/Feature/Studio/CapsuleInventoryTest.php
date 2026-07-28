@@ -60,6 +60,7 @@ final class CapsuleInventoryTest extends TestCase
             ->assertDontSee('Rename for your account')
             ->assertSee('Delete Capsule')
             ->assertSee(route('studio.capsules.destroy', [$capsuleId, 1]), false)
+            ->assertSee('data-confirm-title="Pause access?"', false)
             ->assertSee('data-confirm-title="Permanently revoke access?"', false)
             ->assertSee('data-confirm-title="Delete this Capsule?"', false)
             ->assertSee('7')
@@ -143,6 +144,92 @@ final class CapsuleInventoryTest extends TestCase
                 'capsule_id' => $capsuleId,
                 'capsule_revision' => 1,
             ])->assertNotFound();
+    }
+
+    public function test_a_creator_can_pause_and_resume_capsule_access(): void
+    {
+        $owner = User::factory()->create(['email_verified_at' => now()]);
+        $capsuleId = 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703';
+        $this->grant($owner, $capsuleId, true);
+
+        $this->actingAs($owner)->post(route('studio.capsules.pause'), [
+            'capsule_id' => $capsuleId,
+            'capsule_revision' => 1,
+        ])->assertRedirect(route('password.confirm'));
+
+        $this->actingAs($owner)
+            ->withSession(['auth.password_confirmed_at' => now()->timestamp])
+            ->post(route('studio.capsules.pause'), [
+                'capsule_id' => $capsuleId,
+                'capsule_revision' => 1,
+            ])->assertRedirect()
+            ->assertSessionHas('status', 'Capsule access has been paused.');
+
+        $capsule = CreatorCapsule::query()->where('capsule_id', $capsuleId)->sole();
+        $this->assertSame(CapsuleLifecycleStatus::Paused, $capsule->status);
+        $this->assertFalse($capsule->status->permitsRelease());
+        $broker = $this->app->make(BrokerContentKeyLifecycle::class);
+        $this->assertInstanceOf(FakeBrokerContentKeyLifecycle::class, $broker);
+        $this->assertSame('pause_capsule', $broker->operations[0]['operation']);
+
+        $this->actingAs($owner)->get(route('studio.capsules.index'))
+            ->assertOk()
+            ->assertSee('paused')
+            ->assertSee('data-confirm-title="Resume access?"', false);
+
+        $this->actingAs($owner)
+            ->withSession(['auth.password_confirmed_at' => now()->timestamp])
+            ->post(route('studio.capsules.resume'), [
+                'capsule_id' => $capsuleId,
+                'capsule_revision' => 1,
+            ])->assertRedirect()
+            ->assertSessionHas('status', 'Capsule access has been resumed.');
+
+        $this->assertSame(CapsuleLifecycleStatus::Active, $capsule->fresh()->status);
+        $this->assertSame('resume_capsule', $broker->operations[1]['operation']);
+    }
+
+    public function test_pause_and_resume_require_ownership(): void
+    {
+        $owner = User::factory()->create(['email_verified_at' => now()]);
+        $other = User::factory()->create(['email_verified_at' => now()]);
+        $capsuleId = 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703';
+        $this->grant($owner, $capsuleId, true);
+
+        $this->actingAs($other)
+            ->withSession(['auth.password_confirmed_at' => now()->timestamp])
+            ->post(route('studio.capsules.pause'), [
+                'capsule_id' => $capsuleId,
+                'capsule_revision' => 1,
+            ])->assertNotFound();
+
+        CreatorCapsule::query()->where('capsule_id', $capsuleId)
+            ->update(['status' => CapsuleLifecycleStatus::Paused]);
+
+        $this->actingAs($other)
+            ->withSession(['auth.password_confirmed_at' => now()->timestamp])
+            ->post(route('studio.capsules.resume'), [
+                'capsule_id' => $capsuleId,
+                'capsule_revision' => 1,
+            ])->assertNotFound();
+    }
+
+    public function test_permanent_revocation_can_be_applied_to_a_paused_capsule(): void
+    {
+        $owner = User::factory()->create(['email_verified_at' => now()]);
+        $capsuleId = 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703';
+        $this->grant($owner, $capsuleId, true, ['status' => CapsuleLifecycleStatus::Paused]);
+
+        $this->actingAs($owner)
+            ->withSession(['auth.password_confirmed_at' => now()->timestamp])
+            ->post(route('studio.capsules.revoke'), [
+                'capsule_id' => $capsuleId,
+                'capsule_revision' => 1,
+            ])->assertRedirect()
+            ->assertSessionHas('status', 'Capsule access has been permanently revoked.');
+
+        $capsule = CreatorCapsule::query()->where('capsule_id', $capsuleId)->sole();
+        $this->assertSame(CapsuleLifecycleStatus::Revoked, $capsule->status);
     }
 
     public function test_deletion_requires_recent_authentication_and_destroys_only_an_owned_capsule(): void

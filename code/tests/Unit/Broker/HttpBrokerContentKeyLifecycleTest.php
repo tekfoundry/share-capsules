@@ -22,13 +22,27 @@ final class HttpBrokerContentKeyLifecycleTest extends TestCase
         $lifecycle = new HttpBrokerContentKeyLifecycle(app(Factory::class));
 
         $lifecycle->pauseCreator(42);
+        $lifecycle->pauseCapsule(42, 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703', 3);
+        $lifecycle->resumeCapsule(42, 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703', 3);
         $lifecycle->revokeCapsule(42, 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703', 3);
         $lifecycle->destroyCapsule(42, 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703', 3);
         $lifecycle->destroyCreator(42);
 
-        Http::assertSentCount(4);
+        Http::assertSentCount(6);
         Http::assertSent(fn ($request): bool => $request->hasHeader('Authorization', 'Bearer control-plane-secret')
             && $request->data() === ['operation' => 'pause_creator', 'creator_id' => '42']);
+        Http::assertSent(fn ($request): bool => $request->data() === [
+            'operation' => 'pause_capsule',
+            'creator_id' => '42',
+            'capsule_id' => 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703',
+            'capsule_revision' => 3,
+        ]);
+        Http::assertSent(fn ($request): bool => $request->data() === [
+            'operation' => 'resume_capsule',
+            'creator_id' => '42',
+            'capsule_id' => 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703',
+            'capsule_revision' => 3,
+        ]);
         Http::assertSent(fn ($request): bool => $request->data() === [
             'operation' => 'revoke_capsule',
             'creator_id' => '42',

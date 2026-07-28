@@ -28,6 +28,8 @@ final readonly class CapsuleDeletionService
             }
             if (in_array($record->status, [
                 CapsuleLifecycleStatus::Active,
+                CapsuleLifecycleStatus::PausePending,
+                CapsuleLifecycleStatus::Paused,
                 CapsuleLifecycleStatus::RevocationPending,
                 CapsuleLifecycleStatus::Revoked,
             ], true)) {

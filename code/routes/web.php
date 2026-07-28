@@ -71,6 +71,10 @@ Route::middleware(['auth', 'account.active'])->group(function (): void {
         ->middleware('verified')->whereNumber('revision')->name('studio.capsules.metrics');
     Route::patch('/studio/capsules/{capsuleId}/revisions/{revision}/label', [CapsuleInventoryController::class, 'updateLabel'])
         ->middleware('verified')->whereNumber('revision')->name('studio.capsules.label');
+    Route::post('/studio/capsules/pause', [CapsuleInventoryController::class, 'pause'])
+        ->middleware(['verified', 'password.confirm'])->name('studio.capsules.pause');
+    Route::post('/studio/capsules/resume', [CapsuleInventoryController::class, 'resume'])
+        ->middleware(['verified', 'password.confirm'])->name('studio.capsules.resume');
     Route::post('/studio/capsules/revoke', [CapsuleInventoryController::class, 'revoke'])
         ->middleware(['verified', 'password.confirm'])->name('studio.capsules.revoke');
     Route::delete('/studio/capsules/{capsuleId}/revisions/{revision}', [CapsuleInventoryController::class, 'destroy'])

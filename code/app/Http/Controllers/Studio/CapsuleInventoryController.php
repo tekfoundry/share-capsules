@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Studio;
 
+use App\Broker\Lifecycle\CapsuleAccessPauseService;
 use App\Broker\Lifecycle\CapsuleRevocationService;
 use App\Capsules\Registry\CapsuleDeletionService;
 use App\Capsules\Registry\CapsuleLifecycleStatus;
@@ -26,6 +27,8 @@ final class CapsuleInventoryController extends Controller
         $capsules = $user->creatorCapsules()
             ->whereIn('status', [
                 CapsuleLifecycleStatus::Active->value,
+                CapsuleLifecycleStatus::PausePending->value,
+                CapsuleLifecycleStatus::Paused->value,
                 CapsuleLifecycleStatus::RevocationPending->value,
                 CapsuleLifecycleStatus::Revoked->value,
             ])
@@ -38,7 +41,7 @@ final class CapsuleInventoryController extends Controller
         return view('studio.capsules.index', ['capsules' => $capsules]);
     }
 
-    public function revoke(Request $request, CapsuleRevocationService $revocation): RedirectResponse
+    public function pause(Request $request, CapsuleAccessPauseService $pause): RedirectResponse
     {
         /** @var User $user */
         $user = $request->user();
@@ -48,6 +51,46 @@ final class CapsuleInventoryController extends Controller
         ]);
         $owned = $user->creatorCapsules()
             ->where('status', CapsuleLifecycleStatus::Active->value)
+            ->where('capsule_id', $validated['capsule_id'])
+            ->where('capsule_revision', $validated['capsule_revision'])
+            ->exists();
+        abort_unless($owned, 404);
+
+        $pause->pause($user, $validated['capsule_id'], $validated['capsule_revision']);
+
+        return back()->with('status', 'Capsule access has been paused.');
+    }
+
+    public function resume(Request $request, CapsuleAccessPauseService $pause): RedirectResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $validated = $request->validate([
+            'capsule_id' => ['required', 'string', 'max:45'],
+            'capsule_revision' => ['required', 'integer', 'min:1'],
+        ]);
+        $owned = $user->creatorCapsules()
+            ->where('status', CapsuleLifecycleStatus::Paused->value)
+            ->where('capsule_id', $validated['capsule_id'])
+            ->where('capsule_revision', $validated['capsule_revision'])
+            ->exists();
+        abort_unless($owned, 404);
+
+        $pause->resume($user, $validated['capsule_id'], $validated['capsule_revision']);
+
+        return back()->with('status', 'Capsule access has been resumed.');
+    }
+
+    public function revoke(Request $request, CapsuleRevocationService $revocation): RedirectResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $validated = $request->validate([
+            'capsule_id' => ['required', 'string', 'max:45'],
+            'capsule_revision' => ['required', 'integer', 'min:1'],
+        ]);
+        $owned = $user->creatorCapsules()
+            ->whereIn('status', [CapsuleLifecycleStatus::Active->value, CapsuleLifecycleStatus::Paused->value])
             ->where('capsule_id', $validated['capsule_id'])
             ->where('capsule_revision', $validated['capsule_revision'])
             ->exists();

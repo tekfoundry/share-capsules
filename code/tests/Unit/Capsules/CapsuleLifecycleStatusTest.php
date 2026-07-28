@@ -29,8 +29,13 @@ final class CapsuleLifecycleStatusTest extends TestCase
     {
         yield 'pending activates' => [CapsuleLifecycleStatus::Pending, CapsuleLifecycleStatus::Active, true];
         yield 'pending cleans up' => [CapsuleLifecycleStatus::Pending, CapsuleLifecycleStatus::CleanupPending, true];
+        yield 'active begins pause' => [CapsuleLifecycleStatus::Active, CapsuleLifecycleStatus::PausePending, true];
+        yield 'pause completes' => [CapsuleLifecycleStatus::PausePending, CapsuleLifecycleStatus::Paused, true];
+        yield 'paused resumes' => [CapsuleLifecycleStatus::Paused, CapsuleLifecycleStatus::Active, true];
         yield 'active begins revocation' => [CapsuleLifecycleStatus::Active, CapsuleLifecycleStatus::RevocationPending, true];
+        yield 'paused begins revocation' => [CapsuleLifecycleStatus::Paused, CapsuleLifecycleStatus::RevocationPending, true];
         yield 'revocation completes' => [CapsuleLifecycleStatus::RevocationPending, CapsuleLifecycleStatus::Revoked, true];
+        yield 'paused cleans up for deletion' => [CapsuleLifecycleStatus::Paused, CapsuleLifecycleStatus::CleanupPending, true];
         yield 'revoked cleans up for deletion' => [CapsuleLifecycleStatus::Revoked, CapsuleLifecycleStatus::CleanupPending, true];
         yield 'cleanup completes destruction' => [CapsuleLifecycleStatus::CleanupPending, CapsuleLifecycleStatus::Destroyed, true];
         yield 'active cannot become pending' => [CapsuleLifecycleStatus::Active, CapsuleLifecycleStatus::Pending, false];

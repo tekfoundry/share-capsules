@@ -25,6 +25,8 @@ final class ApplyContentKeyLifecycleController extends Controller
         ]);
         $operation = BrokerContentKeyOperation::from($validated['operation']);
         $expected = match ($operation) {
+            BrokerContentKeyOperation::PauseCapsule,
+            BrokerContentKeyOperation::ResumeCapsule,
             BrokerContentKeyOperation::RevokeCapsule,
             BrokerContentKeyOperation::DestroyCapsule => ['capsule_id', 'capsule_revision', 'creator_id', 'operation'],
             BrokerContentKeyOperation::FinalizeRegistration => ['creator_id', 'operation', 'registration_id', 'release_handle'],

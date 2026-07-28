@@ -15,6 +15,8 @@ final class DashboardController extends Controller
         $user = $request->user();
         $capsules = $user->creatorCapsules()->whereIn('status', [
             CapsuleLifecycleStatus::Active->value,
+            CapsuleLifecycleStatus::PausePending->value,
+            CapsuleLifecycleStatus::Paused->value,
             CapsuleLifecycleStatus::RevocationPending->value,
             CapsuleLifecycleStatus::Revoked->value,
         ]);
