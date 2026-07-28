@@ -77,6 +77,7 @@ return [
             'driver' => env('BROKER_KMS_DRIVER', 'local'),
             'key_id' => env('BROKER_KMS_KEY_ID', 'local-development-key-0001'),
             'local_master_key' => env('BROKER_LOCAL_KMS_KEY'),
+            'allow_local_in_production' => env('BROKER_ALLOW_LOCAL_KMS_IN_PRODUCTION', false),
         ],
     ],
 

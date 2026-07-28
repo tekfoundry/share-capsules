@@ -92,15 +92,21 @@ References:
    - `BROKER_DB_PASSWORD`
    - `BROKER_KMS_DRIVER=managed`
    - `BROKER_KMS_KEY_ID=<managed KMS or HSM key identifier>`
+   - `BROKER_ALLOW_LOCAL_KMS_IN_PRODUCTION=false`
    - `SHARECAPSULES_BROKER_AUDIT_CHANNEL=broker_audit`
    - `BROKER_AUDIT_LOG_LEVEL=notice`
-5. Confirm mail delivery values are production Mailgun values:
+5. For this accepted same-install MVP prototype only, local broker key custody may be used instead of managed custody after recording the reduced-isolation risk. In that case set:
+   - `BROKER_KMS_DRIVER=local`
+   - `BROKER_KMS_KEY_ID=production-prototype-local-key-0001`
+   - `BROKER_LOCAL_KMS_KEY=base64:<32-byte random key>`
+   - `BROKER_ALLOW_LOCAL_KMS_IN_PRODUCTION=true`
+6. Confirm mail delivery values are production Mailgun values:
    - `MAIL_MAILER=mailgun`
    - `MAILGUN_DOMAIN`
    - `MAILGUN_SECRET`
    - `MAIL_FROM_ADDRESS`
-6. Confirm Redis values are production Redis values and `QUEUE_CONNECTION=redis`, `CACHE_STORE=redis`, and `SESSION_DRIVER=database`.
-7. Record only variable names, infrastructure dependencies, and verification status in the production change ledger. Do not record values.
+7. Confirm Redis values are production Redis values and `QUEUE_CONNECTION=redis`, `CACHE_STORE=redis`, and `SESSION_DRIVER=database`.
+8. Record only variable names, infrastructure dependencies, and verification status in the production change ledger. Do not record values.
 
 ## 4. Forge Site And DNS
 

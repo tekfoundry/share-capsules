@@ -53,7 +53,8 @@ final class BrokerDeploymentConfiguration
         }
 
         if (config('sharecapsules.deployment.environment') === 'production'
-            && $kmsDriver !== 'managed') {
+            && $kmsDriver !== 'managed'
+            && ! (bool) config('sharecapsules.broker.kms.allow_local_in_production')) {
             $issues[] = 'broker_kms_not_managed';
         }
 

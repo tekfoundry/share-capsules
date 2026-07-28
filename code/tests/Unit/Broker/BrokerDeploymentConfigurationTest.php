@@ -64,13 +64,27 @@ final class BrokerDeploymentConfigurationTest extends TestCase
         $this->assertSame([], app(BrokerDeploymentConfiguration::class)->issues());
     }
 
-    public function test_production_rejects_the_local_key_custody_driver(): void
+    public function test_production_rejects_the_local_key_custody_driver_by_default(): void
     {
         config()->set('sharecapsules.component', 'broker');
         config()->set('sharecapsules.deployment.environment', 'production');
         config()->set('sharecapsules.broker.kms.driver', 'local');
 
         $this->assertContains(
+            'broker_kms_not_managed',
+            app(BrokerDeploymentConfiguration::class)->issues(),
+        );
+    }
+
+    public function test_production_accepts_explicitly_approved_local_key_custody(): void
+    {
+        config()->set('sharecapsules.component', 'broker');
+        config()->set('sharecapsules.deployment.environment', 'production');
+        config()->set('sharecapsules.broker.kms.driver', 'local');
+        config()->set('sharecapsules.broker.kms.key_id', 'production-prototype-local-key-0001');
+        config()->set('sharecapsules.broker.kms.allow_local_in_production', true);
+
+        $this->assertNotContains(
             'broker_kms_not_managed',
             app(BrokerDeploymentConfiguration::class)->issues(),
         );

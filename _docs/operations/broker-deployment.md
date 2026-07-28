@@ -29,7 +29,8 @@ For hardened broker-only deployment, start from `code/.env.broker.production.exa
 - Share only the dedicated `SHARECAPSULES_BROKER_CONTROL_PLANE_TOKEN` with the control plane. Generate at least 32 random bytes and deliver it through secret management, never source control or a deployment log.
 - Share a separate `SHARECAPSULES_BROKER_CALLBACK_TOKEN` between the broker and control plane, and set the broker-only `SHARECAPSULES_CONTROL_PLANE_INTERNAL_URL` to the protected control-plane origin.
 - Route the `broker_audit` channel so access is restricted to authorized broker security and operations personnel.
-- Configure `BROKER_KMS_DRIVER=managed` with a KMS/HSM key identifier. The local key-custody driver and `BROKER_LOCAL_KMS_KEY` are development-only and are rejected by production health validation.
+- Configure `BROKER_KMS_DRIVER=managed` with a KMS/HSM key identifier for hardened production.
+- For the accepted same-install MVP prototype only, local broker key custody may be used by setting `BROKER_KMS_DRIVER=local`, a strong `BROKER_LOCAL_KMS_KEY`, and `BROKER_ALLOW_LOCAL_KMS_IN_PRODUCTION=true`. This is a reduced-isolation release risk and must not be treated as the hardened broker posture.
 - Set an HTTPS broker identity with no user information, query, or fragment.
 
 Broker health is unhealthy when the component identity, storage separation, service credential, audit channel, or database access is invalid in broker-only mode. Same-install prototype hosting must report the reduced-isolation posture and still verify the broker host identity, service credential, audit channel, and broker storage/key-custody configuration.
