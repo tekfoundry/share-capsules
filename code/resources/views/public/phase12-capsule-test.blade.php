@@ -8,6 +8,14 @@
     $installUrl = route('viewer.install', ['return_to' => url()->current()]);
 @endphp
 
+@push('head')
+    <style>
+        capsule-viewer > error {
+            display: none;
+        }
+    </style>
+@endpush
+
 @section('content')
     <section class="mx-auto max-w-4xl px-5 py-14 sm:px-8 lg:px-10">
         <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">Phase 12 Test</p>

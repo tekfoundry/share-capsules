@@ -28,16 +28,20 @@ document.addEventListener(HANDOFF_EVENT, (event: Event) => {
         document.dispatchEvent(new CustomEvent(FAILED_EVENT));
         return;
     }
-    void chrome.runtime
-        .sendMessage(message)
-        .then((response) => {
-            if (isAcceptedResponse(response)) {
-                document.dispatchEvent(new CustomEvent(ACCEPTED_EVENT));
-                return;
-            }
-            document.dispatchEvent(new CustomEvent(FAILED_EVENT));
-        })
-        .catch(() => document.dispatchEvent(new CustomEvent(FAILED_EVENT)));
+    try {
+        void chrome.runtime
+            .sendMessage(message)
+            .then((response) => {
+                if (isAcceptedResponse(response)) {
+                    document.dispatchEvent(new CustomEvent(ACCEPTED_EVENT));
+                    return;
+                }
+                document.dispatchEvent(new CustomEvent(FAILED_EVENT));
+            })
+            .catch(() => document.dispatchEvent(new CustomEvent(FAILED_EVENT)));
+    } catch {
+        document.dispatchEvent(new CustomEvent(FAILED_EVENT));
+    }
 });
 
 function parseHandoffDetail(

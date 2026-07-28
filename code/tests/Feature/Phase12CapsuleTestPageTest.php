@@ -17,7 +17,8 @@ final class Phase12CapsuleTestPageTest extends TestCase
             ->assertSee('fit="contain"', false)
             ->assertSee('viewer-height="320px"', false)
             ->assertSee('<fallback>', false)
-            ->assertSee('<error>', false);
+            ->assertSee('<error>', false)
+            ->assertSee('capsule-viewer > error', false);
 
         $this->assertTrue(File::exists(public_path('capsules/phase12/tekfoundry-logo.capsule')));
     }
