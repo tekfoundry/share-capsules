@@ -8,6 +8,7 @@ export default defineConfig(
             'node_modules/**',
             'public/build/**',
             'apps/browser-extension/build/**',
+            'apps/browser-extension/share-capsules-extension-*/**',
             '**/dist/**',
             '**/*.d.ts',
         ],
