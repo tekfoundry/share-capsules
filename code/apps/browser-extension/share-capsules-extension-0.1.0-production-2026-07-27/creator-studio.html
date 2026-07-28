@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Create your Capsule</title>
+        <link rel="stylesheet" href="./creator-studio.css" />
+    </head>
+    <body>
+        <main class="studio" data-creator-studio>
+            <header class="studio-header">
+                <div>
+                    <p class="eyebrow">Share Capsules</p>
+                    <h1>Create your Capsule</h1>
+                    <p class="intro">
+                        Choose the file you want to protect. Your original file stays on this
+                        computer and is never sent to the Share Capsules website.
+                    </p>
+                </div>
+                <div class="account-connection" data-creator-account data-state="checking">
+                    <span class="account-connection-dot" aria-hidden="true"></span>
+                    <p data-creator-account-status role="status" aria-live="polite">Connecting…</p>
+                    <button
+                        class="account-connection-retry"
+                        type="button"
+                        data-creator-account-connect
+                        disabled
+                        hidden
+                    >
+                        Retry
+                    </button>
+                </div>
+            </header>
+
+            <section class="panel setup-panel" aria-labelledby="workspace-heading">
+                <div class="setup-panel-header">
+                    <div>
+                        <h2 id="workspace-heading">Workspace and recovery</h2>
+                        <p>
+                            The extension keeps your Capsules and encrypted recovery file together
+                            in a local workspace. Your separate recovery code is shown only when it
+                            needs to be saved.
+                        </p>
+                    </div>
+                    <p
+                        class="setup-status"
+                        data-creator-signing-key-status
+                        data-state="checking"
+                        aria-live="polite"
+                    >
+                        Checking recovery…
+                    </p>
+                </div>
+
+                <div class="workspace-settings" aria-labelledby="workspace-heading">
+                    <input type="hidden" data-creator-workspace-name />
+                    <div class="workspace-location-row">
+                        <span class="workspace-location-label">Location</span>
+                        <p
+                            class="workspace-location-value"
+                            data-creator-workspace-status
+                            role="status"
+                            aria-live="polite"
+                        >
+                            Preparing your save location…
+                        </p>
+                        <button
+                            type="button"
+                            class="secondary-button"
+                            data-creator-workspace-choose
+                            disabled
+                        >
+                            Choose workspace
+                        </button>
+                    </div>
+                </div>
+
+                <div class="recovery-kit" data-creator-recovery-panel hidden>
+                    <h3>Save both recovery items</h3>
+                    <p>
+                        The encrypted recovery file has been saved in your workspace. Store this
+                        separate code somewhere safe—you need both items to recover your signing
+                        identity.
+                    </p>
+                    <code class="recovery-code" data-creator-recovery-code></code>
+                    <label>
+                        <input type="checkbox" data-creator-recovery-bundle-saved />
+                        I understand the encrypted recovery file is saved in this workspace.
+                    </label>
+                    <label>
+                        <input type="checkbox" data-creator-recovery-code-saved />
+                        I saved the recovery code separately.
+                    </label>
+                    <button type="button" data-creator-recovery-confirm disabled>
+                        Confirm recovery kit saved
+                    </button>
+                </div>
+                <details>
+                    <summary>Advanced recovery options</summary>
+                    <p class="privacy-note">
+                        Creating a replacement signing key changes the identity used for Capsules
+                        you create from this browser going forward. Existing Capsules keep using the
+                        signing key they were created with, so keep old recovery files in the
+                        recovery folder and do not delete them.
+                    </p>
+                    <button type="button" data-creator-signing-key-button disabled>
+                        Create replacement signing key
+                    </button>
+                    <ul class="key-list" data-creator-signing-key-list hidden></ul>
+                    <button type="button" data-creator-recovery-create hidden>
+                        Create recovery kit
+                    </button>
+                    <h3>Restore an existing signing key</h3>
+                    <p class="privacy-note">
+                        Use this only when setting up a new browser or restoring a signing key from
+                        a saved encrypted recovery file and its separate recovery code.
+                    </p>
+                    <label class="field">
+                        <span>Encrypted recovery file</span>
+                        <input
+                            type="file"
+                            accept="application/json,.json"
+                            data-creator-recovery-file
+                        />
+                    </label>
+                    <label class="field">
+                        <span>Separate recovery code</span>
+                        <input
+                            type="password"
+                            autocomplete="off"
+                            data-creator-recovery-restore-code
+                        />
+                    </label>
+                    <button type="button" data-creator-recovery-restore>Restore signing key</button>
+                </details>
+            </section>
+
+            <section class="panel primary-panel" aria-labelledby="build-heading">
+                <h2 id="build-heading">Create and save</h2>
+                <p>
+                    Choose the file you want to protect. The extension will encrypt it, register its
+                    key, sign and package the Capsule, then reopen and verify the exact result
+                    before saving it.
+                </p>
+
+                <section class="subsection" aria-labelledby="capsule-details-heading">
+                    <h3 id="capsule-details-heading">Capsule details</h3>
+                    <dl class="summary">
+                        <div>
+                            <dt>Title</dt>
+                            <dd data-creator-title>—</dd>
+                        </div>
+                        <div>
+                            <dt>Description</dt>
+                            <dd data-creator-description>—</dd>
+                        </div>
+                        <div>
+                            <dt>When it can be opened</dt>
+                            <dd data-creator-access>—</dd>
+                        </div>
+                        <div>
+                            <dt>Total opening limit</dt>
+                            <dd data-creator-total-limit>—</dd>
+                        </div>
+                        <div>
+                            <dt>Per-user opening limit</dt>
+                            <dd data-creator-account-limit>—</dd>
+                        </div>
+                        <div>
+                            <dt>Automation protection</dt>
+                            <dd data-creator-automation-risk>—</dd>
+                        </div>
+                    </dl>
+                </section>
+
+                <section class="subsection" aria-labelledby="source-heading">
+                    <h3 id="source-heading">Choose your file</h3>
+                    <p>Supported file types: JPEG, PNG, or WebP. Maximum file size: about 26 MB.</p>
+                    <button type="button" data-creator-source-button>Choose a file</button>
+                    <p class="selection" data-creator-selected-file aria-live="polite">
+                        No file selected
+                    </p>
+                    <p class="privacy-note">
+                        The extension keeps the selected file private. Only its name and size appear
+                        on this screen.
+                    </p>
+                </section>
+
+                <section class="subsection" aria-labelledby="save-heading">
+                    <h3 id="save-heading">Save Capsule</h3>
+                    <label class="field capsule-name-field">
+                        <span>Capsule file name</span>
+                        <input
+                            type="text"
+                            maxlength="100"
+                            spellcheck="false"
+                            autocomplete="off"
+                            data-creator-capsule-name
+                        />
+                    </label>
+
+                    <button type="button" class="create-button" data-creator-build disabled>
+                        Create and save Capsule
+                    </button>
+                    <p data-creator-build-status role="status" aria-live="polite">
+                        Preparing the secure extension runtime…
+                    </p>
+                </section>
+            </section>
+
+            <section class="panel" aria-labelledby="publish-heading">
+                <h2 id="publish-heading">Add the Capsule to your website</h2>
+                <p>
+                    After saving your Capsule, upload it to a permanent public HTTPS address and add
+                    markup like this to your page. This example assumes your website is
+                    <code>example.com</code> and uses the Capsule file name above.
+                </p>
+                <label class="field">
+                    <span>Example website markup</span>
+                    <textarea rows="5" readonly data-creator-host-markup></textarea>
+                </label>
+                <div class="inline-actions">
+                    <button type="button" data-creator-host-copy disabled>Copy markup</button>
+                    <a
+                        href="https://sharecapsules.com/instructions#capsule-hosting"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        data-creator-instructions-link
+                    >
+                        Hosting instructions
+                    </a>
+                </div>
+                <p data-creator-host-status aria-live="polite">
+                    Replace example.com with your real website when you publish.
+                </p>
+
+                <h3>What your file host needs</h3>
+                <ul class="host-checklist">
+                    <li>Keep this exact Capsule revision at a permanent HTTPS URL.</li>
+                    <li>Allow a public download without sign-in, cookies, or credentials.</li>
+                    <li>
+                        Allow public cross-origin reads with
+                        <code>Access-Control-Allow-Origin: *</code>.
+                    </li>
+                    <li>
+                        Serve it as <code>application/octet-stream</code> or
+                        <code>application/zip</code>. Supporting <code>HEAD</code> is recommended.
+                    </li>
+                    <li>
+                        Keep useful public fallback content between the opening and closing
+                        <code>&lt;capsule-viewer&gt;</code> tags.
+                    </li>
+                </ul>
+                <p class="privacy-note">
+                    Your host does not need a Share Capsules account, JavaScript SDK, database, key
+                    access, or server-side decryption. Test the page once with the extension
+                    disabled to confirm the fallback still makes sense.
+                </p>
+            </section>
+        </main>
+        <script type="module" src="./studio.js"></script>
+    </body>
+</html>

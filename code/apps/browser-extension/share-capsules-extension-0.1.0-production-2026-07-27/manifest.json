@@ -1,0 +1,49 @@
+{
+    "manifest_version": 3,
+    "name": "Share Capsules",
+    "version": "0.1.0",
+    "description": "Creates and views Share Capsules without exposing protected content to websites.",
+    "permissions": [
+        "identity",
+        "scripting",
+        "storage"
+    ],
+    "host_permissions": [
+        "https://sharecapsules.com/*",
+        "https://broker.sharecapsules.com/*"
+    ],
+    "optional_host_permissions": [
+        "https://*/*"
+    ],
+    "background": {
+        "service_worker": "service-worker.js",
+        "type": "module"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://sharecapsules.com/studio/capsules/create"
+            ],
+            "js": [
+                "creator-handoff.js"
+            ],
+            "run_at": "document_start"
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "viewer-frame.html",
+                "viewer-frame.css",
+                "viewer-frame.js"
+            ],
+            "matches": [
+                "https://*/*"
+            ]
+        }
+    ],
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'none'; base-uri 'none'"
+    },
+    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnL9kcyXka6oRRsM9/M8hkqOSzogFe7xDoV0wOAUC5706YjuFCQQ7Yl379UCjwSdj0D1dXAx4QkJafUsrfOQx5xubCIWjo3C26axT0oLhO8Jue0rV2B8mamrg6fIv3+nSIHMy+ZsOvSKE2rZF/bFbQcbtdtnWDXv2XCLI4dwNxCswPNvtRruYqKz34WpOwVBt75wcnU7sAHrOCIHlODX1hIqIMNouaNWQtlQ756pkoRzp0Ol+wClDHQsFOWY6D3kjU1iB+JzDsFn68Ts0pNoSxh30Y0WtwV4/2hhHQEk1TfL4FZVuJsPIbaNhZ7WZZPCi+VwUQThKSteT78BIhZ8ttwIDAQAB"
+}

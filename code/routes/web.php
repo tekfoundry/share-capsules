@@ -23,6 +23,7 @@ Route::get('/', function () {
 Route::view('/how-it-works', 'public.how-it-works')->name('how-it-works');
 Route::view('/instructions', 'public.instructions')->name('instructions');
 Route::view('/technical', 'public.technical')->name('technical');
+Route::view('/phase12/capsule-test', 'public.phase12-capsule-test')->name('phase12.capsule-test');
 Route::get('/viewer/install', ViewerInstallController::class)->name('viewer.install');
 
 Route::view('/terms', 'legal.terms')->name('terms');
