@@ -30,13 +30,6 @@
                     </div>
                 </fallback>
 
-                <template>
-                    <figure class="overflow-hidden rounded-xl border border-line bg-surface p-4">
-                        <content class="block w-full rounded-lg bg-white" style="height: 320px;"></content>
-                        <figcaption class="mt-3 text-sm font-semibold text-muted">@{{ title }}</figcaption>
-                    </figure>
-                </template>
-
                 <error>
                     <div class="rounded-xl border border-red-200 bg-red-50 p-6">
                         <h2 class="text-xl font-semibold text-red-950">Capsule unavailable</h2>
