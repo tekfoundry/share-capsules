@@ -4,7 +4,7 @@
 @section('description', 'Production acceptance test page for a Share Capsules encrypted Capsule.')
 
 @php
-    $capsuleUrl = asset('capsules/phase12/tekfoundry-logo.capsule');
+    $capsuleUrl = route('phase12.capsule');
     $installUrl = route('viewer.install', ['return_to' => url()->current()]);
 @endphp
 

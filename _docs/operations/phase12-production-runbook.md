@@ -1,7 +1,7 @@
 # Phase 12 Production Deployment Runbook
 
 Status: in-progress MVP deployment evidence
-Last updated: 2026-07-28
+Last updated: 2026-07-29
 
 This runbook covers the production deployment path for the prototype topology:
 
@@ -166,6 +166,15 @@ For the first production deployment, run the two migration commands deliberately
    - pruning for tickets, grants, device proofs, metrics, automation risk, challenge attempts, sanctions, and deletion ledger entries
 6. Confirm failed jobs, queue logs, and scheduler failures are visible through the approved monitoring channel.
 
+Scheduler evidence recorded on 2026-07-28:
+
+- Forge installed an every-minute site scheduler entry in `/etc/crontab`:
+  `* * * * * forge cd /home/forge/sharecapsules.com/current/code && /usr/bin/php8.4 artisan schedule:run > /home/forge/.forge/scheduled-2090753.log 2>&1`.
+- `/var/log/syslog` showed that exact Share Capsules scheduler command running as `forge` at 2026-07-28 18:13, 18:14, and 18:15 UTC.
+- `php8.4 artisan schedule:list` showed the expected retention, cleanup, account-deletion, and CTX signing-key retirement tasks.
+- `php8.4 artisan queue:failed` reported no failed jobs.
+- Supervisor daemon `978041` was created for the Share Capsules queue worker and restarted successfully. `supervisorctl status daemon-978041:*` reported `RUNNING`, and `ps` showed `/usr/bin/php8.4 artisan queue:work redis --sleep=3 --tries=3 --timeout=90` running as `forge` from the Share Capsules code directory.
+
 ## 7. TLS, Headers, Secrets, Backups, And Alerts
 
 1. Issue or renew TLS certificates for both `sharecapsules.com` and `broker.sharecapsules.com`.
@@ -183,6 +192,16 @@ For the first production deployment, run the two migration commands deliberately
    - high authorization or broker error rates
    - backup failures
    - security audit events requiring operator review
+
+Backup evidence recorded on 2026-07-28:
+
+- DigitalOcean automated daily backups are enabled for the production database server.
+- Remaining backup evidence before public MVP approval: confirm coverage for the application, broker, and deletion-ledger databases by name; record retention and latest successful backup time if available; perform or schedule a restore drill.
+
+Monitoring evidence recorded on 2026-07-28:
+
+- UptimeRobot monitors were added for `https://sharecapsules.com/up` and `https://broker.sharecapsules.com/up`.
+- Remaining alerting evidence before public MVP approval: confirm operator notifications for monitor failures, queue failures, scheduler failures, backup failures, and security/audit events requiring review.
 
 ## 8. Discovery And Signing Keys
 
@@ -238,6 +257,15 @@ For the first production deployment, run the two migration commands deliberately
 5. Submit the fixed production identity to the Chrome Web Store.
 6. Record Web Store package version, extension ID, submission date, review status, and approval status. Do not record private store credentials.
 
+Submission evidence recorded on 2026-07-28:
+
+- Chrome Web Store item `jkejpdcobbbeichpodpeoiilnalepdph` for Share Capsules showed status `Pending review` after submission.
+- The submitted draft uses the fixed production identity that was tested against production.
+- Automatic publishing after review approval was intentionally left enabled for this MVP submission.
+- Review passed and the item was automatically published publicly on 2026-07-29. The dashboard showed status `Published - public`.
+- The store-installed extension was reconnected and rendered the Phase 12 Capsule test image at `/phase12/capsule-test` on 2026-07-29.
+- Public listing URL `https://chromewebstore.google.com/detail/share-capsules/jkejpdcobbbeichpodpeoiilnalepdph` returned HTTP `200` on 2026-07-29.
+
 ## 10. User And Project Documentation
 
 1. Review and publish creator documentation.
@@ -249,6 +277,11 @@ For the first production deployment, run the two migration commands deliberately
 7. Confirm the public repository includes README, Apache License 2.0 notice, sponsorship/contact statement, contribution guide, governance guidance, code of conduct, security policy, and issue/pull-request templates.
 8. Record the exact public documentation URLs and release commit in the production change ledger or release evidence.
 
+Repository documentation evidence recorded on 2026-07-29:
+
+- The repository includes README, Apache License 2.0 license text, NOTICE, sponsorship/contact language, contribution guide, governance notes, code of conduct, security policy, funding metadata, pull request template, and issue templates.
+- Public website documentation routes are implemented for overview, creator/viewer instructions, technical/security-limit language, viewer install/onboarding, terms, and privacy. Final production URL review remains tied to the next deployment.
+
 ## 11. Public Repository And History Audit
 
 1. Run the supply-chain release check in Section 9.
@@ -257,6 +290,17 @@ For the first production deployment, run the two migration commands deliberately
 4. Confirm `.env`, private keys, local databases, build caches, and browser profiles are not committed.
 5. Confirm third-party license obligations are represented in the release notes or NOTICE material.
 6. Follow `_docs/operations/public-repository-security-controls.md` for GitHub settings, branch protection, Discussions, and private vulnerability reporting.
+
+Automated public-tree audit evidence recorded on 2026-07-29:
+
+- `./_infra/kit npm audit --audit-level=moderate` reported `found 0 vulnerabilities`.
+- `./_infra/kit composer audit` reported no security vulnerability advisories.
+- `./_infra/kit npm run release:supply-chain-check` passed, including reproducible extension build, built-extension remote-code scan, and tracked-source high-confidence secret scan. Current-source aggregate extension SHA-256: `e7c16aa937ba573a27be9fc8c973cd8f0b75a1a7b18c0a8fe7566ac6a955dad3`.
+- A tracked filename/history audit found no tracked `.env`, private key, certificate, local database, log, browser profile, `node_modules`, or `vendor` paths. The only tracked archive matches were the intentional production extension ZIP artifacts.
+- A high-confidence tracked text scan produced expected false positives only: the public Chrome Web Store public key, placeholder/example environment values, and scanner source patterns.
+- `./_infra/kit ci` passed, covering Composer validation/lint, TypeScript typecheck/lint/tests, formatting, production build, PHP feature/unit suite, and local health check.
+- `./_infra/kit browser-check` passed with 16 Playwright public-page checks.
+- Remaining repository audit evidence before public MVP approval: GitHub secret-scanning status, branch protection/required-check settings, private vulnerability reporting status, Discussions status, repository access review, and final dependency-license review.
 
 ## 12. Static Reference Host
 
@@ -267,6 +311,12 @@ For the first production deployment, run the two migration commands deliberately
 5. Confirm CORS permits noncredentialed access from a separately hosted page.
 6. Confirm cache headers support immutable revision URLs without breaking updates to index pages.
 7. Record the Host URL, example Capsule URLs, headers reviewed, and verification date.
+
+Same-application host evidence recorded on 2026-07-29:
+
+- Production `https://sharecapsules.com/capsules/phase12/tekfoundry-logo.capsule` returned HTTP `200`, `Content-Length: 101759`, `Content-Type: application/octet-stream`, `ETag`, `Last-Modified`, `Accept-Ranges: bytes`, and `X-Content-Type-Options: nosniff`, but did not return public CORS headers for an external `Origin`.
+- Current source now serves the Phase 12 test Capsule through revisioned URL `/phase12/capsules/tekfoundry-logo-r1.capsule` with tested `Access-Control-Allow-Origin: *`, accepted V1 `application/octet-stream` media type, immutable public cache headers, and `nosniff`; this route is covered by `Tests\Feature\Phase12CapsuleTestPageTest` and the full local CI/browser gates. Deploy and verify this route before treating the production same-application Host header check as complete.
+- The separate static reference Host remains a distinct release task.
 
 ## 13. Production Smoke Checks
 
@@ -328,7 +378,10 @@ Partial evidence recorded on 2026-07-28:
 - A production-created Capsule was saved through the Creator Studio flow after broker callback configuration was completed.
 - The Capsule file was copied to a public same-application test location at `/capsules/phase12/tekfoundry-logo.capsule`.
 - The public test page at `/phase12/capsule-test` rendered the protected TekFoundry logo through the Viewer extension.
-- Remaining acceptance items: revocation, account/device revocation, cleanup, load, concurrency, and separate static-host CORS/cache/header verification.
+- After Chrome Web Store publication, the store-installed extension was reconnected and rendered the protected TekFoundry logo at `/phase12/capsule-test`.
+- Per-Capsule `Pause access` prevented the test Capsule from opening; `Resume access` restored opening and rendered the image again.
+- Viewer device suspension prevented the test Capsule from opening; reactivating the Viewer device restored opening and rendered the image again.
+- Remaining acceptance items: permanent Capsule revocation with a disposable Capsule, account closure/deletion, cleanup, load, concurrency, and separate static-host CORS/cache/header verification.
 
 ## 15. Incident Response And Recovery Exercises
 

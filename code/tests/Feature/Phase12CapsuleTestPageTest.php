@@ -13,7 +13,7 @@ final class Phase12CapsuleTestPageTest extends TestCase
             ->assertOk()
             ->assertSee('TekFoundry Logo Capsule')
             ->assertSee('<capsule-viewer', false)
-            ->assertSee('/capsules/phase12/tekfoundry-logo.capsule', false)
+            ->assertSee('/phase12/capsules/tekfoundry-logo-r1.capsule', false)
             ->assertSee('fit="contain"', false)
             ->assertSee('viewer-height="320px"', false)
             ->assertSee('<fallback>', false)
@@ -21,5 +21,21 @@ final class Phase12CapsuleTestPageTest extends TestCase
             ->assertSee('capsule-viewer > error', false);
 
         $this->assertTrue(File::exists(public_path('capsules/phase12/tekfoundry-logo.capsule')));
+    }
+
+    public function test_it_serves_the_test_capsule_with_static_host_headers(): void
+    {
+        $response = $this->withHeader('Origin', 'https://example.com')
+            ->get('/phase12/capsules/tekfoundry-logo-r1.capsule')
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/octet-stream')
+            ->assertHeader('Access-Control-Allow-Origin', '*')
+            ->assertHeader('X-Content-Type-Options', 'nosniff');
+
+        $cacheControl = $response->headers->get('Cache-Control', '');
+
+        $this->assertStringContainsString('public', $cacheControl);
+        $this->assertStringContainsString('max-age=31536000', $cacheControl);
+        $this->assertStringContainsString('immutable', $cacheControl);
     }
 }
