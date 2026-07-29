@@ -23,6 +23,7 @@ use App\Http\Controllers\Ctx\TicketSigningJwksController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\Internal\RedeemBrokerRegistrationGrantController;
 use App\Http\Controllers\Internal\RedeemCtxTicketController;
+use App\Http\Controllers\PublicPhase12CapsuleController;
 use App\Http\Middleware\AssignCorrelationId;
 use App\Http\Middleware\AuthenticateBrokerCallback;
 use App\Http\Middleware\AuthenticateBrokerControlPlane;
@@ -146,6 +147,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
                 return app()->call([app(HealthController::class), '__invoke']);
             })->name('health');
+
+            Route::get('/phase12/capsules/tekfoundry-logo-r1.capsule', PublicPhase12CapsuleController::class)
+                ->name('phase12.capsule');
 
             $tokenRoute = Route::post('/oauth/token', [AccessTokenController::class, 'issueToken'])
                 ->middleware([ValidateTokenEndpointDpop::class, 'throttle:oauth-token'])

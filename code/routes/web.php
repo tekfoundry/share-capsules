@@ -7,7 +7,6 @@ use App\Http\Controllers\Account\AccountSecurityController;
 use App\Http\Controllers\Account\AccountViewerDeviceController;
 use App\Http\Controllers\Auth\AccountRecoveryController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\PublicPhase12CapsuleController;
 use App\Http\Controllers\Studio\CapsuleInventoryController;
 use App\Http\Controllers\ViewerInstallController;
 use Illuminate\Support\Facades\Route;
@@ -25,7 +24,6 @@ Route::view('/how-it-works', 'public.how-it-works')->name('how-it-works');
 Route::view('/instructions', 'public.instructions')->name('instructions');
 Route::view('/technical', 'public.technical')->name('technical');
 Route::view('/phase12/capsule-test', 'public.phase12-capsule-test')->name('phase12.capsule-test');
-Route::get('/phase12/capsules/tekfoundry-logo-r1.capsule', PublicPhase12CapsuleController::class)->name('phase12.capsule');
 Route::get('/viewer/install', ViewerInstallController::class)->name('viewer.install');
 
 Route::view('/terms', 'legal.terms')->name('terms');

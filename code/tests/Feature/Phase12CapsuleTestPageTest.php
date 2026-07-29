@@ -37,5 +37,6 @@ final class Phase12CapsuleTestPageTest extends TestCase
         $this->assertStringContainsString('public', $cacheControl);
         $this->assertStringContainsString('max-age=31536000', $cacheControl);
         $this->assertStringContainsString('immutable', $cacheControl);
+        $this->assertEmpty($response->headers->all('Set-Cookie'));
     }
 }

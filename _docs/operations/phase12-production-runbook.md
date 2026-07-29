@@ -315,7 +315,8 @@ Automated public-tree audit evidence recorded on 2026-07-29:
 Same-application host evidence recorded on 2026-07-29:
 
 - Production `https://sharecapsules.com/capsules/phase12/tekfoundry-logo.capsule` returned HTTP `200`, `Content-Length: 101759`, `Content-Type: application/octet-stream`, `ETag`, `Last-Modified`, `Accept-Ranges: bytes`, and `X-Content-Type-Options: nosniff`, but did not return public CORS headers for an external `Origin`.
-- Current source now serves the Phase 12 test Capsule through revisioned URL `/phase12/capsules/tekfoundry-logo-r1.capsule` with tested `Access-Control-Allow-Origin: *`, accepted V1 `application/octet-stream` media type, immutable public cache headers, and `nosniff`; this route is covered by `Tests\Feature\Phase12CapsuleTestPageTest` and the full local CI/browser gates. Deploy and verify this route before treating the production same-application Host header check as complete.
+- Production `https://sharecapsules.com/phase12/capsules/tekfoundry-logo-r1.capsule` returned HTTP `200`, public CORS, accepted V1 `application/octet-stream` media type, immutable public cache headers, `Content-Length: 101759`, and `nosniff`; `/phase12/capsule-test` still rendered through the store-installed Viewer extension.
+- Current source serves the revisioned Capsule URL outside the Laravel web session middleware so the file response also avoids `Set-Cookie`; this route is covered by `Tests\Feature\Phase12CapsuleTestPageTest` and the full local CI/browser gates. Deploy and verify the no-cookie response before treating the production same-application Host header check as complete.
 - The separate static reference Host remains a distinct release task.
 
 ## 13. Production Smoke Checks
