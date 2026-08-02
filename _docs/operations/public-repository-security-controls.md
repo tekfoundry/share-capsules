@@ -1,7 +1,7 @@
 # Public Repository Security Controls
 
-Status: Phase 10 repo-side baseline
-Last updated: 2026-06-26
+Status: Phase 12 repo-side review in progress
+Last updated: 2026-07-30
 
 ## Repo-Side Controls
 
@@ -10,7 +10,7 @@ The repository includes the following security-control files:
 - `SECURITY.md` directs vulnerability reports away from public issues and toward GitHub private vulnerability reporting or `info@tekfoundry.com`.
 - `.github/dependabot.yml` enables weekly dependency update pull requests for npm, Composer, and GitHub Actions.
 - `.github/workflows/dependency-review.yml` blocks pull requests that introduce moderate-or-higher vulnerable dependency changes.
-- `.github/workflows/codeql.yml` runs CodeQL for JavaScript/TypeScript and PHP on pull requests, pushes to `main`, and weekly scheduled analysis.
+- `.github/workflows/codeql.yml` runs CodeQL for JavaScript/TypeScript and PHP on pull requests, pushes to `master`, and weekly scheduled analysis.
 - `.github/workflows/ci.yml` runs the containerized non-browser and browser checks that should be required by branch protection.
 
 ## Platform Settings To Record
@@ -22,7 +22,7 @@ These controls are configured in GitHub repository settings and require maintain
 - Enable Dependabot security updates and Dependabot alerts.
 - Confirm dependency graph is enabled.
 - Confirm CodeQL/code scanning alerts are enabled.
-- Protect the primary branch and require the CI, Dependency Review, and CodeQL checks before merge.
+- Protect the primary branch and require the CI, Dependency Review, and CodeQL checks before merge unless explicitly deferred for MVP.
 - Restrict force pushes and deletion on the protected primary branch.
 - Record who has repository admin, security manager, maintainer, and Actions-secret access.
 
@@ -45,7 +45,7 @@ Use a GitHub account with repository admin, organization owner, or security mana
 11. Confirm **Code scanning** is active after `.github/workflows/codeql.yml` runs successfully.
 12. Confirm the **Dependency Review** workflow runs on pull requests.
 13. Open **Settings** > **Branches** or **Rulesets**.
-14. Protect the primary branch, normally `main`.
+14. Protect the primary branch, normally `master` for this repository.
 15. Require pull requests before merging.
 16. Require status checks before merging.
 17. Require these checks after they have run at least once:
@@ -99,6 +99,53 @@ Confirmed controls:
 - Repository access review
 
 Residual risk: none recorded for Phase 10. Re-review these settings before public release and after any repository ownership, maintainer, branch-protection, or GitHub security-plan change.
+
+## Recorded Phase 12 Programmatic Review
+
+Date reviewed: 2026-07-30
+
+Reviewer: Codex local working-tree review
+
+Repository remote configured locally: `git@github-work:tekfoundry/share-capsules.git`
+
+Programmatically confirmed from the working tree:
+
+- `SECURITY.md` directs vulnerability reports away from public issues and toward GitHub private vulnerability reporting or `info@tekfoundry.com`.
+- `.github/ISSUE_TEMPLATE/config.yml` disables blank public issues and links security reports to `https://github.com/tekfoundry/share-capsules/security/advisories/new`.
+- `.github/dependabot.yml` configures weekly update pull requests for npm under `/code`, Composer under `/code`, and GitHub Actions under `/`.
+- `.github/workflows/dependency-review.yml` runs on pull requests and fails moderate-or-higher vulnerable dependency changes.
+- `.github/workflows/ci.yml` defines `non-browser-checks` and `browser-checks`.
+- `.github/workflows/codeql.yml` defines CodeQL analysis for `javascript-typescript` and `php`, runs on pull requests, pushes to `master`, and weekly scheduled analysis.
+- `.github/PULL_REQUEST_TEMPLATE.md` asks authors to record verification, documentation status, and security/privacy impact.
+- Repository governance, conduct, contribution, license, notice, third-party notice, funding, and issue-template files are present in the working tree.
+
+Programmatic limits:
+
+- GitHub CLI authentication was unavailable locally: the configured `tekfoundry` token is invalid.
+- Network-backed remote inspection was unavailable from the sandbox during review.
+- GitHub platform settings, branch protection/rulesets, CodeQL alert status, secret scanning status, private vulnerability reporting status, Discussions status, and repository access cannot be treated as re-verified until a maintainer checks them in GitHub or re-authenticates `gh` with sufficient permissions.
+
+Maintainer-confirmed Phase 12 settings:
+
+- Primary branch is `master`.
+- Private vulnerability reporting is enabled.
+- Secret scanning alerts are enabled.
+- Push protection is enabled.
+- Dependency graph is enabled.
+- Dependabot alerts are enabled.
+- Dependabot security updates are enabled.
+- Code scanning is enabled.
+- Discussions are not enabled for MVP.
+- Branch protection/ruleset is not enabled for MVP.
+- Required checks are not configured because branch protection/rulesets are not enabled.
+- Repository and environment secrets are absent.
+- Repository access and Actions/environment secret access were reviewed; no repository or environment secrets exist.
+
+Accepted residual risk for MVP:
+
+- Discussions are intentionally not enabled.
+- Branch protection/rulesets and required checks are deferred.
+- After enabling branch protection/rulesets, require `non-browser-checks`, `browser-checks`, `dependency-review`, `Analyze javascript-typescript`, and `Analyze php` after those checks have run at least once on the protected branch.
 
 ## Evidence Template
 

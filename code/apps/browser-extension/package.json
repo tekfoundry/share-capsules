@@ -4,6 +4,7 @@
     "private": true,
     "type": "module",
     "dependencies": {
+        "@sharecapsules/capsule-creator": "*",
         "@sharecapsules/capsule-core": "*",
         "@sharecapsules/ctx-client": "*",
         "@sharecapsules/share-capsules-adapter": "*"

@@ -1,0 +1,127 @@
+{
+  "type": "share-capsules-extension-release-candidate",
+  "version": 1,
+  "generated_at": "2026-08-01T19:05:56.068Z",
+  "completed_at": "2026-08-01T19:06:05.013Z",
+  "status": "ready-for-manual-web-store-upload",
+  "extension": {
+    "version": "0.1.1",
+    "id": "jkejpdcobbbeichpodpeoiilnalepdph",
+    "name": "Share Capsules"
+  },
+  "artifact": {
+    "path": "code/apps/browser-extension/share-capsules-extension-0.1.1-production.zip",
+    "bytes": 613823,
+    "sha256": "d9544366a50a571fdd3509561b06fcb9312c03e914f57c442086240ecf883c66",
+    "entries": [
+      {
+        "name": "viewer-frame.css",
+        "bytes": 3191,
+        "sha256": "13d6c9de080c05e3cd7387d6dca89af287b68be06906a295485e33ec62f5077c"
+      },
+      {
+        "name": "creator-studio.html",
+        "bytes": 12692,
+        "sha256": "cf7ae948e0d22abee2c8e98881d1caaf4863e2cc4be6f0db8c81a313a54ea7ba"
+      },
+      {
+        "name": "viewer-discovery.js",
+        "bytes": 9495,
+        "sha256": "38f8565e8d64d481d122fd1dc4bd427aafd8dd70f78df4f8de70b3099f59a35d"
+      },
+      {
+        "name": "creator-studio.css",
+        "bytes": 7451,
+        "sha256": "7f981955b8858b4240433cef08d05f3086b15cd01be25d710369f163a0549f66"
+      },
+      {
+        "name": "creator-handoff.js",
+        "bytes": 3135,
+        "sha256": "7b619a721d10c0e57029780edaf8737bcff35c92926ea681d87e9b5a41049121"
+      },
+      {
+        "name": "studio.js",
+        "bytes": 301447,
+        "sha256": "82f3029a745dd634e41ec685cb653db681053054487b6f95313b3f5f254d8768"
+      },
+      {
+        "name": "viewer-frame.html",
+        "bytes": 1198,
+        "sha256": "c9d25c30c8a36a1a47786abd7a048cdae2bcc986831f5a6a370f709c63b28df5"
+      },
+      {
+        "name": "manifest.json",
+        "bytes": 1633,
+        "sha256": "6037d28b79e401e463d57cf60165d3645baab1fc68326c6182e0169c517df285"
+      },
+      {
+        "name": "service-worker.js",
+        "bytes": 7460,
+        "sha256": "f8bc52a025154709a79d9c6fc8df1726cc8c9fa8eda1c7b25b1ff6bd5ad9e026"
+      },
+      {
+        "name": "viewer-frame.js",
+        "bytes": 265017,
+        "sha256": "9af440aad32008b19623908f002204279491db188d74a12e49527ef42b4485e5"
+      }
+    ]
+  },
+  "supply_chain": {
+    "path": "_docs/operations/supply-chain-release-check-latest.json",
+    "status": "passed",
+    "aggregate_sha256": "b8a8ef92dea389e9f21f15bc74f7c0416611300255520a508ac92d6f712dd756"
+  },
+  "gates": [
+    {
+      "name": "npm audit",
+      "status": "passed",
+      "duration_ms": 295
+    },
+    {
+      "name": "composer audit",
+      "status": "passed",
+      "duration_ms": 353
+    },
+    {
+      "name": "npm test:ts",
+      "status": "passed",
+      "duration_ms": 1488
+    },
+    {
+      "name": "npm typecheck",
+      "status": "passed",
+      "duration_ms": 123
+    },
+    {
+      "name": "npm lint",
+      "status": "passed",
+      "duration_ms": 2329
+    },
+    {
+      "name": "composer lint",
+      "status": "passed",
+      "duration_ms": 473
+    },
+    {
+      "name": "npm format:check",
+      "status": "passed",
+      "duration_ms": 2638
+    },
+    {
+      "name": "production extension build",
+      "status": "passed",
+      "duration_ms": 289
+    },
+    {
+      "name": "production supply-chain release check",
+      "status": "passed",
+      "duration_ms": 942
+    }
+  ],
+  "manual_steps": [
+    "Upload the ZIP to the existing Chrome Web Store item.",
+    "Confirm version, extension ID, permissions, and no remote-code warnings in the dashboard.",
+    "Submit for review as a no-behavior-change maintenance/refactor release.",
+    "After publication, smoke test the store-installed extension against https://sharecapsules.com/capsule-test."
+  ]
+}

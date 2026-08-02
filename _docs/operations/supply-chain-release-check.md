@@ -12,16 +12,24 @@ Record repeatable commands for dependency review, static analysis, extension per
 Run from the repository root:
 
 ```sh
+./_infra/kit npm run release:extension:production
+```
+
+The extension release script runs the release gates, builds the production extension with the recorded public production identity, verifies the production manifest, writes the production supply-chain evidence, creates the Chrome Web Store upload ZIP, and writes `extension-release-candidate-latest.json`.
+
+For lower-level troubleshooting, these are the individual gates the release script runs:
+
+```sh
 ./_infra/kit npm audit --audit-level=moderate
 ./_infra/kit composer audit
+./_infra/kit npm run test:ts
 ./_infra/kit npm run lint
 ./_infra/kit composer lint
 ./_infra/kit npm run typecheck
-./_infra/kit npm run build:extension
-./_infra/kit npm run release:supply-chain-check
+./_infra/kit npm run format:check
 ```
 
-The final command builds the unpacked extension twice, compares every built file hash, scans the built extension for remote executable-code references, scans tracked source for high-confidence secret patterns, and writes sanitized JSON evidence.
+The supply-chain portion builds the unpacked extension twice, compares every built file hash, scans the built extension for remote executable-code references, scans tracked source for high-confidence secret patterns, and writes sanitized JSON evidence.
 
 ## Current Evidence
 
@@ -31,7 +39,7 @@ Current result:
 
 - Status: passed
 - Built extension files: 15
-- Extension aggregate SHA-256: `b80e70ba33c66def4ded9c21694040254194facaa417b67abecc8110461319d5`
+- Extension aggregate SHA-256: `b8a8ef92dea389e9f21f15bc74f7c0416611300255520a508ac92d6f712dd756`
 - Reproducible extension build: passed
 - Built extension remote-code scan: passed
 - Tracked-source secret scan: passed
@@ -44,7 +52,7 @@ Current audit and static-analysis command results:
 - `./_infra/kit npm run lint`: passed
 - `./_infra/kit composer lint`: passed
 - `./_infra/kit npm run typecheck`: passed
-- `./_infra/kit npm run build:extension`: passed
+- `./_infra/kit npm run build:extension:production -- --sharecapsules-extension-id=jkejpdcobbbeichpodpeoiilnalepdph --sharecapsules-extension-public-key=<recorded-production-public-key> --sharecapsules-oauth-extension-client-id=418997f0-d3bd-4f91-811b-3352a006220f`: passed
 
 ## Owners
 

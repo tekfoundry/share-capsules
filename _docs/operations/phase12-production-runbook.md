@@ -196,12 +196,26 @@ Scheduler evidence recorded on 2026-07-28:
 Backup evidence recorded on 2026-07-28:
 
 - DigitalOcean automated daily backups are enabled for the production database server.
-- Remaining backup evidence before public MVP approval: confirm coverage for the application, broker, and deletion-ledger databases by name; record retention and latest successful backup time if available; perform or schedule a restore drill.
+
+Backup evidence recorded on 2026-07-30:
+
+- The production database server backup covers all production databases on that server, including application, broker, and deletion-ledger storage.
+- Database backups run daily, are retained for seven days, and carry an accepted recovery-point risk of losing up to one day of data.
+- Production source code is backed up in the Git repository.
+- The production `.env` file is backed up in a 1Password note; no secret values are recorded here.
+- Restore is currently a manual operator process. The data needed to complete a restore is backed up, and the operator has performed manual Laravel application restores before, but this specific production stack has not been restore-drilled.
+- Accepted residual risk for MVP approval: defer the Share Capsules-specific restore drill and record it as an operational follow-up.
 
 Monitoring evidence recorded on 2026-07-28:
 
 - UptimeRobot monitors were added for `https://sharecapsules.com/up` and `https://broker.sharecapsules.com/up`.
-- Remaining alerting evidence before public MVP approval: confirm operator notifications for monitor failures, queue failures, scheduler failures, backup failures, and security/audit events requiring review.
+
+Monitoring evidence recorded on 2026-07-30:
+
+- UptimeRobot alerting is confirmed working for the monitored production health routes.
+- Forge scheduler is configured to run every minute.
+- Forge queue worker is configured as a visible background process.
+- Accepted residual risk for MVP approval: richer internal alerting for queue failures, scheduler failures, backup failures, and security/audit events is deferred to a Phase 12 operations follow-up.
 
 ## 8. Discovery And Signing Keys
 
@@ -263,7 +277,7 @@ Submission evidence recorded on 2026-07-28:
 - The submitted draft uses the fixed production identity that was tested against production.
 - Automatic publishing after review approval was intentionally left enabled for this MVP submission.
 - Review passed and the item was automatically published publicly on 2026-07-29. The dashboard showed status `Published - public`.
-- The store-installed extension was reconnected and rendered the Phase 12 Capsule test image at `/phase12/capsule-test` on 2026-07-29.
+- The store-installed extension was reconnected and rendered the Phase 12 Capsule test image on 2026-07-29. The long-lived canonical route is now `/capsule-test`, and `/phase12/capsule-test` redirects there for compatibility.
 - Public listing URL `https://chromewebstore.google.com/detail/share-capsules/jkejpdcobbbeichpodpeoiilnalepdph` returned HTTP `200` on 2026-07-29.
 
 ## 10. User And Project Documentation
@@ -300,7 +314,27 @@ Automated public-tree audit evidence recorded on 2026-07-29:
 - A high-confidence tracked text scan produced expected false positives only: the public Chrome Web Store public key, placeholder/example environment values, and scanner source patterns.
 - `./_infra/kit ci` passed, covering Composer validation/lint, TypeScript typecheck/lint/tests, formatting, production build, PHP feature/unit suite, and local health check.
 - `./_infra/kit browser-check` passed with 16 Playwright public-page checks.
-- Remaining repository audit evidence before public MVP approval: GitHub secret-scanning status, branch protection/required-check settings, private vulnerability reporting status, Discussions status, repository access review, and final dependency-license review.
+
+Repo-side control evidence recorded on 2026-07-30:
+
+- Local working-tree review confirmed security reporting files, issue templates, pull request template, Dependabot configuration, Dependency Review workflow, CI workflow, and CodeQL workflow are present.
+- CodeQL now defines both `javascript-typescript` and `php` analysis in the workflow matrix, matching the required-check evidence template.
+- CodeQL push scanning targets the confirmed primary branch, `master`.
+
+Extension maintenance release evidence recorded on 2026-08-02:
+
+- `./_infra/kit npm run release:extension:production` prepared extension version `0.1.1` as a no-behavior-change maintenance release after extracting reusable Creator code into `@sharecapsules/capsule-creator`.
+- Release candidate ZIP: `code/apps/browser-extension/share-capsules-extension-0.1.1-production.zip`.
+- Release candidate ZIP SHA-256: `d9544366a50a571fdd3509561b06fcb9312c03e914f57c442086240ecf883c66`.
+- Production-mode supply-chain aggregate SHA-256: `b8a8ef92dea389e9f21f15bc74f7c0416611300255520a508ac92d6f712dd756`.
+- Chrome Web Store review passed and extension version `0.1.1` was released for extension ID `jkejpdcobbbeichpodpeoiilnalepdph`.
+- The store-installed extension continued to render the production test page, now canonicalized at `https://sharecapsules.com/capsule-test`.
+- Local YAML parsing passed for `.github/workflows/codeql.yml`.
+- GitHub CLI authentication was unavailable locally because the configured token is invalid, and network-backed remote inspection was unavailable from the sandbox.
+- Maintainer confirmed private vulnerability reporting, secret scanning, push protection, dependency graph, Dependabot alerts, Dependabot security updates, and code scanning are enabled.
+- Maintainer confirmed the primary branch is `master`, Discussions are not enabled, branch protection/rulesets are not enabled, required checks are not configured, repository/environment secrets are absent, and access has been reviewed.
+- Accepted residual risk for MVP: Discussions, branch protection/rulesets, and required checks are deferred.
+- Remaining repository audit evidence before public MVP approval: final dependency-license review.
 
 ## 12. Static Reference Host
 
@@ -315,8 +349,8 @@ Automated public-tree audit evidence recorded on 2026-07-29:
 Same-application host evidence recorded on 2026-07-29:
 
 - Production `https://sharecapsules.com/capsules/phase12/tekfoundry-logo.capsule` returned HTTP `200`, `Content-Length: 101759`, `Content-Type: application/octet-stream`, `ETag`, `Last-Modified`, `Accept-Ranges: bytes`, and `X-Content-Type-Options: nosniff`, but did not return public CORS headers for an external `Origin`.
-- Production `https://sharecapsules.com/phase12/capsules/tekfoundry-logo-r1.capsule` returned HTTP `200`, public CORS, accepted V1 `application/octet-stream` media type, immutable public cache headers, `Content-Length: 101759`, and `nosniff`; `/phase12/capsule-test` still rendered through the store-installed Viewer extension.
-- Current source serves the revisioned Capsule URL outside the Laravel web session middleware so the file response also avoids `Set-Cookie`; this route is covered by `Tests\Feature\Phase12CapsuleTestPageTest` and the full local CI/browser gates. Deploy and verify the no-cookie response before treating the production same-application Host header check as complete.
+- Production `https://sharecapsules.com/phase12/capsules/tekfoundry-logo-r1.capsule` returned HTTP `200`, public CORS, accepted V1 `application/octet-stream` media type, immutable public cache headers, `Content-Length: 101759`, `nosniff`, and no `Set-Cookie` headers after moving the file route outside Laravel web session middleware; `/capsule-test` rendered through the store-installed Viewer extension.
+- The revisioned same-application Capsule route is covered by `Tests\Feature\Phase12CapsuleTestPageTest` and the full local CI/browser gates.
 - The separate static reference Host remains a distinct release task.
 
 ## 13. Production Smoke Checks
@@ -378,8 +412,8 @@ Partial evidence recorded on 2026-07-28:
 - Production Passport keys were generated outside source control after an initial authorization failure exposed the missing-key condition.
 - A production-created Capsule was saved through the Creator Studio flow after broker callback configuration was completed.
 - The Capsule file was copied to a public same-application test location at `/capsules/phase12/tekfoundry-logo.capsule`.
-- The public test page at `/phase12/capsule-test` rendered the protected TekFoundry logo through the Viewer extension.
-- After Chrome Web Store publication, the store-installed extension was reconnected and rendered the protected TekFoundry logo at `/phase12/capsule-test`.
+- The public test page at `/capsule-test` rendered the protected TekFoundry logo through the Viewer extension.
+- After Chrome Web Store publication, the store-installed extension was reconnected and rendered the protected TekFoundry logo at `/capsule-test`.
 - Per-Capsule `Pause access` prevented the test Capsule from opening; `Resume access` restored opening and rendered the image again.
 - Viewer device suspension prevented the test Capsule from opening; reactivating the Viewer device restored opening and rendered the image again.
 - Remaining acceptance items: permanent Capsule revocation with a disposable Capsule, account closure/deletion, cleanup, load, concurrency, and separate static-host CORS/cache/header verification.

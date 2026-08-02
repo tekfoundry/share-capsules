@@ -21,6 +21,7 @@
         "format:check": "prettier --check .",
         "generate:schema-validators": "node scripts/generate-schema-validators.mjs",
         "lint": "eslint apps packages resources/js scripts tests/Browser playwright.config.ts vite.config.js",
+        "release:extension:production": "node scripts/release-extension-production.mjs",
         "release:supply-chain-check": "node scripts/release-supply-chain-check.mjs",
         "test:browser": "playwright test",
         "test:ts": "vitest run --passWithNoTests",

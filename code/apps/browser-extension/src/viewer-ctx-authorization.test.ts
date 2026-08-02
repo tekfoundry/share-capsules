@@ -65,7 +65,7 @@ describe('Viewer CTX authorization client', () => {
             view_event_consent: true,
             viewer: {
                 name: 'share-capsules-chromium-extension',
-                version: '0.1.0',
+                version: '0.1.1',
                 browser_family: 'Chrome',
                 browser_major: 149,
             },

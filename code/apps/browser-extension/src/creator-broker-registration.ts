@@ -4,8 +4,12 @@ import {
     encodeBase64Url,
     parseCtxPolicyV1,
     sha256Base64Url,
-    type CtxPolicyV1,
 } from '@sharecapsules/capsule-core';
+import {
+    createBrokerRegistrationId,
+    type CreatorBrokerRegistrationInput,
+    type CreatorBrokerRegistrationResult,
+} from '@sharecapsules/capsule-creator';
 
 import { CreatorPayloadSecrets } from './creator-payload-secrets.js';
 import { DpopProofFactory } from './dpop.js';
@@ -18,24 +22,8 @@ export interface CreatorBrokerRegistrationConfiguration {
     readonly lifecycleBaseEndpoint: string;
 }
 
-export interface CreatorBrokerRegistrationInput {
-    readonly registrationId: string;
-    readonly capsuleId: string;
-    readonly capsuleRevision: number;
-    readonly payloadId: string;
-    readonly policySha256: string;
-    readonly policy: CtxPolicyV1;
-    readonly title: string;
-    readonly contentProfileId: string;
-    readonly contentProfileVersion: string;
-    readonly mediaType: string;
-}
-
-export interface CreatorBrokerRegistrationResult {
-    readonly broker: string;
-    readonly releaseHandle: string;
-    readonly registrationId: string;
-}
+export { createBrokerRegistrationId };
+export type { CreatorBrokerRegistrationInput, CreatorBrokerRegistrationResult };
 
 export interface JsonPostResponse {
     readonly status: number;
@@ -305,13 +293,6 @@ export class CreatorBrokerRegistrationClient {
             throw new CreatorBrokerRegistrationError(errorCode);
         }
     }
-}
-
-export function createBrokerRegistrationId(
-    randomUUID: () => `${string}-${string}-${string}-${string}-${string}` = () =>
-        crypto.randomUUID(),
-): string {
-    return `registration_${randomUUID().replaceAll('-', '')}`;
 }
 
 function parseGrantResponse(

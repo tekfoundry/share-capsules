@@ -1,0 +1,175 @@
+{
+    "fixture": "creator-build/full-static-image",
+    "fixture_version": 1,
+    "note": "Sanitized deterministic fixture. Keys, nonces, tokens, and browser session data are test-only or omitted.",
+    "policy": {
+        "type": "ctx-policy",
+        "version": 1,
+        "combiner": "all",
+        "requirements": [
+            {
+                "predicate": "ctx.account.email-verified",
+                "equals": true
+            },
+            {
+                "predicate": "ctx.account.active",
+                "equals": true
+            },
+            {
+                "predicate": "ctx.viewer.device-registered",
+                "equals": true
+            },
+            {
+                "predicate": "ctx.consent.capsule-view-event",
+                "equals": true
+            },
+            {
+                "predicate": "ctx.time.capsule-access-window",
+                "not_before": "2026-07-01T05:00:00Z",
+                "not_after": "2026-08-01T05:00:00Z"
+            },
+            {
+                "predicate": "ctx.usage.capsule-lifetime-limit",
+                "scope": "capsule",
+                "maximum": 10
+            },
+            {
+                "predicate": "ctx.usage.capsule-account-lifetime-limit",
+                "scope": "account-and-capsule",
+                "maximum": 2
+            },
+            {
+                "predicate": "ctx.risk.ecosystem-automation-not-high",
+                "issuer": "https://trust.example"
+            }
+        ]
+    },
+    "policy_sha256": "dH2h1_urqn8JzpLUK0qsvm57vxOJfnEfNU39NJibxNc",
+    "manifest": {
+        "type": "capsule-manifest",
+        "format_version": "1.0",
+        "capsule": {
+            "id": "urn:uuid:00000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "created_at": "2026-06-21T12:00:00Z"
+        },
+        "cryptographic_suite": "ctx-capsule-v1",
+        "creator": {
+            "signing_key": {
+                "id": "creator_test_only_deterministic_baseline",
+                "algorithm": "Ed25519",
+                "public_key": "Fqprzgfmr3GWCjvYsnlS3xvsZMcMZcQl8gCBsfJiMC4"
+            }
+        },
+        "content_profile": {
+            "id": "ctx.content.static-image",
+            "version": "1.0"
+        },
+        "description": {
+            "title": "Protected image",
+            "description": "A test image."
+        },
+        "policy": {
+            "type": "ctx-policy",
+            "version": 1,
+            "combiner": "all",
+            "requirements": [
+                {
+                    "predicate": "ctx.account.email-verified",
+                    "equals": true
+                },
+                {
+                    "predicate": "ctx.account.active",
+                    "equals": true
+                },
+                {
+                    "predicate": "ctx.viewer.device-registered",
+                    "equals": true
+                },
+                {
+                    "predicate": "ctx.consent.capsule-view-event",
+                    "equals": true
+                },
+                {
+                    "predicate": "ctx.time.capsule-access-window",
+                    "not_before": "2026-07-01T05:00:00Z",
+                    "not_after": "2026-08-01T05:00:00Z"
+                },
+                {
+                    "predicate": "ctx.usage.capsule-lifetime-limit",
+                    "scope": "capsule",
+                    "maximum": 10
+                },
+                {
+                    "predicate": "ctx.usage.capsule-account-lifetime-limit",
+                    "scope": "account-and-capsule",
+                    "maximum": 2
+                },
+                {
+                    "predicate": "ctx.risk.ecosystem-automation-not-high",
+                    "issuer": "https://trust.example"
+                }
+            ]
+        },
+        "ctx": {
+            "issuer": "https://share.example"
+        },
+        "payloads": [
+            {
+                "id": "primary",
+                "path": "payloads/primary.enc",
+                "media_type": "image/png",
+                "plaintext_size": 4,
+                "ciphertext_size": 20,
+                "ciphertext_sha256": "bttw-iZlogUkYZ0uTmK-wUhI2saD5AFPiB7Yy4rpGMQ",
+                "encryption": {
+                    "representation": "whole",
+                    "nonce": "AwMDAwMDAwMDAwMD"
+                },
+                "key_release": {
+                    "broker": "https://broker.example",
+                    "handle": "CAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg"
+                },
+                "profile_metadata": {
+                    "width": 2,
+                    "height": 2,
+                    "pixel_count": 4
+                }
+            }
+        ]
+    },
+    "canonical_manifest_sha256": "WNjjhotE_KifCkLswJoQe1KgEk4VKjzn6qcCuUjrpzw",
+    "manifest_signature_sha256": "S7mAatWu8pXgf574tMJhBpy-SgHwdRfdTW2qcu9Wb8I",
+    "encrypted_payload_sha256": "bttw-iZlogUkYZ0uTmK-wUhI2saD5AFPiB7Yy4rpGMQ",
+    "archive_sha256": "ewEop3S2WsY6ehxHgd_h88Ds2VPNHu6v7SEjUkZHlao",
+    "archive_entries": [
+        {
+            "name": "manifest.json",
+            "size": 1650
+        },
+        {
+            "name": "manifest.sig",
+            "size": 64
+        },
+        {
+            "name": "payloads/primary.enc",
+            "size": 20
+        }
+    ],
+    "broker_registration_input": {
+        "registrationId": "registration_00000000000040008000000000000002",
+        "capsuleId": "urn:uuid:00000000-0000-4000-8000-000000000001",
+        "capsuleRevision": 1,
+        "payloadId": "primary",
+        "policySha256": "dH2h1_urqn8JzpLUK0qsvm57vxOJfnEfNU39NJibxNc",
+        "title": "Protected image",
+        "contentProfileId": "ctx.content.static-image",
+        "contentProfileVersion": "1.0",
+        "mediaType": "image/png",
+        "contentKeySha256": "ZIqlxXn7MPOK90TZfW7IQMepEnekmaDXgPPnMU7KCQs"
+    },
+    "broker_lifecycle": {
+        "finalized": true,
+        "cancelled": false
+    }
+}

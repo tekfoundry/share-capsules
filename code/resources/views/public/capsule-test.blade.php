@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Phase 12 Capsule Test - Share Capsules')
-@section('description', 'Production acceptance test page for a Share Capsules encrypted Capsule.')
+@section('title', 'Capsule Test - Share Capsules')
+@section('description', 'Public test page for a Share Capsules encrypted Capsule.')
 
 @php
     $capsuleUrl = route('phase12.capsule');
@@ -18,9 +18,9 @@
 
 @section('content')
     <section class="mx-auto max-w-4xl px-5 py-14 sm:px-8 lg:px-10">
-        <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">Phase 12 Test</p>
+        <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">Capsule Test</p>
         <h1 class="mt-3 text-4xl font-bold text-ink sm:text-5xl">TekFoundry Logo Capsule</h1>
-        <p class="mt-4 max-w-2xl text-base leading-7 text-muted">This public page hosts a production-created Capsule for the clean-account viewer acceptance check.</p>
+        <p class="mt-4 max-w-2xl text-base leading-7 text-muted">This public page hosts a production-created Capsule for viewer acceptance checks.</p>
 
         <div class="mt-8 rounded-2xl border border-line bg-white p-5 shadow-card sm:p-8">
             <capsule-viewer

@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Share Capsules (Development)",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Creates and views Share Capsules without exposing protected content to websites.",
     "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlOwE0UgfIp5MUQNusv7zGk9LpXxwjGwHSxjsS+CsvNgf3ce8BBq9YJ/C5sNJnXQp3x3J6jShtovhn2QPffjdTprN8ypI5OfjhpXYXSjlod7EzvioatwoCCLg2pnrudLgBv12td9reLPhumtntyRkPzSPlPJ8wtC1Pl1a2HYu4nnSFePtH/Bbus6TvnYOJcfhzAcVgMpPFsPndDlL0XOJaMsgtMfwwzBcad+YhOa8vvqFrzJZdnnjfpyO72uQYg1uNPUemoQKTe66EDXhdHZphoJfLF1a4qUmr721ZscBJIpK0bJ6wf9VGbh9bqTWfDTuCgrGBrrXu7qgfKlWZb/VVwIDAQAB",
     "permissions": ["identity", "scripting", "storage"],

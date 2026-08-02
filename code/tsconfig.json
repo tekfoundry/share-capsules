@@ -3,6 +3,7 @@
     "files": [],
     "references": [
         { "path": "./packages/capsule-core" },
+        { "path": "./packages/capsule-creator" },
         { "path": "./packages/ctx-client" },
         { "path": "./packages/share-capsules-adapter" },
         { "path": "./packages/test-fixtures" },

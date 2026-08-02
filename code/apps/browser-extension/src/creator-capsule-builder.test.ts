@@ -1,17 +1,22 @@
 import {
+    canonicalizeCapsuleManifest,
     ctxPolicySha256,
     decryptPayloadV1,
     encodeBase64Url,
+    expectedArchiveEntries,
     payloadEncryptionContextFromManifest,
+    sha256Base64Url,
     verifyCapsuleManifestSignature,
     type StaticImageMetadataV1,
 } from '@sharecapsules/capsule-core';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
 
 import {
     CreatorCapsuleBuildError,
     CreatorCapsuleBuilderV1,
     buildCtxPolicyV1,
+    type BuiltCapsuleV1,
     type BrokerKeyRegistrar,
 } from './creator-capsule-builder.js';
 import { CreatorPayloadSecretsFactory } from './creator-payload-secrets.js';
@@ -19,11 +24,16 @@ import type { CreatorSigningKeyRecord } from './creator-signing-key.js';
 import { parseCreatorStudioDraftV1 } from './creator-studio.js';
 import type { OAuthTokenSet } from './oauth.js';
 import type { StoredViewerDeviceKeys } from './viewer-device.js';
+import { createPrivateKey, createPublicKey } from 'node:crypto';
 
 const CAPSULE_ID = 'urn:uuid:00000000-0000-4000-8000-000000000001';
 const REGISTRATION_ID = 'registration_00000000000040008000000000000002';
 const BROKER = 'https://broker.example';
 const RELEASE_HANDLE = encodeBase64Url(new Uint8Array(32).fill(8));
+const CREATOR_BUILD_BASELINE = new URL(
+    '../../../tests/fixtures/creator-build-baseline/full-static-image.json',
+    import.meta.url,
+);
 
 describe('local Creator Capsule builder', () => {
     it('allows the explicit localhost development issuer without allowing public HTTP', () => {
@@ -134,6 +144,27 @@ describe('local Creator Capsule builder', () => {
         expect(broker.cancelled).toBe(false);
     });
 
+    it('matches the committed deterministic Creator build baseline', async () => {
+        const plaintext = Uint8Array.from([1, 2, 3, 4]);
+        const broker = new RecordingBroker();
+        const built = await builderUsing(broker, new RecordingSecretFactory()).build({
+            draft: fullDraft(),
+            source: { size: plaintext.byteLength, read: async () => plaintext },
+            metadata: metadata(plaintext.byteLength),
+            signingKey: await deterministicCreatorSigningKey(),
+            token: token(),
+            device: await device(),
+        });
+        const baseline = await sanitizedBaseline(built, broker);
+
+        if (process.env.UPDATE_CREATOR_BUILD_BASELINE === '1') {
+            await mkdir(new URL('.', CREATOR_BUILD_BASELINE), { recursive: true });
+            await writeFile(CREATOR_BUILD_BASELINE, `${JSON.stringify(baseline, null, 2)}\n`);
+        }
+
+        await expect(readJson(CREATOR_BUILD_BASELINE)).resolves.toEqual(baseline);
+    });
+
     it('builds the mandatory policy without inventing omitted optional gates', () => {
         const policy = buildCtxPolicyV1(
             parseCreatorStudioDraftV1({
@@ -151,6 +182,101 @@ describe('local Creator Capsule builder', () => {
             'ctx.viewer.device-registered',
             'ctx.consent.capsule-view-event',
         ]);
+    });
+
+    it.each([
+        [
+            'open',
+            {
+                automation_risk_required: false,
+            },
+            [
+                'ctx.account.email-verified',
+                'ctx.account.active',
+                'ctx.viewer.device-registered',
+                'ctx.consent.capsule-view-event',
+            ],
+        ],
+        [
+            'time-window',
+            {
+                access_window: {
+                    not_before: '2026-07-01T05:00:00Z',
+                    not_after: '2026-08-01T05:00:00Z',
+                },
+                automation_risk_required: false,
+            },
+            [
+                'ctx.account.email-verified',
+                'ctx.account.active',
+                'ctx.viewer.device-registered',
+                'ctx.consent.capsule-view-event',
+                'ctx.time.capsule-access-window',
+            ],
+        ],
+        [
+            'limit',
+            {
+                capsule_lifetime_maximum: 10,
+                account_capsule_lifetime_maximum: 2,
+                automation_risk_required: false,
+            },
+            [
+                'ctx.account.email-verified',
+                'ctx.account.active',
+                'ctx.viewer.device-registered',
+                'ctx.consent.capsule-view-event',
+                'ctx.usage.capsule-lifetime-limit',
+                'ctx.usage.capsule-account-lifetime-limit',
+            ],
+        ],
+        [
+            'trust',
+            {
+                automation_risk_required: true,
+            },
+            [
+                'ctx.account.email-verified',
+                'ctx.account.active',
+                'ctx.viewer.device-registered',
+                'ctx.consent.capsule-view-event',
+                'ctx.risk.ecosystem-automation-not-high',
+            ],
+        ],
+        [
+            'combined',
+            {
+                access_window: {
+                    not_before: '2026-07-01T05:00:00Z',
+                    not_after: '2026-08-01T05:00:00Z',
+                },
+                capsule_lifetime_maximum: 10,
+                account_capsule_lifetime_maximum: 2,
+                automation_risk_required: true,
+            },
+            [
+                'ctx.account.email-verified',
+                'ctx.account.active',
+                'ctx.viewer.device-registered',
+                'ctx.consent.capsule-view-event',
+                'ctx.time.capsule-access-window',
+                'ctx.usage.capsule-lifetime-limit',
+                'ctx.usage.capsule-account-lifetime-limit',
+                'ctx.risk.ecosystem-automation-not-high',
+            ],
+        ],
+    ] as const)('builds the expected %s CTX policy shape', (_, policyDraft, predicates) => {
+        const policy = buildCtxPolicyV1(
+            parseCreatorStudioDraftV1({
+                version: 1,
+                description: { title: 'Policy matrix' },
+                fallback: { alt_text: 'Policy matrix' },
+                policy: policyDraft,
+            }),
+            'https://trust.example',
+        );
+
+        expect(policy.requirements.map((item) => item.predicate)).toEqual(predicates);
     });
 
     it('builds a trust policy with a loopback development issuer only', () => {
@@ -372,6 +498,104 @@ async function creatorSigningKey(): Promise<CreatorSigningKeyRecord> {
         recoveryStatus: 'confirmed',
         recoveryConfirmedAt: '2026-06-21T11:05:00.000Z',
     };
+}
+
+async function deterministicCreatorSigningKey(): Promise<CreatorSigningKeyRecord> {
+    const seed = await sha256Bytes(
+        new TextEncoder().encode('sharecapsules:test-only:creator-build-baseline:ed25519'),
+    );
+    const pkcs8 = ed25519Pkcs8FromSeed(seed);
+    const privateKey = await crypto.subtle.importKey('pkcs8', pkcs8, 'Ed25519', false, ['sign']);
+
+    return {
+        id: 'creator_test_only_deterministic_baseline',
+        algorithm: 'Ed25519',
+        publicKey: encodeBase64Url(rawEd25519PublicKeyFromPkcs8(pkcs8)),
+        privateKey,
+        status: 'active',
+        createdAt: '2026-06-21T11:00:00.000Z',
+        statusChangedAt: '2026-06-21T11:00:00.000Z',
+        recoveryStatus: 'confirmed',
+        recoveryConfirmedAt: '2026-06-21T11:05:00.000Z',
+    };
+}
+
+function ed25519Pkcs8FromSeed(seed: Uint8Array): ArrayBuffer {
+    const prefix = Uint8Array.from([
+        0x30, 0x2e, 0x02, 0x01, 0x00, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65, 0x70, 0x04, 0x22, 0x04,
+        0x20,
+    ]);
+    const pkcs8 = new Uint8Array(prefix.byteLength + seed.byteLength);
+    pkcs8.set(prefix);
+    pkcs8.set(seed, prefix.byteLength);
+    return pkcs8.buffer;
+}
+
+function rawEd25519PublicKeyFromPkcs8(pkcs8: ArrayBuffer): Uint8Array {
+    const privateKey = createPrivateKey({
+        key: Buffer.from(pkcs8),
+        format: 'der',
+        type: 'pkcs8',
+    });
+    const publicKey = createPublicKey(privateKey);
+    const spki = new Uint8Array(publicKey.export({ format: 'der', type: 'spki' }));
+    return spki.slice(-32);
+}
+
+async function sanitizedBaseline(built: BuiltCapsuleV1, broker: RecordingBroker) {
+    if (broker.input === undefined) throw new Error('Broker input was not captured.');
+    const manifestBytes = canonicalizeCapsuleManifest(built.manifest);
+    const archiveEntries = expectedArchiveEntries(built.manifest).map((name) => ({
+        name,
+        size:
+            name === 'manifest.json'
+                ? manifestBytes.byteLength
+                : name === 'manifest.sig'
+                  ? built.manifestSignature.byteLength
+                  : built.encryptedPayload.byteLength,
+    }));
+
+    return {
+        fixture: 'creator-build/full-static-image',
+        fixture_version: 1,
+        note: 'Sanitized deterministic fixture. Keys, nonces, tokens, and browser session data are test-only or omitted.',
+        policy: built.manifest.policy,
+        policy_sha256: await ctxPolicySha256(built.manifest.policy),
+        manifest: built.manifest,
+        canonical_manifest_sha256: await sha256Base64Url(manifestBytes),
+        manifest_signature_sha256: await sha256Base64Url(built.manifestSignature),
+        encrypted_payload_sha256: await sha256Base64Url(built.encryptedPayload),
+        archive_sha256: await sha256Base64Url(built.archive),
+        archive_entries: archiveEntries,
+        broker_registration_input: {
+            registrationId: broker.input.registrationId,
+            capsuleId: broker.input.capsuleId,
+            capsuleRevision: broker.input.capsuleRevision,
+            payloadId: broker.input.payloadId,
+            policySha256: broker.input.policySha256,
+            title: broker.input.title,
+            contentProfileId: broker.input.contentProfileId,
+            contentProfileVersion: broker.input.contentProfileVersion,
+            mediaType: broker.input.mediaType,
+            contentKeySha256: await sha256Base64Url(broker.contentKey),
+        },
+        broker_lifecycle: {
+            finalized: broker.finalized,
+            cancelled: broker.cancelled,
+        },
+    };
+}
+
+async function readJson(url: URL): Promise<unknown> {
+    return JSON.parse(await readFile(url, 'utf8')) as unknown;
+}
+
+async function sha256Bytes(value: Uint8Array): Promise<Uint8Array> {
+    return new Uint8Array(await crypto.subtle.digest('SHA-256', asArrayBuffer(value)));
+}
+
+function asArrayBuffer(value: Uint8Array): ArrayBuffer {
+    return value.slice().buffer;
 }
 
 function token(): OAuthTokenSet {

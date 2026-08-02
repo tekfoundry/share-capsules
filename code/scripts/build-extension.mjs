@@ -171,7 +171,7 @@ function manifest(config) {
     const base = {
         manifest_version: 3,
         name: config.name,
-        version: '0.1.0',
+        version: '0.1.1',
         description:
             'Creates and views Share Capsules without exposing protected content to websites.',
         permissions: ['identity', 'scripting', 'storage'],
