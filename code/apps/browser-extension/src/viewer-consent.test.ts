@@ -10,7 +10,7 @@ const POLICY_A = 'A'.repeat(43);
 const POLICY_B = 'B'.repeat(43);
 
 describe('Viewer disclosure consent', () => {
-    it('stores standing consent scoped to site origin, CTX issuer, and signed policy digest', async () => {
+    it('stores standing consent scoped to site origin and CTX issuer', async () => {
         const storage = new MemoryStorage();
         const store = new ViewerDisclosureConsentStore(
             storage,
@@ -48,7 +48,7 @@ describe('Viewer disclosure consent', () => {
             store.hasStandingConsent(
                 viewerConsentScope('https://example.com', 'https://trust.example', POLICY_B),
             ),
-        ).resolves.toBe(false);
+        ).resolves.toBe(true);
     });
 
     it('deduplicates repeated grants and drops malformed stored records', async () => {
@@ -100,7 +100,7 @@ describe('Viewer disclosure consent', () => {
                 ctxIssuer: 'https://trust.example',
                 policySha256: POLICY_A,
                 grantedAt: '2026-06-23T12:00:00.000Z',
-                automaticOpening: 'enabled-for-matching-site-issuer-and-policy',
+                automaticOpening: 'enabled-for-matching-site-and-issuer',
                 ctxDisclosureScope: 'account-device-policy-limits-and-key-release',
                 measurementScope: 'view-event-accounting-on-successful-key-release',
                 retentionScope: 'provider-retention-policy',
@@ -109,7 +109,7 @@ describe('Viewer disclosure consent', () => {
         ]);
     });
 
-    it('revokes one standing consent without removing other site or policy scopes', async () => {
+    it('revokes one standing consent without removing other site scopes', async () => {
         const storage = new MemoryStorage();
         const store = new ViewerDisclosureConsentStore(storage);
         const first = viewerConsentScope('https://example.com', 'https://trust.example', POLICY_A);
@@ -127,7 +127,7 @@ describe('Viewer disclosure consent', () => {
         await expect(store.revokeStandingConsent(first)).resolves.toBe(true);
         await expect(store.revokeStandingConsent(first)).resolves.toBe(false);
         await expect(store.hasStandingConsent(first)).resolves.toBe(false);
-        await expect(store.hasStandingConsent(second)).resolves.toBe(true);
+        await expect(store.hasStandingConsent(second)).resolves.toBe(false);
         await expect(store.hasStandingConsent(third)).resolves.toBe(true);
     });
 
@@ -145,7 +145,7 @@ describe('Viewer disclosure consent', () => {
             viewerConsentScope('https://other.example', 'https://trust.example', POLICY_A),
         );
 
-        await expect(store.revokeSiteConsents('https://example.com/settings')).resolves.toBe(2);
+        await expect(store.revokeSiteConsents('https://example.com/settings')).resolves.toBe(1);
         await expect(store.listStandingConsents()).resolves.toEqual([
             expect.objectContaining({ siteOrigin: 'https://other.example' }),
         ]);

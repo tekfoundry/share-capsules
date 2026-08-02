@@ -342,9 +342,8 @@ async function renderAuthorizationGate(
         'action_required',
         `Verified “${summary.title ?? 'Capsule'}”. Approve view-event accounting before authorization.`,
     );
-    const remember = checkbox(
-        'Remember this consent for this site when the signed policy is unchanged.',
-    );
+    const remember = checkbox('Remember this consent for other Capsules on this site.');
+    remember.input.checked = true;
     const approve = button('Approve and continue');
     approve.addEventListener('click', () => {
         void withDisabledButton(approve, async () => {

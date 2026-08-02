@@ -16,7 +16,7 @@ export interface ViewerDisclosureConsentRecord extends ViewerConsentScope {
 }
 
 export interface ViewerDisclosureConsentInspection extends ViewerDisclosureConsentRecord {
-    readonly automaticOpening: 'enabled-for-matching-site-issuer-and-policy';
+    readonly automaticOpening: 'enabled-for-matching-site-and-issuer';
     readonly ctxDisclosureScope: 'account-device-policy-limits-and-key-release';
     readonly measurementScope: 'view-event-accounting-on-successful-key-release';
     readonly retentionScope: 'provider-retention-policy';
@@ -41,7 +41,7 @@ export class ViewerDisclosureConsentStore {
             (await this.records()).map((record) =>
                 Object.freeze({
                     ...record,
-                    automaticOpening: 'enabled-for-matching-site-issuer-and-policy',
+                    automaticOpening: 'enabled-for-matching-site-and-issuer',
                     ctxDisclosureScope: 'account-device-policy-limits-and-key-release',
                     measurementScope: 'view-event-accounting-on-successful-key-release',
                     retentionScope: 'provider-retention-policy',
@@ -157,7 +157,7 @@ function parseRecord(value: unknown): ViewerDisclosureConsentRecord | undefined 
 }
 
 function consentKey(scope: ViewerConsentScope): string {
-    return `${scope.siteOrigin}\n${scope.ctxIssuer}\n${scope.policySha256}`;
+    return `${scope.siteOrigin}\n${scope.ctxIssuer}`;
 }
 
 function normalizedSiteOrigin(value: string): string {
