@@ -6,7 +6,7 @@ import { TextEncoder } from 'node:util';
 
 const codeRoot = resolve(import.meta.dirname, '..');
 const repositoryRoot = resolve(codeRoot, '..');
-const extensionBuild = resolve(codeRoot, 'apps/browser-extension/build');
+const extensionBuild = resolve(codeRoot, 'apps/browser-extension/build/production');
 const extensionSource = resolve(codeRoot, 'apps/browser-extension');
 const releaseEvidencePath = resolve(
     repositoryRoot,

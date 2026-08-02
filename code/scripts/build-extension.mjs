@@ -6,8 +6,9 @@ import { build } from 'vite';
 
 const root = resolve(import.meta.dirname, '..');
 const source = resolve(root, 'apps/browser-extension');
-const output = resolve(source, 'build');
 const target = buildTarget();
+const output = resolve(source, 'build', buildOutputDirectory(target));
+const releaseVersion = await sourceReleaseVersion();
 const config = extensionConfig(target);
 
 await rm(output, { recursive: true, force: true });
@@ -102,6 +103,20 @@ function buildTarget() {
     );
 }
 
+function buildOutputDirectory(buildTarget) {
+    return buildTarget === 'development' ? 'development' : 'production';
+}
+
+async function sourceReleaseVersion() {
+    const text = await readFile(resolve(source, 'src/viewer-release.ts'), 'utf8');
+    const match = /version:\s*'(?<version>\d+\.\d+\.\d+)'/u.exec(text);
+    if (match?.groups?.version === undefined) {
+        throw new Error('Could not read extension release version from viewer-release.ts.');
+    }
+
+    return match.groups.version;
+}
+
 function extensionConfig(buildTarget) {
     if (buildTarget === 'development') {
         return {
@@ -171,7 +186,7 @@ function manifest(config) {
     const base = {
         manifest_version: 3,
         name: config.name,
-        version: '0.1.1',
+        version: releaseVersion,
         description:
             'Creates and views Share Capsules without exposing protected content to websites.',
         permissions: ['identity', 'scripting', 'storage'],

@@ -42,6 +42,9 @@ services:
       SHARECAPSULES_BROKER_CONTROL_PLANE_TOKEN: ${BROKER_CONTROL_PLANE_TOKEN}
       SHARECAPSULES_BROKER_CALLBACK_TOKEN: ${BROKER_CALLBACK_TOKEN:-dev-broker-callback-token-0001-safe-change-me}
       SHARECAPSULES_BROKER_INTERNAL_URL: http://broker:3000
+      BROKER_KMS_DRIVER: local
+      BROKER_KMS_KEY_ID: local-development-key-0001
+      BROKER_LOCAL_KMS_KEY: ${BROKER_LOCAL_KMS_KEY}
     volumes: &app_volumes
       - ..:/workspace
       - code_vendor:/workspace/code/vendor

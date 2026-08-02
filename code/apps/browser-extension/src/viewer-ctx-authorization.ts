@@ -9,6 +9,18 @@ import { VIEWER_RELEASE } from './viewer-release.js';
 export interface ViewerCtxAuthorizationTicket {
     readonly ticket: string;
     readonly expiresIn: number;
+    readonly usage?: ViewerCtxAuthorizationUsage;
+}
+
+export interface ViewerCtxAuthorizationUsageLimit {
+    readonly used: number;
+    readonly maximum: number;
+    readonly remaining: number;
+}
+
+export interface ViewerCtxAuthorizationUsage {
+    readonly capsuleLifetime?: ViewerCtxAuthorizationUsageLimit;
+    readonly accountCapsuleLifetime?: ViewerCtxAuthorizationUsageLimit;
 }
 
 export type ViewerCtxAuthorizationFailureCode =
@@ -204,7 +216,10 @@ function parseAuthorizationResponse(value: unknown): ViewerCtxAuthorizationTicke
     const record = value as Record<string, unknown>;
     const keys = Object.keys(record).sort();
     if (
-        keys.join(',') !== 'expires_in,ticket,type,version' ||
+        !(
+            keys.join(',') === 'expires_in,ticket,type,version' ||
+            keys.join(',') === 'expires_in,ticket,type,usage,version'
+        ) ||
         record.type !== 'ctx-authorization' ||
         record.version !== 1 ||
         typeof record.ticket !== 'string' ||
@@ -217,7 +232,63 @@ function parseAuthorizationResponse(value: unknown): ViewerCtxAuthorizationTicke
         throw new ViewerCtxAuthorizationParseError();
     }
 
-    return Object.freeze({ ticket: record.ticket, expiresIn: record.expires_in });
+    return Object.freeze({
+        ticket: record.ticket,
+        expiresIn: record.expires_in,
+        usage: Object.hasOwn(record, 'usage') ? parseAuthorizationUsage(record.usage) : undefined,
+    });
+}
+
+function parseAuthorizationUsage(value: unknown): ViewerCtxAuthorizationUsage {
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+        throw new ViewerCtxAuthorizationParseError();
+    }
+    const record = value as Record<string, unknown>;
+    const keys = Object.keys(record).sort();
+    if (
+        !keys.every((key) => ['account_capsule_lifetime', 'capsule_lifetime'].includes(key)) ||
+        keys.length === 0
+    ) {
+        throw new ViewerCtxAuthorizationParseError();
+    }
+
+    return Object.freeze({
+        capsuleLifetime: Object.hasOwn(record, 'capsule_lifetime')
+            ? parseAuthorizationUsageLimit(record.capsule_lifetime)
+            : undefined,
+        accountCapsuleLifetime: Object.hasOwn(record, 'account_capsule_lifetime')
+            ? parseAuthorizationUsageLimit(record.account_capsule_lifetime)
+            : undefined,
+    });
+}
+
+function parseAuthorizationUsageLimit(value: unknown): ViewerCtxAuthorizationUsageLimit {
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+        throw new ViewerCtxAuthorizationParseError();
+    }
+    const record = value as Record<string, unknown>;
+    const keys = Object.keys(record).sort();
+    if (
+        keys.join(',') !== 'maximum,remaining,used' ||
+        !isUsageInteger(record.used) ||
+        !isUsageInteger(record.maximum) ||
+        !isUsageInteger(record.remaining) ||
+        record.maximum < 1 ||
+        record.used > record.maximum ||
+        record.remaining !== record.maximum - record.used
+    ) {
+        throw new ViewerCtxAuthorizationParseError();
+    }
+
+    return Object.freeze({
+        used: record.used,
+        maximum: record.maximum,
+        remaining: record.remaining,
+    });
+}
+
+function isUsageInteger(value: unknown): value is number {
+    return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0;
 }
 
 function parseChallengeAttemptResponse(value: unknown): ViewerCtxChallengeAttempt {

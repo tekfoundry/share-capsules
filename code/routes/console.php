@@ -63,6 +63,12 @@ Schedule::command('capsules:clean-pending')
     ->onOneServer()
     ->withoutOverlapping();
 
+Schedule::command('showcase:generate-capsules', ['--force' => true])
+    ->dailyAt('03:15')
+    ->when(fn (): bool => (bool) config('showcase.generation.enabled'))
+    ->onOneServer()
+    ->withoutOverlapping();
+
 Schedule::call(fn () => app(TicketSigningKeyLifecycle::class)->retireExpired())
     ->everyMinute()
     ->name('ctx-ticket-signing-key-retirement')

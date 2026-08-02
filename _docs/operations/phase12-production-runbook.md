@@ -33,7 +33,7 @@ The production Forge environment cannot be finalized until the production Chrome
    ./_infra/kit npm run build:extension:reservation
    ```
 
-   Upload the contents of `code/apps/browser-extension/build` as the draft extension package.
+   Upload the contents of `code/apps/browser-extension/build/production` as the draft extension package.
 3. In the Chrome Developer Dashboard, create a new item and upload the candidate ZIP without publishing it. The Chrome docs describe this as the way to preserve a stable extension ID during development: upload the ZIP, open the Package tab, view the public key, add the public key to the manifest `key` field, and compare the loaded extension ID with the Developer Dashboard item ID.
 4. Record the Chrome Web Store item ID as the production extension ID in private operational notes.
 5. Record the public key needed to preserve the production extension ID in the source or build configuration that produces the production manifest. Do not reuse the development manifest key.

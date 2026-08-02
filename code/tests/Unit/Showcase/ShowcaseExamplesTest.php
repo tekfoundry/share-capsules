@@ -18,6 +18,7 @@ final class ShowcaseExamplesTest extends TestCase
             'time-open',
             'time-expired',
             'limit',
+            'trust',
             'revoked',
         ], array_column($examples, 'slug'));
 

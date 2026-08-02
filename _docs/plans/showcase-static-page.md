@@ -192,31 +192,72 @@ Section 4 extraction evidence recorded on 2026-08-01:
 - ✅️ Create `code/app/Showcase/` as the container for showcase generation domain code.
 - ✅️ Define typed showcase example configuration, including slug, title, source image path, output Capsule filename, policy type, and expected Viewer behavior.
 - ✅️ Add a policy factory for the first showcase examples: open, future-locked time, currently-open time, expired time, limit, and optional revoked.
-- ⬜️ Add a narrow Node CLI bridge that invokes the shared `@sharecapsules/capsule-creator` package using JSON input over stdin and sanitized JSON output over stdout.
-- ⬜️ Add a Laravel-side builder service that shells out to the Node bridge with strict timeout, exit-code handling, no command-line secrets, and cleanup of temporary files.
-- ⬜️ Ensure the bridge can read a source image, create static-image metadata, encrypt payloads, sign manifests, assemble the Capsule archive, and strictly re-open/verify the archive through the shared TypeScript package.
-- ⬜️ Add a broker/registry publisher that creates pending registry state, registers the content key through broker services, finalizes registration, and writes the `.capsule` file only after successful verification and finalization.
-- ⬜️ Ensure failed, partial, or ambiguous generation cancels or leaves cleanup-retryable state rather than producing a public orphaned Capsule.
-- ⬜️ Ensure generated files use stable revision-friendly names and do not overwrite existing Capsule bytes unless an explicit force flag is supplied.
+- ✅️ Add a narrow Node CLI bridge that invokes the shared `@sharecapsules/capsule-creator` package using JSON input over stdin and sanitized JSON output over stdout.
+- ✅️ Add a Laravel-side builder service that shells out to the Node bridge with strict timeout, exit-code handling, no command-line secrets, and cleanup of temporary files.
+- ✅️ Ensure the bridge can read a source image, create static-image metadata, encrypt payloads, sign manifests, assemble the Capsule archive, and strictly re-open/verify the archive through the shared TypeScript package.
+- ✅️ Add a broker/registry publisher that creates pending registry state, registers the content key through broker services, finalizes registration, and writes the `.capsule` file only after successful verification and finalization.
+- ✅️ Ensure failed, partial, or ambiguous generation cancels or leaves cleanup-retryable state rather than producing a public orphaned Capsule.
+- ✅️ Ensure generated files use stable revision-friendly names and do not overwrite existing Capsule bytes unless an explicit force flag is supplied.
+
+Section 5 generation-code evidence recorded on 2026-08-02:
+
+- Added `code/scripts/showcase-capsule-bridge.mjs` as a two-step Node bridge. `prepare` accepts JSON over stdin, inspects the source image, creates Creator-compatible policy/build material, writes private temp state plus a short-lived content-key file, and returns sanitized registration evidence over stdout. `complete` accepts the real broker release handle, signs the final manifest, assembles the archive, verifies it with `verifyCapsuleZipV1`, writes the archive to a caller-owned temp path, and returns sanitized archive evidence.
+- Added Laravel bridge/result objects and `App\Showcase\NodeShowcaseCapsuleBridge`, which shells out with JSON stdin, strict timeout, exit-code handling, and parsed JSON stdout.
+- Added `App\Showcase\ShowcaseCapsulePublisher`, which resolves the non-interactive showcase owner/device, rejects existing output files unless force/overwrite is explicit, creates pending registry state, issues a real broker registration grant, delegates content-key registration through the existing broker registrar adapter, finalizes through `CapsuleRegistrationLifecycle`, and moves the verified archive to `code/public/showcase/capsules/` only after success.
+- Added `ShowcaseContentKeyRegistration` as a narrow internal seam. Production binds it to `BrokerShowcaseContentKeyRegistration`, which delegates to the existing `ContentKeyRegistrar`; tests can fake it without changing broker behavior.
+- Added failure coverage proving completion failure cancels the registration through the existing lifecycle and does not leave a public `.capsule` file.
+- Added revoked-example handling after review: when the generated slug is `revoked`, the publisher now finalizes and writes the archive, then calls the existing `CapsuleRevocationService` so server-side lifecycle state matches the showcased behavior.
+- Node bridge smoke generated and verified a temporary archive from `code/public/showcase/images/open-image.jpg`; the smoke result reported `image/jpeg`, `archive_bytes=117414`, and `verified=true`.
+- Focused Showcase unit result: `./_infra/kit test tests/Unit/Showcase` passed with 19 tests and 107 assertions after adding revoked lifecycle coverage.
+- JavaScript lint result: `./_infra/kit npm run lint` passed.
+- PHP lint result: `./_infra/kit composer lint` passed.
+- Whitespace check result: `git diff --check` passed.
+- No extension, broker protocol, public API route, policy predicate, Capsule format, or Viewer behavior changes were made for Section 5.
 
 ### 6. Operator Command
 
-- ⬜️ Add an Artisan command, for example `php artisan showcase:generate-capsules`.
-- ⬜️ Support a dry-run mode that reports planned examples, source files, output files, and owner identity without creating broker records.
-- ⬜️ Support generating one named example for focused testing.
-- ⬜️ Support an explicit force or revision option for intentional regeneration.
-- ⬜️ Emit sanitized generation evidence: example slug, policy type, output filename, capsule id, registration id, release handle presence, and verification result, without logging content keys or private signing material.
-- ⬜️ Add tests for successful generation and failure cleanup using fake broker/key services where appropriate.
+- ✅️ Add an Artisan command, for example `php artisan showcase:generate-capsules`.
+- ✅️ Support a dry-run mode that reports planned examples, source files, output files, and owner identity without creating broker records.
+- ✅️ Support generating one named example for focused testing.
+- ✅️ Support an explicit force or revision option for intentional regeneration.
+- ✅️ Emit sanitized generation evidence: example slug, policy type, output filename, capsule id, registration id, release handle presence, and verification result, without logging content keys or private signing material.
+- ✅️ Add tests for successful generation and failure cleanup using fake broker/key services where appropriate.
+
+Section 6 operator-command evidence recorded on 2026-08-02:
+
+- Added `php artisan showcase:generate-capsules`.
+- Added `--dry-run`, which reports generation enabled state, owner email, owner verification state, signing strategy, planned examples, source URL paths, output URL paths, policy type, and expected behavior without resolving broker/key services or creating records/files.
+- Added `--example=<slug>` for focused generation of one showcase example.
+- Added `--force` to allow intentional overwrite/regeneration through the existing publisher flag; default behavior still refuses to overwrite existing generated Capsule bytes.
+- Real generation emits short sanitized evidence lines with slug, policy type, output URL path, Capsule ID, registration ID, release-handle presence, and verification status. It does not log content keys, private signing material, grants, release handles, or temp paths.
+- Real generation now also emits `revoked=yes/no` so the operator can confirm the special revoked example ran its post-generation lifecycle action.
+- Command tests cover dry-run while generation is disabled, invalid example handling, focused successful generation, sanitized evidence output, revoked evidence output, and failure reporting after publisher cleanup.
+- Focused Showcase unit result: `./_infra/kit test tests/Unit/Showcase` passed with 19 tests and 107 assertions.
+- PHP lint result: `./_infra/kit composer lint` passed.
+- Whitespace check result: `git diff --check` passed.
 
 ### 7. Static Showcase Page
 
-- ⬜️ Create `code/public/showcase.html` as a static page, not a Blade view or authenticated Laravel route.
-- ⬜️ Rewrite test-fixture language into user-facing showcase language while preserving clear expected behavior for each example.
-- ⬜️ Present each example with the public source image and protected Capsule side by side so visitors can compare ordinary hosting with Capsule-gated viewing.
-- ⬜️ Clearly explain in-page that showcased source images are intentionally public demo material.
-- ⬜️ Point showcase examples at stable public Capsule URLs under `/showcase/capsules/`.
-- ⬜️ Ensure Viewer install fallback links point users back to `/showcase.html` after installation or connection.
-- ⬜️ Keep time-dependent, expired, revoked, or unavailable examples clearly labeled so users understand locked states are intentional.
+- ✅️ Create `code/public/showcase.html` as a static page, not a Blade view or authenticated Laravel route.
+- ✅️ Rewrite test-fixture language into user-facing showcase language while preserving clear expected behavior for each example.
+- ✅️ Present each example with the public source image and protected Capsule side by side so visitors can compare ordinary hosting with Capsule-gated viewing.
+- ✅️ Clearly explain in-page that showcased source images are intentionally public demo material.
+- ✅️ Point showcase examples at stable public Capsule URLs under `/showcase/capsules/`.
+- ✅️ Ensure Viewer install fallback links point users back to `/showcase.html` after installation or connection.
+- ✅️ Keep time-dependent, expired, revoked, or unavailable examples clearly labeled so users understand locked states are intentional.
+
+Section 7 static-page evidence recorded on 2026-08-02:
+
+- Added `code/public/showcase.html` as a static public Host page.
+- The page includes all six generated examples: open image, future time, currently-open time, expired time, limit, and revoked.
+- Each example shows the intentionally public source image beside a `<capsule-viewer>` pointed at the matching generated `.capsule` under `/showcase/capsules/`.
+- Fallback install links use `https://sharecapsules.com/showcase.html` as the safe return URL accepted by the Viewer install route.
+- The page labels expected behavior for opening, time-locked, expired, limited, and revoked examples.
+- Added `Tests\Feature\ShowcaseStaticPageTest` to assert the static page exists, references every configured source image and generated Capsule, includes `<capsule-viewer>`, and includes the Viewer install return link.
+- Focused static-page result: `./_infra/kit test tests/Feature/ShowcaseStaticPageTest.php tests/Feature/Phase12CapsuleTestPageTest.php` passed with 4 tests and 60 assertions.
+- PHP lint result: `./_infra/kit composer lint` passed.
+- Local container HTTP check returned `200` for `/showcase.html` with `Content-Length: 23272`.
+- Local container HEAD checks returned `200` for `/showcase/images/open-image.jpg` with `Content-Type: image/jpeg` and `Content-Length: 115697`, and `200` for `/showcase/capsules/open-image-r1.capsule` with `Content-Length: 117414`.
 
 ### 8. Verification
 

@@ -8,6 +8,8 @@ use App\Ctx\Metrics\CtxMetricEvent;
 use App\Ctx\Metrics\CtxMetricEventType;
 use App\Ctx\Metrics\CtxMetricRecorder;
 use App\Ctx\Metrics\MetricEventIdentifierSource;
+use App\Ctx\Policy\CtxPolicyUsageSnapshot;
+use App\Ctx\Policy\CtxPolicyV1;
 use App\Ctx\Policy\UnsupportedCtxPolicy;
 use App\Ctx\Risk\AutomationRiskActivityRecorder;
 use App\Ctx\Risk\AutomationRiskActivityType;
@@ -38,6 +40,7 @@ final class AuthorizeCtxController extends Controller
         MetricEventIdentifierSource $metricIdentifiers,
         AutomationRiskActivityRecorder $riskActivity,
         ViewerCompatibilityPolicy $viewerCompatibility,
+        CtxPolicyUsageSnapshot $usageSnapshot,
     ): JsonResponse {
         $keys = array_keys($request->all());
         sort($keys);
@@ -111,12 +114,34 @@ final class AuthorizeCtxController extends Controller
             $occurredAt,
         );
 
-        return response()->json([
+        $payload = [
             'type' => 'ctx-authorization',
             'version' => 1,
             'ticket' => $ticket->compact,
             'expires_in' => max(1, $ticket->expiresAt->getTimestamp() - CarbonImmutable::now()->getTimestamp()),
-        ], 201, ['Cache-Control' => 'no-store']);
+        ];
+
+        if ($this->viewerAcceptsUsageSnapshot($request)) {
+            $usage = $usageSnapshot->forPolicy(
+                CtxPolicyV1::parse($request->array('policy')),
+                $user,
+                $request->string('capsule_id')->toString(),
+                $request->integer('capsule_revision'),
+            );
+            if ($usage !== []) {
+                $payload['usage'] = $usage;
+            }
+        }
+
+        return response()->json($payload, 201, ['Cache-Control' => 'no-store']);
+    }
+
+    private function viewerAcceptsUsageSnapshot(AuthorizeCtxRequest $request): bool
+    {
+        $viewer = $request->array('viewer');
+        $version = $viewer['version'] ?? null;
+
+        return is_string($version) && version_compare($version, '0.1.3', '>=');
     }
 
     private function authorizeWithShortWindowIdempotency(

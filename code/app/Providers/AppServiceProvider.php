@@ -39,6 +39,10 @@ use App\OAuth\Dpop\DpopAccessToken;
 use App\OAuth\Dpop\DpopAccessTokenRepository;
 use App\OAuth\Dpop\DpopRefreshTokenRepository;
 use App\OAuth\Dpop\DpopTokenResponse;
+use App\Showcase\BrokerShowcaseContentKeyRegistration;
+use App\Showcase\NodeShowcaseCapsuleBridge;
+use App\Showcase\ShowcaseCapsuleBridge;
+use App\Showcase\ShowcaseContentKeyRegistration;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -77,6 +81,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ReleaseBindingVerifier::class, BrokerReleaseBindingVerifier::class);
         $this->app->bind(GrantSecretSource::class, NativeGrantSecretSource::class);
         $this->app->bind(BrokerContentKeyLifecycle::class, HttpBrokerContentKeyLifecycle::class);
+        $this->app->bind(ShowcaseCapsuleBridge::class, fn (): NodeShowcaseCapsuleBridge => NodeShowcaseCapsuleBridge::fromConfig());
+        $this->app->bind(ShowcaseContentKeyRegistration::class, BrokerShowcaseContentKeyRegistration::class);
         $this->app->tag(
             [
                 BrokerContentKeyDeletionParticipant::class,

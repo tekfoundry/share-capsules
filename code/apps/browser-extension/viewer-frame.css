@@ -93,6 +93,7 @@ p {
 
 .viewer-render {
     display: none;
+    position: relative;
 }
 
 .viewer-render.is-visible {
@@ -112,6 +113,22 @@ p {
     border: 1px solid #b8cae8;
     border-radius: 0.75rem;
     object-fit: contain;
+}
+
+.viewer-usage {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    max-width: calc(100% - 1.5rem);
+    border: 1px solid rgba(184, 202, 232, 0.8);
+    border-radius: 999px;
+    background: rgba(248, 250, 252, 0.94);
+    color: #162033;
+    font-size: 0.78rem;
+    font-weight: 800;
+    line-height: 1.2;
+    padding: 0.45rem 0.65rem;
+    box-shadow: 0 0.45rem 1.2rem rgba(22, 32, 51, 0.16);
 }
 
 .viewer-shell.is-open .viewer-render img {

@@ -78,6 +78,26 @@ final class ShowcasePolicyFactoryTest extends TestCase
         ], $policy['requirements'][4]);
     }
 
+    public function test_trust_example_requires_automation_risk_policy(): void
+    {
+        $factory = new ShowcasePolicyFactory;
+
+        $draft = $factory->draftPolicyFor(
+            ShowcaseExamples::TRUST,
+            CarbonImmutable::parse('2026-08-01T12:34:56Z'),
+        );
+        $policy = $factory->policyFor(
+            ShowcaseExamples::TRUST,
+            CarbonImmutable::parse('2026-08-01T12:34:56Z'),
+        );
+
+        $this->assertTrue($draft['automation_risk_required']);
+        $this->assertSame([
+            'predicate' => 'ctx.risk.ecosystem-automation-not-high',
+            'issuer' => (string) config('sharecapsules.ctx.issuer'),
+        ], $policy['requirements'][4]);
+    }
+
     public function test_unknown_policy_is_rejected(): void
     {
         $this->expectException(InvalidArgumentException::class);

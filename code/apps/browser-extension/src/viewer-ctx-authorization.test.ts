@@ -65,9 +65,46 @@ describe('Viewer CTX authorization client', () => {
             view_event_consent: true,
             viewer: {
                 name: 'share-capsules-chromium-extension',
-                version: '0.1.1',
+                version: '0.1.3',
                 browser_family: 'Chrome',
                 browser_major: 149,
+            },
+        });
+    });
+
+    it('accepts compatible authorization responses with policy usage metadata', async () => {
+        const client = new ViewerCtxAuthorizationClient('https://trust.example/ctx/authorize', {
+            dpop: proofFactory(),
+            fetch: async () =>
+                jsonResponse({
+                    type: 'ctx-authorization',
+                    version: 1,
+                    ticket: 'header.claims.signature',
+                    expires_in: 60,
+                    usage: {
+                        capsule_lifetime: { used: 3, maximum: 10, remaining: 7 },
+                        account_capsule_lifetime: { used: 2, maximum: 4, remaining: 2 },
+                    },
+                }),
+        });
+
+        await expect(
+            client.authorize(
+                summary(),
+                token(['ctx:authorize']),
+                device(),
+                'https://host.example',
+                true,
+            ),
+        ).resolves.toEqual({
+            ok: true,
+            authorization: {
+                ticket: 'header.claims.signature',
+                expiresIn: 60,
+                usage: {
+                    capsuleLifetime: { used: 3, maximum: 10, remaining: 7 },
+                    accountCapsuleLifetime: { used: 2, maximum: 4, remaining: 2 },
+                },
             },
         });
     });

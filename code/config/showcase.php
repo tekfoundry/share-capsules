@@ -25,4 +25,10 @@ return [
         'overwrite_existing_capsules' => false,
         'default_revision' => 1,
     ],
+
+    'bridge' => [
+        'node_binary' => env('SHOWCASE_NODE_BINARY', 'node'),
+        'script_path' => 'scripts/showcase-capsule-bridge.mjs',
+        'timeout_seconds' => env('SHOWCASE_NODE_TIMEOUT_SECONDS', 30),
+    ],
 ];

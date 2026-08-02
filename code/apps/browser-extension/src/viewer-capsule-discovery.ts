@@ -242,7 +242,7 @@ function showStandaloneViewerFrame(frame: HTMLIFrameElement): void {
     } else {
         frame.style.height = height;
     }
-    frame.style.marginTop = '0.75rem';
+    frame.style.marginTop = '0';
     frame.style.border = '0';
     frame.style.background = 'transparent';
     frame.style.opacity = '1';

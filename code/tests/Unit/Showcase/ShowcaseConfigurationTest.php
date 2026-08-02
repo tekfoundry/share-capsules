@@ -3,6 +3,7 @@
 namespace Tests\Unit\Showcase;
 
 use App\Showcase\ShowcaseConfiguration;
+use Illuminate\Support\Facades\Config;
 use InvalidArgumentException;
 use Tests\TestCase;
 
@@ -10,6 +11,7 @@ final class ShowcaseConfigurationTest extends TestCase
 {
     public function test_configuration_loads_secure_defaults(): void
     {
+        Config::set('showcase.generation.enabled', false);
         $configuration = ShowcaseConfiguration::fromConfig();
 
         $this->assertFalse($configuration->generationEnabled);

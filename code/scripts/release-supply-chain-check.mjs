@@ -5,7 +5,7 @@ import { basename, relative, resolve } from 'node:path';
 
 const codeRoot = resolve(import.meta.dirname, '..');
 const repositoryRoot = resolve(codeRoot, '..');
-const extensionBuild = resolve(codeRoot, 'apps/browser-extension/build');
+const extensionBuild = resolve(codeRoot, 'apps/browser-extension/build/production');
 const outputPath = resolve(
     repositoryRoot,
     process.env.SUPPLY_CHAIN_CHECK_OUTPUT ??

@@ -16,6 +16,8 @@ final class ShowcaseExamples
 
     public const LIMIT = 'limit';
 
+    public const TRUST = 'trust';
+
     public const REVOKED = 'revoked';
 
     /**
@@ -29,6 +31,7 @@ final class ShowcaseExamples
             self::example(self::TIME_OPEN, 'Currently Open', 'time-open.jpg', 'time-open-r1.capsule', 'time:open-window', 'opens during the current window'),
             self::example(self::TIME_EXPIRED, 'Expired', 'time-expired.jpg', 'time-expired-r1.capsule', 'time:not-after', 'locked because the opening window ended'),
             self::example(self::LIMIT, 'Limited Opens', 'limit.jpg', 'limit-r1.capsule', 'limit', 'opens until the configured limit is reached'),
+            self::example(self::TRUST, 'Trust Challenge', 'trust.jpg', 'trust-r1.capsule', 'trust', 'opens normally, or asks for a quick human check when trust signals require it'),
             self::example(self::REVOKED, 'Revoked', 'revoked.jpg', 'revoked-r1.capsule', 'revoked', 'locked because access was permanently revoked'),
         ];
     }

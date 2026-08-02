@@ -41,7 +41,7 @@ In Chrome or Chromium:
 1. Open `chrome://extensions`.
 2. Enable **Developer mode**.
 3. Choose **Load unpacked**.
-4. Select `code/apps/browser-extension/build`.
+4. Select `code/apps/browser-extension/build/development`.
 5. Confirm the displayed extension ID is exactly `dhconceamghcnndjodjhjikknblhkmej`. Stop if it differs.
 
 After rebuilding an extension that is already loaded, return to `chrome://extensions` and choose **Reload** on its card before repeating the test.

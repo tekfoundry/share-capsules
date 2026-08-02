@@ -21,7 +21,10 @@ import {
     type ExtensionIdentityFlow,
     type OAuthTokenSet,
 } from './oauth.js';
-import { ViewerCtxAuthorizationClient } from './viewer-ctx-authorization.js';
+import {
+    ViewerCtxAuthorizationClient,
+    type ViewerCtxAuthorizationUsage,
+} from './viewer-ctx-authorization.js';
 import { ViewerBrokerRedemptionClient } from './viewer-broker-redemption.js';
 import {
     viewerOpenSlotAcquireMessage,
@@ -575,7 +578,11 @@ async function authorizeAndOpenVerifiedCapsule(
         return;
     }
 
-    showRenderedPayload(runtime.renderer, rendered);
+    showRenderedPayload(
+        runtime.renderer,
+        rendered,
+        usageAfterSuccessfulRelease(authorization.authorization.usage),
+    );
     payloadOpened = true;
     setViewerFrameState(
         'opened',
@@ -789,6 +796,7 @@ export {};
 function showRenderedPayload(
     renderer: ViewerPayloadRenderer,
     rendered: ViewerPayloadRenderResult,
+    usage?: ViewerCtxAuthorizationUsage,
 ): void {
     if (!(renderElement instanceof HTMLElement) || !rendered.ok) return;
     if (activeRenderedPayload !== undefined) renderer.dispose(activeRenderedPayload);
@@ -797,8 +805,65 @@ function showRenderedPayload(
     const image = document.createElement('img');
     image.src = rendered.objectUrl;
     image.alt = rendered.altText;
-    renderElement.replaceChildren(image);
+    const usageBadge = usageBadgeElement(usage);
+    renderElement.replaceChildren(usageBadge === undefined ? image : fragment(image, usageBadge));
     renderElement.classList.add('is-visible');
+}
+
+function usageBadgeElement(
+    usage: ViewerCtxAuthorizationUsage | undefined,
+): HTMLElement | undefined {
+    const label = usageLabel(usage);
+    if (label === undefined) return undefined;
+    const badge = document.createElement('p');
+    badge.className = 'viewer-usage';
+    badge.textContent = label;
+    return badge;
+}
+
+function usageLabel(usage: ViewerCtxAuthorizationUsage | undefined): string | undefined {
+    if (usage?.capsuleLifetime !== undefined) {
+        return `Opened ${usage.capsuleLifetime.used.toLocaleString()} of ${usage.capsuleLifetime.maximum.toLocaleString()} times`;
+    }
+    if (usage?.accountCapsuleLifetime !== undefined) {
+        return `Opened ${usage.accountCapsuleLifetime.used.toLocaleString()} of ${usage.accountCapsuleLifetime.maximum.toLocaleString()} times for this account`;
+    }
+
+    return undefined;
+}
+
+function usageAfterSuccessfulRelease(
+    usage: ViewerCtxAuthorizationUsage | undefined,
+): ViewerCtxAuthorizationUsage | undefined {
+    if (usage === undefined) return undefined;
+
+    return {
+        capsuleLifetime:
+            usage.capsuleLifetime === undefined
+                ? undefined
+                : {
+                      ...usage.capsuleLifetime,
+                      used: Math.min(usage.capsuleLifetime.maximum, usage.capsuleLifetime.used + 1),
+                      remaining: Math.max(0, usage.capsuleLifetime.remaining - 1),
+                  },
+        accountCapsuleLifetime:
+            usage.accountCapsuleLifetime === undefined
+                ? undefined
+                : {
+                      ...usage.accountCapsuleLifetime,
+                      used: Math.min(
+                          usage.accountCapsuleLifetime.maximum,
+                          usage.accountCapsuleLifetime.used + 1,
+                      ),
+                      remaining: Math.max(0, usage.accountCapsuleLifetime.remaining - 1),
+                  },
+    };
+}
+
+function fragment(...nodes: readonly Node[]): DocumentFragment {
+    const content = document.createDocumentFragment();
+    content.append(...nodes);
+    return content;
 }
 
 function waitForSharedViewerCredential(action: () => Promise<void>): void {

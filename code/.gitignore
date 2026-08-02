@@ -26,6 +26,8 @@
 **/dist
 apps/browser-extension/build
 apps/browser-extension/share-capsules-extension-*/
+apps/browser-extension/share-capsules-extension-*.zip
+public/showcase/capsules/*.capsule
 *.tsbuildinfo
 _ide_helper.php
 Homestead.json

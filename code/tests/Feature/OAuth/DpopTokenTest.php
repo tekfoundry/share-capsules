@@ -8,10 +8,12 @@ use App\Ctx\SigningKeys\TicketSigningKeyLifecycle;
 use App\Ctx\Tickets\CtxTicketBindings;
 use App\Ctx\Tickets\ReleaseBindingVerifier;
 use App\Http\Middleware\ValidateDpopAccessToken;
+use App\Models\CtxAccountCapsuleReleaseCounter;
 use App\Models\CtxAuthorizationTicket;
 use App\Models\CtxAutomationRiskActivity;
 use App\Models\CtxCapsuleMetricDenial;
 use App\Models\CtxCapsuleMetricProjection;
+use App\Models\CtxCapsuleReleaseCounter;
 use App\Models\CtxChallengeAttempt;
 use App\Models\CtxMetricEventRecord;
 use App\Models\User;
@@ -383,7 +385,8 @@ final class DpopTokenTest extends TestCase
         ])->assertCreated()
             ->assertJsonPath('type', 'ctx-authorization')
             ->assertJsonPath('version', 1)
-            ->assertJsonPath('expires_in', 60);
+            ->assertJsonPath('expires_in', 60)
+            ->assertJsonMissingPath('usage');
         $claims = $this->jwtClaims($response->json('ticket'));
         $this->assertArrayNotHasKey('sub', $claims);
         $this->assertSame($device->proof_jkt, $claims['ctx']['proof_jkt']);
@@ -419,6 +422,79 @@ final class DpopTokenTest extends TestCase
         $this->assertSame(2, CtxAutomationRiskActivity::query()->count());
         $this->assertFalse(Schema::hasColumn('ctx_metric_event_records', 'user_id'));
         $this->assertFalse(Schema::hasColumn('ctx_metric_event_records', 'viewer_device_id'));
+    }
+
+    #[Test]
+    public function ctx_authorization_can_include_policy_limit_usage_for_compatible_viewers(): void
+    {
+        config()->set('sharecapsules.broker.base_url', 'https://broker.example.test');
+        $this->app->instance(ReleaseBindingVerifier::class, new class implements ReleaseBindingVerifier
+        {
+            public function valid(CtxTicketBindings $bindings): bool
+            {
+                return true;
+            }
+        });
+        $key = app(TicketSigningKeyLifecycle::class)->stage();
+        app(TicketSigningKeyLifecycle::class)->activate($key->kid);
+        [$user, $device] = $this->userAndDevice();
+        $code = $this->approveAndExtractCode($user, 'ctx:authorize');
+        $issued = $this->withHeader('DPoP', $this->proof())
+            ->postJson(route('passport.token'), $this->tokenParameters($code, $device))
+            ->assertOk();
+        $accessToken = $issued->json('access_token');
+        $resourceUrl = route('ctx.authorize');
+        $capsuleId = 'urn:uuid:018f61fe-729b-4f87-8865-2e1f9d8db703';
+        $policy = [
+            'type' => 'ctx-policy',
+            'version' => 1,
+            'combiner' => 'all',
+            'requirements' => [
+                ['predicate' => 'ctx.account.email-verified', 'equals' => true],
+                ['predicate' => 'ctx.account.active', 'equals' => true],
+                ['predicate' => 'ctx.viewer.device-registered', 'equals' => true],
+                ['predicate' => 'ctx.consent.capsule-view-event', 'equals' => true],
+                ['predicate' => 'ctx.usage.capsule-lifetime-limit', 'scope' => 'capsule', 'maximum' => 10],
+                ['predicate' => 'ctx.usage.capsule-account-lifetime-limit', 'scope' => 'account-and-capsule', 'maximum' => 4],
+            ],
+        ];
+        CtxCapsuleReleaseCounter::query()->create([
+            'capsule_id' => $capsuleId,
+            'capsule_revision' => 1,
+            'committed_releases' => 3,
+        ]);
+        CtxAccountCapsuleReleaseCounter::query()->create([
+            'user_id' => $user->getKey(),
+            'capsule_id' => $capsuleId,
+            'capsule_revision' => 1,
+            'committed_releases' => 2,
+        ]);
+
+        $this->withHeaders([
+            'Authorization' => 'DPoP '.$accessToken,
+            'DPoP' => $this->proof($resourceUrl, $accessToken),
+        ])->postJson($resourceUrl, [
+            'type' => 'ctx-authorization-request',
+            'version' => 1,
+            'broker' => 'https://broker.example.test',
+            'host_origin' => 'https://host.example.test',
+            'capsule_id' => $capsuleId,
+            'capsule_revision' => 1,
+            'policy' => $policy,
+            'policy_sha256' => app(CtxPolicyDigest::class)->calculate($policy),
+            'payload_id' => 'primary-image',
+            'release_handle' => 'opaque-release-handle-0001',
+            'action' => 'render',
+            'cryptographic_suite' => 'ctx-capsule-v1',
+            'view_event_consent' => true,
+            'viewer' => [...$this->viewerRelease(), 'version' => '0.1.3'],
+        ])->assertCreated()
+            ->assertJsonPath('usage.capsule_lifetime.used', 3)
+            ->assertJsonPath('usage.capsule_lifetime.maximum', 10)
+            ->assertJsonPath('usage.capsule_lifetime.remaining', 7)
+            ->assertJsonPath('usage.account_capsule_lifetime.used', 2)
+            ->assertJsonPath('usage.account_capsule_lifetime.maximum', 4)
+            ->assertJsonPath('usage.account_capsule_lifetime.remaining', 2);
     }
 
     #[Test]
