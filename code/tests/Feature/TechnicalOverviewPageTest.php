@@ -19,9 +19,9 @@ final class TechnicalOverviewPageTest extends TestCase
             ->assertSee('Recognition is a product security boundary, not protocol ownership.')
             ->assertSee('Policy predicates, not a universal trust score.')
             ->assertSee('A focused proof, not universal content control.')
-            ->assertSee('What exists today—and what does not.')
-            ->assertSee('Active development')
-            ->assertSee('Deferred beyond V1');
+            ->assertSee('Secure image sharing is ready to use.')
+            ->assertSee('Use the hosted service')
+            ->assertSee('Still coming later');
     }
 
     public function test_design_sources_become_links_when_the_public_repository_is_configured(): void

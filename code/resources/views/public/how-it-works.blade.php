@@ -12,7 +12,7 @@
                 <h1 class="mt-5 max-w-6xl text-4xl leading-[1.05] font-semibold tracking-[-0.045em] text-balance sm:text-6xl">From original work to a trusted viewing session.</h1>
                 <p class="mt-5 inline-flex items-center gap-2 rounded-full border border-amber-300/50 bg-amber-50 px-3 py-1.5 text-xs font-bold tracking-wide text-amber-900 uppercase">
                     <span class="size-1.5 rounded-full bg-amber-500" aria-hidden="true"></span>
-                    Proposed complete flow — under active development
+                    Supported image Capsule flow
                 </p>
             </div>
         </section>

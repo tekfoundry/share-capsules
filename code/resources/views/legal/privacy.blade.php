@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Privacy notice — Share Capsules')
-@section('description', 'How the experimental Share Capsules reference implementation handles account, session, and trust-related information.')
+@section('description', 'How the early-release Share Capsules service handles account, session, and trust-related information.')
 @section('robots', 'index, follow')
 
 @section('content')

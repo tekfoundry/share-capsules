@@ -6,18 +6,19 @@ use Tests\TestCase;
 
 final class PublicReadinessStatusTest extends TestCase
 {
-    public function test_every_explanatory_page_distinguishes_vision_reality_and_deferred_work(): void
+    public function test_every_explanatory_page_describes_available_features_and_remaining_scope(): void
     {
         foreach ([route('home'), route('how-it-works'), route('technical')] as $url) {
             $this->get($url)
                 ->assertOk()
                 ->assertSeeInOrder([
-                    'Long-term vision',
-                    'Implemented and tested',
-                    'Active development',
-                    'Deferred beyond V1',
+                    'Protect images',
+                    'Choose access rules',
+                    'Use the hosted service',
+                    'Still coming later',
                 ])
-                ->assertSee('not a production content-protection service')
+                ->assertSee('Secure image sharing is ready to use.')
+                ->assertSee('The hosted Share Capsules services handle the account, access, and key-release steps')
                 ->assertSee('id="'.($url === route('technical') ? 'status' : 'project-status').'"', false);
         }
     }

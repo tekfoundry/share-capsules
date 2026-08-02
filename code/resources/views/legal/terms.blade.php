@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Account terms — Share Capsules')
-@section('description', 'Working account terms for the experimental Share Capsules reference implementation.')
+@section('description', 'Working account terms for the early-release Share Capsules service.')
 @section('robots', 'index, follow')
 
 @section('content')
@@ -9,7 +9,7 @@
         <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">Version {{ config('accounts.terms.version') }}</p>
         <h1 class="mt-3 text-4xl font-semibold tracking-[-0.035em] text-ink">Account terms</h1>
         <div class="mt-8 space-y-5 leading-7 text-muted">
-            <p>Share Capsules is experimental software under active development. Do not rely on it yet to protect sensitive or irreplaceable content.</p>
+            <p>Share Capsules is early-release software with a focused supported feature set. Do not rely on it yet to protect sensitive or irreplaceable content.</p>
             <p>You are responsible for your account credentials, content, hosting choices, and compliance with laws and third-party rights. Do not use the service to distribute unlawful or harmful material or to interfere with the service or other users.</p>
             <p>Capsule and CTX reduce specific access risks; they cannot prevent screenshots, external capture, authorized-user misuse, or modified client software.</p>
             <p>Trust Capsules may require quick human challenges before content opens. A successful challenge is temporary evidence for access confidence, not proof of identity, unique personhood, or trustworthy behavior. High automation-risk activity may still block access.</p>

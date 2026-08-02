@@ -318,7 +318,7 @@ Automated public-tree audit evidence recorded on 2026-07-29:
 Repo-side control evidence recorded on 2026-07-30:
 
 - Local working-tree review confirmed security reporting files, issue templates, pull request template, Dependabot configuration, Dependency Review workflow, CI workflow, and CodeQL workflow are present.
-- CodeQL now defines both `javascript-typescript` and `php` analysis in the workflow matrix, matching the required-check evidence template.
+- CodeQL now defines `javascript-typescript` analysis in the workflow matrix. PHP analysis is not enabled because GitHub CodeQL rejected `php` as an unsupported language for this workflow.
 - CodeQL push scanning targets the confirmed primary branch, `master`.
 
 Extension maintenance release evidence recorded on 2026-08-02:
@@ -329,6 +329,11 @@ Extension maintenance release evidence recorded on 2026-08-02:
 - Production-mode supply-chain aggregate SHA-256: `b8a8ef92dea389e9f21f15bc74f7c0416611300255520a508ac92d6f712dd756`.
 - Chrome Web Store review passed and extension version `0.1.1` was released for extension ID `jkejpdcobbbeichpodpeoiilnalepdph`.
 - The store-installed extension continued to render the production test page, now canonicalized at `https://sharecapsules.com/capsule-test`.
+- `./_infra/kit npm run release:extension:production` prepared extension version `0.1.3` for the showcase Viewer presentation update.
+- Release candidate ZIP: `code/apps/browser-extension/share-capsules-extension-0.1.3-production.zip`.
+- Release candidate ZIP SHA-256: `43ddce477a6c57a75397df0cc80affd69029c93d2015a968848fd0e5412cc9a7`.
+- Production-mode supply-chain aggregate SHA-256: `0c2a6141dd50540199c8249c09c8d755a441effa27dfb558658b903e0e85d532`.
+- Maintainer uploaded extension version `0.1.3` to the existing Chrome Web Store item and requested review for extension ID `jkejpdcobbbeichpodpeoiilnalepdph`.
 - Local YAML parsing passed for `.github/workflows/codeql.yml`.
 - GitHub CLI authentication was unavailable locally because the configured token is invalid, and network-backed remote inspection was unavailable from the sandbox.
 - Maintainer confirmed private vulnerability reporting, secret scanning, push protection, dependency graph, Dependabot alerts, Dependabot security updates, and code scanning are enabled.

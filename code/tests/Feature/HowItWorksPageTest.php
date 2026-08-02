@@ -11,7 +11,7 @@ final class HowItWorksPageTest extends TestCase
         $this->get(route('how-it-works'))
             ->assertOk()
             ->assertSee('From original work to a trusted viewing session.')
-            ->assertSee('Proposed complete flow — under active development')
+            ->assertSee('Supported image Capsule flow')
             ->assertSeeInOrder([
                 'Creator',
                 'Creator tool',

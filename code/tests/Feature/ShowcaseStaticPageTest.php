@@ -16,6 +16,7 @@ final class ShowcaseStaticPageTest extends TestCase
         $html = File::get($path);
 
         $this->assertStringContainsString('<title>Share Capsules Showcase</title>', $html);
+        $this->assertStringContainsString('href="/">Share Capsules home</a>', $html);
         $this->assertStringContainsString('Original images beside protected Capsules', $html);
         $this->assertStringContainsString('intentionally public', $html);
         $this->assertStringContainsString('No additional policy gates', $html);

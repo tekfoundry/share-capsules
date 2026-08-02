@@ -18,22 +18,24 @@
             </h1>
 
             <p class="mt-7 max-w-2xl text-lg leading-8 text-muted sm:text-xl">
-                Publishing online should not automatically grant scrapers, bulk collectors, and AI training pipelines unrestricted access to your work. Share Capsules is exploring a more intentional way to publish.
+                Publishing online should not automatically grant scrapers, bulk collectors, and AI training pipelines unrestricted access to your work. Share Capsules helps you protect images, publish them on your site, and decide when they can open.
             </p>
 
             <div class="mt-9 flex flex-col gap-3 sm:flex-row">
                 <a
-                    href="#lifecycle"
+                    href="{{ auth()->check() ? route('studio.capsules.create') : route('register') }}"
                     class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-brand px-5 text-sm font-bold text-white shadow-lg shadow-brand/15 transition hover:-translate-y-0.5 hover:bg-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                 >
-                    See how it could work
+                    Secure your images
                     <span aria-hidden="true">→</span>
                 </a>
                 <a
-                    href="#project-status"
+                    href="/showcase.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     class="inline-flex min-h-12 items-center justify-center rounded-xl border border-line bg-white px-5 text-sm font-bold text-ink shadow-sm transition hover:-translate-y-0.5 hover:border-brand/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                 >
-                    Follow the project
+                    View live examples
                 </a>
             </div>
 
