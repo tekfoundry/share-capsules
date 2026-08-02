@@ -8,8 +8,12 @@ final class InstructionsPageTest extends TestCase
 {
     public function test_the_instructions_page_explains_viewer_outcomes(): void
     {
+        $storeUrl = config('sharecapsules.extension.store_url');
+
         $this->get(route('instructions'))
             ->assertOk()
+            ->assertSee('Install from Chrome Web Store')
+            ->assertSee('href="'.$storeUrl.'"', false)
             ->assertSee('What viewers may see')
             ->assertSee('Capsule opens')
             ->assertSee('Capsule locked by rule')

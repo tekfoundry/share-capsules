@@ -14,16 +14,29 @@
             <article class="rounded-2xl border border-line bg-white p-6 shadow-card sm:p-8">
                 <h2 class="text-2xl font-semibold tracking-[-0.025em] text-ink">What to do next</h2>
                 <ol class="mt-5 list-decimal space-y-3 pl-5 text-sm leading-6 text-muted">
-                    <li>Install the official Share Capsules Viewer extension for your browser. The public store listing will be linked here when the V1 extension is published.</li>
+                    <li>
+                        Install the official
+                        <a class="font-semibold text-brand hover:text-brand-strong" href="{{ config('sharecapsules.extension.store_url') }}" target="_blank" rel="noopener noreferrer">Share Capsules Viewer extension</a>
+                        from the Chrome Web Store.
+                    </li>
                     <li>Return to the page that contains the Capsule.</li>
                     <li>Allow the extension on that site if your browser asks.</li>
                     <li>Connect your Share Capsules account when the Viewer asks. Your password stays on the Share Capsules sign-in page and is not given to the extension.</li>
                 </ol>
 
+                <a
+                    href="{{ config('sharecapsules.extension.store_url') }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="mt-7 inline-flex min-h-11 items-center justify-center rounded-xl bg-brand px-5 text-sm font-bold text-white shadow-sm shadow-brand/20 transition hover:bg-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                >
+                    Install from Chrome Web Store
+                </a>
+
                 @if ($returnTo !== null)
                     <a
                         href="{{ $returnTo }}"
-                        class="mt-7 inline-flex min-h-11 items-center justify-center rounded-xl bg-brand px-5 text-sm font-bold text-white shadow-sm shadow-brand/20 transition hover:bg-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                        class="mt-3 inline-flex min-h-11 items-center justify-center rounded-xl border border-line bg-white px-5 text-sm font-bold text-ink shadow-sm transition hover:border-brand/30 hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:ml-3 sm:mt-7"
                     >
                         Return to the Capsule page
                     </a>

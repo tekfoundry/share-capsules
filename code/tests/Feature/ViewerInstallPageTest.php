@@ -8,10 +8,15 @@ final class ViewerInstallPageTest extends TestCase
 {
     public function test_the_viewer_install_page_explains_the_no_extension_path(): void
     {
+        $storeUrl = config('sharecapsules.extension.store_url');
+
         $this->get(route('viewer.install'))
             ->assertOk()
             ->assertSee('Install or enable the Share Capsules Viewer.')
-            ->assertSee('The public store listing will be linked here when the V1 extension is published.')
+            ->assertSee('Install from Chrome Web Store')
+            ->assertSee('href="'.$storeUrl.'"', false)
+            ->assertSee('target="_blank"', false)
+            ->assertSee('rel="noopener noreferrer"', false)
             ->assertSee('go back to the website where you found the Capsule and reload the page')
             ->assertSee('does not provide a browser-only fallback decryption path')
             ->assertSee('What may happen when you return')

@@ -17,6 +17,10 @@ return [
     'extension' => [
         'channel' => env('SHARECAPSULES_EXTENSION_CHANNEL', 'development'),
         'id' => env('SHARECAPSULES_EXTENSION_ID', 'development-not-configured'),
+        'store_url' => env(
+            'SHARECAPSULES_EXTENSION_STORE_URL',
+            'https://chromewebstore.google.com/detail/share-capsules/jkejpdcobbbeichpodpeoiilnalepdph',
+        ),
         'viewer' => [
             'name' => 'share-capsules-chromium-extension',
             'minimum_version' => env('SHARECAPSULES_VIEWER_MINIMUM_VERSION', '0.1.0'),

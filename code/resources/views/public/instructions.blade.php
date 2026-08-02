@@ -25,10 +25,22 @@
                 <h2 class="mt-3 text-2xl font-semibold tracking-[-0.025em] text-ink">Install the Share Capsules browser extension.</h2>
                 <p class="mt-4 text-sm leading-6 text-muted">Creators and viewers use the extension because file selection, encryption, signing, authorization, and decryption need a trusted local boundary. The original source file and private signing material should not be uploaded to the Share Capsules website.</p>
                 <ol class="mt-5 list-decimal space-y-2 pl-5 text-sm leading-6 text-muted">
-                    <li>Install the official extension for your browser.</li>
+                    <li>
+                        Install the official
+                        <a class="font-semibold text-brand hover:text-brand-strong" href="{{ config('sharecapsules.extension.store_url') }}" target="_blank" rel="noopener noreferrer">Share Capsules Viewer extension</a>
+                        from the Chrome Web Store.
+                    </li>
                     <li>Open Share Capsules and sign in.</li>
                     <li>Let the extension connect to your account when prompted.</li>
                 </ol>
+                <a
+                    class="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-brand px-5 text-sm font-bold text-white shadow-sm shadow-brand/20 transition hover:bg-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                    href="{{ config('sharecapsules.extension.store_url') }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Install from Chrome Web Store
+                </a>
             </article>
 
             <article id="capsule-creation" class="scroll-mt-24 rounded-2xl border border-line bg-canvas p-6 sm:p-8">
