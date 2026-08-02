@@ -10,7 +10,7 @@ const publicPages = [
     '/terms',
     '/privacy',
 ] as const;
-const mobilePrimaryNavigationLinkCount = 6;
+const mobilePrimaryNavigationLinkCount = 7;
 
 const viewports = [
     { name: 'mobile', width: 390, height: 844 },
