@@ -338,6 +338,28 @@ Extension maintenance release evidence recorded on 2026-08-02:
 
 ## 12. Static Reference Host
 
+The Laravel-hosted showcase at `https://sharecapsules.com/showcase.html` is separate from
+the static reference Host fixtures in `_examples/static-host`. The showcase is the
+invited-user demo surface and repeatable generation harness. The static reference Host remains
+the independent-host compatibility fixture set.
+
+Before treating the showcase as invited-user ready:
+
+1. Deploy the current application release.
+2. Run the production showcase generation command after production config is active:
+
+   ```bash
+   php artisan showcase:generate-capsules --force
+   ```
+
+3. Confirm `https://sharecapsules.com/showcase.html` and
+   `https://sharecapsules.com/showcase/showcase-manifest.json` return anonymous `200`
+   responses.
+4. Inspect generated production Capsules and confirm CTX/broker identities reference
+   `https://sharecapsules.com` and `https://broker.sharecapsules.com`, not localhost.
+5. Smoke test the Chrome Web Store-installed Viewer against each showcase row and record
+   whether it renders or correctly denies according to the expected policy state.
+
 1. Publish `_examples/static-host` to the approved public static hosting location.
 2. Confirm the hosted page is accessible over HTTPS without account cookies or credentials.
 3. Confirm downloadable example Capsules are available at stable revisioned URLs.

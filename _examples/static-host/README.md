@@ -2,6 +2,19 @@
 
 This directory shows the minimum host-side shape for publishing Capsules on an ordinary static site.
 
+## Relationship to the Laravel showcase
+
+The public Laravel showcase lives at `code/public/showcase.html` with source images under
+`code/public/showcase/images/` and generated Capsules under
+`code/public/showcase/capsules/`. It is the invited-user, production-compatible demo page
+served from `https://sharecapsules.com/showcase.html`.
+
+This `_examples/static-host` directory remains a separate reference fixture. It documents
+the Host boundary for ordinary static sites and keeps local development policy fixtures for
+extension and protocol testing. Do not copy the local `.capsule` files from this directory
+into the production showcase; they were created against local development services and their
+manifests intentionally reference localhost identities.
+
 ## Contents
 
 - `index.html` — a static page containing multiple `<capsule-viewer>` examples using the target host markup syntax.

@@ -292,14 +292,22 @@ Section 8 verification evidence recorded on 2026-08-02:
 - Store-installed Viewer verification remains a production post-deploy smoke check because local generated Capsules intentionally reference local development CTX/broker identities and the local development extension is currently used for localhost validation.
 - Resolved timestamp caveat: full `php artisan showcase:generate-capsules` runs now write ignored `/showcase/showcase-manifest.json` metadata from the same generation timestamp used for Capsule policies, and `showcase.html` hydrates time-window and limit display text from that manifest while keeping static fallback copy.
 - Local full generation with `--force` wrote `/showcase/showcase-manifest.json` using `generated_at=2026-08-02T18:33:34Z`, with `time-future.not_before=2026-08-04T18:33:34Z`, `time-open=2026-08-01T18:33:34Z to 2026-08-04T18:33:34Z`, `time-expired.not_after=2026-07-31T18:33:34Z`, and `limit.capsule_lifetime_maximum=1000`.
+- Production store-installed Viewer verification is blocked until the showcase is deployed: `https://sharecapsules.com/showcase.html` and `https://sharecapsules.com/showcase/showcase-manifest.json` both returned `HTTP/2 404` on 2026-08-02, so there is no production showcase page for the Web Store Viewer to exercise yet.
 
 ### 9. Cleanup And Documentation
 
-- ⬜️ Review `_examples/static-host` after migration and decide which files remain as independent static-host reference fixtures.
-- ⬜️ Remove only duplicated or obsolete static-host fixture files whose role is fully replaced by the showcase or another retained reference fixture.
-- ⬜️ Update `_examples/static-host/README.md` to distinguish the Laravel-hosted showcase from the separate static-host reference implementation.
-- ⬜️ Update extension release evidence if the shared-package refactor changes the production extension bundle.
-- ⬜️ Update Phase 12 runbook or release evidence if the showcase becomes part of invited-user readiness.
+- ✅️ Review `_examples/static-host` after migration and decide which files remain as independent static-host reference fixtures.
+- ✅️ Remove only duplicated or obsolete static-host fixture files whose role is fully replaced by the showcase or another retained reference fixture.
+- ✅️ Update `_examples/static-host/README.md` to distinguish the Laravel-hosted showcase from the separate static-host reference implementation.
+- ✅️ Update extension release evidence if the shared-package refactor changes the production extension bundle.
+- ✅️ Update Phase 12 runbook or release evidence if the showcase becomes part of invited-user readiness.
+
+Section 9 cleanup evidence recorded on 2026-08-02:
+
+- Reviewed `_examples/static-host` after the Laravel showcase migration. It remains the independent static Host compatibility fixture set and local policy regression page; no files were removed because the Laravel showcase does not fully replace the static-host reference pages or their extra local fixtures.
+- Updated `_examples/static-host/README.md` to explicitly distinguish `code/public/showcase.html` and generated production showcase assets from `_examples/static-host` local development fixtures.
+- Extension release evidence for the shared Creator package refactor was already recorded in Section 4 and `_docs/operations/chrome-web-store-production-identity.md`: Chrome Web Store version `0.1.1` was released on 2026-08-02 and continued to render `https://sharecapsules.com/capsule-test`.
+- Updated the Phase 12 production runbook to describe the Laravel showcase as separate from the static reference Host and to list the post-deploy production showcase verification steps.
 
 ## Success Goals
 

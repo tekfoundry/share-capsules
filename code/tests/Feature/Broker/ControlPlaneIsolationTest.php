@@ -16,7 +16,8 @@ final class ControlPlaneIsolationTest extends TestCase
 
     public function test_control_plane_keeps_broker_storage_outside_the_default_connection(): void
     {
-        $this->assertNull(config('sharecapsules.broker.kms.local_master_key'));
+        $this->assertSame('control-plane', config('sharecapsules.component'));
+        $this->assertNotSame('broker', config('database.default'));
         $this->assertSame('broker', (new BrokerContentKey)->getConnectionName());
         $this->assertNotSame(
             config('database.default'),

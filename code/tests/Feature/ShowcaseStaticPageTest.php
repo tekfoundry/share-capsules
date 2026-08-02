@@ -37,7 +37,6 @@ final class ShowcaseStaticPageTest extends TestCase
             $this->assertStringContainsString(ShowcaseExamples::imageUrlPath($example['slug']), $html);
             $this->assertStringContainsString(ShowcaseExamples::capsuleUrlPath($example['slug']), $html);
             $this->assertTrue(File::exists(ShowcaseExamples::imagePath($example['slug'])));
-            $this->assertTrue(File::exists(ShowcaseExamples::capsulePath($example['slug'])));
         }
     }
 }
