@@ -6,6 +6,8 @@ use App\Showcase\ShowcaseCapsulePublisher;
 use App\Showcase\ShowcaseConfiguration;
 use App\Showcase\ShowcaseExamples;
 use App\Showcase\ShowcaseGenerationFailed;
+use App\Showcase\ShowcaseManifestPublisher;
+use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 
 final class GenerateShowcaseCapsules extends Command
@@ -55,12 +57,14 @@ final class GenerateShowcaseCapsules extends Command
         }
 
         $failed = 0;
+        $generationTime = CarbonImmutable::now('UTC')->startOfSecond();
         $publisher = app(ShowcaseCapsulePublisher::class);
         foreach ($examples as $planned) {
             try {
                 $result = $publisher->generate(
                     $planned['slug'],
                     force: (bool) $this->option('force'),
+                    now: $generationTime,
                 );
                 $this->line(sprintf(
                     'Generated %s: policy=%s output=%s',
@@ -83,6 +87,15 @@ final class GenerateShowcaseCapsules extends Command
             $this->components->error("{$failed} showcase generation task(s) failed.");
 
             return self::FAILURE;
+        }
+
+        if ($example === null) {
+            $manifestPath = app(ShowcaseManifestPublisher::class)->publish($examples, $generationTime);
+            $this->line('Generated showcase manifest: '.ShowcaseManifestPublisher::URL_PATH);
+            $this->line("Evidence manifest: path={$manifestPath}");
+            $this->line('Evidence manifest: generated_at='.$generationTime->format('Y-m-d\TH:i:s\Z'));
+        } else {
+            $this->line('Skipped showcase manifest update for focused example generation.');
         }
 
         return self::SUCCESS;

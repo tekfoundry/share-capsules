@@ -261,16 +261,37 @@ Section 7 static-page evidence recorded on 2026-08-02:
 
 ### 8. Verification
 
-- ⬜️ Verify the shared TypeScript package and extension Creator workflow produce equivalent deterministic outputs for the covered fixtures.
-- ⬜️ Verify before/after baseline artifacts remain equivalent after extraction or explicitly document reviewed intentional differences.
-- ⬜️ Verify public API routes, broker routes, Capsule format identifiers, and Viewer-facing manifest shape did not change as part of showcase automation unless an intentional release note is added.
-- ⬜️ Verify the generation command creates all expected `.capsule` files from the checked-in source images.
-- ⬜️ Verify generated Capsules reference production-compatible CTX and broker identities, not localhost fixture services.
-- ⬜️ Verify `showcase.html` loads publicly without authentication.
-- ⬜️ Verify `showcase.html` does not depend on Laravel session state or account cookies.
-- ⬜️ Verify source image and Capsule URLs return anonymous `GET` and `HEAD` responses with bounded content length.
-- ⬜️ Verify the store-installed Viewer can render or correctly deny each showcased Capsule according to expected policy behavior.
-- ⬜️ Verify optional revoked example is actually revoked through lifecycle services, not simulated only by page copy.
+- ✅️ Verify the shared TypeScript package and extension Creator workflow produce equivalent deterministic outputs for the covered fixtures.
+- ✅️ Verify before/after baseline artifacts remain equivalent after extraction or explicitly document reviewed intentional differences.
+- ✅️ Verify public API routes, broker routes, Capsule format identifiers, and Viewer-facing manifest shape did not change as part of showcase automation unless an intentional release note is added.
+- ✅️ Verify the generation command creates all expected `.capsule` files from the checked-in source images.
+- ⬜️ Verify generated production Capsules reference production CTX and broker identities after deployment, not localhost fixture services.
+- ✅️ Verify `showcase.html` loads publicly without authentication.
+- ✅️ Verify `showcase.html` does not depend on Laravel session state or account cookies.
+- ✅️ Verify source image and Capsule URLs return anonymous `GET` and `HEAD` responses with bounded content length.
+- ⬜️ Verify the store-installed Viewer can render or correctly deny each showcased Capsule according to expected policy behavior on production after deployment.
+- ✅️ Verify optional revoked example is actually revoked through lifecycle services, not simulated only by page copy.
+
+Section 8 verification evidence recorded on 2026-08-02:
+
+- Focused Creator deterministic baseline/equivalence command passed:
+  `./_infra/kit npm run test:ts -- apps/browser-extension/src/creator-capsule-builder.test.ts apps/browser-extension/src/static-image-creator-profile.test.ts apps/browser-extension/src/creator-broker-registration.test.ts apps/browser-extension/src/creator-capsule-workflow.test.ts apps/browser-extension/src/creator-payload-secrets.test.ts`
+- Focused Creator deterministic baseline/equivalence result: 5 test files passed, 52 tests passed.
+- Focused Showcase/API command passed:
+  `./_infra/kit test tests/Feature/ShowcaseStaticPageTest.php tests/Unit/Showcase/ShowcaseExamplesTest.php tests/Unit/Showcase/ShowcasePolicyFactoryTest.php tests/Unit/Showcase/GenerateShowcaseCapsulesCommandTest.php tests/Unit/Showcase/ShowcaseCapsulePublisherTest.php tests/Feature/OAuth/DpopTokenTest.php --filter='policy_limit_usage|Showcase|showcase|examples|policy|generation|revoked'`
+- Focused Showcase/API result: 21 tests passed, 177 assertions passed.
+- The only Viewer-facing API contract change in this work is intentional and additive: `/ctx/authorize` may include optional `usage` metadata for compatible Viewer versions `>=0.1.3`; existing published Viewer versions continue receiving the original strict four-field authorization response. `DpopTokenTest` covers the backwards-compatible response and the compatible-viewer usage response.
+- `./_infra/kit artisan showcase:generate-capsules --dry-run` listed all seven planned examples: open image, future time, currently-open time, expired time, limit, trust, and revoked.
+- Local filesystem verification found all seven generated local Capsule archives under `code/public/showcase/capsules/`, with sizes between 42 KiB and 115 KiB, and all seven source JPEGs under `code/public/showcase/images/`, with sizes between 41 KiB and 113 KiB.
+- Local manifest inspection found every generated archive uses `format_version=1.0` and `cryptographic_suite=ctx-capsule-v1`; policy predicates match the configured examples, including limit and trust.
+- Local manifest inspection correctly showed local development identities, `ctx.issuer=http://localhost:3003` and broker `http://localhost:3004`. Generated `.capsule` files are ignored and must not be committed; production deployment must run `php artisan showcase:generate-capsules --force` after production config is active so public Capsules reference `https://sharecapsules.com` identities.
+- Local anonymous page check returned `HTTP/1.1 200 OK` for `http://127.0.0.1:3003/showcase.html` with `Content-Type: text/html; charset=UTF-8` and `Content-Length: 43702`.
+- Local anonymous image `HEAD` check returned `HTTP/1.1 200 OK` for `/showcase/images/open-image.jpg` with `Content-Type: image/jpeg` and `Content-Length: 115697`; anonymous `GET` returned 115697 bytes.
+- Local anonymous Capsule `HEAD` check returned `HTTP/1.1 200 OK` for `/showcase/capsules/open-image-r1.capsule` with `Content-Length: 117414`; anonymous `GET` returned 117414 bytes.
+- Revoked lifecycle verification queried the latest generated `Revoked` creator Capsule and confirmed `status=revoked` with `revoked_at=2026-08-02 16:43:26 UTC`.
+- Store-installed Viewer verification remains a production post-deploy smoke check because local generated Capsules intentionally reference local development CTX/broker identities and the local development extension is currently used for localhost validation.
+- Resolved timestamp caveat: full `php artisan showcase:generate-capsules` runs now write ignored `/showcase/showcase-manifest.json` metadata from the same generation timestamp used for Capsule policies, and `showcase.html` hydrates time-window and limit display text from that manifest while keeping static fallback copy.
+- Local full generation with `--force` wrote `/showcase/showcase-manifest.json` using `generated_at=2026-08-02T18:33:34Z`, with `time-future.not_before=2026-08-04T18:33:34Z`, `time-open=2026-08-01T18:33:34Z to 2026-08-04T18:33:34Z`, `time-expired.not_after=2026-07-31T18:33:34Z`, and `limit.capsule_lifetime_maximum=1000`.
 
 ### 9. Cleanup And Documentation
 

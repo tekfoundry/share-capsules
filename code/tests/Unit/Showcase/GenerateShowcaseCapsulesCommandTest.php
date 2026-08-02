@@ -14,7 +14,9 @@ use App\Showcase\ShowcaseCapsulePrepareResult;
 use App\Showcase\ShowcaseContentKeyRegistration;
 use App\Showcase\ShowcaseExamples;
 use App\Showcase\ShowcaseGenerationFailed;
+use App\Showcase\ShowcaseManifestPublisher;
 use App\Showcase\ShowcasePolicyFactory;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
@@ -25,34 +27,39 @@ final class GenerateShowcaseCapsulesCommandTest extends TestCase
 {
     use RefreshDatabase;
 
-    private ?string $originalCapsuleBytes = null;
+    /** @var array<string, string|null> */
+    private array $originalCapsuleBytes = [];
 
-    private ?string $originalRevokedCapsuleBytes = null;
+    private ?string $originalManifestBytes = null;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $outputPath = ShowcaseExamples::capsulePath(ShowcaseExamples::OPEN_IMAGE);
-        $this->originalCapsuleBytes = File::exists($outputPath) ? File::get($outputPath) : null;
-        File::delete($outputPath);
-        $revokedOutputPath = ShowcaseExamples::capsulePath(ShowcaseExamples::REVOKED);
-        $this->originalRevokedCapsuleBytes = File::exists($revokedOutputPath) ? File::get($revokedOutputPath) : null;
-        File::delete($revokedOutputPath);
+        foreach (ShowcaseExamples::all() as $example) {
+            $outputPath = ShowcaseExamples::capsulePath($example['slug']);
+            $this->originalCapsuleBytes[$outputPath] = File::exists($outputPath) ? File::get($outputPath) : null;
+            File::delete($outputPath);
+        }
+        $manifestPath = public_path(ltrim(ShowcaseManifestPublisher::URL_PATH, '/'));
+        $this->originalManifestBytes = File::exists($manifestPath) ? File::get($manifestPath) : null;
+        File::delete($manifestPath);
     }
 
     protected function tearDown(): void
     {
-        $outputPath = ShowcaseExamples::capsulePath(ShowcaseExamples::OPEN_IMAGE);
-        File::delete($outputPath);
-        if ($this->originalCapsuleBytes !== null) {
-            File::put($outputPath, $this->originalCapsuleBytes);
+        foreach ($this->originalCapsuleBytes as $outputPath => $bytes) {
+            File::delete($outputPath);
+            if ($bytes !== null) {
+                File::put($outputPath, $bytes);
+            }
         }
-        $revokedOutputPath = ShowcaseExamples::capsulePath(ShowcaseExamples::REVOKED);
-        File::delete($revokedOutputPath);
-        if ($this->originalRevokedCapsuleBytes !== null) {
-            File::put($revokedOutputPath, $this->originalRevokedCapsuleBytes);
+        $manifestPath = public_path(ltrim(ShowcaseManifestPublisher::URL_PATH, '/'));
+        File::delete($manifestPath);
+        if ($this->originalManifestBytes !== null) {
+            File::put($manifestPath, $this->originalManifestBytes);
         }
+        CarbonImmutable::setTestNow();
 
         parent::tearDown();
     }
@@ -96,6 +103,34 @@ final class GenerateShowcaseCapsulesCommandTest extends TestCase
 
         $this->assertSame(1, CreatorCapsule::query()->count());
         $this->assertSame('fake-command-capsule', File::get(ShowcaseExamples::capsulePath(ShowcaseExamples::OPEN_IMAGE)));
+        $this->assertFalse(File::exists(public_path(ltrim(ShowcaseManifestPublisher::URL_PATH, '/'))));
+    }
+
+    public function test_full_generation_emits_showcase_manifest_with_matching_policy_metadata(): void
+    {
+        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-08-01T12:34:56Z'));
+        Config::set('showcase.generation.enabled', true);
+        $this->app->instance(ShowcaseCapsuleBridge::class, new CommandFakeShowcaseCapsuleBridge);
+        $this->app->instance(ShowcaseContentKeyRegistration::class, new CommandFakeShowcaseContentKeyRegistration);
+
+        $this->artisan('showcase:generate-capsules')
+            ->expectsOutputToContain('Generated showcase manifest: /showcase/showcase-manifest.json')
+            ->expectsOutputToContain('Evidence manifest: generated_at=2026-08-01T12:34:56Z')
+            ->assertSuccessful();
+
+        $manifestPath = public_path(ltrim(ShowcaseManifestPublisher::URL_PATH, '/'));
+        $this->assertTrue(File::exists($manifestPath));
+
+        $manifest = json_decode(File::get($manifestPath), true, flags: JSON_THROW_ON_ERROR);
+        $this->assertSame('share-capsules-showcase-manifest', $manifest['type']);
+        $this->assertSame(1, $manifest['version']);
+        $this->assertSame('2026-08-01T12:34:56Z', $manifest['generated_at']);
+        $this->assertSame('2026-08-03T12:34:56Z', $manifest['examples']['time-future']['access_window']['not_before']);
+        $this->assertSame('2026-07-31T12:34:56Z', $manifest['examples']['time-open']['access_window']['not_before']);
+        $this->assertSame('2026-08-03T12:34:56Z', $manifest['examples']['time-open']['access_window']['not_after']);
+        $this->assertSame('2026-07-30T12:34:56Z', $manifest['examples']['time-expired']['access_window']['not_after']);
+        $this->assertSame(1000, $manifest['examples']['limit']['capsule_lifetime_maximum']);
+        $this->assertTrue($manifest['examples']['trust']['automation_risk_required']);
     }
 
     public function test_generation_failures_return_failure(): void
@@ -136,7 +171,7 @@ final class CommandFakeShowcaseCapsuleBridge implements ShowcaseCapsuleBridge
 
     /** @param array<string, mixed> $policy */
     public function __construct(
-        private readonly array $policy,
+        private readonly ?array $policy = null,
         private readonly bool $failComplete = false,
     ) {
         $this->contentKey = str_repeat('c', 32);
@@ -155,8 +190,8 @@ final class CommandFakeShowcaseCapsuleBridge implements ShowcaseCapsuleBridge
             capsuleId: 'urn:uuid:'.(string) Str::uuid(),
             capsuleRevision: 1,
             payloadId: 'primary',
-            policySha256: (new CtxPolicyDigest)->calculate($this->policy),
-            policy: $this->policy,
+            policySha256: (new CtxPolicyDigest)->calculate($this->policyFor($input)),
+            policy: $this->policyFor($input),
             title: 'Open Capsule',
             contentProfileId: 'ctx.static-image',
             contentProfileVersion: '1.0',
@@ -191,6 +226,15 @@ final class CommandFakeShowcaseCapsuleBridge implements ShowcaseCapsuleBridge
             verified: true,
         );
     }
+
+    /** @return array<string, mixed> */
+    private function policyFor(ShowcaseCapsulePrepareInput $input): array
+    {
+        return $this->policy ?? app(ShowcasePolicyFactory::class)->policyFor(
+            $input->slug,
+            CarbonImmutable::now('UTC')->startOfSecond(),
+        );
+    }
 }
 
 final class CommandFakeShowcaseContentKeyRegistration implements ShowcaseContentKeyRegistration
@@ -212,6 +256,9 @@ final class CommandFakeShowcaseContentKeyRegistration implements ShowcaseContent
             ))
             ->firstOrFail();
 
-        return new RegisteredContentKey(str_repeat('s', 43), true);
+        return new RegisteredContentKey(
+            sodium_bin2base64(random_bytes(32), SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING),
+            true,
+        );
     }
 }

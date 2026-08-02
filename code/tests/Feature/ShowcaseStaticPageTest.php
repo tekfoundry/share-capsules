@@ -22,11 +22,14 @@ final class ShowcaseStaticPageTest extends TestCase
         $this->assertStringContainsString('<capsule-viewer', $html);
         $this->assertStringContainsString('data-showcase-frame', $html);
         $this->assertStringContainsString('syncShowcaseFrames', $html);
+        $this->assertStringContainsString('hydrateShowcaseManifest', $html);
+        $this->assertStringContainsString('/showcase/showcase-manifest.json', $html);
         $this->assertStringContainsString('<content class="viewer-frame"></content>', $html);
         $this->assertStringContainsString('Viewing window', $html);
-        $this->assertStringContainsString('2026-08-01T16:33:51Z', $html);
-        $this->assertStringContainsString('2026-08-04T16:33:51Z', $html);
-        $this->assertStringContainsString('2026-07-31T16:33:51Z', $html);
+        $this->assertStringContainsString('data-showcase-policy-detail="time-future.window"', $html);
+        $this->assertStringContainsString('data-showcase-policy-detail="time-open.window"', $html);
+        $this->assertStringContainsString('data-showcase-policy-detail="time-expired.window"', $html);
+        $this->assertStringContainsString('data-showcase-policy-detail="limit.maximum"', $html);
         $this->assertStringContainsString('/viewer/install?return_to=https%3A%2F%2Fsharecapsules.com%2Fshowcase.html', $html);
 
         foreach (ShowcaseExamples::all() as $example) {

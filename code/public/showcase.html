@@ -488,11 +488,8 @@
                         </div>
                         <div>
                             <dt>Viewing window</dt>
-                            <dd>
-                                Opens
-                                <time datetime="2026-08-04T16:33:51Z"
-                                    >Aug 4, 2026, 4:33 PM UTC</time
-                                >
+                            <dd data-showcase-policy-detail="time-future.window">
+                                Opens after the next generated showcase window.
                             </dd>
                         </div>
                         <div>
@@ -579,14 +576,8 @@
                         </div>
                         <div>
                             <dt>Viewing window</dt>
-                            <dd>
-                                <time datetime="2026-08-01T16:33:51Z"
-                                    >Aug 1, 2026, 4:33 PM UTC</time
-                                >
-                                to
-                                <time datetime="2026-08-04T16:33:51Z"
-                                    >Aug 4, 2026, 4:33 PM UTC</time
-                                >
+                            <dd data-showcase-policy-detail="time-open.window">
+                                Active during the current generated showcase window.
                             </dd>
                         </div>
                         <div>
@@ -677,11 +668,8 @@
                         </div>
                         <div>
                             <dt>Viewing window</dt>
-                            <dd>
-                                Ended
-                                <time datetime="2026-07-31T16:33:51Z"
-                                    >Jul 31, 2026, 4:33 PM UTC</time
-                                >
+                            <dd data-showcase-policy-detail="time-expired.window">
+                                Ended before the current generated showcase window.
                             </dd>
                         </div>
                         <div>
@@ -764,7 +752,9 @@
                     <dl class="details">
                         <div>
                             <dt>Policy</dt>
-                            <dd>Capsule lifetime limit: 1000</dd>
+                            <dd data-showcase-policy-detail="limit.maximum">
+                                Capsule lifetime limit: generated with the showcase.
+                            </dd>
                         </div>
                         <div>
                             <dt>Source</dt>
@@ -949,6 +939,121 @@
         </main>
         <script>
             (() => {
+                const formatInstant = (value) => {
+                    if (typeof value !== 'string') {
+                        return null;
+                    }
+
+                    const instant = new Date(value);
+                    if (Number.isNaN(instant.getTime())) {
+                        return null;
+                    }
+
+                    return {
+                        iso: value,
+                        label: new Intl.DateTimeFormat(undefined, {
+                            dateStyle: 'medium',
+                            timeStyle: 'short',
+                            timeZoneName: 'short',
+                        }).format(instant),
+                    };
+                };
+
+                const appendTime = (target, instant) => {
+                    const formatted = formatInstant(instant);
+                    if (formatted === null) {
+                        return false;
+                    }
+
+                    const time = document.createElement('time');
+                    time.dateTime = formatted.iso;
+                    time.textContent = formatted.label;
+                    target.append(time);
+
+                    return true;
+                };
+
+                const setText = (selector, text) => {
+                    const target = document.querySelector(selector);
+                    if (target instanceof HTMLElement) {
+                        target.textContent = text;
+                    }
+                };
+
+                const setWindowText = (slug, accessWindow) => {
+                    if (accessWindow === null || typeof accessWindow !== 'object') {
+                        return;
+                    }
+
+                    const target = document.querySelector(
+                        `[data-showcase-policy-detail="${slug}.window"]`,
+                    );
+                    if (!(target instanceof HTMLElement)) {
+                        return;
+                    }
+
+                    const notBefore =
+                        typeof accessWindow.not_before === 'string'
+                            ? accessWindow.not_before
+                            : null;
+                    const notAfter =
+                        typeof accessWindow.not_after === 'string' ? accessWindow.not_after : null;
+
+                    target.replaceChildren();
+                    if (notBefore !== null && notAfter !== null) {
+                        if (!appendTime(target, notBefore)) {
+                            return;
+                        }
+                        target.append(document.createTextNode(' to '));
+                        appendTime(target, notAfter);
+
+                        return;
+                    }
+
+                    if (notBefore !== null) {
+                        target.append(document.createTextNode('Opens '));
+                        appendTime(target, notBefore);
+
+                        return;
+                    }
+
+                    if (notAfter !== null) {
+                        target.append(document.createTextNode('Ended '));
+                        appendTime(target, notAfter);
+                    }
+                };
+
+                const hydrateShowcaseManifest = async () => {
+                    try {
+                        const response = await fetch('/showcase/showcase-manifest.json', {
+                            cache: 'no-store',
+                        });
+                        if (!response.ok) {
+                            return;
+                        }
+
+                        const manifest = await response.json();
+                        const examples = manifest?.examples;
+                        if (examples === null || typeof examples !== 'object') {
+                            return;
+                        }
+
+                        setWindowText('time-future', examples['time-future']?.access_window);
+                        setWindowText('time-open', examples['time-open']?.access_window);
+                        setWindowText('time-expired', examples['time-expired']?.access_window);
+
+                        const maximum = examples.limit?.capsule_lifetime_maximum;
+                        if (Number.isInteger(maximum)) {
+                            setText(
+                                '[data-showcase-policy-detail="limit.maximum"]',
+                                `Capsule lifetime limit: ${maximum}`,
+                            );
+                        }
+                    } catch {
+                        // The static fallback copy remains accurate enough if the manifest is absent.
+                    }
+                };
+
                 const syncShowcaseFrames = () => {
                     for (const frame of document.querySelectorAll('[data-showcase-frame]')) {
                         const size = Math.max(280, Math.round(frame.getBoundingClientRect().width));
@@ -980,6 +1085,7 @@
                     childList: true,
                     subtree: true,
                 });
+                hydrateShowcaseManifest();
                 scheduleSync();
             })();
         </script>
