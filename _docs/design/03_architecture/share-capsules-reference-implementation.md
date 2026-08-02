@@ -1,7 +1,7 @@
 # Share Capsules Reference Implementation
 
 Status: Draft
-Last updated: 2026-06-24
+Last updated: 2026-08-02
 
 ## Purpose
 
@@ -168,6 +168,18 @@ Without the extension or site permission, the fallback remains ordinary public c
 The reference Host requires only HTTPS, ordinary HTML, and static-file delivery. It does not load a Share Capsules JavaScript SDK. Capsule responses use unauthenticated `GET`, preferably support `HEAD`, provide a usable length or bounded stream, allow public CORS, use an accepted V1 media type, and keep each revision URL immutable. Range requests are not required in V1. See [Compatible Host contract](compatible-host.md).
 
 The Host must not receive Share Capsules account identifiers, trust evidence, authorization tokens, content keys, or plaintext.
+
+## Public showcase and generation harness
+
+The Laravel-hosted public showcase is the invited-user demonstration surface for the reference implementation. It is served as a static public Host page from `code/public/showcase.html`, not as an authenticated Laravel feature or creator-specific route. The page presents intentionally public demo source images beside generated Capsules so visitors can compare ordinary public media with protected Capsule viewing.
+
+Showcase source images live under `code/public/showcase/images/`. Generated Capsule archives live under `code/public/showcase/capsules/` and are operational artifacts rather than source-controlled fixtures. The production generation command creates them from checked-in source images and policy definitions, registers them through the normal pending/finalized Capsule lifecycle, and publishes only verified archives after successful broker registration and finalization.
+
+The showcase automation uses a non-interactive system-owned creator account selected by configuration. It does not log in, use OAuth refresh tokens, reuse a human creator's extension signing key, or retain creator source content. The first implementation uses fresh automation-owned signing material per generation instead of a persistent showcase signing secret.
+
+The Artisan command `showcase:generate-capsules` is the operational boundary. It creates representative open, time-window, limit, trust, and revoked policy examples through the same shared TypeScript Capsule construction path used by the extension. Full generation also emits an ignored `showcase/showcase-manifest.json` file containing the same generated timestamps and policy display metadata used by the Capsules, so the static page can show sliding time windows without hardcoded stale dates.
+
+The showcase is separate from `_examples/static-host`. The showcase is production-compatible demo infrastructure served from Share Capsules. `_examples/static-host` remains the independent static Host compatibility fixture set and local policy regression surface; its local development `.capsule` files must not be copied into production showcase content.
 
 ## Shared client library
 

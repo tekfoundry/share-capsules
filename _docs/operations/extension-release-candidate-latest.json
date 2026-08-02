@@ -1,23 +1,23 @@
 {
   "type": "share-capsules-extension-release-candidate",
   "version": 1,
-  "generated_at": "2026-08-02T17:46:44.715Z",
-  "completed_at": "2026-08-02T17:46:54.198Z",
+  "generated_at": "2026-08-02T18:55:19.678Z",
+  "completed_at": "2026-08-02T18:55:29.776Z",
   "status": "ready-for-manual-web-store-upload",
   "extension": {
-    "version": "0.1.2",
+    "version": "0.1.3",
     "id": "jkejpdcobbbeichpodpeoiilnalepdph",
     "name": "Share Capsules"
   },
   "artifact": {
-    "path": "code/apps/browser-extension/share-capsules-extension-0.1.2-production.zip",
-    "bytes": 613817,
-    "sha256": "34204534600b4362cff1a9eddd82cf05dc35683c9db16ed5ecdb99b6850dda50",
+    "path": "code/apps/browser-extension/share-capsules-extension-0.1.3-production.zip",
+    "bytes": 617417,
+    "sha256": "43ddce477a6c57a75397df0cc80affd69029c93d2015a968848fd0e5412cc9a7",
     "entries": [
       {
         "name": "viewer-frame.css",
-        "bytes": 3191,
-        "sha256": "13d6c9de080c05e3cd7387d6dca89af287b68be06906a295485e33ec62f5077c"
+        "bytes": 3627,
+        "sha256": "11bbcdd7d2293689217d114a12b9414dc615ee0930cc2061451d625966e4667c"
       },
       {
         "name": "creator-studio.html",
@@ -52,7 +52,7 @@
       {
         "name": "manifest.json",
         "bytes": 1633,
-        "sha256": "e19c124c64a54864c7a768e75298c238bb50b7de686378592c4f5acd33e4119e"
+        "sha256": "f4bfe53d18530ba9d7e60e28adb4f4e1ad83f47760487dfc3f1f6addcea9166b"
       },
       {
         "name": "service-worker.js",
@@ -61,61 +61,61 @@
       },
       {
         "name": "viewer-frame.js",
-        "bytes": 265017,
-        "sha256": "6af5cf106bc7964e89543c3df96ceb6bc07ee930f8594d03aaa18923692dfb2c"
+        "bytes": 268181,
+        "sha256": "c76a8c4e34c0a9017282b2ae5719b8d6abddd11de153ce6d239b1d9e7678685d"
       }
     ]
   },
   "supply_chain": {
     "path": "_docs/operations/supply-chain-release-check-latest.json",
     "status": "passed",
-    "aggregate_sha256": "f658cea3732528892978042a07273aa98da757c84b861ea764125d6c3abdea9c"
+    "aggregate_sha256": "0c2a6141dd50540199c8249c09c8d755a441effa27dfb558658b903e0e85d532"
   },
   "gates": [
     {
       "name": "npm audit",
       "status": "passed",
-      "duration_ms": 363
+      "duration_ms": 376
     },
     {
       "name": "composer audit",
       "status": "passed",
-      "duration_ms": 363
+      "duration_ms": 365
     },
     {
       "name": "npm test:ts",
       "status": "passed",
-      "duration_ms": 1704
+      "duration_ms": 1861
     },
     {
       "name": "npm typecheck",
       "status": "passed",
-      "duration_ms": 140
+      "duration_ms": 157
     },
     {
       "name": "npm lint",
       "status": "passed",
-      "duration_ms": 2374
+      "duration_ms": 2605
     },
     {
       "name": "composer lint",
       "status": "passed",
-      "duration_ms": 547
+      "duration_ms": 553
     },
     {
       "name": "npm format:check",
       "status": "passed",
-      "duration_ms": 2847
+      "duration_ms": 2917
     },
     {
       "name": "production extension build",
       "status": "passed",
-      "duration_ms": 269
+      "duration_ms": 301
     },
     {
       "name": "production supply-chain release check",
       "status": "passed",
-      "duration_ms": 859
+      "duration_ms": 945
     }
   ],
   "manual_steps": [

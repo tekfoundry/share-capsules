@@ -265,11 +265,11 @@ Section 7 static-page evidence recorded on 2026-08-02:
 - ✅️ Verify before/after baseline artifacts remain equivalent after extraction or explicitly document reviewed intentional differences.
 - ✅️ Verify public API routes, broker routes, Capsule format identifiers, and Viewer-facing manifest shape did not change as part of showcase automation unless an intentional release note is added.
 - ✅️ Verify the generation command creates all expected `.capsule` files from the checked-in source images.
-- ⬜️ Verify generated production Capsules reference production CTX and broker identities after deployment, not localhost fixture services.
+- ✅️ Verify generated production Capsules reference production CTX and broker identities after deployment, not localhost fixture services.
 - ✅️ Verify `showcase.html` loads publicly without authentication.
 - ✅️ Verify `showcase.html` does not depend on Laravel session state or account cookies.
 - ✅️ Verify source image and Capsule URLs return anonymous `GET` and `HEAD` responses with bounded content length.
-- ⬜️ Verify the store-installed Viewer can render or correctly deny each showcased Capsule according to expected policy behavior on production after deployment.
+- ✅️ Verify the store-installed Viewer can render or correctly deny each showcased Capsule according to expected policy behavior on production after deployment.
 - ✅️ Verify optional revoked example is actually revoked through lifecycle services, not simulated only by page copy.
 
 Section 8 verification evidence recorded on 2026-08-02:
@@ -293,6 +293,8 @@ Section 8 verification evidence recorded on 2026-08-02:
 - Resolved timestamp caveat: full `php artisan showcase:generate-capsules` runs now write ignored `/showcase/showcase-manifest.json` metadata from the same generation timestamp used for Capsule policies, and `showcase.html` hydrates time-window and limit display text from that manifest while keeping static fallback copy.
 - Local full generation with `--force` wrote `/showcase/showcase-manifest.json` using `generated_at=2026-08-02T18:33:34Z`, with `time-future.not_before=2026-08-04T18:33:34Z`, `time-open=2026-08-01T18:33:34Z to 2026-08-04T18:33:34Z`, `time-expired.not_after=2026-07-31T18:33:34Z`, and `limit.capsule_lifetime_maximum=1000`.
 - Production store-installed Viewer verification is blocked until the showcase is deployed: `https://sharecapsules.com/showcase.html` and `https://sharecapsules.com/showcase/showcase-manifest.json` both returned `HTTP/2 404` on 2026-08-02, so there is no production showcase page for the Web Store Viewer to exercise yet.
+- Production deployment verification on 2026-08-02 confirmed `https://sharecapsules.com/showcase.html`, `/showcase/showcase-manifest.json`, and all seven `/showcase/capsules/*-r1.capsule` archives returned `HTTP 200`. The generated showcase manifest reported `generated_at=2026-08-02T18:49:32Z`. All seven production Capsule manifests referenced `https://sharecapsules.com` and `https://broker.sharecapsules.com`; no `localhost` identities were found.
+- Maintainer confirmed on 2026-08-02 that the production showcase Capsules render or deny as expected with the Chrome Web Store-installed Viewer.
 
 ### 9. Cleanup And Documentation
 
@@ -324,12 +326,11 @@ Section 9 cleanup evidence recorded on 2026-08-02:
 - The separate static reference Host task remains explicitly separate.
 - The migration avoids carrying two confusing copies of the same showcase material unless both have distinct documented purposes.
 
-## Open Questions
+## Deferred Follow-Up Questions
 
-- Should the first implementation use an encrypted persistent showcase signing key, or generate a fresh automation signing key each time Capsules are regenerated?
-- Should the system-owned showcase creator be provisioned by a one-time Artisan command or selected by environment configuration from an existing verified account?
+- Should a future implementation add an encrypted persistent showcase signing key, or continue generating a fresh automation signing key each time Capsules are regenerated?
+- Should the system-owned showcase creator eventually be provisioned by a one-time Artisan command, or continue being selected by environment configuration from an existing verified account?
 - Should generated showcase Capsule registry records be hidden from normal creator inventory, visibly labeled as showcase-owned, or managed through a dedicated operational view?
-- Should dynamic relative-time examples, such as "expires in 2 days," wait for a later regeneration mode after fixed examples are working?
 - Should `/showcase.html` be linked from the public navigation immediately, or shared only with invited users at first?
 
 ## Follow-Up Ideas
@@ -337,3 +338,8 @@ Section 9 cleanup evidence recorded on 2026-08-02:
 - Add dynamic showcase regeneration for relative examples, such as "opens in 2 days" or "expired 2 days ago," after fixed examples are stable.
 - Promote manual showcase regeneration to a scheduled job only after the command is deterministic, idempotent, cleanup-safe, observable, and operationally boring.
 - Publish the same showcase content to the separate static reference Host once the Phase 12 independent-host validation path is ready.
+
+## Lessons
+
+- Generated production artifacts should not be required by source-tree tests. Tests should verify committed inputs, public references, and generation behavior separately.
+- When automation refreshes time-sensitive policy values, publish display metadata from the same generation timestamp instead of hardcoding absolute dates in static HTML.

@@ -1,14 +1,14 @@
 {
   "type": "share-capsules-supply-chain-release-check",
   "version": 1,
-  "generated_at": "2026-08-02T17:46:53.343Z",
-  "completed_at": "2026-08-02T17:46:54.180Z",
+  "generated_at": "2026-08-02T18:55:28.836Z",
+  "completed_at": "2026-08-02T18:55:29.756Z",
   "status": "passed",
   "checks": {
     "reproducible_extension_build": {
       "status": "passed",
       "file_count": 15,
-      "aggregate_sha256": "f658cea3732528892978042a07273aa98da757c84b861ea764125d6c3abdea9c",
+      "aggregate_sha256": "0c2a6141dd50540199c8249c09c8d755a441effa27dfb558658b903e0e85d532",
       "files": [
         {
           "path": "creator-handoff.js",
@@ -33,7 +33,7 @@
         {
           "path": "manifest.json",
           "bytes": 1633,
-          "sha256": "e19c124c64a54864c7a768e75298c238bb50b7de686378592c4f5acd33e4119e"
+          "sha256": "f4bfe53d18530ba9d7e60e28adb4f4e1ad83f47760487dfc3f1f6addcea9166b"
         },
         {
           "path": "service-worker.js",
@@ -67,8 +67,8 @@
         },
         {
           "path": "viewer-frame.css",
-          "bytes": 3191,
-          "sha256": "13d6c9de080c05e3cd7387d6dca89af287b68be06906a295485e33ec62f5077c"
+          "bytes": 3627,
+          "sha256": "11bbcdd7d2293689217d114a12b9414dc615ee0930cc2061451d625966e4667c"
         },
         {
           "path": "viewer-frame.html",
@@ -77,13 +77,13 @@
         },
         {
           "path": "viewer-frame.js",
-          "bytes": 265017,
-          "sha256": "6af5cf106bc7964e89543c3df96ceb6bc07ee930f8594d03aaa18923692dfb2c"
+          "bytes": 268181,
+          "sha256": "c76a8c4e34c0a9017282b2ae5719b8d6abddd11de153ce6d239b1d9e7678685d"
         },
         {
           "path": "viewer-frame.js.map",
-          "bytes": 619679,
-          "sha256": "c2d9ea911f1143be5ab40d08471d49acce4796e8591008d9e234c9d0a4d5bda3"
+          "bytes": 626754,
+          "sha256": "9a87bacab59bd13169de3c0fb1a55da0316759cacd617d5ee6bd7aaee0100e65"
         }
       ]
     },
