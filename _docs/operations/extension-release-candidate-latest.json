@@ -1,18 +1,18 @@
 {
   "type": "share-capsules-extension-release-candidate",
   "version": 1,
-  "generated_at": "2026-08-02T18:55:19.678Z",
-  "completed_at": "2026-08-02T18:55:29.776Z",
+  "generated_at": "2026-08-02T19:49:08.256Z",
+  "completed_at": "2026-08-02T19:49:20.581Z",
   "status": "ready-for-manual-web-store-upload",
   "extension": {
-    "version": "0.1.3",
+    "version": "0.1.4",
     "id": "jkejpdcobbbeichpodpeoiilnalepdph",
     "name": "Share Capsules"
   },
   "artifact": {
-    "path": "code/apps/browser-extension/share-capsules-extension-0.1.3-production.zip",
-    "bytes": 617417,
-    "sha256": "43ddce477a6c57a75397df0cc80affd69029c93d2015a968848fd0e5412cc9a7",
+    "path": "code/apps/browser-extension/share-capsules-extension-0.1.4-production.zip",
+    "bytes": 617401,
+    "sha256": "4b23b53af4a114ed16933f06cd042535e3003ddb7720414fb10a0860fe42c4f1",
     "entries": [
       {
         "name": "viewer-frame.css",
@@ -52,7 +52,7 @@
       {
         "name": "manifest.json",
         "bytes": 1633,
-        "sha256": "f4bfe53d18530ba9d7e60e28adb4f4e1ad83f47760487dfc3f1f6addcea9166b"
+        "sha256": "f7318d923c7eff3780b7f7e4f9e99e4d636c96fd87f6a2d01d7efe98a411aee1"
       },
       {
         "name": "service-worker.js",
@@ -61,61 +61,61 @@
       },
       {
         "name": "viewer-frame.js",
-        "bytes": 268181,
-        "sha256": "c76a8c4e34c0a9017282b2ae5719b8d6abddd11de153ce6d239b1d9e7678685d"
+        "bytes": 268165,
+        "sha256": "defdd617988ee2063e6b1ab807b6aa152aa73dd63d47208e776bd9accccf9ba3"
       }
     ]
   },
   "supply_chain": {
     "path": "_docs/operations/supply-chain-release-check-latest.json",
     "status": "passed",
-    "aggregate_sha256": "0c2a6141dd50540199c8249c09c8d755a441effa27dfb558658b903e0e85d532"
+    "aggregate_sha256": "1c9bba98173a1d3266cca765c25c0b020dc9b6c567a398db4b2dae5c2d6142c9"
   },
   "gates": [
     {
       "name": "npm audit",
       "status": "passed",
-      "duration_ms": 376
+      "duration_ms": 302
     },
     {
       "name": "composer audit",
       "status": "passed",
-      "duration_ms": 365
+      "duration_ms": 329
     },
     {
       "name": "npm test:ts",
       "status": "passed",
-      "duration_ms": 1861
+      "duration_ms": 1536
     },
     {
       "name": "npm typecheck",
       "status": "passed",
-      "duration_ms": 157
+      "duration_ms": 1456
     },
     {
       "name": "npm lint",
       "status": "passed",
-      "duration_ms": 2605
+      "duration_ms": 2857
     },
     {
       "name": "composer lint",
       "status": "passed",
-      "duration_ms": 553
+      "duration_ms": 1578
     },
     {
       "name": "npm format:check",
       "status": "passed",
-      "duration_ms": 2917
+      "duration_ms": 3073
     },
     {
       "name": "production extension build",
       "status": "passed",
-      "duration_ms": 301
+      "duration_ms": 323
     },
     {
       "name": "production supply-chain release check",
       "status": "passed",
-      "duration_ms": 945
+      "duration_ms": 856
     }
   ],
   "manual_steps": [

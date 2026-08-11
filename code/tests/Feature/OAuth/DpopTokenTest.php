@@ -487,7 +487,7 @@ final class DpopTokenTest extends TestCase
             'action' => 'render',
             'cryptographic_suite' => 'ctx-capsule-v1',
             'view_event_consent' => true,
-            'viewer' => [...$this->viewerRelease(), 'version' => '0.1.3'],
+            'viewer' => [...$this->viewerRelease(), 'version' => '0.1.4'],
         ])->assertCreated()
             ->assertJsonPath('usage.capsule_lifetime.used', 3)
             ->assertJsonPath('usage.capsule_lifetime.maximum', 10)
