@@ -226,14 +226,27 @@
             }
 
             .media-label {
-                display: flex;
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) auto;
                 min-height: 28px;
-                align-items: center;
-                justify-content: space-between;
+                align-items: start;
                 gap: 10px;
                 color: var(--ink);
                 font-size: 0.82rem;
                 font-weight: 800;
+            }
+
+            .media-label-text {
+                display: grid;
+                gap: 2px;
+                min-width: 0;
+            }
+
+            .media-path {
+                color: var(--muted);
+                font-size: 0.76rem;
+                font-weight: 600;
+                overflow-wrap: anywhere;
             }
 
             .media-link {
@@ -300,28 +313,73 @@
 
             .details {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                grid-template-columns: repeat(3, minmax(0, 1fr));
                 gap: 10px;
                 color: var(--muted);
                 font-size: 0.9rem;
             }
 
-            .details div {
+            .details > div {
                 min-width: 0;
                 border: 1px solid var(--line);
                 border-radius: 8px;
                 background: var(--panel);
-                padding: 12px;
+                overflow: hidden;
             }
 
             .details dt {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 8px;
+                border-bottom: 1px solid var(--line);
+                background: #f8fafc;
                 color: var(--ink);
                 font-weight: 800;
+                padding: 10px 12px;
+            }
+
+            .policy-status {
+                display: inline-flex;
+                width: 1.35rem;
+                height: 1.35rem;
+                flex: 0 0 auto;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid #ccd6e4;
+                border-radius: 999px;
+                background: #eef2f7;
+                color: #9aa8ba;
+                font-size: 0.82rem;
+                line-height: 1;
+            }
+
+            .policy-status.configured {
+                border-color: #b7dbce;
+                background: #eaf7f1;
+                color: var(--green);
             }
 
             .details dd {
-                margin: 4px 0 0;
+                margin: 0;
                 overflow-wrap: anywhere;
+                padding: 10px 12px 12px;
+            }
+
+            .summary-lines {
+                display: grid;
+                gap: 3px;
+            }
+
+            .summary-line {
+                display: grid;
+                grid-template-columns: 6.25rem minmax(0, 1fr);
+                gap: 0.35rem;
+            }
+
+            .summary-line-label {
+                color: var(--ink);
+                font-weight: 800;
             }
 
             @media (max-width: 820px) {
@@ -380,7 +438,10 @@
                     <div class="comparison">
                         <div class="media-block">
                             <div class="media-label">
-                                <span>Original public image</span>
+                                <span class="media-label-text">
+                                    <span>Original public image</span>
+                                    <code class="media-path">/showcase/images/open-image.jpg</code>
+                                </span>
                                 <a class="media-link" href="/showcase/images/open-image.jpg"
                                     >JPEG</a
                                 >
@@ -395,7 +456,12 @@
                         </div>
                         <div class="media-block">
                             <div class="media-label">
-                                <span>Protected Capsule</span>
+                                <span class="media-label-text">
+                                    <span>Protected Capsule</span>
+                                    <code class="media-path"
+                                        >/showcase/capsules/open-image-r1.capsule</code
+                                    >
+                                </span>
                                 <a
                                     class="media-link"
                                     href="/showcase/capsules/open-image-r1.capsule"
@@ -440,16 +506,39 @@
                     </div>
                     <dl class="details">
                         <div>
-                            <dt>Policy</dt>
-                            <dd>No additional policy gates</dd>
+                            <dt>Time Policy <span class="policy-status" data-showcase-policy-status="open-image.time" title="Policy not configured" aria-label="Policy not configured">&#10003;</span></dt>
+                            <dd class="summary-lines" data-showcase-policy-detail="open-image.time">
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Opens:</span>
+                                    <span>always open</span>
+                                </span>
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Closes:</span>
+                                    <span>never closes</span>
+                                </span>
+                            </dd>
                         </div>
                         <div>
-                            <dt>Source</dt>
-                            <dd><code>/showcase/images/open-image.jpg</code></dd>
+                            <dt>Limit Policy <span class="policy-status" data-showcase-policy-status="open-image.limit" title="Policy not configured" aria-label="Policy not configured">&#10003;</span></dt>
+                            <dd class="summary-lines" data-showcase-policy-detail="open-image.limit">
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Per Viewer:</span>
+                                    <span>no limit</span>
+                                </span>
+                                <span class="summary-line">
+                                    <span class="summary-line-label">All Viewers:</span>
+                                    <span>no limit</span>
+                                </span>
+                            </dd>
                         </div>
                         <div>
-                            <dt>Capsule</dt>
-                            <dd><code>/showcase/capsules/open-image-r1.capsule</code></dd>
+                            <dt>Trust Policy <span class="policy-status" data-showcase-policy-status="open-image.trust" title="Policy not configured" aria-label="Policy not configured">&#10003;</span></dt>
+                            <dd class="summary-lines" data-showcase-policy-detail="open-image.trust">
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Challenges:</span>
+                                    <span>Off</span>
+                                </span>
+                            </dd>
                         </div>
                     </dl>
                 </article>
@@ -466,7 +555,10 @@
                     <div class="comparison">
                         <div class="media-block">
                             <div class="media-label">
-                                <span>Original public image</span>
+                                <span class="media-label-text">
+                                    <span>Original public image</span>
+                                    <code class="media-path">/showcase/images/time-future.jpg</code>
+                                </span>
                                 <a class="media-link" href="/showcase/images/time-future.jpg"
                                     >JPEG</a
                                 >
@@ -481,7 +573,12 @@
                         </div>
                         <div class="media-block">
                             <div class="media-label">
-                                <span>Protected Capsule</span>
+                                <span class="media-label-text">
+                                    <span>Protected Capsule</span>
+                                    <code class="media-path"
+                                        >/showcase/capsules/time-future-r1.capsule</code
+                                    >
+                                </span>
                                 <a
                                     class="media-link"
                                     href="/showcase/capsules/time-future-r1.capsule"
@@ -504,6 +601,10 @@
                                                 Install or connect the Share Capsules Viewer to
                                                 evaluate this time gate.
                                             </p>
+                                            <p>
+                                                Review the policy boxes below to see why this
+                                                Capsule may stay closed.
+                                            </p>
                                             <a
                                                 class="install-link"
                                                 href="/viewer/install?return_to=https%3A%2F%2Fsharecapsules.com%2Fshowcase.html"
@@ -518,6 +619,10 @@
                                                 This locked state is intentional for the future time
                                                 example.
                                             </p>
+                                            <p>
+                                                Review the policy boxes below for the configured
+                                                opening window.
+                                            </p>
                                         </section>
                                     </error>
                                 </capsule-viewer>
@@ -526,22 +631,39 @@
                     </div>
                     <dl class="details">
                         <div>
-                            <dt>Policy</dt>
-                            <dd>Not-before time gate</dd>
-                        </div>
-                        <div>
-                            <dt>Viewing window</dt>
-                            <dd data-showcase-policy-detail="time-future.window">
-                                Opens after the next generated showcase window.
+                            <dt>Time Policy <span class="policy-status configured" data-showcase-policy-status="time-future.time" title="Policy configured" aria-label="Policy configured">&#10003;</span></dt>
+                            <dd class="summary-lines" data-showcase-policy-detail="time-future.time">
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Opens:</span>
+                                    <span>after the next generated showcase window</span>
+                                </span>
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Closes:</span>
+                                    <span>never closes</span>
+                                </span>
                             </dd>
                         </div>
                         <div>
-                            <dt>Source</dt>
-                            <dd><code>/showcase/images/time-future.jpg</code></dd>
+                            <dt>Limit Policy <span class="policy-status" data-showcase-policy-status="time-future.limit" title="Policy not configured" aria-label="Policy not configured">&#10003;</span></dt>
+                            <dd class="summary-lines" data-showcase-policy-detail="time-future.limit">
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Per Viewer:</span>
+                                    <span>no limit</span>
+                                </span>
+                                <span class="summary-line">
+                                    <span class="summary-line-label">All Viewers:</span>
+                                    <span>no limit</span>
+                                </span>
+                            </dd>
                         </div>
                         <div>
-                            <dt>Capsule</dt>
-                            <dd><code>/showcase/capsules/time-future-r1.capsule</code></dd>
+                            <dt>Trust Policy <span class="policy-status" data-showcase-policy-status="time-future.trust" title="Policy not configured" aria-label="Policy not configured">&#10003;</span></dt>
+                            <dd class="summary-lines" data-showcase-policy-detail="time-future.trust">
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Challenges:</span>
+                                    <span>Off</span>
+                                </span>
+                            </dd>
                         </div>
                     </dl>
                 </article>
@@ -558,7 +680,10 @@
                     <div class="comparison">
                         <div class="media-block">
                             <div class="media-label">
-                                <span>Original public image</span>
+                                <span class="media-label-text">
+                                    <span>Original public image</span>
+                                    <code class="media-path">/showcase/images/time-open.jpg</code>
+                                </span>
                                 <a class="media-link" href="/showcase/images/time-open.jpg">JPEG</a>
                             </div>
                             <div class="frame" data-showcase-frame>
@@ -571,7 +696,12 @@
                         </div>
                         <div class="media-block">
                             <div class="media-label">
-                                <span>Protected Capsule</span>
+                                <span class="media-label-text">
+                                    <span>Protected Capsule</span>
+                                    <code class="media-path"
+                                        >/showcase/capsules/time-open-r1.capsule</code
+                                    >
+                                </span>
                                 <a class="media-link" href="/showcase/capsules/time-open-r1.capsule"
                                     >Capsule</a
                                 >
@@ -614,22 +744,39 @@
                     </div>
                     <dl class="details">
                         <div>
-                            <dt>Policy</dt>
-                            <dd>Current access window</dd>
-                        </div>
-                        <div>
-                            <dt>Viewing window</dt>
-                            <dd data-showcase-policy-detail="time-open.window">
-                                Active during the current generated showcase window.
+                            <dt>Time Policy <span class="policy-status configured" data-showcase-policy-status="time-open.time" title="Policy configured" aria-label="Policy configured">&#10003;</span></dt>
+                            <dd class="summary-lines" data-showcase-policy-detail="time-open.time">
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Opens:</span>
+                                    <span>during the current generated showcase window</span>
+                                </span>
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Closes:</span>
+                                    <span>during the current generated showcase window</span>
+                                </span>
                             </dd>
                         </div>
                         <div>
-                            <dt>Source</dt>
-                            <dd><code>/showcase/images/time-open.jpg</code></dd>
+                            <dt>Limit Policy <span class="policy-status" data-showcase-policy-status="time-open.limit" title="Policy not configured" aria-label="Policy not configured">&#10003;</span></dt>
+                            <dd class="summary-lines" data-showcase-policy-detail="time-open.limit">
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Per Viewer:</span>
+                                    <span>no limit</span>
+                                </span>
+                                <span class="summary-line">
+                                    <span class="summary-line-label">All Viewers:</span>
+                                    <span>no limit</span>
+                                </span>
+                            </dd>
                         </div>
                         <div>
-                            <dt>Capsule</dt>
-                            <dd><code>/showcase/capsules/time-open-r1.capsule</code></dd>
+                            <dt>Trust Policy <span class="policy-status" data-showcase-policy-status="time-open.trust" title="Policy not configured" aria-label="Policy not configured">&#10003;</span></dt>
+                            <dd class="summary-lines" data-showcase-policy-detail="time-open.trust">
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Challenges:</span>
+                                    <span>Off</span>
+                                </span>
+                            </dd>
                         </div>
                     </dl>
                 </article>
@@ -646,7 +793,10 @@
                     <div class="comparison">
                         <div class="media-block">
                             <div class="media-label">
-                                <span>Original public image</span>
+                                <span class="media-label-text">
+                                    <span>Original public image</span>
+                                    <code class="media-path">/showcase/images/time-expired.jpg</code>
+                                </span>
                                 <a class="media-link" href="/showcase/images/time-expired.jpg"
                                     >JPEG</a
                                 >
@@ -661,7 +811,12 @@
                         </div>
                         <div class="media-block">
                             <div class="media-label">
-                                <span>Protected Capsule</span>
+                                <span class="media-label-text">
+                                    <span>Protected Capsule</span>
+                                    <code class="media-path"
+                                        >/showcase/capsules/time-expired-r1.capsule</code
+                                    >
+                                </span>
                                 <a
                                     class="media-link"
                                     href="/showcase/capsules/time-expired-r1.capsule"
@@ -684,6 +839,10 @@
                                                 Install or connect the Share Capsules Viewer to
                                                 evaluate this expired state.
                                             </p>
+                                            <p>
+                                                Review the policy boxes below to see why this
+                                                Capsule may stay closed.
+                                            </p>
                                             <a
                                                 class="install-link"
                                                 href="/viewer/install?return_to=https%3A%2F%2Fsharecapsules.com%2Fshowcase.html"
@@ -698,6 +857,10 @@
                                                 This unavailable state is intentional for the
                                                 expired time example.
                                             </p>
+                                            <p>
+                                                Review the policy boxes below for the configured
+                                                closing window.
+                                            </p>
                                         </section>
                                     </error>
                                 </capsule-viewer>
@@ -706,22 +869,39 @@
                     </div>
                     <dl class="details">
                         <div>
-                            <dt>Policy</dt>
-                            <dd>Past not-after time gate</dd>
-                        </div>
-                        <div>
-                            <dt>Viewing window</dt>
-                            <dd data-showcase-policy-detail="time-expired.window">
-                                Ended before the current generated showcase window.
+                            <dt>Time Policy <span class="policy-status configured" data-showcase-policy-status="time-expired.time" title="Policy configured" aria-label="Policy configured">&#10003;</span></dt>
+                            <dd class="summary-lines" data-showcase-policy-detail="time-expired.time">
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Opens:</span>
+                                    <span>always open</span>
+                                </span>
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Closes:</span>
+                                    <span>before the current generated showcase window</span>
+                                </span>
                             </dd>
                         </div>
                         <div>
-                            <dt>Source</dt>
-                            <dd><code>/showcase/images/time-expired.jpg</code></dd>
+                            <dt>Limit Policy <span class="policy-status" data-showcase-policy-status="time-expired.limit" title="Policy not configured" aria-label="Policy not configured">&#10003;</span></dt>
+                            <dd class="summary-lines" data-showcase-policy-detail="time-expired.limit">
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Per Viewer:</span>
+                                    <span>no limit</span>
+                                </span>
+                                <span class="summary-line">
+                                    <span class="summary-line-label">All Viewers:</span>
+                                    <span>no limit</span>
+                                </span>
+                            </dd>
                         </div>
                         <div>
-                            <dt>Capsule</dt>
-                            <dd><code>/showcase/capsules/time-expired-r1.capsule</code></dd>
+                            <dt>Trust Policy <span class="policy-status" data-showcase-policy-status="time-expired.trust" title="Policy not configured" aria-label="Policy not configured">&#10003;</span></dt>
+                            <dd class="summary-lines" data-showcase-policy-detail="time-expired.trust">
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Challenges:</span>
+                                    <span>Off</span>
+                                </span>
+                            </dd>
                         </div>
                     </dl>
                 </article>
@@ -738,7 +918,10 @@
                     <div class="comparison">
                         <div class="media-block">
                             <div class="media-label">
-                                <span>Original public image</span>
+                                <span class="media-label-text">
+                                    <span>Original public image</span>
+                                    <code class="media-path">/showcase/images/limit.jpg</code>
+                                </span>
                                 <a class="media-link" href="/showcase/images/limit.jpg">JPEG</a>
                             </div>
                             <div class="frame" data-showcase-frame>
@@ -751,7 +934,10 @@
                         </div>
                         <div class="media-block">
                             <div class="media-label">
-                                <span>Protected Capsule</span>
+                                <span class="media-label-text">
+                                    <span>Protected Capsule</span>
+                                    <code class="media-path">/showcase/capsules/limit-r1.capsule</code>
+                                </span>
                                 <a class="media-link" href="/showcase/capsules/limit-r1.capsule"
                                     >Capsule</a
                                 >
@@ -786,6 +972,10 @@
                                                 This example opens until its configured opening
                                                 limit is reached.
                                             </p>
+                                            <p>
+                                                Review the policy boxes below for the configured
+                                                viewer limits.
+                                            </p>
                                         </section>
                                     </error>
                                 </capsule-viewer>
@@ -794,18 +984,39 @@
                     </div>
                     <dl class="details">
                         <div>
-                            <dt>Policy</dt>
-                            <dd data-showcase-policy-detail="limit.maximum">
-                                Capsule lifetime limit: generated with the showcase.
+                            <dt>Time Policy <span class="policy-status" data-showcase-policy-status="limit.time" title="Policy not configured" aria-label="Policy not configured">&#10003;</span></dt>
+                            <dd class="summary-lines" data-showcase-policy-detail="limit.time">
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Opens:</span>
+                                    <span>always open</span>
+                                </span>
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Closes:</span>
+                                    <span>never closes</span>
+                                </span>
                             </dd>
                         </div>
                         <div>
-                            <dt>Source</dt>
-                            <dd><code>/showcase/images/limit.jpg</code></dd>
+                            <dt>Limit Policy <span class="policy-status configured" data-showcase-policy-status="limit.limit" title="Policy configured" aria-label="Policy configured">&#10003;</span></dt>
+                            <dd class="summary-lines" data-showcase-policy-detail="limit.limit">
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Per Viewer:</span>
+                                    <span>no limit</span>
+                                </span>
+                                <span class="summary-line">
+                                    <span class="summary-line-label">All Viewers:</span>
+                                    <span>generated with the showcase</span>
+                                </span>
+                            </dd>
                         </div>
                         <div>
-                            <dt>Capsule</dt>
-                            <dd><code>/showcase/capsules/limit-r1.capsule</code></dd>
+                            <dt>Trust Policy <span class="policy-status" data-showcase-policy-status="limit.trust" title="Policy not configured" aria-label="Policy not configured">&#10003;</span></dt>
+                            <dd class="summary-lines" data-showcase-policy-detail="limit.trust">
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Challenges:</span>
+                                    <span>Off</span>
+                                </span>
+                            </dd>
                         </div>
                     </dl>
                 </article>
@@ -825,7 +1036,10 @@
                     <div class="comparison">
                         <div class="media-block">
                             <div class="media-label">
-                                <span>Original public image</span>
+                                <span class="media-label-text">
+                                    <span>Original public image</span>
+                                    <code class="media-path">/showcase/images/trust.jpg</code>
+                                </span>
                                 <a class="media-link" href="/showcase/images/trust.jpg">JPEG</a>
                             </div>
                             <div class="frame" data-showcase-frame>
@@ -838,7 +1052,10 @@
                         </div>
                         <div class="media-block">
                             <div class="media-label">
-                                <span>Protected Capsule</span>
+                                <span class="media-label-text">
+                                    <span>Protected Capsule</span>
+                                    <code class="media-path">/showcase/capsules/trust-r1.capsule</code>
+                                </span>
                                 <a class="media-link" href="/showcase/capsules/trust-r1.capsule"
                                     >Capsule</a
                                 >
@@ -859,6 +1076,10 @@
                                                 Install or connect the Share Capsules Viewer to
                                                 evaluate this Trust Capsule.
                                             </p>
+                                            <p>
+                                                Review the policy boxes below to see whether
+                                                challenges are enabled.
+                                            </p>
                                             <a
                                                 class="install-link"
                                                 href="/viewer/install?return_to=https%3A%2F%2Fsharecapsules.com%2Fshowcase.html"
@@ -873,6 +1094,10 @@
                                                 This example may ask for a quick human check when
                                                 trust signals require it.
                                             </p>
+                                            <p>
+                                                Review the policy boxes below to see whether
+                                                challenges are enabled.
+                                            </p>
                                         </section>
                                     </error>
                                 </capsule-viewer>
@@ -881,16 +1106,39 @@
                     </div>
                     <dl class="details">
                         <div>
-                            <dt>Policy</dt>
-                            <dd>Automation risk must not be high</dd>
+                            <dt>Time Policy <span class="policy-status" data-showcase-policy-status="trust.time" title="Policy not configured" aria-label="Policy not configured">&#10003;</span></dt>
+                            <dd class="summary-lines" data-showcase-policy-detail="trust.time">
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Opens:</span>
+                                    <span>always open</span>
+                                </span>
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Closes:</span>
+                                    <span>never closes</span>
+                                </span>
+                            </dd>
                         </div>
                         <div>
-                            <dt>Source</dt>
-                            <dd><code>/showcase/images/trust.jpg</code></dd>
+                            <dt>Limit Policy <span class="policy-status" data-showcase-policy-status="trust.limit" title="Policy not configured" aria-label="Policy not configured">&#10003;</span></dt>
+                            <dd class="summary-lines" data-showcase-policy-detail="trust.limit">
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Per Viewer:</span>
+                                    <span>no limit</span>
+                                </span>
+                                <span class="summary-line">
+                                    <span class="summary-line-label">All Viewers:</span>
+                                    <span>no limit</span>
+                                </span>
+                            </dd>
                         </div>
                         <div>
-                            <dt>Capsule</dt>
-                            <dd><code>/showcase/capsules/trust-r1.capsule</code></dd>
+                            <dt>Trust Policy <span class="policy-status configured" data-showcase-policy-status="trust.trust" title="Policy configured" aria-label="Policy configured">&#10003;</span></dt>
+                            <dd class="summary-lines" data-showcase-policy-detail="trust.trust">
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Challenges:</span>
+                                    <span>On</span>
+                                </span>
+                            </dd>
                         </div>
                     </dl>
                 </article>
@@ -909,7 +1157,10 @@
                     <div class="comparison">
                         <div class="media-block">
                             <div class="media-label">
-                                <span>Original public image</span>
+                                <span class="media-label-text">
+                                    <span>Original public image</span>
+                                    <code class="media-path">/showcase/images/revoked.jpg</code>
+                                </span>
                                 <a class="media-link" href="/showcase/images/revoked.jpg">JPEG</a>
                             </div>
                             <div class="frame" data-showcase-frame>
@@ -922,7 +1173,10 @@
                         </div>
                         <div class="media-block">
                             <div class="media-label">
-                                <span>Protected Capsule</span>
+                                <span class="media-label-text">
+                                    <span>Protected Capsule</span>
+                                    <code class="media-path">/showcase/capsules/revoked-r1.capsule</code>
+                                </span>
                                 <a class="media-link" href="/showcase/capsules/revoked-r1.capsule"
                                     >Capsule</a
                                 >
@@ -943,6 +1197,10 @@
                                                 Install or connect the Share Capsules Viewer to
                                                 evaluate the revoked state.
                                             </p>
+                                            <p>
+                                                This example is expected to stay closed because it
+                                                was revoked after generation.
+                                            </p>
                                             <a
                                                 class="install-link"
                                                 href="/viewer/install?return_to=https%3A%2F%2Fsharecapsules.com%2Fshowcase.html"
@@ -957,6 +1215,10 @@
                                                 This unavailable state is intentional for the
                                                 revoked example.
                                             </p>
+                                            <p>
+                                                This example is expected to stay closed because it
+                                                was revoked after generation.
+                                            </p>
                                         </section>
                                     </error>
                                 </capsule-viewer>
@@ -965,16 +1227,39 @@
                     </div>
                     <dl class="details">
                         <div>
-                            <dt>Policy</dt>
-                            <dd>Server-side revocation</dd>
+                            <dt>Time Policy <span class="policy-status" data-showcase-policy-status="revoked.time" title="Policy not configured" aria-label="Policy not configured">&#10003;</span></dt>
+                            <dd class="summary-lines" data-showcase-policy-detail="revoked.time">
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Opens:</span>
+                                    <span>always open</span>
+                                </span>
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Closes:</span>
+                                    <span>never closes</span>
+                                </span>
+                            </dd>
                         </div>
                         <div>
-                            <dt>Source</dt>
-                            <dd><code>/showcase/images/revoked.jpg</code></dd>
+                            <dt>Limit Policy <span class="policy-status" data-showcase-policy-status="revoked.limit" title="Policy not configured" aria-label="Policy not configured">&#10003;</span></dt>
+                            <dd class="summary-lines" data-showcase-policy-detail="revoked.limit">
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Per Viewer:</span>
+                                    <span>no limit</span>
+                                </span>
+                                <span class="summary-line">
+                                    <span class="summary-line-label">All Viewers:</span>
+                                    <span>no limit</span>
+                                </span>
+                            </dd>
                         </div>
                         <div>
-                            <dt>Capsule</dt>
-                            <dd><code>/showcase/capsules/revoked-r1.capsule</code></dd>
+                            <dt>Trust Policy <span class="policy-status" data-showcase-policy-status="revoked.trust" title="Policy not configured" aria-label="Policy not configured">&#10003;</span></dt>
+                            <dd class="summary-lines" data-showcase-policy-detail="revoked.trust">
+                                <span class="summary-line">
+                                    <span class="summary-line-label">Challenges:</span>
+                                    <span>Off</span>
+                                </span>
+                            </dd>
                         </div>
                     </dl>
                 </article>
@@ -1005,68 +1290,130 @@
                     };
                 };
 
-                const appendTime = (target, instant) => {
+                const createTime = (instant) => {
                     const formatted = formatInstant(instant);
                     if (formatted === null) {
-                        return false;
+                        return null;
                     }
 
                     const time = document.createElement('time');
                     time.dateTime = formatted.iso;
                     time.textContent = formatted.label;
-                    target.append(time);
 
-                    return true;
+                    return time;
                 };
 
-                const setText = (selector, text) => {
-                    const target = document.querySelector(selector);
-                    if (target instanceof HTMLElement) {
-                        target.textContent = text;
+                const createSummaryLine = (label, value) => {
+                    const row = document.createElement('div');
+                    row.className = 'summary-line';
+
+                    const rowLabel = document.createElement('span');
+                    rowLabel.className = 'summary-line-label';
+                    rowLabel.textContent = `${label}:`;
+
+                    const valueElement =
+                        value instanceof Node ? value : document.createElement('span');
+                    if (!(value instanceof Node)) {
+                        valueElement.textContent = value;
                     }
+
+                    row.append(rowLabel, valueElement);
+
+                    return row;
                 };
 
-                const setWindowText = (slug, accessWindow) => {
-                    if (accessWindow === null || typeof accessWindow !== 'object') {
+                const createWindowLine = (label, instant, fallback) =>
+                    createSummaryLine(
+                        label,
+                        createTime(instant) ?? (instant === null ? fallback : 'unavailable'),
+                    );
+
+                const setPolicyStatus = (slug, policy, configured) => {
+                    const target = document.querySelector(
+                        `[data-showcase-policy-status="${slug}.${policy}"]`,
+                    );
+                    if (!(target instanceof HTMLElement)) {
                         return;
                     }
 
+                    target.classList.toggle('configured', configured);
+                    const label = configured ? 'Policy configured' : 'Policy not configured';
+                    target.title = label;
+                    target.setAttribute('aria-label', label);
+                };
+
+                const setTimePolicy = (slug, accessWindow) => {
                     const target = document.querySelector(
-                        `[data-showcase-policy-detail="${slug}.window"]`,
+                        `[data-showcase-policy-detail="${slug}.time"]`,
                     );
                     if (!(target instanceof HTMLElement)) {
                         return;
                     }
 
                     const notBefore =
+                        accessWindow !== null &&
+                        typeof accessWindow === 'object' &&
                         typeof accessWindow.not_before === 'string'
                             ? accessWindow.not_before
                             : null;
                     const notAfter =
-                        typeof accessWindow.not_after === 'string' ? accessWindow.not_after : null;
+                        accessWindow !== null &&
+                        typeof accessWindow === 'object' &&
+                        typeof accessWindow.not_after === 'string'
+                            ? accessWindow.not_after
+                            : null;
 
                     target.replaceChildren();
-                    if (notBefore !== null && notAfter !== null) {
-                        if (!appendTime(target, notBefore)) {
-                            return;
-                        }
-                        target.append(document.createTextNode(' to '));
-                        appendTime(target, notAfter);
+                    target.classList.add('summary-lines');
+                    target.append(
+                        createWindowLine('Opens', notBefore, 'always open'),
+                        createWindowLine('Closes', notAfter, 'never closes'),
+                    );
+                    setPolicyStatus(slug, 'time', notBefore !== null || notAfter !== null);
+                };
 
+                const setLimitPolicy = (slug, maximum) => {
+                    const target = document.querySelector(
+                        `[data-showcase-policy-detail="${slug}.limit"]`,
+                    );
+                    if (!(target instanceof HTMLElement)) {
                         return;
                     }
 
-                    if (notBefore !== null) {
-                        target.append(document.createTextNode('Opens '));
-                        appendTime(target, notBefore);
+                    target.replaceChildren();
+                    target.classList.add('summary-lines');
+                    target.append(
+                        createSummaryLine(
+                            'Per Viewer',
+                            'no limit',
+                        ),
+                        createSummaryLine(
+                            'All Viewers',
+                            Number.isInteger(maximum)
+                                ? `${maximum.toLocaleString()} opens`
+                                : 'no limit',
+                        ),
+                    );
+                    setPolicyStatus(slug, 'limit', Number.isInteger(maximum));
+                };
 
+                const setTrustPolicy = (slug, required) => {
+                    const target = document.querySelector(
+                        `[data-showcase-policy-detail="${slug}.trust"]`,
+                    );
+                    if (!(target instanceof HTMLElement)) {
                         return;
                     }
 
-                    if (notAfter !== null) {
-                        target.append(document.createTextNode('Ended '));
-                        appendTime(target, notAfter);
-                    }
+                    target.replaceChildren();
+                    target.classList.add('summary-lines');
+                    target.append(
+                        createSummaryLine(
+                            'Challenges',
+                            required === true ? 'On' : 'Off',
+                        ),
+                    );
+                    setPolicyStatus(slug, 'trust', required === true);
                 };
 
                 const hydrateShowcaseManifest = async () => {
@@ -1084,16 +1431,18 @@
                             return;
                         }
 
-                        setWindowText('time-future', examples['time-future']?.access_window);
-                        setWindowText('time-open', examples['time-open']?.access_window);
-                        setWindowText('time-expired', examples['time-expired']?.access_window);
-
-                        const maximum = examples.limit?.capsule_lifetime_maximum;
-                        if (Number.isInteger(maximum)) {
-                            setText(
-                                '[data-showcase-policy-detail="limit.maximum"]',
-                                `Capsule lifetime limit: ${maximum}`,
-                            );
+                        for (const slug of [
+                            'open-image',
+                            'time-future',
+                            'time-open',
+                            'time-expired',
+                            'limit',
+                            'trust',
+                            'revoked',
+                        ]) {
+                            setTimePolicy(slug, examples[slug]?.access_window);
+                            setLimitPolicy(slug, examples[slug]?.capsule_lifetime_maximum);
+                            setTrustPolicy(slug, examples[slug]?.automation_risk_required);
                         }
                     } catch {
                         // The static fallback copy remains accurate enough if the manifest is absent.
