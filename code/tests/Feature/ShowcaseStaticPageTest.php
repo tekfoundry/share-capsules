@@ -31,6 +31,10 @@ final class ShowcaseStaticPageTest extends TestCase
         $this->assertStringContainsString('<capsule-viewer', $html);
         $this->assertStringContainsString('data-showcase-frame', $html);
         $this->assertStringContainsString('syncShowcaseFrames', $html);
+        $this->assertStringContainsString('enhanceEmbedControls', $html);
+        $this->assertStringContainsString('Preview', $html);
+        $this->assertStringContainsString('Embed', $html);
+        $this->assertStringContainsString('Embed code', $html);
         $this->assertStringContainsString('hydrateShowcaseManifest', $html);
         $this->assertStringContainsString('/showcase/showcase-manifest.json', $html);
         $this->assertStringContainsString('<content class="viewer-frame"></content>', $html);

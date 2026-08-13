@@ -255,6 +255,38 @@
                 text-decoration: none;
             }
 
+            .view-toggle {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                z-index: 3;
+                display: inline-grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                overflow: hidden;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: var(--panel);
+                box-shadow: 0 8px 18px rgb(24 34 53 / 0.14);
+            }
+
+            .view-toggle button,
+            .copy-embed-button {
+                min-height: 30px;
+                border: 0;
+                background: transparent;
+                color: var(--muted);
+                cursor: pointer;
+                font: inherit;
+                font-size: 0.76rem;
+                font-weight: 800;
+                padding: 5px 9px;
+            }
+
+            .view-toggle button[aria-pressed='true'] {
+                background: var(--blue);
+                color: #fff;
+            }
+
             .frame {
                 position: relative;
                 aspect-ratio: 1 / 1;
@@ -286,6 +318,63 @@
                 height: 100%;
                 min-height: 0;
                 margin: 0;
+            }
+
+            .embed-code-panel {
+                position: absolute;
+                inset: 0;
+                display: none;
+                grid-template-rows: auto 1fr;
+                gap: 10px;
+                background: #111827;
+                color: #e5edf7;
+                padding: 14px;
+            }
+
+            .frame.show-embed capsule-viewer {
+                display: none;
+            }
+
+            .frame.show-embed .embed-code-panel {
+                display: grid;
+            }
+
+            .embed-code-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 10px;
+            }
+
+            .embed-code-title {
+                color: #fff;
+                font-size: 0.82rem;
+                font-weight: 800;
+            }
+
+            .copy-embed-button {
+                border: 1px solid #334155;
+                border-radius: 8px;
+                background: #1f2937;
+                color: #dbeafe;
+            }
+
+            .embed-code-panel pre {
+                min-height: 0;
+                margin: 0;
+                overflow: auto;
+                border: 1px solid #334155;
+                border-radius: 8px;
+                background: #0b1120;
+                padding: 12px;
+            }
+
+            .embed-code-panel code {
+                width: auto;
+                color: #e5edf7;
+                font-size: 0.76rem;
+                line-height: 1.55;
+                white-space: pre-wrap;
             }
 
             .fallback-card,
@@ -1416,6 +1505,134 @@
                     setPolicyStatus(slug, 'trust', required === true);
                 };
 
+                const cleanBlockHtml = (element, indent) => {
+                    const lines = element.innerHTML
+                        .trim()
+                        .split('\n')
+                        .map((line) => line.trim())
+                        .filter((line) => line !== '');
+
+                    return lines.map((line) => `${indent}${line}`).join('\n');
+                };
+
+                const embedSnippet = (viewer) => {
+                    const src = viewer.getAttribute('src');
+                    const fit = viewer.getAttribute('fit') ?? 'contain';
+                    const blocks = ['template', 'fallback', 'error']
+                        .map((tagName) => {
+                            const block = viewer.querySelector(tagName);
+                            if (!(block instanceof HTMLElement)) {
+                                return null;
+                            }
+
+                            return `  <${tagName}>
+${cleanBlockHtml(block, '    ')}
+  </${tagName}>`;
+                        })
+                        .filter((block) => block !== null)
+                        .join('\n');
+
+                    return `<capsule-viewer src="${src}" fit="${fit}">
+${blocks}
+</capsule-viewer>`;
+                };
+
+                const setEmbedMode = (frame, toggle, mode) => {
+                    frame.classList.toggle('show-embed', mode === 'embed');
+
+                    for (const button of toggle.querySelectorAll('button')) {
+                        button.setAttribute(
+                            'aria-pressed',
+                            button.dataset.showcaseView === mode ? 'true' : 'false',
+                        );
+                    }
+                };
+
+                const enhanceEmbedControls = () => {
+                    for (const viewer of document.querySelectorAll('capsule-viewer[src]')) {
+                        const frame = viewer.closest('[data-showcase-frame]');
+                        const src = viewer.getAttribute('src');
+
+                        if (
+                            !(frame instanceof HTMLElement) ||
+                            typeof src !== 'string' ||
+                            src === '' ||
+                            frame.querySelector('.embed-code-panel') !== null
+                        ) {
+                            continue;
+                        }
+
+                        const snippet = embedSnippet(viewer);
+                        const toggle = document.createElement('div');
+                        toggle.className = 'view-toggle';
+                        toggle.setAttribute('aria-label', 'Protected Capsule view');
+
+                        const previewButton = document.createElement('button');
+                        previewButton.type = 'button';
+                        previewButton.dataset.showcaseView = 'preview';
+                        previewButton.setAttribute('aria-pressed', 'true');
+                        previewButton.textContent = 'Preview';
+
+                        const embedButton = document.createElement('button');
+                        embedButton.type = 'button';
+                        embedButton.dataset.showcaseView = 'embed';
+                        embedButton.setAttribute('aria-pressed', 'false');
+                        embedButton.textContent = 'Embed';
+
+                        toggle.append(previewButton, embedButton);
+                        toggle.addEventListener('click', (event) => {
+                            const button = event.target;
+                            if (!(button instanceof HTMLButtonElement)) {
+                                return;
+                            }
+
+                            const mode = button.dataset.showcaseView;
+                            if (mode === 'preview' || mode === 'embed') {
+                                setEmbedMode(frame, toggle, mode);
+                            }
+                        });
+
+                        frame.append(toggle);
+
+                        const panel = document.createElement('section');
+                        panel.className = 'embed-code-panel';
+                        panel.setAttribute('aria-label', 'Embed code');
+
+                        const header = document.createElement('div');
+                        header.className = 'embed-code-header';
+
+                        const title = document.createElement('span');
+                        title.className = 'embed-code-title';
+                        title.textContent = 'Embed code';
+
+                        const copyButton = document.createElement('button');
+                        copyButton.type = 'button';
+                        copyButton.className = 'copy-embed-button';
+                        copyButton.textContent = 'Copy';
+                        copyButton.addEventListener('click', async () => {
+                            try {
+                                await navigator.clipboard.writeText(snippet);
+                                copyButton.textContent = 'Copied';
+                            } catch {
+                                copyButton.textContent = 'Copy failed';
+                            }
+
+                            window.setTimeout(() => {
+                                copyButton.textContent = 'Copy';
+                            }, 1600);
+                        });
+
+                        header.append(title, copyButton);
+
+                        const pre = document.createElement('pre');
+                        const code = document.createElement('code');
+                        code.textContent = snippet;
+                        pre.append(code);
+                        panel.append(header, pre);
+                        frame.append(panel);
+                    }
+                };
+
                 const hydrateShowcaseManifest = async () => {
                     try {
                         const response = await fetch('/showcase/showcase-manifest.json', {
@@ -1480,6 +1697,7 @@
                     childList: true,
                     subtree: true,
                 });
+                enhanceEmbedControls();
                 hydrateShowcaseManifest();
                 scheduleSync();
             })();
