@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Init"
+  short_description: "Initialize project documentation scaffolding"
+  default_prompt: "Use $project-init to initialize or repair the standard _docs structure without overwriting project-owned content."

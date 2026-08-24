@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plan Complete"
+  short_description: "Verify, promote, and archive a completed plan"
+  default_prompt: "Use $plan-complete to verify closeout conditions, promote durable design, and archive the plan only when complete."

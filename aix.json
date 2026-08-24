@@ -1,0 +1,13 @@
+{
+  "sources": {
+    "skills": {},
+    "workflows": {
+      "aix": "https://github.com/tekfoundry/ai-extensions/tree/master/aix/workflows/design-plan-execute"
+    }
+  },
+  "skills": [
+    "aix:brainstorming-skill",
+    "aix:discover-skill"
+  ],
+  "workflow": "aix:aix/workflows/design-plan-execute"
+}

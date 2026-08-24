@@ -1,0 +1,4 @@
+interface:
+  display_name: "Task Execute"
+  short_description: "Execute one authorized plan task"
+  default_prompt: "Use $task-execute to implement the specified task, or select the best next task from the current phase, with targeted verification and evidence."

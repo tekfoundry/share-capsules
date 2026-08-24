@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plan Activate"
+  short_description: "Promote backlog work to active planning"
+  default_prompt: "Use $plan-activate to move a human-authorized backlog plan into active implementation work."

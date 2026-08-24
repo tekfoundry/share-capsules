@@ -1,0 +1,4 @@
+interface:
+  display_name: "Work Verify"
+  short_description: "Run targeted checks and report verification gaps"
+  default_prompt: "Use $work-verify to verify the changed behavior and report exact results and remaining gaps."

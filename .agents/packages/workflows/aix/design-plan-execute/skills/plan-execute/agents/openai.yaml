@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plan Execute"
+  short_description: "Orchestrate execution of an active plan"
+  default_prompt: "Use $plan-execute to coordinate plan execution phase by phase until completion or a stop condition."

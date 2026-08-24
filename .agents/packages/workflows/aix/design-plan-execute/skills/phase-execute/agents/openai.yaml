@@ -1,0 +1,4 @@
+interface:
+  display_name: "Phase Execute"
+  short_description: "Orchestrate one authorized plan phase"
+  default_prompt: "Use $phase-execute to coordinate the referenced active-plan phase task by task through task-execute until completion or a stop condition."

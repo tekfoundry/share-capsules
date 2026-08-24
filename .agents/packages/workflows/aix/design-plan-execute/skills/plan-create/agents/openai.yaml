@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plan Create"
+  short_description: "Create a backlog plan"
+  default_prompt: "Use $plan-create to inspect context and produce a decision-complete backlog plan for developer review."

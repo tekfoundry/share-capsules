@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plan Review"
+  short_description: "Assess plan readiness before implementation"
+  default_prompt: "Use $plan-review to inspect the referenced plan and report blockers, risks, and verification gaps."

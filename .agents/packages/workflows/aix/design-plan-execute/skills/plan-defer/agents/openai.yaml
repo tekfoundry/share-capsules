@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plan Defer"
+  short_description: "Move planned work into backlog safely"
+  default_prompt: "Use $plan-defer to move a plan into backlog while preserving context and status."

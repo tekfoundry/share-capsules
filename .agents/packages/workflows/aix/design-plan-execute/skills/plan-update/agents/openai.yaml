@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plan Update"
+  short_description: "Revise an active or backlog plan safely"
+  default_prompt: "Use $plan-update to revise the referenced plan without changing implementation status incorrectly."
