@@ -1,4 +1,4 @@
 interface:
   display_name: "Design Create"
-  short_description: "Create a stable design document"
-  default_prompt: "Use $design-create to create a focused _docs/design document with the active workflow design-doc template and index links."
+  short_description: "Create a knowledge-base document"
+  default_prompt: "Use $design-create to create a focused _docs/kb document with the active workflow kb templates and index links."

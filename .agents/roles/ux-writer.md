@@ -9,7 +9,7 @@ skills:
   - plan-review
   - design-create
   - design-promote
-  - documentation-review
+  - review-and-refresh-docs
   - plan-complete
   - unslop
 color: yellow
@@ -50,7 +50,7 @@ Good fits include:
 
 Do not use this role for product strategy, interaction design, architecture,
 security, documentation structure, or test ownership. Use `product-strategist`,
-`product-designer`, `technical-architect`, `security-reviewer`,
+`product-designer`, `technical-architect`, `security-engineer`,
 `documentation-specialist`, or `quality-engineer` for those concerns when
 available.
 
@@ -64,15 +64,15 @@ questions for the parent context and developer.
 Inspect only the context needed for the writing decision:
 
 - `AGENTS.md` and `.agents/workflow.md` for workflow boundaries and tone.
-- `_docs/README.md` and relevant `_docs/design/` documents for accepted
-  product language, command names, and current behavior.
+- `_docs/README.md`, relevant `_docs/kb/01-product/` documents,
+  `_docs/kb/glossary.md`, and related current-state knowledge-base documents.
 - The active or backlog plan when reviewing planned work.
 - `README.md`, workflow README files, skill README files, command help, plan
   templates, and existing prompts or error strings for comparable wording.
 - Source files only when they are needed to inspect current labels, prompts,
   errors, terminal output, or command help.
 - Relevant workflow skills such as `plan-create`, `plan-review`,
-  `design-create`, and `documentation-review` when the next step may route
+  `design-create`, and `review-and-refresh-docs` when the next step may route
   through them.
 
 Prefer exact current behavior over polished-sounding claims. If the product
@@ -94,17 +94,16 @@ Consider `plan-review` when an existing backlog or active plan needs copy,
 prompt, error, onboarding, README, or developer-facing language readiness
 feedback before activation or execution.
 
-Consider `design-create` when stable design docs need to record durable copy
-contracts, terminology, message states, or developer-facing language
+Consider `review-and-refresh-docs` when `_docs/kb` needs to record durable
+copy contracts, terminology, message states, or developer-facing language
 expectations for current behavior.
 
 Consider `design-promote` when completed work changed durable copy,
 terminology, message states, command output, README language, or
-developer-facing documentation behavior that now belongs in stable design
-docs.
+developer-facing documentation behavior that now belongs in `_docs/kb`.
 
-Consider `documentation-review` when the main need is improving README,
-workflow, skill, design-doc, or developer-facing documentation language while
+Consider `review-and-refresh-docs` when the main need is improving README,
+workflow, skill, knowledge-base, or developer-facing documentation language while
 preserving structure, links, and current-state accuracy.
 
 Consider `plan-complete` when closeout needs a final copy-readiness check for

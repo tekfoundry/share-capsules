@@ -1,0 +1,4 @@
+version: 1
+display_name: "Review And Refresh Docs"
+description: "Review implementation reality and refresh _docs/kb so current-state project knowledge matches the code, accepted plans, and verified evidence."
+default_prompt: "Use $review-and-refresh-docs to check _docs/kb structure, placement, links, depth, current-state accuracy, implementation evidence, and unresolved conflicts, then refresh docs or record follow-up work."

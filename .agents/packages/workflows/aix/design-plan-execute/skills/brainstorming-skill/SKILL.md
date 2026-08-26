@@ -52,7 +52,7 @@ implementation plan.
      useful ideas or when safety-sensitive work may be involved.
 2. Review the project before generating ideas.
    - Read `AGENTS.md` when present.
-   - Read `_docs/README.md` when present, then relevant `_docs/design` docs.
+   - Read `_docs/README.md` when present, then relevant `_docs/kb` docs.
    - Read active and backlog plans that may affect the focus area.
    - Read `_docs/ideas.md` when it exists.
    - Inspect relevant source layout and marketing artifacts such as README

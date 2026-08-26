@@ -8,4 +8,4 @@ reviewed. Remove default entries that were not read. -->
 - `.agents/README.md`
 - `.agents/workflow.md`
 - `_docs/README.md`
-- `_docs/design/README.md`
+- `_docs/kb/README.md`

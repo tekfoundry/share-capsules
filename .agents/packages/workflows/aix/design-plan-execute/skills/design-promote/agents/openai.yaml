@@ -1,4 +1,4 @@
 interface:
   display_name: "Design Promote"
-  short_description: "Move accepted plan behavior into stable design docs"
-  default_prompt: "Use $design-promote to identify and update stable design documentation for accepted plan behavior."
+  short_description: "Move accepted plan behavior into _docs/kb"
+  default_prompt: "Use $design-promote to identify verified accepted plan behavior and update the right _docs/kb documentation."

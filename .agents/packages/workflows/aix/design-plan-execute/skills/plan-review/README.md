@@ -24,7 +24,7 @@ Dependencies:
 - The referenced active or backlog plan
 - `AGENTS.md`
 - `_docs/README.md`
-- Relevant `_docs/design/` documents
+- Relevant `_docs/kb/` documents
 - Related active or backlog plans, when relevant
 - The active workflow `plan.md` template, when available
 
@@ -64,7 +64,7 @@ requirements-readiness review on requirements, actors, workflows, inputs,
 outputs, constraints, non-goals, boundaries, acceptance signals, open
 decisions, and Design Intent readiness while still checking those concerns
 itself when the role is unavailable. When the workflow-owned
-`security-reviewer` role is installed, the skill can use it for bounded
+`security-engineer` role is installed, the skill can use it for bounded
 security-readiness review on trust boundaries, secrets, authorization,
 destructive operations, dependency risk, source resolution, lockfile integrity,
 and no-write guarantees while still checking those concerns itself when the

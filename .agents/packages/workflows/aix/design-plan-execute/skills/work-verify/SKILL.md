@@ -15,7 +15,7 @@ and the final verification report. Roles can supply bounded specialist
 judgment, but they do not own command execution, plan status, or the decision
 to accept residual risk.
 
-When `.agents/roles/security-reviewer.md` exists and the changed behavior is
+When `.agents/roles/security-engineer.md` exists and the changed behavior is
 security-sensitive, use `delegate-to-role` or a prompt-overlay delegation to
 request a bounded security-verification pass. Good triggers include trust
 boundaries, secrets, authentication, authorization, permissions, dependency or
@@ -25,7 +25,7 @@ destructive operations, no-write guarantees, or redaction.
 
 Fold returned evidence into selected checks, skipped-check rationale, manual
 verification notes, residual risk, or follow-up work as appropriate. Do not
-require `security-reviewer` for direct use. If the role is unavailable or the
+require `security-engineer` for direct use. If the role is unavailable or the
 host cannot delegate, continue verification yourself by checking the same
 security-sensitive behavior and failure paths.
 

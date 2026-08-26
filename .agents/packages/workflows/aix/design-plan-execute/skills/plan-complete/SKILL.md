@@ -15,7 +15,7 @@ promotion, documentation review, and archive placement. Roles can supply
 bounded specialist judgment, but they do not own completion approval,
 developer acceptance, lifecycle state, or final residual-risk decisions.
 
-When `.agents/roles/security-reviewer.md` exists and the plan includes
+When `.agents/roles/security-engineer.md` exists and the plan includes
 security-sensitive behavior, use `delegate-to-role` or a prompt-overlay
 delegation to request the required post-phase security review before
 completion. Good triggers include trust boundaries, secrets, authentication,
@@ -26,7 +26,7 @@ guarantees, or redaction.
 
 Fold returned evidence into the plan's `Security Review` section, completion
 checklist, final risks, follow-on work, or blocking task list as appropriate.
-Do not require `security-reviewer` for direct use. If the role is unavailable
+Do not require `security-engineer` for direct use. If the role is unavailable
 or the host cannot delegate, continue closeout yourself by checking the same
 security-sensitive behavior and recording the review evidence.
 
@@ -67,14 +67,14 @@ or documentation follow-up, use `delegate-to-role` or a prompt-overlay
 delegation to request bounded final documentation input before archive.
 
 Fold returned evidence into the completion checklist, documentation impact,
-design-promotion notes, documentation-review handoff, final risks, follow-on
+design-promotion notes, review-and-refresh-docs handoff, final risks, follow-on
 work, current-state accuracy gaps, human-review notes, or closeout report as
 appropriate. Do not require `documentation-specialist` for direct use. If the
 role is unavailable or the host cannot delegate, continue closeout yourself by
 checking the same documentation-impact, design-promotion, link, structure,
 README, workflow-doc, and current-state accuracy concerns. Do not use the role
 to override developer acceptance, archive the plan, promote speculative
-behavior, or replace `design-promote` or `documentation-review`.
+behavior, or replace `design-promote` or `review-and-refresh-docs`.
 
 ## Workflow
 
@@ -95,18 +95,23 @@ behavior, or replace `design-promote` or `documentation-review`.
    blockers.
 7. Promote durable accepted behavior using `$design-promote`.
 8. Review documentation structure, formatting, links, and current-state
-   accuracy using `$documentation-review`.
-9. Harvest reusable lessons and update workflow guidance when appropriate.
-10. Record final risks, follow-on work, documentation impact, and verification.
+   accuracy using `$review-and-refresh-docs`.
+9. Add an operator-understanding closeout summary for meaningful work. Cover
+   what changed, important boundaries, data touched, failure modes, evidence,
+   unverified areas, and manual inspection needs. Do not introduce separate
+   learning-mode or delivery-mode paths.
+10. Harvest reusable lessons and update workflow guidance when appropriate.
+11. Record final risks, follow-on work, documentation impact, and verification.
    Keep the completed record consistent with the active workflow `plan.md`
    template where it applies.
-11. Archive only completed plans under `_docs/plans/completed/` with the
+12. Archive only completed plans under `_docs/plans/completed/` with the
    required `YYYY-MM-DD-<name>.md` filename.
 
-When the plan contains `## Completion Checklist`, update it during closeout.
-The checklist is visible planning guidance, not the sole source of truth. Still
-enforce this skill's workflow and guardrails if the section is missing or was
-edited locally.
+Every implementation plan must contain `## Completion Checklist`. If the
+section is missing, repair it from the active `plan.md` template before
+closeout review continues. The checklist is visible planning guidance, not the
+sole source of truth. Still enforce this skill's workflow and guardrails if the
+section was edited locally.
 
 ## Guardrails
 

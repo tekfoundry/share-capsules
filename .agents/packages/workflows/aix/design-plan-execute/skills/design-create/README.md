@@ -2,8 +2,8 @@
 
 ## Skill Summary
 
-Creates a new stable design document in the right `_docs/design` location, or
-updates an existing design document when that is clearer.
+Creates a new current-state knowledge-base document in the right `_docs/kb`
+location, or updates an existing knowledge-base document when that is clearer.
 
 Installation:
 
@@ -22,31 +22,31 @@ aix workflow install https://github.com/tekfoundry/ai-extensions/tree/master/aix
 Dependencies:
 
 - `_docs/README.md`
-- `_docs/design/README.md`
-- `.agents/templates/design-doc.md`, when published
-- `.agents/packages/workflows/<source>/<workflow>/templates/design-doc.md`, as
-  the workflow template fallback
+- `_docs/kb/README.md`
+- `.agents/templates/kb/*`, when published
+- `.agents/packages/workflows/<source>/<workflow>/templates/kb/*`, as workflow
+  template fallbacks
 
 ## How to use it
 
 Here are example prompts that invoke this skill:
 
 - "Use design-create to document the workflow update model."
-- "Create a stable design doc for package source resolution."
-- "Add a design document for CLI verification behavior."
+- "Create a knowledge-base doc for package source resolution."
+- "Add a current-state doc for CLI verification behavior."
 
 ## When it is used
 
-Use this skill when accepted current design needs a new durable home under
-`_docs/design/`. It is not for implementation plans, speculative ideas, or
+Use this skill when accepted current-state knowledge needs a durable home under
+`_docs/kb/`. It is not for implementation plans, speculative ideas, or
 execution history.
 
 ## What it does
 
 The skill reads the project documentation routers, chooses the smallest
-appropriate design area, checks nearby docs before creating anything new,
-resolves the `design-doc.md` template when available, writes current-state
-design intent, and links the document from the relevant index. When the
+appropriate knowledge-base area, checks nearby docs before creating anything
+new, uses the relevant `kb/*` template when available, writes current-state
+knowledge, and links the document from the relevant index. When the
 workflow-owned `technical-architect` role is installed, the skill can use it
 for bounded architecture input on system-shape, boundary, contract,
 integration, persistence, workflow lifecycle, or maintainability topics while

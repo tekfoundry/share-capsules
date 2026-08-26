@@ -24,9 +24,8 @@ Dependencies:
 - `AGENTS.md`, when present
 - `.agents/workflow.md`, when present
 - `.agents/templates/docs-readme.md`, when published
-- `.agents/templates/design-readme.md`, when published
-- Active workflow origin templates for `docs-readme.md` and
-  `design-readme.md`, as fallbacks
+- Active workflow origin templates for `docs-readme.md` and `kb/*`, as
+  fallbacks
 
 ## How to use it
 
@@ -44,7 +43,9 @@ router files, or when that structure is incomplete.
 ## What it does
 
 The skill reads repository workflow instructions, inspects the existing
-`_docs` tree, creates missing standard directories, creates `_docs/README.md`
-and `_docs/design/README.md` only when missing, and reports what it created or
-left untouched. It does not overwrite project-owned documentation or begin
-feature implementation.
+`_docs` tree, creates missing standard directories, creates `_docs/README.md`,
+`_docs/kb/README.md`, `_docs/kb/glossary.md`, and owner README files only when
+missing, and reports what it created or left untouched. It leaves any existing
+`_docs/kb/` content preserved as project-owned current knowledge.
+It does not overwrite project-owned documentation or begin feature
+implementation.

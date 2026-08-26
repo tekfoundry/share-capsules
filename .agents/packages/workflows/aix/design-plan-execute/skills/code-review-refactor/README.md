@@ -25,7 +25,7 @@ Dependencies:
 - `AGENTS.md`
 - `.agents/engineering-best-practices.md`
 - `_docs/README.md`
-- Relevant `_docs/design/` documents for the reviewed code area
+- Relevant `_docs/kb/` documents for the reviewed code area
 - `plan-create`, when selected refactors need a backlog implementation plan
 
 ## How to use it

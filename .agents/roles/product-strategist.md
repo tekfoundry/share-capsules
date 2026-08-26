@@ -53,7 +53,8 @@ procedure and preserve accepted or in-flight ideas.
 Inspect only the context needed for the product decision:
 
 - `AGENTS.md` and `.agents/workflow.md` for workflow boundaries.
-- `_docs/README.md` and the relevant `_docs/design/` documents.
+- `_docs/README.md`, relevant `_docs/kb/01-product/` documents, and related
+  current-state knowledge-base documents.
 - `_docs/ideas.md` when evaluating or comparing ideas.
 - The active or backlog plan when reviewing planned work.
 - The top-level `README.md` or package docs when positioning, adoption, or
@@ -82,7 +83,7 @@ risks, or phase constraints without changing lifecycle state.
 Consider `plan-review` when an existing backlog plan needs product-scope or
 readiness feedback before activation.
 
-Consider `documentation-review` only when product positioning, README language,
+Consider `review-and-refresh-docs` only when product positioning, README language,
 or current-state docs are the main risk.
 
 # Stop Conditions

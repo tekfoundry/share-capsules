@@ -38,7 +38,7 @@ behavior, workflow lifecycle behavior, phase order, task boundaries, or
 maintainability tradeoffs, use `delegate-to-role` or a prompt-overlay
 delegation to request bounded architecture input.
 
-When `.agents/roles/security-reviewer.md` exists and the requested update
+When `.agents/roles/security-engineer.md` exists and the requested update
 changes trust boundaries, secrets, authentication, authorization, permissions,
 dependency or supply-chain risk, local file writes, overwrites, deletes,
 renames, external systems, network access, package trust, source resolution,
@@ -84,7 +84,7 @@ checking the same specialty concerns when they apply.
 1. Resolve the referenced plan. If none is referenced, infer one only when the
    user intent and active/backlog plan context identify exactly one plan.
 2. Read `AGENTS.md`, `.agents/workflow.md`, `_docs/README.md`, relevant
-   design docs, and the target plan section. Read completed plans only for
+   `_docs/kb` docs, and the target plan section. Read completed plans only for
    relevant historical decisions, regressions, or migrations.
 3. Classify the plan location as active, backlog, or completed and state that
    classification before editing.
@@ -115,14 +115,14 @@ checking the same specialty concerns when they apply.
 
 - Stop when the requested update would authorize backlog implementation,
   archive incomplete work, or make a product/security/data-safety decision not
-  already supported by the plan or design docs.
+  already supported by the plan or current knowledge-base docs.
 - Before closing, scan touched plan task lists for stale checkbox syntax and
   convert it to the workflow status markers when the intended state is clear.
 - Before closing an accepted backlog plan update, scan for detached review-gate
   summaries and move accepted status into the relevant headings when the mapping
   is clear.
 - Keep execution history in plans and stable current-state truth in
-  `_docs/design`.
+  `_docs/kb`.
 - Resolve `plan.md` from `.agents/templates/plan.md` first, then from the
   active workflow origin. If neither exists, follow the existing plan shape and
   report the missing template.

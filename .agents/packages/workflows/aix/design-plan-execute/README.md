@@ -6,9 +6,9 @@
 use AI agents to ship high-quality, maintainable code. It gives organizations a
 way to standardize agent-assisted development across teams and projects.
 
-Teams use the workflow to keep agent work grounded in design intent, small
-plans, verified changes, and project documentation that stays current with the
-code.
+Teams use the workflow to keep agent work grounded in current project
+knowledge, small plans, verified changes, and documentation that stays current
+with the code.
 
 ## Quick Start
 
@@ -64,8 +64,7 @@ After initialization or workflow installation, `aix` updates the project:
    [Included Files](#included-files).
 4. `_docs/` gets the standard project documentation structure when directories
    are missing. These files belong to the project:
-   - `_docs/design/` holds stable design intent for the current accepted
-     system.
+   - `_docs/kb/` holds current implemented project knowledge.
    - `_docs/plans/` holds active in-progress implementation plans.
    - `_docs/plans/backlog/` holds planned but intentionally not started work.
    - `_docs/plans/completed/` holds archived plans after completion and design
@@ -87,10 +86,10 @@ This workflow installs these roles:
 | [`product-designer`](roles/project-dev/product-designer.md) | "Use product-designer to review this workflow."<br>"Review this plan's user flow and accessibility before implementation."<br>"Does this prompt flow have clear states, recovery paths, and layout hierarchy?" | Reviews user flows, interaction design, accessibility, layout hierarchy, prototypes, terminal UX, and design-system fit before product-facing work is finalized. |
 | [`requirements-engineer`](roles/project-dev/requirements-engineer.md) | "Use requirements-engineer to refine this Design Intent."<br>"Are the requirements, non-goals, and acceptance signals ready?"<br>"Find open decisions before we draft phases." | Turns accepted product vision into requirements, non-goals, boundaries, acceptance signals, and plan-readiness evidence before implementation phases are drafted. |
 | [`technical-architect`](roles/project-dev/technical-architect.md) | "Use technical-architect to review this plan."<br>"Do these module boundaries and runtime contracts look ready for implementation?"<br>"Split this design into maintainable implementation phases." | Reviews system design, component boundaries, runtime contracts, integration choices, and maintainability tradeoffs before implementation phases are finalized. |
-| [`security-reviewer`](roles/project-dev/security-reviewer.md) | "Use security-reviewer to review this plan."<br>"Do these install and update safeguards cover local drift and trust boundaries?"<br>"Review the security risks before closeout." | Reviews trust boundaries, secrets, authorization, destructive operations, dependency risk, and safety-sensitive behavior before implementation or closeout. |
+| [`security-engineer`](roles/project-dev/security-engineer.md) | "Use security-engineer to review this plan."<br>"Do these install and update safeguards cover local drift and trust boundaries?"<br>"Review the security risks before closeout." | Reviews trust boundaries, secrets, authorization, destructive operations, dependency risk, and safety-sensitive behavior before implementation or closeout. |
 | [`ux-writer`](roles/project-dev/ux-writer.md) | "Use ux-writer to review this command output."<br>"Check this plan's labels, errors, empty states, and README copy."<br>"Does this onboarding text tell users what to do next?" | Reviews labels, prompts, errors, empty states, onboarding copy, README language, and developer-facing text before release. |
 | [`quality-engineer`](roles/project-dev/quality-engineer.md) | "Use quality-engineer to plan verification."<br>"Check this phase for regression risk and validation gaps."<br>"Do these checks prove the acceptance criteria?" | Reviews verification strategy, regression risk, acceptance evidence, gaps, and residual risk before implementation phases or closeout are treated as complete. |
-| [`documentation-specialist`](roles/project-dev/documentation-specialist.md) | "Use documentation-specialist for this docs impact review."<br>"Where should this current-state behavior be documented?"<br>"Does the implementation match the design docs and active plan?" | Reviews documentation impact, `_docs` placement, design promotion needs, current-state accuracy, implementation-to-intent drift, links, and developer-facing documentation before planning or closeout treats docs as current. |
+| [`documentation-specialist`](roles/project-dev/documentation-specialist.md) | "Use documentation-specialist for this docs impact review."<br>"Where should this current-state behavior be documented?"<br>"Does the implementation match the knowledge base and active plan?" | Reviews documentation impact, `_docs` placement, knowledge-base promotion needs, current-state accuracy, implementation-to-intent drift, links, and developer-facing documentation before planning or closeout treats docs as current. |
 | [`implementation-engineer`](roles/project-dev/implementation-engineer.md) | "Use implementation-engineer to split this phase into tasks."<br>"Check whether this task is ready for task-execute."<br>"What files, tests, docs, and risks should this implementation touch?" | Reviews implementation task boundaries, sequencing, likely changed areas, code-change readiness, verification handoff, documentation impact, and residual risk before planned work moves into or through execution. |
 
 The workflow activates these roles under `.agents/roles/`. Remove or update the
@@ -119,7 +118,7 @@ This workflow installs these skills:
 | --- | --- | --- |
 | [`project-init`](skills/project-init/README.md) | "Initialize project."<br>"Bootstrap project docs." | Creates or repairs the project-owned `_docs` structure without overwriting existing project-owned content. |
 | [`brainstorming-skill`](skills/brainstorming-skill/README.md) | "Use brainstorming-skill. Let's brainstorm."<br>"Brainstorm new workflow ideas."<br>"Review our ideas and help prioritize what should come next." | Runs project-grounded idea discovery before implementation planning, maintains `_docs/ideas.md`, and routes mature ideas toward `plan-create`. |
-| [`design-create`](skills/design-create/README.md) | "Use design-create for this feature."<br>"Create a stable design doc for workflow install." | Creates a focused stable design document in the right `_docs/design` area, using the workflow template and index links. |
+| [`design-create`](skills/design-create/README.md) | "Use design-create for this feature."<br>"Create a knowledge-base doc for workflow install." | Creates a focused current-state document in the right `_docs/kb` area, using workflow KB templates and index links. |
 | [`plan-create`](skills/plan-create/README.md) | "Use plan-create to plan saved search filters."<br>"Create a plan for workflow update diff previews." | Turns an idea into a backlog implementation plan through gated vision, design-intent, phase, and task review. |
 | [`plan-review`](skills/plan-review/README.md) | "Use plan-review on this backlog plan."<br>"Review this plan before activation." | Reviews an implementation plan for scope, authorization, design completeness, risks, and verification readiness without implementing it. |
 | [`plan-activate`](skills/plan-activate/README.md) | "Use plan-activate on this backlog plan."<br>"Activate the approved plan." | Moves a human-authorized backlog plan into active implementation without changing its intended scope. |
@@ -132,8 +131,8 @@ This workflow installs these skills:
 | [`delegate-to-role`](skills/delegate-to-role/README.md) | "Use quality-engineer."<br>"Delegate to documentation-specialist." | Selects an installed project role and prepares bounded delegation while preserving parent-context ownership. |
 | [`plan-defer`](skills/plan-defer/README.md) | "Use plan-defer for this active plan."<br>"Move this work back to backlog." | Moves planned work out of active implementation and back into backlog while preserving status and future activation context. |
 | [`plan-complete`](skills/plan-complete/README.md) | "Use plan-complete."<br>"Complete and archive this plan." | Closes an implementation plan after tasks, verification, human validation, design promotion, risks, and documentation impact are resolved or recorded. |
-| [`design-promote`](skills/design-promote/README.md) | "Use design-promote for this completed plan."<br>"Promote accepted behavior into design docs." | Transfers accepted durable behavior from completed implementation plans into stable design documentation. |
-| [`documentation-review`](skills/documentation-review/README.md) | "Use documentation-review."<br>"Check the docs after this phase." | Reviews documentation structure, formatting, links, maintainability, and current-state accuracy; fixes issues or records follow-up work. |
+| [`design-promote`](skills/design-promote/README.md) | "Use design-promote for this completed plan."<br>"Promote accepted behavior into the knowledge base." | Transfers accepted durable behavior from completed implementation plans into `_docs/kb` documentation. |
+| [`review-and-refresh-docs`](skills/review-and-refresh-docs/README.md) | "Use review-and-refresh-docs."<br>"Check the docs after this phase." | Reviews documentation structure, formatting, links, maintainability, and current-state accuracy; fixes issues or records follow-up work. |
 
 The workflow activates these skills under `.agents/skills/`. Remove or update
 the workflow to change them. Do not deactivate them like normal root skills.
@@ -176,6 +175,16 @@ The current section templates are:
 - `sections/security-review`
 - `sections/task`
 - `sections/verification`
+
+The current knowledge-base templates are:
+
+- `kb/area-readme`
+- `kb/architecture`
+- `kb/decision-record`
+- `kb/operational-runbook`
+- `kb/requirements-use-cases`
+- `kb/threat-model`
+- `kb/verification-strategy`
 
 The default plan template includes reusable security-review and completion
 checklist sections. Those sections make closeout work visible in the plan,
@@ -266,8 +275,8 @@ starts changing code.
 </blockquote>
 </td>
 <td>
-The agent reads repository instructions, relevant design docs, related plans,
-and the current worktree. If the goal is not clear yet, it asks discovery
+The agent reads repository instructions, relevant knowledge-base docs, related
+plans, and the current worktree. If the goal is not clear yet, it asks discovery
 questions. Then it creates a living plan under <code>_docs/plans/backlog/</code>
 and works with you through the main planning gates: goal, design intent,
 implementation phases, and final backlog acceptance.
@@ -363,7 +372,7 @@ Depending on the task, phase, or plan, execution may create or update:
 <ul>
 <li>implementation code, tests, fixtures, command output, and generated assets</li>
 <li>automated test coverage, including targeted regression tests for the changed behavior</li>
-<li>documentation, help text, README examples, design docs, and release notes</li>
+<li>documentation, help text, README examples, knowledge-base docs, and release notes</li>
 <li>project state files such as manifests, lockfiles, package files, or active skill/workflow links</li>
 <li>the active plan's task status, completion evidence, verification notes, risk notes, validation gaps, and follow-up work</li>
 <li>verification results from targeted checks, type checks, builds, full test runs, package smoke checks, stale-syntax scans, and <code>git diff --check</code></li>
@@ -401,10 +410,9 @@ record properly.
 </td>
 <td>
 The agent confirms tasks, success goals, verification, documentation impact,
-and risks. It promotes accepted behavior into <code>_docs/design/</code>
-through <code>design-promote</code>, reviews documentation structure,
-formatting, and links through <code>documentation-review</code>, records final
-evidence and follow-up work, then archives the completed plan under
+and risks. It promotes accepted behavior into <code>_docs/kb/</code>,
+reviews documentation structure, formatting, and links, records final evidence
+and follow-up work, then archives the completed plan under
 <code>_docs/plans/completed/</code> with a dated filename.
 See the example plan's <a href="plan-example.md#phase-5-review-documentation-and-release-readiness-status-accepted">release-readiness phase</a>,
 <a href="plan-example.md#risks">risks</a>, and
@@ -413,17 +421,16 @@ See the example plan's <a href="plan-example.md#phase-5-review-documentation-and
 </tr>
 </table>
 
-Completion only happens after the plan, verification, risks, and design docs
+Completion only happens after the plan, verification, risks, and knowledge-base docs
 are in order.
 
 > [!NOTE]
-> **Completed plans are history.** During plan completion, the design intent
-> that is now true in the codebase is promoted into `_docs/design/`. That
-> directory holds the current design state of the application as a whole. The
-> design intent inside completed plan files is not kept current and may become
-> stale as later plans change the system. Treat `_docs/plans/completed/` as the
-> dated execution history: the incremental state changes each plan made at the
-> time it was completed.
+> **Completed plans are history.** During plan completion, current-state
+> knowledge is promoted into `_docs/kb/`. That directory holds the current
+> implemented state of the application as a whole. Completed plan files are not
+> kept current and may become stale as later plans change the system. Treat
+> `_docs/plans/completed/` as the dated execution history: the incremental
+> state changes each plan made at the time it was completed.
 
 ### Other Prompts
 
@@ -489,7 +496,7 @@ and completed states. Plan updates usually touch sections like
 </td>
 <td>
 The agent reads repository instructions, <code>.agents/engineering-best-practices.md</code>,
-relevant design docs, and the current worktree. It inspects the requested code
+relevant knowledge-base docs, and the current worktree. It inspects the requested code
 against the workflow's engineering guidance, reports findings first, then asks
 which findings you want to refactor.
 
@@ -535,19 +542,37 @@ See the example plan's <a href="plan-example.md#status">status</a>,
 <tr>
 <td>
 <blockquote>
-<p>Promote the accepted saved search behavior from the completed plan into the design docs.</p>
+<p>Promote the accepted saved search behavior from the completed plan into the knowledge base.</p>
 </blockquote>
 <blockquote>
-<p>Use design-promote to update the stable design docs with what is now true.</p>
+<p>Use design-promote to update the knowledge base with what is now true.</p>
 </blockquote>
 </td>
 <td>
 The agent updates the smallest appropriate design document with behavior that
-is now true in the codebase. When a new stable design document is needed, it
-uses <code>design-create</code> to choose the right location, apply the
-workflow design-doc template, and update index links.
+is now true in the codebase. Completed plans guide inspection, but
+implementation evidence determines what belongs in <code>_docs/kb/</code>.
+When a new current-state document is needed, the agent uses the workflow
+knowledge-base templates and updates index links.
 See the example plan's
 <a href="plan-example.md#promotion-to-design">promotion notes</a>.
+</td>
+</tr>
+<tr>
+<td>
+<blockquote>
+<p>Use documentation-specialist to review and refresh the docs.</p>
+</blockquote>
+<blockquote>
+<p>Use review-and-refresh-docs after this implementation.</p>
+</blockquote>
+</td>
+<td>
+The agent inspects current implementation state, accepted plan evidence, and
+existing documentation, then refreshes <code>_docs/kb/</code> or records
+unresolved conflicts as decisions, risks, or follow-up plan candidates. The
+documentation specialist coordinates placement, links, freshness, duplication,
+and domain-role routing without becoming the owner of every technical fact.
 </td>
 </tr>
 <tr>
@@ -628,7 +653,7 @@ Root integration:
 
 Project documentation:
 
-- `_docs/design/`: stable design intent for the current accepted system.
+- `_docs/kb/`: current implemented project knowledge.
 - `_docs/plans/`: active in-progress implementation plans.
 - `_docs/plans/backlog/`: planned but intentionally not started work.
 - `_docs/plans/completed/`: archived plans after completion and design

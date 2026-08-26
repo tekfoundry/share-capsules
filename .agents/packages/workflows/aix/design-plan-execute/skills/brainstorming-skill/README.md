@@ -25,7 +25,7 @@ Dependencies:
 
 - `AGENTS.md`
 - `_docs/README.md`, when present
-- `_docs/design/`
+- `_docs/kb/`
 - `_docs/plans/` and `_docs/plans/backlog/`
 - `_docs/ideas.md`, when present
 - repository README files and other marketing-related docs

@@ -24,7 +24,7 @@ Dependencies:
 - `AGENTS.md`
 - `.agents/workflow.md`
 - `_docs/README.md`
-- Relevant `_docs/design/` documents
+- Relevant `_docs/kb/` documents
 - The active workflow `plan.md` template, when available
 
 ## How to use it

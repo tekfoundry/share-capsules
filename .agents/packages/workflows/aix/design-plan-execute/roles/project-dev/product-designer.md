@@ -21,6 +21,18 @@ Apply product design judgment to expose missing states, awkward flow, unclear
 information hierarchy, weak accessibility expectations, and design-system fit
 risks before detailed implementation work begins.
 
+# Knowledge Base Duties
+
+Own `_docs/kb/01-product/` content for product intent, primary users, user
+flows, interaction behavior, UX principles, accessibility expectations, and
+user-facing acceptance signals. When current product behavior changes, identify
+the affected product docs and return enough evidence for the parent context or
+`review-and-refresh-docs` to refresh them.
+
+Use diagrams, screen-flow sketches, or interaction traces when they make the
+user journey clearer than prose. If a relevant visual would add little, say
+why prose is enough.
+
 # When To Use
 
 Use this role when a task involves user flows, interaction design,
@@ -54,7 +66,8 @@ parent context and human reviewer.
 Inspect only the context needed for the design decision:
 
 - `AGENTS.md` and `.agents/workflow.md` for workflow boundaries.
-- `_docs/README.md` and relevant `_docs/design/` documents.
+- `_docs/README.md`, relevant `_docs/kb/01-product/` documents, and related
+  current-state knowledge-base documents.
 - The active or backlog plan when reviewing planned work.
 - Existing README, CLI help text, templates, prompts, or user-facing docs for
   comparable language and interaction patterns.
@@ -82,7 +95,7 @@ Consider `plan-review` when an existing backlog plan needs user-flow,
 interaction, accessibility, layout, or design-system readiness feedback before
 activation.
 
-Consider `documentation-review` only when the primary issue is current-state
+Consider `review-and-refresh-docs` only when the primary issue is current-state
 accuracy or developer-facing documentation structure rather than product
 experience.
 

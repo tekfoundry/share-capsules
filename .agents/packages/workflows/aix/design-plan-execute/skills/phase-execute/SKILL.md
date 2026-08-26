@@ -69,7 +69,8 @@ concerns.
      repair the plan only when the intended task state is clear. Otherwise ask
      a concise question.
 3. Read `AGENTS.md`, `.agents/workflow.md`, and `_docs/README.md`.
-4. Use the documentation router to select and read only the relevant `_docs/design` files.
+4. Use the documentation router to select and read only the relevant
+   `_docs/kb` files.
 5. Read the full referenced plan section, including context, design intent, risks, verification, and promotion-to-design requirements.
    Use the active workflow `plan.md` template as a consistency reference for
    phase, task, execution-note, verification, risk, and promotion sections when

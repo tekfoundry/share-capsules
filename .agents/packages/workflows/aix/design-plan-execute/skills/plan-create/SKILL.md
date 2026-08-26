@@ -60,7 +60,7 @@ verification expectations, risks, and promotion-to-design notes as
 appropriate. Use architecture review to shape phases only after Design Intent
 is accepted.
 
-When `.agents/roles/security-reviewer.md` exists and the plan involves trust
+When `.agents/roles/security-engineer.md` exists and the plan involves trust
 boundaries, secrets, authentication, authorization, permissions, dependency or
 supply-chain risk, local file writes, overwrites, deletes, renames, external
 systems, network access, package trust, workflow installation or updates,
@@ -104,7 +104,7 @@ returned evidence into `Design Intent`, implementation-phase constraints,
 documentation impact, promotion-to-design notes, completion checklist notes,
 open questions, risks, and human review notes as appropriate. Do not use the
 role to invent design truth, promote speculative behavior, finalize docs, or
-take over `documentation-review`, `design-create`, or `design-promote`.
+take over `review-and-refresh-docs`, `design-create`, or `design-promote`.
 
 When `.agents/roles/implementation-engineer.md` exists and Design Intent has
 been accepted, use `delegate-to-role` or a prompt-overlay delegation to request
@@ -135,7 +135,7 @@ Do not require `technical-architect` for direct use either. If the role is
 unavailable or the host cannot delegate, continue the planning session yourself
 by asking concise boundary, contract, integration, maintainability, and
 verification questions when those concerns apply.
-Do not require `security-reviewer` for direct use either. If the role is
+Do not require `security-engineer` for direct use either. If the role is
 unavailable or the host cannot delegate, continue the planning session yourself
 by asking concise trust-boundary, credential, authorization, file-operation,
 dependency, failure-path, and safety-verification questions when those
@@ -163,9 +163,9 @@ Intent is accepted.
 ## Workflow
 
 1. Read `AGENTS.md`, `.agents/workflow.md`, `_docs/README.md`, relevant
-   design docs, and related active or backlog plans. Read completed plans only
-   when specific historical decisions, regressions, or migrations are relevant
-   to the requested plan.
+   `_docs/kb` docs, and related active or backlog plans. Read completed plans
+   only when specific historical decisions, regressions, or migrations are
+   relevant to the requested plan.
 2. Classify the work as backlog planning unless it is clearly a micro-fix.
    Do not promote backlog work autonomously.
 3. If the user has not already provided a high-level goal, ask them to
@@ -206,7 +206,7 @@ Intent is accepted.
    pass when the plan touches
    system boundaries, component contracts, integration choices, runtime
    contracts, persistence, data flow, package-management behavior, workflow
-   lifecycle behavior, or maintainability tradeoffs. Use `security-reviewer`
+   lifecycle behavior, or maintainability tradeoffs. Use `security-engineer`
    for a bounded security pass when the plan touches trust boundaries,
    credentials, authorization, permissions, destructive file operations,
    dependencies, network or external systems, package trust, source resolution,
@@ -301,13 +301,26 @@ planning work without pretending it is final:
   security-sensitive work. During planning, record expected review scope or
   intentionally deferred questions. During closeout, record post-phase
   findings, blocking issues converted to normal plan tasks, and residual risk.
+- `Documentation Impact`: classify expected current-state knowledge impact by
+  product, requirements, architecture, security, quality, operations,
+  decisions, and glossary. Record when no `_docs/kb` update is expected and
+  why.
+- `Product Readiness`: when work moves toward user-facing release, classify the
+  expected readiness as prototype-ready, internal-use-ready, beta-ready, or
+  production-ready, with the evidence needed to support that claim.
 - `Lessons To Carry Forward` and `Promotion To Design` when relevant.
+- `Completion Checklist`: always include this required section from the active
+  `plan.md` template. Keep items pending until closeout; do not omit the
+  section just because the plan is still in draft or backlog review.
 
 Resolve `plan.md` from `.agents/templates/plan.md` first, then from the active
 workflow origin under `.agents/packages/workflows/<source>/<workflow>/templates/`.
 If neither exists, continue with the structure above and report the missing
 template. When using a template manually instead of a renderer, strip every
 `DO NOT INCLUDE IN OUTPUT` comment block from the created or updated plan.
+Before treating the plan as ready, compare it against the required template
+sections and repair missing required sections, especially `Completion
+Checklist`.
 
 For accepted backlog plans, place acceptance state in the section and phase
 headings, for example:

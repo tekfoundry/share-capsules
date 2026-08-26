@@ -1,6 +1,6 @@
 ---
 name: project-init
-description: Initialize or repair a project's `_docs` documentation structure without overwriting existing project-owned content. Use when a user asks to initialize project docs, bootstrap documentation, or create the standard design and planning folders.
+description: Initialize or repair a project's `_docs` documentation structure without overwriting existing project-owned content. Use when a user asks to initialize project docs, bootstrap documentation, or create the standard knowledge-base and planning folders.
 ---
 
 # Project Init
@@ -18,20 +18,28 @@ separately.
 1. Read `AGENTS.md` and `.agents/workflow.md` when present.
 2. Inspect the existing `_docs` tree before editing.
 3. Create missing standard directories:
-   - `_docs/design/`
+   - `_docs/kb/`
+   - `_docs/kb/01-product/`
+   - `_docs/kb/02-requirements/`
+   - `_docs/kb/03-architecture/`
+   - `_docs/kb/04-security/`
+   - `_docs/kb/05-quality/`
+   - `_docs/kb/06-operations/`
+   - `_docs/kb/07-decisions/`
    - `_docs/plans/`
    - `_docs/plans/backlog/`
    - `_docs/plans/completed/`
 4. Create `_docs/README.md` only when missing. Keep it as a project
    documentation router, not a product design document. Use the
    `docs-readme.md` workflow template when available.
-5. Create `_docs/design/README.md` only when missing. Keep it focused on
-   stable current design intent and links to deeper design documents. Use the
-   `design-readme.md` workflow template when available.
+5. Create `_docs/kb/README.md`, `_docs/kb/glossary.md`, and owner README files
+   for each standard knowledge-base area only when missing. Keep them focused
+   on current implemented project knowledge and links to deeper documents.
 6. Never overwrite or replace existing project-owned documentation. If a file
    exists but appears stale or incomplete, report the issue and ask before
    rewriting substantial content.
-7. Report created paths, existing paths left untouched, and any follow-up
+7. Create only the standard knowledge-base and planning directories.
+8. Report created paths, existing paths left untouched, and any follow-up
    documentation questions.
 
 ## Guardrails

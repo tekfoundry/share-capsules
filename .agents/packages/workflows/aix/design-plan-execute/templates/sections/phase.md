@@ -21,9 +21,19 @@ Verification:
 
 <!-- DO NOT INCLUDE IN OUTPUT
 Agent note: list concrete checks expected for this phase. Include exact
-commands when known. -->
+commands when known, manual validation needs, security-sensitive paths,
+data-integrity checks, error/recovery paths, and known unverified areas. -->
 
 - {{ phase:verification }}
+
+Documentation impact:
+
+<!-- DO NOT INCLUDE IN OUTPUT
+Agent note: classify `_docs/kb` impact by product, requirements, architecture,
+security, quality, operations, decisions, and glossary. Record "none" only
+after checking the affected behavior. -->
+
+- {{ phase:docs_impact }}
 
 Execution notes:
 

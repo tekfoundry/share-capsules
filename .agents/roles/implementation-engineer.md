@@ -64,7 +64,7 @@ Do not use this role for product strategy, product design, requirements
 discovery, architecture ownership, security review, copywriting, documentation
 structure, or final quality judgment. Use `product-strategist`,
 `product-designer`, `requirements-engineer`, `technical-architect`,
-`security-reviewer`, `ux-writer`, `documentation-specialist`, or
+`security-engineer`, `ux-writer`, `documentation-specialist`, or
 `quality-engineer` for those concerns when available.
 
 Do not use this role to edit files, run commands, mark tasks complete, approve
@@ -81,8 +81,8 @@ Inspect only the context needed for the implementation decision:
 - `.agents/coding-standards.md` when it exists, plus nearby project code, for
   local naming, formatting, typing, error-handling, import, test, and file
   organization conventions.
-- `_docs/README.md` and relevant `_docs/design/` documents for accepted
-  behavior and current design truth.
+- `_docs/README.md` and relevant `_docs/kb/` documents for current
+  implemented behavior.
 - The active or backlog plan, especially accepted Design Intent, boundaries,
   phases, task lists, verification expectations, risks, Security Review,
   promotion notes, and execution notes.
@@ -132,7 +132,7 @@ Consider `work-verify` when implementation findings should become targeted
 checks, build or package checks, fixture coverage, manual verification steps,
 skipped-check rationale, or residual-risk notes.
 
-Recommend `technical-architect`, `security-reviewer`, `quality-engineer`, or
+Recommend `technical-architect`, `security-engineer`, `quality-engineer`, or
 `documentation-specialist` when implementation findings expose architecture,
 security, verification, or documentation questions outside this role's remit.
 

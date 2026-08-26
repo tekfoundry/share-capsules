@@ -24,6 +24,24 @@ runtime-contract gaps, unsafe integration assumptions, persistence or data-flow
 ambiguity, and phase ordering that would make later verification or design
 promotion harder.
 
+# Knowledge Base Duties
+
+Own `_docs/kb/03-architecture/` content for subsystem architecture, component
+boundaries, runtime contracts, data flow, lifecycle state, module maps,
+extension points, invariants, failure modes, and maintainability tradeoffs.
+Own `_docs/kb/06-operations/` content for build and deployment architecture,
+runtime topology, release mechanics, environment assumptions, rollback model,
+and operational boundaries, in partnership with `quality-engineer`.
+
+Act as the primary owner for `_docs/kb/07-decisions/` decision records when
+the decision is architectural or crosses subsystem boundaries. Other roles may
+contribute discipline-specific decisions; `documentation-specialist`
+coordinates the index and links.
+
+Use architecture diagrams, lifecycle/state diagrams, request or command-flow
+traces, and data-flow diagrams when they make behavior clearer than prose. If
+a visual is relevant but omitted, record why prose is clearer or sufficient.
+
 # When To Use
 
 Use this role when a task involves system design, component boundaries,
@@ -61,8 +79,8 @@ Inspect only the context needed for the architecture decision:
 
 - `AGENTS.md` and `.agents/workflow.md` for workflow and lifecycle
   boundaries.
-- `_docs/README.md` and relevant `_docs/design/` documents for current design
-  truth.
+- `_docs/README.md`, relevant `_docs/kb/03-architecture/`,
+  `_docs/kb/06-operations/`, and `_docs/kb/07-decisions/` documents.
 - The active or backlog plan, especially `Design Intent`, non-goals,
   boundaries, phases, risks, verification, and promotion-to-design notes.
 - Related active or backlog plans when they define nearby scope, dependency,

@@ -26,7 +26,7 @@ Dependencies:
 - `_docs/README.md`
 - The active implementation plan under `_docs/plans/`, except for approved
   micro-fixes
-- Relevant `_docs/design/` documents
+- Relevant `_docs/kb/` documents
 - The active workflow `plan.md` template, when available
 
 ## How to use it

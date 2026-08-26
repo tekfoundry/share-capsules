@@ -24,7 +24,7 @@ Dependencies:
 - `.agents/workflow.md`
 - `_docs/README.md`
 - The active implementation plan under `_docs/plans/`
-- Relevant `_docs/design/` documents
+- Relevant `_docs/kb/` documents
 - `phase-execute`
 - `task-execute`
 - `plan-complete`

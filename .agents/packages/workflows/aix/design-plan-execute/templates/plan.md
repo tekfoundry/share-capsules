@@ -84,6 +84,50 @@ none remain, write "None." or remove the section.
 
 - {{ decision:item }}
 
+## Documentation Impact
+
+<!-- DO NOT INCLUDE IN OUTPUT
+Agent note: classify current-state knowledge impact by area. Keep this section
+short for small work. For micro-fixes or tiny changes, it is fine to record
+that no `_docs/kb` update is needed when the regression analysis supports it.
+-->
+
+- Product: {{ docs_impact:product }}
+- Requirements: {{ docs_impact:requirements }}
+- Architecture: {{ docs_impact:architecture }}
+- Security: {{ docs_impact:security }}
+- Quality: {{ docs_impact:quality }}
+- Operations: {{ docs_impact:operations }}
+- Decisions: {{ docs_impact:decisions }}
+- Glossary: {{ docs_impact:glossary }}
+
+## Product Readiness
+
+<!-- DO NOT INCLUDE IN OUTPUT
+Agent note: include this section when work moves toward user-facing release.
+Use prototype-ready, internal-use-ready, beta-ready, or production-ready.
+Remove it when readiness classification is irrelevant.
+-->
+
+- Readiness: {{ readiness:category }}
+- Evidence needed: {{ readiness:evidence }}
+
+## Operator Closeout Summary
+
+<!-- DO NOT INCLUDE IN OUTPUT
+Agent note: add during closeout for meaningful work. Cover what changed,
+important boundaries, data touched, failure modes, evidence, unverified areas,
+and manual inspection needs. Remove it before closeout if it is not ready.
+-->
+
+- What changed: {{ closeout:changed }}
+- Important boundaries: {{ closeout:boundaries }}
+- Data touched: {{ closeout:data }}
+- Failure modes: {{ closeout:failure_modes }}
+- Evidence: {{ closeout:evidence }}
+- Unverified areas: {{ closeout:unverified }}
+- Manual inspection needs: {{ closeout:manual }}
+
 {{ section:risks }}
 
 {{ section:security-review }}

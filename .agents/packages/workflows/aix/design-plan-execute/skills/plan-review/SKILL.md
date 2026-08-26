@@ -66,7 +66,7 @@ notes, or readiness notes as appropriate. Do not require
 cannot delegate, continue the review yourself by checking the same
 requirements-readiness concerns.
 
-When `.agents/roles/security-reviewer.md` exists and the plan has
+When `.agents/roles/security-engineer.md` exists and the plan has
 security-sensitive scope, use `delegate-to-role` or a prompt-overlay delegation
 to request a bounded security-readiness pass. Good triggers include trust
 boundaries, secrets, authentication, authorization, permissions, dependency or
@@ -78,7 +78,7 @@ guarantees.
 Fold returned evidence into review findings, activation blockers, risks,
 verification gaps, requested plan revisions, Security Review notes, human
 review notes, or readiness notes as appropriate. Do not require
-`security-reviewer` for direct use. If the role is unavailable or the host
+`security-engineer` for direct use. If the role is unavailable or the host
 cannot delegate, continue the review yourself by checking the same
 security-readiness concerns.
 
@@ -114,16 +114,18 @@ by checking the same verification-readiness concerns.
 1. Resolve the plan and read its context, design intent, phases, risks,
    verification, Security Review, and promotion requirements.
    Compare the plan against the active workflow `plan.md` template when that
-   template is available, but do not treat local template customization as a
-   defect by itself.
-2. Read the repository instructions, documentation router, relevant design
+   template is available. Local customization is fine, but missing required
+   sections are workflow defects.
+2. Read the repository instructions, documentation router, relevant `_docs/kb`
    docs, related active or backlog plans, and current worktree state. Read
    completed plans only when specific historical decisions, regressions, or
    migrations are relevant to the review.
 3. Check work classification and whether the requested phase is authorized.
-4. Report findings in priority order: missing decisions, conflicting sources
+4. Flag a missing `Completion Checklist` as a required-section defect that
+   must be repaired before the plan is treated as ready or complete.
+5. Report findings in priority order: missing decisions, conflicting sources
    of truth, unsafe assumptions, weak success criteria, and verification gaps.
-5. State whether the plan is ready for execution and identify the exact
+6. State whether the plan is ready for execution and identify the exact
    blocking questions when it is not.
 
 ## Guardrails

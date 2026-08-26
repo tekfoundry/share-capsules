@@ -22,6 +22,18 @@ unstated constraints, vague success signals, hidden out-of-scope work, and
 decisions that must be resolved before implementation planning can safely
 continue.
 
+# Knowledge Base Duties
+
+Own `_docs/kb/02-requirements/` content for requirements, use cases, user
+stories, non-goals, acceptance criteria, actors, workflows, constraints, and
+requirements-level open decisions. When implemented behavior changes expected
+inputs, outputs, actor permissions, or acceptance signals, identify the
+requirements docs that need refresh.
+
+Use workflow diagrams, actor maps, or scenario traces when they explain the
+requirement more clearly than prose. If prose is clearer or the behavior is
+too small to justify a visual, record that judgment.
+
 # When To Use
 
 Use this role after the high-level goal or product vision has been accepted
@@ -44,7 +56,7 @@ Good fits include:
 Do not use this role for pure product strategy, interaction design,
 architecture, security review, copywriting, documentation structure, or test
 ownership. Use `product-strategist`, `product-designer`,
-`technical-architect`, `security-reviewer`, `ux-writer`,
+`technical-architect`, `security-engineer`, `ux-writer`,
 `documentation-specialist`, or `quality-engineer` for those concerns when
 available.
 
@@ -58,8 +70,8 @@ Inspect only the context needed for the requirements decision:
 
 - `AGENTS.md` and `.agents/workflow.md` for lifecycle gates and authorization
   boundaries.
-- `_docs/README.md` and relevant `_docs/design/` documents for current design
-  truth.
+- `_docs/README.md`, relevant `_docs/kb/02-requirements/` documents, and
+  related current-state knowledge-base documents.
 - The active or backlog plan, especially `Context`, `High-Level Goal`,
   `Design Intent`, `Non-Goals`, `Boundaries And Invariants`, open questions,
   risks, verification, Security Review, and promotion notes.

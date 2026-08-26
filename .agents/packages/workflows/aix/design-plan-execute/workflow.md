@@ -17,7 +17,7 @@ Use this document as the default process contract for the repo.
 - Use this document for the durable workflow rules that should remain reusable across projects.
 - Use `.agents/README.md` as the reusable process router when it exists.
 - Use `_docs/README.md` as the project documentation router when it exists.
-- Use `_docs/design` for stable design truth.
+- Use `_docs/kb` for current implemented project knowledge.
 - Use active plans in `_docs/plans` for implementation work and execution records.
 - Use `_docs/plans/backlog` for planned work that has not been activated.
 - Use completed plans only for relevant historical context.
@@ -90,6 +90,11 @@ capture the intended behavior and the change is a localized bug fix or UX/UI
 improvement. The change must not introduce new design intent, architecture,
 schema, security or data-safety behavior, or broad cross-module changes.
 
+Every micro-fix still needs a knowledge-base impact check. Most small fixes
+will need little or no documentation change, but the agent must decide that by
+checking the changed behavior against `_docs/kb` rather than assuming docs are
+unaffected.
+
 Escalate a micro-fix to a new plan or an existing active plan when its scope
 expands, it changes accepted design intent, crosses subsystem boundaries,
 requires a meaningful new workflow or contract, carries material production
@@ -107,9 +112,9 @@ or a qualified micro-fix. The same sequence also governs backlog review, but
 backlog work stops before implementation unless a human activates it.
 
 1. **Orient:** Identify the user request, repository entrypoint instructions,
-   relevant workflow guidance, applicable design docs, active or backlog plan
+   relevant workflow guidance, applicable knowledge-base docs, active or backlog plan
    context, and current worktree state. At minimum, read `AGENTS.md`,
-   `.agents/workflow.md`, `_docs/README.md`, the relevant `_docs/design`
+   `.agents/workflow.md`, `_docs/README.md`, the relevant `_docs/kb`
    files routed from the documentation index, the related active or backlog
    plans, and the current worktree status. Load completed plans only when they
    are needed for historical decisions, migrations, or regressions.
@@ -138,7 +143,7 @@ backlog work stops before implementation unless a human activates it.
 7. **Close:** Update plan status or the micro-fix completion record, report
    files changed, verification evidence, documentation impact, escalation
    status, and unresolved follow-up work. Promote durable current-state behavior
-   into `_docs/design` when the implementation changes accepted design intent.
+   into `_docs/kb` when the implementation changes accepted project knowledge.
 
 ### Context Lifetime for Long-Running Skills
 
@@ -224,7 +229,7 @@ At minimum, a repo using this workflow should have the following documentation s
 - `.agents/workflow.md`: the reusable workflow and planning contract
 - `.agents/engineering-best-practices.md`: reusable agent-facing engineering guidance
 - `.agents/skills/`: canonical repository-local agent workflow skills
-- `_docs/design/`: stable design intent for the current accepted system
+- `_docs/kb/`: current implemented project knowledge
 - `_docs/plans/`: active in-progress implementation plans
 - `_docs/plans/backlog/`: planned but intentionally not started work
 - `_docs/plans/completed/`: archived plans after design promotion and completion
@@ -237,11 +242,24 @@ Projects may also include these optional supporting files or directories:
 - object-verb workflow skills such as `project-init`, `plan-create`,
   `plan-activate`, `plan-execute`, `task-execute`, and `work-verify`
 - `_docs/competitive-analysis.md`: market and landscape analysis used before or during product shaping
-- `_docs/design/overview/`: cross-cutting architecture, workspace shape, and runtime boundaries
-- `_docs/design/features/`: feature-level design intent
-- `_docs/design/product/`: product goals, user stories, scope, and requirements
-- `_docs/design/quality/`: testing, validation, security, and acceptance guidance
-- `_docs/design/operations/`: build, deployment, release, and support guidance
+- `_docs/kb/01-product/`: product intent, user workflows, interaction
+  behavior, UX principles, and user-facing acceptance signals
+- `_docs/kb/02-requirements/`: requirements, use cases, user stories,
+  non-goals, acceptance criteria, actors, workflows, and open decisions
+- `_docs/kb/03-architecture/`: architecture, subsystem boundaries, runtime
+  contracts, data flow, state machines, module maps, extension points, and
+  maintainability tradeoffs
+- `_docs/kb/04-security/`: threat models, trust boundaries, secrets posture,
+  authorization concerns, destructive operations, supply-chain risk, local
+  file safety, and auditability
+- `_docs/kb/05-quality/`: testing strategy, verification matrices, regression
+  risk, manual validation, release checks, coverage philosophy, and known
+  validation gaps
+- `_docs/kb/06-operations/`: build, deployment, release, runtime, rollback,
+  smoke-check, monitoring, and incident validation knowledge
+- `_docs/kb/07-decisions/`: accepted decisions, tradeoffs, and decision
+  indexes
+- `_docs/kb/glossary.md`: shared project terminology
 
 For long-term maintainability, the recommended design-doc structure is:
 
@@ -285,7 +303,7 @@ Before implementation begins, create a concise product summary that captures the
 
 Expected output:
 
-- `_docs/design/product/product-summary.md`
+- `_docs/kb/01-product/product-summary.md`
 - a short product summary, typically 1-2 pages
 
 Use the `product-summary.md` workflow template when it is available.
@@ -320,7 +338,7 @@ The discovery process should cover at least these categories:
   - data, storage, auth, or integration constraints
   - testing, CI, release, and operational expectations
 
-Unless the repository explicitly uses a different product-doc location, the default output path for this stage is `_docs/design/product/product-summary.md`.
+Unless the repository explicitly uses a different product-doc location, the default output path for this stage is `_docs/kb/01-product/product-summary.md`.
 
 The product summary document should be treated as the primary output of the initial product elicitation step.
 
@@ -388,14 +406,14 @@ This is the main execution loop for day-to-day work.
 
 Every non-trivial effort should run through the following sequence:
 
-1. Review existing code, tests, design docs, and active plans.
+1. Review existing code, tests, knowledge-base docs, and active plans.
 2. Create a new plan or update an existing active plan.
 3. Implement in small, verifiable slices.
 4. Run the relevant verification.
 5. Update docs to match the resulting accepted behavior.
 6. Record lessons worth preserving.
 
-If code, design docs, and plans disagree, identify the drift explicitly and resolve it deliberately.
+If code, knowledge-base docs, and plans disagree, identify the drift explicitly and resolve it deliberately.
 
 ### Stage 6: Completion and Design Promotion
 
@@ -406,7 +424,7 @@ Expected outputs:
 - working code
 - relevant verification completed, or verification gaps explicitly documented
 - active plan updated to reflect the finished state
-- durable design intent promoted into `_docs/design`
+- durable current-state knowledge promoted into `_docs/kb`
 - completed plan archived under `_docs/plans/completed/`
 
 The goal is that completed plans do not remain the only place where final design truth lives.
@@ -415,7 +433,7 @@ For a newly initialized project, the desired long-term outputs of this workflow 
 
 - working code
 - strong verification coverage appropriate to the product
-- stable design intent documents under `_docs/design`
+- current implemented knowledge documents under `_docs/kb`
 - completed execution plans archived under `_docs/plans/completed/`
 
 ## Documentation Model
@@ -433,12 +451,18 @@ and active execution.
 - Do not place project product knowledge, design truth, or execution records in
   `.agents/`.
 
-### `_docs/design`
+### `_docs/kb`
 
-- This directory holds stable design intent for the application.
-- Documents in this directory should describe the desired current state of the system.
-- Stable design docs should reflect the latest accepted iteration of the codebase.
-- Treat this directory as the durable reference for how the system is supposed to behave.
+- This directory holds current implemented project knowledge.
+- Documents in this directory should describe behavior that exists now, not
+  future intent or superseded history.
+- Knowledge-base docs should reflect the latest accepted iteration of the
+  codebase.
+- Treat this directory as the durable reference for how the system behaves.
+- Every implementation change, including a micro-fix, should include a
+  regression analysis for knowledge-base impact. Most micro-fixes may require
+  little or no docs update, but the decision should follow from the behavior
+  touched.
 
 ### `_docs/plans`
 
@@ -448,15 +472,40 @@ and active execution.
 - `_docs/plans/completed/` holds archived plans after implementation and design promotion are finished.
 - Every non-trivial effort starts with a plan document unless an existing active plan already covers the work.
 
+### Knowledge-Base Routing Examples
+
+- A new user-facing command or changed command output usually updates
+  `_docs/kb/01-product/`, `_docs/kb/02-requirements/`, and possibly glossary
+  terminology. Route product behavior to `product-designer`, requirements to
+  `requirements-engineer`, and wording to `ux-writer`.
+- A changed manifest, lockfile, package-store, activation, template, role, or
+  workflow lifecycle usually updates `_docs/kb/03-architecture/` and
+  `_docs/kb/07-decisions/`. Route architecture and decisions to
+  `technical-architect`.
+- A changed overwrite, remove, update, trust, source, credential, dependency,
+  or destructive-operation path usually updates `_docs/kb/04-security/`.
+  Route this to `security-engineer`.
+- A changed test strategy, release check, manual validation path, regression
+  gate, or known verification gap usually updates `_docs/kb/05-quality/` and
+  sometimes `_docs/kb/06-operations/`. Route quality to `quality-engineer`.
+- A changed build, package, release, rollback, smoke-check, or recovery
+  workflow usually updates `_docs/kb/06-operations/`. Route operating
+  topology to `technical-architect` and release verification to
+  `quality-engineer`.
+- Cross-links, placement, stale references, duplicate current-state claims,
+  and migration consistency are coordinated by `documentation-specialist`, but
+  that role does not replace domain owners for product, requirements,
+  architecture, security, quality, operations, or decisions truth.
+
 ### Relationship Between Code, Design, Plans, and Workflow
 
 - Code is the implemented behavior.
-- `_docs/design` is the stable design truth for the intended current system.
+- `_docs/kb` is the current implemented knowledge for the system.
 - `_docs/plans` is the temporary and evolving design space for active work.
 - `_docs/plans/backlog` captures planned-but-not-started work.
 - This document captures reusable workflow guidance learned across efforts.
 
-When plan work is completed, durable design intent must be moved into `_docs/design`, and useful lessons should be harvested to improve this workflow.
+When plan work is completed, durable current-state knowledge must be moved into `_docs/kb`, and useful lessons should be harvested to improve this workflow.
 
 ## Plan Mode Default
 
@@ -495,10 +544,10 @@ The final handoff for a micro-fix should include:
 
 - Scope: what narrow behavior or document issue was changed
 - Files changed: the concrete files touched
-- Design docs reviewed: the stable docs checked for intended behavior, or why no
-  design doc was relevant
+- Knowledge-base impact: the `_docs/kb` area checked or updated, or why no
+  current-state doc change was needed
 - Verification: the targeted check, command, or manual review performed
-- Documentation impact: whether stable design, lessons, engineering guidance, or
+- Documentation impact: whether `_docs/kb`, lessons, engineering guidance, or
   no further docs changed
 - Escalation: whether the work stayed a micro-fix or why it needed a plan
 
@@ -508,13 +557,13 @@ Use this compact format when it helps make the record clear:
 Micro-fix record:
 - Scope:
 - Files changed:
-- Design docs reviewed:
+- Knowledge-base impact:
 - Verification:
 - Documentation impact:
 - Escalation:
 ```
 
-Update `_docs/design` when the fix changes accepted current-state behavior or
+Update `_docs/kb` when the fix changes accepted current-state behavior or
 clarifies behavior that future agents should treat as stable truth. Update
 `_docs/lessons-learned.md` when the fix reveals a reusable product or
 architecture lesson. Update `.agents/engineering-best-practices.md` or this
@@ -534,11 +583,42 @@ Each plan document in `_docs/plans` should include, at minimum, the following se
 - What repo, product, or market context was reviewed
 - Any assumptions or constraints that materially shape the work
 
+Plans must also include a `Completion Checklist` section. If the plan was
+created manually, compare it with the active `plan.md` template and repair
+missing required sections before treating the plan as ready or complete.
+
+Classify documentation impact by knowledge-base area when work changes durable
+current-state behavior:
+
+- Product: user flows, interaction behavior, UX principles, and user-facing
+  acceptance signals
+- Requirements: actors, workflows, use cases, constraints, non-goals, and
+  acceptance criteria
+- Architecture: subsystem boundaries, contracts, data flow, lifecycle state,
+  module maps, invariants, and failure modes
+- Security: trust boundaries, secrets, authorization, destructive operations,
+  supply-chain risk, and auditability
+- Quality: verification strategy, regression risk, test matrices, manual
+  validation, release checks, and known gaps
+- Operations: build, deployment, runtime, release, rollback, smoke checks, and
+  incident validation
+- Decisions: accepted tradeoffs and current decisions
+- Glossary: shared terminology
+
+Use diagrams, images, tables, sequence traces, lifecycle diagrams, state
+machines, request traces, data-flow traces, or command-flow traces when they
+explain architecture, lifecycle, interaction, security, data flow, or
+operations more clearly than prose. If a relevant visual is omitted, record why
+prose is clearer or sufficient.
+
+For product-facing release work, record the readiness category and evidence:
+prototype-ready, internal-use-ready, beta-ready, or production-ready.
+
 ### 2. Design Intent
 
 - The intended end state for the change
 - The key behaviors, interfaces, boundaries, and invariants that should exist when the work is complete
-- Any design decisions that should later become part of stable design documentation
+- Any design decisions that should later become part of the knowledge base
 - For backlog plans, track review acceptance inline on the relevant section
   heading once accepted, for example `### Design Intent (status: accepted)`.
 
@@ -586,14 +666,14 @@ Each plan document in `_docs/plans` should include, at minimum, the following se
 
 ### 6. Promotion to Design
 
-- Identify which `_docs/design` documents need to be created or updated when the work is complete
+- Identify which `_docs/kb` documents need to be created or updated when the work is complete
 
 ## Implementation Workflow
 
 ### 1. Review Existing Context
 
 - Read the relevant code, tests, and documentation before editing
-- Check `_docs/design` for current intended behavior
+- Check `_docs/kb` for current implemented behavior
 - Check `_docs/plans` for active related implementation work
 - Check `_docs/plans/backlog` for future work that may overlap or should be promoted to active
 - Read `_docs/plans/completed` only when relevant historical context is needed
@@ -684,12 +764,22 @@ reorganization that belongs in a separate plan.
 When work covered by a plan document is complete:
 
 1. Verify that the implementation matches the intended outcome.
-2. Move durable design intent into a new or existing document in `_docs/design`.
-3. Remove ambiguity about what is still future work versus what is now stable design.
-4. Review the plan's `Lessons` section.
-5. Harvest reusable workflow improvements from those lessons into this document.
-6. Move the completed plan document into `_docs/plans/completed/`.
-7. Rename the completed plan file to prefix it with the completion date using `YYYY-MM-DD-<original-name>.md`.
+2. Move durable current-state knowledge into a new or existing document in `_docs/kb`.
+3. Remove ambiguity about what is still future work versus what is now current-state knowledge.
+4. Use the completed plan as an inspection guide, then verify and refresh
+   `_docs/kb` against implemented behavior, tests, and accepted evidence.
+5. Run `$review-and-refresh-docs` to check links, placement, duplication,
+   depth, and current-state accuracy against implemented behavior.
+6. Record unresolved implementation-vs-intent conflicts as open decisions,
+   risks, or follow-up plan candidates instead of treating the docs as
+   acceptable.
+7. Add an operator-understanding closeout summary for meaningful work. Cover
+   what changed, important boundaries, data touched, failure modes, evidence,
+   unverified areas, and manual inspection needs.
+8. Review the plan's `Lessons` section.
+9. Harvest reusable workflow improvements from those lessons into this document.
+10. Move the completed plan document into `_docs/plans/completed/`.
+11. Rename the completed plan file to prefix it with the completion date using `YYYY-MM-DD-<original-name>.md`.
 
 ### Completed Plan Archiving
 
@@ -704,11 +794,14 @@ When work covered by a plan document is complete:
 Before archiving a plan, confirm all of the following:
 
 - All plan tasks are marked as completed
-- Stable design intent from the plan has been distributed into the appropriate files under `_docs/design`
-- Related current-state docs outside `_docs/design` (for example `README.md`, handoff docs, or other repo-level reference docs) have been reviewed and updated if they describe the affected architecture, runtime, setup, QA flow, or release flow
-- The `_docs/design` structure has been reviewed for any refactors or reorganization needed to keep the docs clear and easy to navigate
-- Any new design docs are referenced from related docs where appropriate and can be discovered through the current design-doc entry points used by the repo
+- Current-state knowledge from the plan has been distributed into the appropriate files under `_docs/kb`
+- Related current-state docs outside `_docs/kb` (for example `README.md`, handoff docs, or other repo-level reference docs) have been reviewed and updated if they describe the affected architecture, runtime, setup, QA flow, or release flow
+- The `_docs/kb` structure has been reviewed for any refactors or reorganization needed to keep the docs clear and easy to navigate
+- Any new knowledge-base docs are referenced from related docs where appropriate and can be discovered through the current documentation entry points used by the repo
+- Visuals, diagrams, tables, or traces were added where they convey meaning
+  better than prose, or the plan records why prose was enough
 - Relevant verification is in a good state, with the goal of keeping the system dependable
+- Meaningful work has an operator-understanding closeout summary
 - The plan no longer contains active implementation work, unresolved execution tasks, or validation follow-up that should remain in `_docs/plans`
 
 ## Communication Expectations
@@ -763,7 +856,7 @@ A task is done when:
 - The active plan document reflects the final state of the work
 - The phase's `Review & Refactor` task has been completed, with any remaining
   structural concerns fixed or recorded as explicit follow-on work
-- Durable design knowledge has been promoted into `_docs/design` when the work is complete
+- Durable current-state knowledge has been promoted into `_docs/kb` when the work is complete
 - Reusable lessons have been considered for inclusion in this document
 
 ## Plan Template
@@ -833,4 +926,4 @@ For accepted backlog phases, write phase headings as:
 
 ### Promotion to Design
 
-- Which `_docs/design` documents need to be created or updated when the work is complete
+- Which `_docs/kb` documents need to be created or updated when the work is complete

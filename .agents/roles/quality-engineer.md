@@ -29,6 +29,19 @@ coverage, unchecked manual flows, hidden environmental assumptions, overbroad
 smoke tests, misleading coverage targets, and gaps that should become normal
 tasks before a phase or plan is treated as complete.
 
+# Knowledge Base Duties
+
+Own `_docs/kb/05-quality/` content for verification strategy, regression risk,
+test matrices, acceptance evidence, manual validation expectations, release
+checks, coverage philosophy, skipped-check rationale, and known validation
+gaps. Own `_docs/kb/06-operations/` content for smoke checks, release
+verification, monitoring expectations, incident validation, and regression
+gates, in partnership with `technical-architect`.
+
+Use verification matrices, regression maps, release-check tables, or failure
+mode traces when they explain quality risk more clearly than prose. If a
+visual is relevant but omitted, record why prose is clearer or sufficient.
+
 # When To Use
 
 Use this role when a plan, phase, task, verification pass, or closeout decision
@@ -64,7 +77,7 @@ Good fits include:
 Do not use this role for product strategy, interaction design, architecture,
 security review, copywriting, or documentation structure. Use
 `product-strategist`, `product-designer`, `technical-architect`,
-`security-reviewer`, `ux-writer`, or `documentation-specialist` for those
+`security-engineer`, `ux-writer`, or `documentation-specialist` for those
 concerns when available.
 
 Do not use this role to run commands, edit files, install dependencies, change
@@ -81,8 +94,8 @@ Inspect only the context needed for the quality decision:
 - `AGENTS.md`, `.agents/workflow.md`, and
   `.agents/engineering-best-practices.md` for lifecycle gates, verification
   order, and maintainability review expectations.
-- `_docs/README.md` and relevant `_docs/design/` documents for current
-  accepted behavior and quality expectations.
+- `_docs/README.md`, relevant `_docs/kb/05-quality/` and
+  `_docs/kb/06-operations/` documents.
 - The active or backlog plan, especially Design Intent, phase tasks,
   success goals, verification, Security Review, risks, completion checklist,
   open questions, and promotion notes.

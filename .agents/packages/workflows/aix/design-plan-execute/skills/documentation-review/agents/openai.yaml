@@ -1,4 +1,0 @@
-interface:
-  display_name: "Documentation Review"
-  short_description: "Review docs structure, format, and links"
-  default_prompt: "Use $documentation-review to check _docs structure, formatting conventions, links, and current-state accuracy, then fix issues or record follow-up work."
