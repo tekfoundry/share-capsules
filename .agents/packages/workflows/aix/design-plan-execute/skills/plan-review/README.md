@@ -48,3 +48,28 @@ router, relevant design docs, related plans, and worktree state. It reports
 missing decisions, conflicting sources of truth, unsafe assumptions, weak
 success criteria, and verification gaps in priority order. It states whether
 the plan is ready for execution and names the exact blockers when it is not.
+When the workflow-owned `technical-architect` role is installed, the skill can
+use it for bounded architecture-readiness review while still checking
+architecture concerns itself when the role is unavailable. When the
+workflow-owned `product-strategist` role is installed, the skill can use it
+for bounded product-strategy readiness review on audience, value, scope,
+sequencing, prioritization, and product fit while still checking those
+concerns itself when the role is unavailable. When the
+workflow-owned `product-designer` role is installed, the skill can use it for
+bounded design-readiness review on user flows, interaction states,
+accessibility, terminal UX, prompts, and design-system fit while still checking
+those concerns itself when the role is unavailable. When the workflow-owned
+`requirements-engineer` role is installed, the skill can use it for bounded
+requirements-readiness review on requirements, actors, workflows, inputs,
+outputs, constraints, non-goals, boundaries, acceptance signals, open
+decisions, and Design Intent readiness while still checking those concerns
+itself when the role is unavailable. When the workflow-owned
+`security-reviewer` role is installed, the skill can use it for bounded
+security-readiness review on trust boundaries, secrets, authorization,
+destructive operations, dependency risk, source resolution, lockfile integrity,
+and no-write guarantees while still checking those concerns itself when the
+role is unavailable. When the workflow-owned `ux-writer` role is installed,
+the skill can use it for bounded copy-readiness review on labels, prompts,
+command help, terminal output, errors, empty states, onboarding copy, README
+language, and developer-facing docs while still checking those concerns itself
+when the role is unavailable.

@@ -8,6 +8,77 @@ description: Update an active or backlog implementation plan without executing i
 Use this skill for plan maintenance only. Do not implement code, activate
 backlog work, or archive completed work from this skill.
 
+## Role Collaboration
+
+`plan-update` owns the plan edit. Roles can supply bounded specialist
+judgment, but they do not own lifecycle state, accepted decisions, task
+execution, verification results, or final user-facing reporting.
+
+When `.agents/roles/product-strategist.md` exists and the requested update
+changes product scope, audience, user value, prioritization, sequencing,
+opportunity cost, or product fit, use `delegate-to-role` or a prompt-overlay
+delegation to request bounded product-strategy input.
+
+When `.agents/roles/product-designer.md` exists and the requested update
+changes user flows, interaction states, accessibility expectations, layout
+hierarchy, terminal UX, prompts, product-facing states, recovery paths, or
+design-system constraints, use `delegate-to-role` or a prompt-overlay
+delegation to request bounded product-design input.
+
+When `.agents/roles/requirements-engineer.md` exists and the requested update
+changes requirements, actors, workflows, inputs, outputs, constraints,
+non-goals, boundaries, acceptance signals, open decisions, Design Intent
+readiness, or implementation-phase constraints, use `delegate-to-role` or a
+prompt-overlay delegation to request bounded requirements input.
+
+When `.agents/roles/technical-architect.md` exists and the requested update
+changes system boundaries, component contracts, module ownership, runtime
+contracts, integration choices, data flow, persistence, package-management
+behavior, workflow lifecycle behavior, phase order, task boundaries, or
+maintainability tradeoffs, use `delegate-to-role` or a prompt-overlay
+delegation to request bounded architecture input.
+
+When `.agents/roles/security-reviewer.md` exists and the requested update
+changes trust boundaries, secrets, authentication, authorization, permissions,
+dependency or supply-chain risk, local file writes, overwrites, deletes,
+renames, external systems, network access, package trust, source resolution,
+lockfile integrity, no-write guarantees, Security Review expectations, or
+other safety-sensitive behavior, use `delegate-to-role` or a prompt-overlay
+delegation to request bounded security input.
+
+When `.agents/roles/ux-writer.md` exists and the requested update changes
+user-facing or developer-facing text requirements, labels, prompts, command
+help, terminal output, errors, empty states, onboarding copy, README language,
+workflow instructions, release notes, terminology, or docs copy that tells
+users what to do, use `delegate-to-role` or a prompt-overlay delegation to
+request bounded UX writing input.
+
+When `.agents/roles/quality-engineer.md` exists and the requested update
+changes verification expectations, acceptance checks, regression-risk notes,
+manual validation, skipped-check rationale, evidence expectations, validation
+gaps, residual risk, or phase success criteria, use `delegate-to-role` or a
+prompt-overlay delegation to request bounded quality input.
+
+When `.agents/roles/documentation-specialist.md` exists and the requested
+update changes documentation impact, `_docs` placement, design-promotion
+notes, README or workflow-doc expectations, index-link tasks, current-state
+accuracy risks, documentation follow-up, or closeout docs expectations, use
+`delegate-to-role` or a prompt-overlay delegation to request bounded
+documentation input.
+
+When `.agents/roles/implementation-engineer.md` exists and the requested
+update changes task boundaries, phase sequencing, likely changed areas,
+dependencies, implementation risks, verification handoff, documentation
+impact, execution notes, or follow-on work, use `delegate-to-role` or a
+prompt-overlay delegation to request bounded implementation input.
+
+Fold returned evidence into the smallest appropriate plan update: scope,
+Design Intent, non-goals, boundaries, tasks, risks, verification, Security
+Review expectations, documentation impact, promotion notes, open questions, or
+human-review notes. Do not require any role for direct use. If a role is
+unavailable or the host cannot delegate, continue the plan update yourself by
+checking the same specialty concerns when they apply.
+
 ## Workflow
 
 1. Resolve the referenced plan. If none is referenced, infer one only when the

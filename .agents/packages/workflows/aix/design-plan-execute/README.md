@@ -38,6 +38,14 @@ Update the active workflow after reviewing the diff:
 aix workflow update
 ```
 
+To refresh both the active workflow and locked standalone skills, use the
+workspace-level update command. It also lists any missing skills from the
+built-in `aix` source after the update:
+
+```bash
+aix update
+```
+
 Check workspace health and installed workflow state:
 
 ```bash
@@ -69,33 +77,63 @@ agent creates and updates them while following the developer workflow below.
 Existing project-owned documentation is preserved. Routine workflow updates do
 not rewrite project documents.
 
+## Installed Roles
+
+This workflow installs these roles:
+
+| Role name | Example prompts | What it does |
+| --- | --- | --- |
+| [`product-strategist`](roles/project-dev/product-strategist.md) | "Use product-strategist to review this feature idea."<br>"Should this idea become a plan, or should we narrow it first?"<br>"Compare these feature ideas by user value and sequencing." | Generates and evaluates product ideas, audience fit, scope, tradeoffs, and sequencing before planned work is accepted. |
+| [`product-designer`](roles/project-dev/product-designer.md) | "Use product-designer to review this workflow."<br>"Review this plan's user flow and accessibility before implementation."<br>"Does this prompt flow have clear states, recovery paths, and layout hierarchy?" | Reviews user flows, interaction design, accessibility, layout hierarchy, prototypes, terminal UX, and design-system fit before product-facing work is finalized. |
+| [`requirements-engineer`](roles/project-dev/requirements-engineer.md) | "Use requirements-engineer to refine this Design Intent."<br>"Are the requirements, non-goals, and acceptance signals ready?"<br>"Find open decisions before we draft phases." | Turns accepted product vision into requirements, non-goals, boundaries, acceptance signals, and plan-readiness evidence before implementation phases are drafted. |
+| [`technical-architect`](roles/project-dev/technical-architect.md) | "Use technical-architect to review this plan."<br>"Do these module boundaries and runtime contracts look ready for implementation?"<br>"Split this design into maintainable implementation phases." | Reviews system design, component boundaries, runtime contracts, integration choices, and maintainability tradeoffs before implementation phases are finalized. |
+| [`security-reviewer`](roles/project-dev/security-reviewer.md) | "Use security-reviewer to review this plan."<br>"Do these install and update safeguards cover local drift and trust boundaries?"<br>"Review the security risks before closeout." | Reviews trust boundaries, secrets, authorization, destructive operations, dependency risk, and safety-sensitive behavior before implementation or closeout. |
+| [`ux-writer`](roles/project-dev/ux-writer.md) | "Use ux-writer to review this command output."<br>"Check this plan's labels, errors, empty states, and README copy."<br>"Does this onboarding text tell users what to do next?" | Reviews labels, prompts, errors, empty states, onboarding copy, README language, and developer-facing text before release. |
+| [`quality-engineer`](roles/project-dev/quality-engineer.md) | "Use quality-engineer to plan verification."<br>"Check this phase for regression risk and validation gaps."<br>"Do these checks prove the acceptance criteria?" | Reviews verification strategy, regression risk, acceptance evidence, gaps, and residual risk before implementation phases or closeout are treated as complete. |
+| [`documentation-specialist`](roles/project-dev/documentation-specialist.md) | "Use documentation-specialist for this docs impact review."<br>"Where should this current-state behavior be documented?"<br>"Does the implementation match the design docs and active plan?" | Reviews documentation impact, `_docs` placement, design promotion needs, current-state accuracy, implementation-to-intent drift, links, and developer-facing documentation before planning or closeout treats docs as current. |
+| [`implementation-engineer`](roles/project-dev/implementation-engineer.md) | "Use implementation-engineer to split this phase into tasks."<br>"Check whether this task is ready for task-execute."<br>"What files, tests, docs, and risks should this implementation touch?" | Reviews implementation task boundaries, sequencing, likely changed areas, code-change readiness, verification handoff, documentation impact, and residual risk before planned work moves into or through execution. |
+
+The workflow activates these roles under `.agents/roles/`. Remove or update the
+workflow to change them. Do not deactivate them like normal root roles.
+
+Use roles explicitly when you want bounded specialist judgment, for example
+`Use quality-engineer to plan verification` or
+`Delegate to documentation-specialist for docs impact`. The
+`delegate-to-role` skill resolves named role intent, stops on missing or
+ambiguous role requests, and keeps implicit routing conservative. When the host
+does not provide a clear bounded subagent handoff, delegation uses a
+prompt-overlay fallback.
+
+The parent context remains authoritative for plan state, worktree safety,
+verification review, final decisions, and user-facing reporting. The
+`.agents/roles/` directory is AIX-managed role storage for this workflow, not a
+claim that every host runtime treats it as a native agent directory. Host-native
+agent exposure is deferred until an explicit integration command or
+configuration owns that compatibility output.
+
 ## Installed Skills
 
 This workflow installs these skills:
 
-- `project-init`: create or repair the project-owned `_docs` structure.
-- `design-create`: create a focused stable design document with the right
-  template and index links.
-- `plan-create`: turn an idea into a backlog plan for review.
-- `plan-review`: review a plan for scope, authorization, design completeness,
-  risks, and verification readiness.
-- `plan-activate`: move a human-authorized backlog plan into active
-  implementation.
-- `plan-update`: revise an active or backlog plan without implementing it.
-- `plan-execute`: run an active implementation plan across phases.
-- `phase-execute`: execute one phase of an active plan through focused tasks.
-- `task-execute`: implement one concrete task from an active plan, or one
-  approved micro-fix.
-- `work-verify`: choose and run targeted checks for changed behavior.
-- `code-review-refactor`: review project code for maintainability risks and
-  route selected refactors through the right workflow path.
-- `plan-defer`: move active planned work back to the backlog.
-- `plan-complete`: close a plan after tasks, verification, documentation, and
-  risks are resolved or recorded.
-- `design-promote`: move accepted behavior from completed plans into stable
-  design docs.
-- `documentation-review`: review documentation structure, formatting, links,
-  and current-state accuracy.
+| Skill name | Example prompts | What it does |
+| --- | --- | --- |
+| [`project-init`](skills/project-init/README.md) | "Initialize project."<br>"Bootstrap project docs." | Creates or repairs the project-owned `_docs` structure without overwriting existing project-owned content. |
+| [`brainstorming-skill`](skills/brainstorming-skill/README.md) | "Use brainstorming-skill. Let's brainstorm."<br>"Brainstorm new workflow ideas."<br>"Review our ideas and help prioritize what should come next." | Runs project-grounded idea discovery before implementation planning, maintains `_docs/ideas.md`, and routes mature ideas toward `plan-create`. |
+| [`design-create`](skills/design-create/README.md) | "Use design-create for this feature."<br>"Create a stable design doc for workflow install." | Creates a focused stable design document in the right `_docs/design` area, using the workflow template and index links. |
+| [`plan-create`](skills/plan-create/README.md) | "Use plan-create to plan saved search filters."<br>"Create a plan for workflow update diff previews." | Turns an idea into a backlog implementation plan through gated vision, design-intent, phase, and task review. |
+| [`plan-review`](skills/plan-review/README.md) | "Use plan-review on this backlog plan."<br>"Review this plan before activation." | Reviews an implementation plan for scope, authorization, design completeness, risks, and verification readiness without implementing it. |
+| [`plan-activate`](skills/plan-activate/README.md) | "Use plan-activate on this backlog plan."<br>"Activate the approved plan." | Moves a human-authorized backlog plan into active implementation without changing its intended scope. |
+| [`plan-update`](skills/plan-update/README.md) | "Use plan-update to revise this plan."<br>"Record this risk in the active plan." | Updates an active or backlog implementation plan without executing it or changing lifecycle boundaries. |
+| [`plan-execute`](skills/plan-execute/README.md) | "Use plan-execute on this active plan."<br>"Continue the current implementation plan." | Orchestrates execution of an active implementation plan across phases while preserving plan continuity and verification evidence. |
+| [`phase-execute`](skills/phase-execute/README.md) | "Use phase-execute for Phase 3."<br>"Complete as much of the current phase as possible." | Executes one active-plan phase through bounded task work and records phase-level evidence, risks, and gaps. |
+| [`task-execute`](skills/task-execute/README.md) | "Use task-execute for the next task."<br>"Implement this active-plan task." | Implements one concrete task from an active plan, or one approved micro-fix, with targeted verification and plan updates. |
+| [`work-verify`](skills/work-verify/README.md) | "Use work-verify on this change."<br>"Verify the current phase." | Selects and runs targeted verification for a change, then reports evidence, gaps, and whether success criteria are satisfied. |
+| [`code-review-refactor`](skills/code-review-refactor/README.md) | "Use code-review-refactor."<br>"Review these changes for maintainability risks." | Reviews project code for maintainability risks and routes substantial refactors through developer-approved planning. |
+| [`delegate-to-role`](skills/delegate-to-role/README.md) | "Use quality-engineer."<br>"Delegate to documentation-specialist." | Selects an installed project role and prepares bounded delegation while preserving parent-context ownership. |
+| [`plan-defer`](skills/plan-defer/README.md) | "Use plan-defer for this active plan."<br>"Move this work back to backlog." | Moves planned work out of active implementation and back into backlog while preserving status and future activation context. |
+| [`plan-complete`](skills/plan-complete/README.md) | "Use plan-complete."<br>"Complete and archive this plan." | Closes an implementation plan after tasks, verification, human validation, design promotion, risks, and documentation impact are resolved or recorded. |
+| [`design-promote`](skills/design-promote/README.md) | "Use design-promote for this completed plan."<br>"Promote accepted behavior into design docs." | Transfers accepted durable behavior from completed implementation plans into stable design documentation. |
+| [`documentation-review`](skills/documentation-review/README.md) | "Use documentation-review."<br>"Check the docs after this phase." | Reviews documentation structure, formatting, links, maintainability, and current-state accuracy; fixes issues or records follow-up work. |
 
 The workflow activates these skills under `.agents/skills/`. Remove or update
 the workflow to change them. Do not deactivate them like normal root skills.
@@ -135,13 +173,14 @@ The current section templates are:
 - `sections/promotion-to-design`
 - `sections/reviewed-context`
 - `sections/risks`
+- `sections/security-review`
 - `sections/task`
 - `sections/verification`
 
-The default plan template includes a reusable completion checklist section.
-That checklist makes closeout work visible in the plan, while the
-`plan-complete` skill still enforces completion requirements if the local plan
-template was edited.
+The default plan template includes reusable security-review and completion
+checklist sections. Those sections make closeout work visible in the plan,
+while the `plan-complete` skill still enforces completion requirements if the
+local plan template was edited.
 
 Projects can publish editable copies with `aix templates publish` after the
 workflow is installed. Published copies belong under `.agents/templates/` and

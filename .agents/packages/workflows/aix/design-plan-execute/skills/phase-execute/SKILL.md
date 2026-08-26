@@ -18,6 +18,41 @@ phase. It sequences task work, owns phase-level integration, reviews
 verification evidence and documentation impact after each task, tracks risks,
 and does not bypass `task-execute`.
 
+## Role Collaboration
+
+`phase-execute` owns phase sequencing, integration review, verification
+evidence review, documentation impact, risk tracking, and the decision to stop
+or continue within the selected phase. Roles can supply bounded specialist
+judgment, but they do not own task execution, command execution, plan status,
+or final phase completion decisions.
+
+When `.agents/roles/quality-engineer.md` exists and the phase has meaningful
+verification, regression, manual validation, or residual-risk questions, use
+`delegate-to-role` or a prompt-overlay delegation to request bounded quality
+input. Good triggers include cross-task regression risk, integration checks,
+phase-level success criteria, skipped checks, manual validation evidence,
+validation gaps, or whether a missing check should become a normal task.
+
+Fold returned evidence into phase verification, task ordering, validation
+gaps, residual risk, follow-on tasks, or closeout notes as appropriate. Do not
+require `quality-engineer` for direct use. If the role is unavailable or the
+host cannot delegate, continue phase execution yourself by checking the same
+verification and regression concerns.
+
+When `.agents/roles/implementation-engineer.md` exists and phase execution
+depends on task slicing, changed-area ownership, dependency order, integration
+risk, documentation impact, or whether the next task is ready for
+`task-execute`, use `delegate-to-role` or a prompt-overlay delegation to
+request bounded implementation input.
+
+Fold returned evidence into task ordering, task boundaries, changed-file
+expectations, implementation notes, verification handoff, documentation
+impact, residual risk, follow-on tasks, or phase closeout notes as
+appropriate. Do not require `implementation-engineer` for direct use. If the
+role is unavailable or the host cannot delegate, continue phase execution
+yourself by checking the same implementation readiness and sequencing
+concerns.
+
 ## 1. Orient
 
 1. Resolve the plan file using `Active Plan Resolution` in

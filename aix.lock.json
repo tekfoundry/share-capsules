@@ -5,6 +5,83 @@
       "kind": "skill",
       "source": "aix",
       "sourceType": "git",
+      "sourceUrl": "https://github.com/tekfoundry/ai-extensions.git",
+      "requestedRef": "master",
+      "resolvedCommit": "bfba7160319a9e9c287acc9acb97fd91f77a623d",
+      "sourcePath": "discover-skill",
+      "packagePath": ".agents/packages/skills/aix/discover-skill",
+      "activationPath": ".agents/skills/discover-skill",
+      "originalName": "discover-skill",
+      "activeName": "discover-skill",
+      "requested": true,
+      "packageFiles": [
+        {
+          "path": "known-sources.json",
+          "sha256": "526e87ca945f5e7d91b4589bfd38d46ebe35b66a2c75b00d20ab14a58a1fee5c"
+        },
+        {
+          "path": "README.md",
+          "sha256": "dbcb43fdd8ba8c0e26fadc100fe5a7d4d109bf05783b6d08eb3968a6f94b8d49"
+        },
+        {
+          "path": "SKILL.md",
+          "sha256": "942377aed594797204dc3a0a679419650f2af3bc5effc1023141e64ca4a11104"
+        }
+      ],
+      "activeFiles": [
+        {
+          "path": "known-sources.json",
+          "sha256": "526e87ca945f5e7d91b4589bfd38d46ebe35b66a2c75b00d20ab14a58a1fee5c"
+        },
+        {
+          "path": "README.md",
+          "sha256": "dbcb43fdd8ba8c0e26fadc100fe5a7d4d109bf05783b6d08eb3968a6f94b8d49"
+        },
+        {
+          "path": "SKILL.md",
+          "sha256": "942377aed594797204dc3a0a679419650f2af3bc5effc1023141e64ca4a11104"
+        }
+      ]
+    },
+    {
+      "kind": "skill",
+      "source": "aix",
+      "sourceType": "git",
+      "sourcePath": "skills/brainstorming-skill",
+      "packagePath": ".agents/packages/workflows/aix/design-plan-execute/skills/brainstorming-skill",
+      "activationPath": ".agents/skills/brainstorming-skill",
+      "originalName": "brainstorming-skill",
+      "activeName": "brainstorming-skill",
+      "requested": false,
+      "owner": {
+        "kind": "workflow",
+        "name": "design-plan-execute"
+      },
+      "packageFiles": [
+        {
+          "path": "README.md",
+          "sha256": "f09f60a3227ca2fa98b4eb5723d6e430146c391a364c1786f4fd384cff674e16"
+        },
+        {
+          "path": "SKILL.md",
+          "sha256": "92925c881951eac2e2b68e41a01772a7033663469b9c78c61d928392e8cfd1fb"
+        }
+      ],
+      "activeFiles": [
+        {
+          "path": "README.md",
+          "sha256": "f09f60a3227ca2fa98b4eb5723d6e430146c391a364c1786f4fd384cff674e16"
+        },
+        {
+          "path": "SKILL.md",
+          "sha256": "92925c881951eac2e2b68e41a01772a7033663469b9c78c61d928392e8cfd1fb"
+        }
+      ]
+    },
+    {
+      "kind": "skill",
+      "source": "aix",
+      "sourceType": "git",
       "sourcePath": "skills/code-review-refactor",
       "packagePath": ".agents/packages/workflows/aix/design-plan-execute/skills/code-review-refactor",
       "activationPath": ".agents/skills/code-review-refactor",
@@ -18,21 +95,56 @@
       "packageFiles": [
         {
           "path": "README.md",
-          "sha256": "5227a1697333d7ca843ec06d48f2951049ef2d6fc0da7a3e9e2a811409c2c60c"
+          "sha256": "0fd18bed20458fe8ca3a49f2b12aa9fb7977bad366092e7f0b0e7abf73249972"
         },
         {
           "path": "SKILL.md",
-          "sha256": "656f1ac64ad73e5d714a602896d449d4d2445d477f1a76925d705fda231f52b3"
+          "sha256": "6e2bd2a386d2e4075aed2267310750b7fa2aff29b068de18a0837e08fd36af0c"
         }
       ],
       "activeFiles": [
         {
           "path": "README.md",
-          "sha256": "5227a1697333d7ca843ec06d48f2951049ef2d6fc0da7a3e9e2a811409c2c60c"
+          "sha256": "0fd18bed20458fe8ca3a49f2b12aa9fb7977bad366092e7f0b0e7abf73249972"
         },
         {
           "path": "SKILL.md",
-          "sha256": "656f1ac64ad73e5d714a602896d449d4d2445d477f1a76925d705fda231f52b3"
+          "sha256": "6e2bd2a386d2e4075aed2267310750b7fa2aff29b068de18a0837e08fd36af0c"
+        }
+      ]
+    },
+    {
+      "kind": "skill",
+      "source": "aix",
+      "sourceType": "git",
+      "sourcePath": "skills/delegate-to-role",
+      "packagePath": ".agents/packages/workflows/aix/design-plan-execute/skills/delegate-to-role",
+      "activationPath": ".agents/skills/delegate-to-role",
+      "originalName": "delegate-to-role",
+      "activeName": "delegate-to-role",
+      "requested": false,
+      "owner": {
+        "kind": "workflow",
+        "name": "design-plan-execute"
+      },
+      "packageFiles": [
+        {
+          "path": "README.md",
+          "sha256": "f79ec334bc2475d54e847c41189af23e2bf5d51279fdb088b8b4e7c9fe85b3ba"
+        },
+        {
+          "path": "SKILL.md",
+          "sha256": "e91386508e7e09368ed97cd6cff51918f0d9d19a32e49e1dc15fdfc2ce68dc2a"
+        }
+      ],
+      "activeFiles": [
+        {
+          "path": "README.md",
+          "sha256": "f79ec334bc2475d54e847c41189af23e2bf5d51279fdb088b8b4e7c9fe85b3ba"
+        },
+        {
+          "path": "SKILL.md",
+          "sha256": "e91386508e7e09368ed97cd6cff51918f0d9d19a32e49e1dc15fdfc2ce68dc2a"
         }
       ]
     },
@@ -57,11 +169,11 @@
         },
         {
           "path": "README.md",
-          "sha256": "1be78d7222e58334191546bb683d22f4791ec94f3eee1892c4ae56e7fa4a82c1"
+          "sha256": "c684dc91013cedbb8bea77bf2d9ad4617ed9474b8773d6820f60acc7c29fcd75"
         },
         {
           "path": "SKILL.md",
-          "sha256": "9b6a2acbef854994a090a9806f977164e62db18253667686cd3d4a0c0e8a47e9"
+          "sha256": "3d1e29481304fbe8bc80c0c01eb7d196a131877c8e58fc7693280cde387b2d44"
         }
       ],
       "activeFiles": [
@@ -71,11 +183,11 @@
         },
         {
           "path": "README.md",
-          "sha256": "1be78d7222e58334191546bb683d22f4791ec94f3eee1892c4ae56e7fa4a82c1"
+          "sha256": "c684dc91013cedbb8bea77bf2d9ad4617ed9474b8773d6820f60acc7c29fcd75"
         },
         {
           "path": "SKILL.md",
-          "sha256": "9b6a2acbef854994a090a9806f977164e62db18253667686cd3d4a0c0e8a47e9"
+          "sha256": "3d1e29481304fbe8bc80c0c01eb7d196a131877c8e58fc7693280cde387b2d44"
         }
       ]
     },
@@ -100,11 +212,11 @@
         },
         {
           "path": "README.md",
-          "sha256": "45bd559647ccc67a1d6a0f35b1a5ffaddc107927f7e3e5620a2d45ec208ac009"
+          "sha256": "e3dd1f4b9a258aba6e511e0d68ce46d69559bb778a13f8b8aa2526916bf775f2"
         },
         {
           "path": "SKILL.md",
-          "sha256": "d6d2a216f37bc6261242095a7db174640b2dba61547384c8168b7ecbd27ce61c"
+          "sha256": "d603eff2f1bdc285b35e3e8a47751112f0910ed6d94e119e0d572a0a0b039c50"
         }
       ],
       "activeFiles": [
@@ -114,11 +226,11 @@
         },
         {
           "path": "README.md",
-          "sha256": "45bd559647ccc67a1d6a0f35b1a5ffaddc107927f7e3e5620a2d45ec208ac009"
+          "sha256": "e3dd1f4b9a258aba6e511e0d68ce46d69559bb778a13f8b8aa2526916bf775f2"
         },
         {
           "path": "SKILL.md",
-          "sha256": "d6d2a216f37bc6261242095a7db174640b2dba61547384c8168b7ecbd27ce61c"
+          "sha256": "d603eff2f1bdc285b35e3e8a47751112f0910ed6d94e119e0d572a0a0b039c50"
         }
       ]
     },
@@ -143,11 +255,11 @@
         },
         {
           "path": "README.md",
-          "sha256": "26002be8a33426021926b39049c73ac8da403060856e3ff72ceb27da8d8773d6"
+          "sha256": "dfe7089a51bcd0a5dee31a24d31eefdda59520ad28f43601f0d854770faa025f"
         },
         {
           "path": "SKILL.md",
-          "sha256": "62e6ed6bc3b996da19b87723d2c6ebd2e0c92393d59b9e102752f926b95b0cae"
+          "sha256": "b817ea53ac95d159600f844d100bf2ef1f493697be0ce81c972172496769e285"
         }
       ],
       "activeFiles": [
@@ -157,11 +269,11 @@
         },
         {
           "path": "README.md",
-          "sha256": "26002be8a33426021926b39049c73ac8da403060856e3ff72ceb27da8d8773d6"
+          "sha256": "dfe7089a51bcd0a5dee31a24d31eefdda59520ad28f43601f0d854770faa025f"
         },
         {
           "path": "SKILL.md",
-          "sha256": "62e6ed6bc3b996da19b87723d2c6ebd2e0c92393d59b9e102752f926b95b0cae"
+          "sha256": "b817ea53ac95d159600f844d100bf2ef1f493697be0ce81c972172496769e285"
         }
       ]
     },
@@ -190,7 +302,7 @@
         },
         {
           "path": "SKILL.md",
-          "sha256": "d05ed6d9ca2b296149f5bb1fcf50861ef3b78e53623cc17681888adcf89196a8"
+          "sha256": "550d408cf61f8a8139a89e225dcdd991e7841ab99a9b78e5d93e54cb7f809d4d"
         }
       ],
       "activeFiles": [
@@ -204,7 +316,7 @@
         },
         {
           "path": "SKILL.md",
-          "sha256": "d05ed6d9ca2b296149f5bb1fcf50861ef3b78e53623cc17681888adcf89196a8"
+          "sha256": "550d408cf61f8a8139a89e225dcdd991e7841ab99a9b78e5d93e54cb7f809d4d"
         }
       ]
     },
@@ -272,11 +384,11 @@
         },
         {
           "path": "README.md",
-          "sha256": "9efab1125819d4f63710d75a4587e6c6b24574851115da7502d71676b980c40c"
+          "sha256": "99ba0ee70cf5feba489831739d3bfdee1ed5f5e04e3e286789edee343d32bb58"
         },
         {
           "path": "SKILL.md",
-          "sha256": "23b20d876d04e0dc892cf2ca6486131187649165039c26dc077882c2a8cbc9f1"
+          "sha256": "13018b5b1630dcf575942d860d11d9e4d46fe7bb639d046b9d8a43e4989f9bcb"
         }
       ],
       "activeFiles": [
@@ -286,11 +398,11 @@
         },
         {
           "path": "README.md",
-          "sha256": "9efab1125819d4f63710d75a4587e6c6b24574851115da7502d71676b980c40c"
+          "sha256": "99ba0ee70cf5feba489831739d3bfdee1ed5f5e04e3e286789edee343d32bb58"
         },
         {
           "path": "SKILL.md",
-          "sha256": "23b20d876d04e0dc892cf2ca6486131187649165039c26dc077882c2a8cbc9f1"
+          "sha256": "13018b5b1630dcf575942d860d11d9e4d46fe7bb639d046b9d8a43e4989f9bcb"
         }
       ]
     },
@@ -315,11 +427,11 @@
         },
         {
           "path": "README.md",
-          "sha256": "7364d5b84a718773c1270ce5e58f580f6424581c5e2ee01c63c4bc5c93f7e2aa"
+          "sha256": "22e27987f69d5140d952f013d213d591480ab4bf2f095dad94f7cd3557338453"
         },
         {
           "path": "SKILL.md",
-          "sha256": "330858c10f388d3803b8e05c751d78af605d6e35cb02bc0ac76111964feec18f"
+          "sha256": "96b85badefa5a2a2a1bcfb9d26a758bdf4b52f09d3ed3ac5f848c9a384193d25"
         }
       ],
       "activeFiles": [
@@ -329,11 +441,11 @@
         },
         {
           "path": "README.md",
-          "sha256": "7364d5b84a718773c1270ce5e58f580f6424581c5e2ee01c63c4bc5c93f7e2aa"
+          "sha256": "22e27987f69d5140d952f013d213d591480ab4bf2f095dad94f7cd3557338453"
         },
         {
           "path": "SKILL.md",
-          "sha256": "330858c10f388d3803b8e05c751d78af605d6e35cb02bc0ac76111964feec18f"
+          "sha256": "96b85badefa5a2a2a1bcfb9d26a758bdf4b52f09d3ed3ac5f848c9a384193d25"
         }
       ]
     },
@@ -405,7 +517,7 @@
         },
         {
           "path": "SKILL.md",
-          "sha256": "73d350079b2edb934c9372aea2db4d42bd08bab0d04b620efd4b4c882127047b"
+          "sha256": "afb32b440d99dad4a2f03ff04d6995f33506362406a46de70e588fa4609a96a3"
         }
       ],
       "activeFiles": [
@@ -419,7 +531,7 @@
         },
         {
           "path": "SKILL.md",
-          "sha256": "73d350079b2edb934c9372aea2db4d42bd08bab0d04b620efd4b4c882127047b"
+          "sha256": "afb32b440d99dad4a2f03ff04d6995f33506362406a46de70e588fa4609a96a3"
         }
       ]
     },
@@ -444,11 +556,11 @@
         },
         {
           "path": "README.md",
-          "sha256": "d92df873053a0595f6df24c7ba5609b2355a5b9ce555f8330a24789e90846143"
+          "sha256": "5221b191d091163bc8eafd4498752c10b0bc835bb75c269726a132edc0897985"
         },
         {
           "path": "SKILL.md",
-          "sha256": "69ed4451e630ae74eb8abcf04064228dd4f0ea7765cf5ba1396a62fe0d88e80b"
+          "sha256": "e24ffa98245d758f2e89f73a2b030fe4bcfb87708791296e52b6d532cc505a5a"
         }
       ],
       "activeFiles": [
@@ -458,11 +570,11 @@
         },
         {
           "path": "README.md",
-          "sha256": "d92df873053a0595f6df24c7ba5609b2355a5b9ce555f8330a24789e90846143"
+          "sha256": "5221b191d091163bc8eafd4498752c10b0bc835bb75c269726a132edc0897985"
         },
         {
           "path": "SKILL.md",
-          "sha256": "69ed4451e630ae74eb8abcf04064228dd4f0ea7765cf5ba1396a62fe0d88e80b"
+          "sha256": "e24ffa98245d758f2e89f73a2b030fe4bcfb87708791296e52b6d532cc505a5a"
         }
       ]
     },
@@ -487,11 +599,11 @@
         },
         {
           "path": "README.md",
-          "sha256": "5259916c42ec8c79c2448a701db1b284639e2f3ae38d7cbff8efd22f5e07743a"
+          "sha256": "3f9d1346de8a58959c26112c464ffb37381c5ae9177ec7ad86f2c485054e8e45"
         },
         {
           "path": "SKILL.md",
-          "sha256": "a1f1d901c799931ec52d159f59f6e8948002b0b681e8861fa06a0f3aa5c546f9"
+          "sha256": "a962dc345b5b25d3accc77378032f21505c098cc54c2a41ff233a502825006fb"
         }
       ],
       "activeFiles": [
@@ -501,11 +613,11 @@
         },
         {
           "path": "README.md",
-          "sha256": "5259916c42ec8c79c2448a701db1b284639e2f3ae38d7cbff8efd22f5e07743a"
+          "sha256": "3f9d1346de8a58959c26112c464ffb37381c5ae9177ec7ad86f2c485054e8e45"
         },
         {
           "path": "SKILL.md",
-          "sha256": "a1f1d901c799931ec52d159f59f6e8948002b0b681e8861fa06a0f3aa5c546f9"
+          "sha256": "a962dc345b5b25d3accc77378032f21505c098cc54c2a41ff233a502825006fb"
         }
       ]
     },
@@ -577,7 +689,7 @@
         },
         {
           "path": "SKILL.md",
-          "sha256": "99cb80fb2776a166ab2a03ffa5240dd449ac0ac08fc3eaf9ab799e1b4a4db47e"
+          "sha256": "350236a7317e8cbf4ba922b48fd04cbee7c6c16ea5f200bb137f9a580543223a"
         }
       ],
       "activeFiles": [
@@ -591,7 +703,7 @@
         },
         {
           "path": "SKILL.md",
-          "sha256": "99cb80fb2776a166ab2a03ffa5240dd449ac0ac08fc3eaf9ab799e1b4a4db47e"
+          "sha256": "350236a7317e8cbf4ba922b48fd04cbee7c6c16ea5f200bb137f9a580543223a"
         }
       ]
     },
@@ -616,11 +728,11 @@
         },
         {
           "path": "README.md",
-          "sha256": "4dd3df8ee2712719ab52babb5890e53dd4132e34c7244521de6be994accd1cd0"
+          "sha256": "82e09bbdefa17e766bd4fa8eb629d3a4c08e5afe66a65bf5f4de93a5e38f3e52"
         },
         {
           "path": "SKILL.md",
-          "sha256": "f139071a27618911c7b266c8b8d4ea2e2a5031e37534a170175ec4f808953d7e"
+          "sha256": "44540275aa58b63fb9a1c14b66cbf5a93176040f912e3543faab68667f095dc3"
         }
       ],
       "activeFiles": [
@@ -630,87 +742,256 @@
         },
         {
           "path": "README.md",
-          "sha256": "4dd3df8ee2712719ab52babb5890e53dd4132e34c7244521de6be994accd1cd0"
+          "sha256": "82e09bbdefa17e766bd4fa8eb629d3a4c08e5afe66a65bf5f4de93a5e38f3e52"
         },
         {
           "path": "SKILL.md",
-          "sha256": "f139071a27618911c7b266c8b8d4ea2e2a5031e37534a170175ec4f808953d7e"
+          "sha256": "44540275aa58b63fb9a1c14b66cbf5a93176040f912e3543faab68667f095dc3"
         }
       ]
-    },
+    }
+  ],
+  "roles": [
     {
-      "kind": "skill",
+      "kind": "role",
       "source": "aix",
       "sourceType": "git",
-      "sourceUrl": "https://github.com/tekfoundry/ai-extensions.git",
-      "requestedRef": "master",
-      "resolvedCommit": "f948cf243816a9f3dc82c8ccb8329c91207ec1ed",
-      "sourcePath": "brainstorming-skill",
-      "packagePath": ".agents/packages/skills/aix/brainstorming-skill",
-      "activationPath": ".agents/skills/brainstorming-skill",
-      "originalName": "brainstorming-skill",
-      "activeName": "brainstorming-skill",
-      "requested": true,
+      "sourcePath": "roles/project-dev/documentation-specialist.md",
+      "packagePath": ".agents/packages/workflows/aix/design-plan-execute/roles/project-dev/documentation-specialist.md",
+      "activationPath": ".agents/roles/documentation-specialist.md",
+      "originalName": "documentation-specialist",
+      "activeName": "documentation-specialist",
+      "requested": false,
+      "owner": {
+        "kind": "workflow",
+        "name": "design-plan-execute"
+      },
       "packageFiles": [
         {
-          "path": "README.md",
-          "sha256": "f4c02eafbcf5ca21b131249c93831b4d8803c650ad252020f8c2f1ccb0cd5b20"
-        },
-        {
-          "path": "SKILL.md",
-          "sha256": "78b2bd1ce2d1648552476d6396b07298d77ae3273b4f8906a60dcb9e86d0c761"
+          "path": "documentation-specialist.md",
+          "sha256": "a93b5604349bf67e118f8f69b702a647fdd095daac8d5289c1aac6066e32908c"
         }
       ],
       "activeFiles": [
         {
-          "path": "README.md",
-          "sha256": "f4c02eafbcf5ca21b131249c93831b4d8803c650ad252020f8c2f1ccb0cd5b20"
-        },
-        {
-          "path": "SKILL.md",
-          "sha256": "78b2bd1ce2d1648552476d6396b07298d77ae3273b4f8906a60dcb9e86d0c761"
+          "path": "documentation-specialist.md",
+          "sha256": "a93b5604349bf67e118f8f69b702a647fdd095daac8d5289c1aac6066e32908c"
         }
       ]
     },
     {
-      "kind": "skill",
+      "kind": "role",
       "source": "aix",
       "sourceType": "git",
-      "sourceUrl": "https://github.com/tekfoundry/ai-extensions.git",
-      "requestedRef": "master",
-      "resolvedCommit": "f948cf243816a9f3dc82c8ccb8329c91207ec1ed",
-      "sourcePath": "discover-skill",
-      "packagePath": ".agents/packages/skills/aix/discover-skill",
-      "activationPath": ".agents/skills/discover-skill",
-      "originalName": "discover-skill",
-      "activeName": "discover-skill",
-      "requested": true,
+      "sourcePath": "roles/project-dev/implementation-engineer.md",
+      "packagePath": ".agents/packages/workflows/aix/design-plan-execute/roles/project-dev/implementation-engineer.md",
+      "activationPath": ".agents/roles/implementation-engineer.md",
+      "originalName": "implementation-engineer",
+      "activeName": "implementation-engineer",
+      "requested": false,
+      "owner": {
+        "kind": "workflow",
+        "name": "design-plan-execute"
+      },
       "packageFiles": [
         {
-          "path": "known-sources.json",
-          "sha256": "526e87ca945f5e7d91b4589bfd38d46ebe35b66a2c75b00d20ab14a58a1fee5c"
-        },
-        {
-          "path": "README.md",
-          "sha256": "dbcb43fdd8ba8c0e26fadc100fe5a7d4d109bf05783b6d08eb3968a6f94b8d49"
-        },
-        {
-          "path": "SKILL.md",
-          "sha256": "942377aed594797204dc3a0a679419650f2af3bc5effc1023141e64ca4a11104"
+          "path": "implementation-engineer.md",
+          "sha256": "3c94e05886ab110955705399f484527a83b16f56ae0626abb86e6a5195c31d36"
         }
       ],
       "activeFiles": [
         {
-          "path": "known-sources.json",
-          "sha256": "526e87ca945f5e7d91b4589bfd38d46ebe35b66a2c75b00d20ab14a58a1fee5c"
-        },
+          "path": "implementation-engineer.md",
+          "sha256": "3c94e05886ab110955705399f484527a83b16f56ae0626abb86e6a5195c31d36"
+        }
+      ]
+    },
+    {
+      "kind": "role",
+      "source": "aix",
+      "sourceType": "git",
+      "sourcePath": "roles/project-dev/product-designer.md",
+      "packagePath": ".agents/packages/workflows/aix/design-plan-execute/roles/project-dev/product-designer.md",
+      "activationPath": ".agents/roles/product-designer.md",
+      "originalName": "product-designer",
+      "activeName": "product-designer",
+      "requested": false,
+      "owner": {
+        "kind": "workflow",
+        "name": "design-plan-execute"
+      },
+      "packageFiles": [
         {
-          "path": "README.md",
-          "sha256": "dbcb43fdd8ba8c0e26fadc100fe5a7d4d109bf05783b6d08eb3968a6f94b8d49"
-        },
+          "path": "product-designer.md",
+          "sha256": "6f1122e74847fe47824151ff3878cbc15c84649cde96e85c537b42e782de8f99"
+        }
+      ],
+      "activeFiles": [
         {
-          "path": "SKILL.md",
-          "sha256": "942377aed594797204dc3a0a679419650f2af3bc5effc1023141e64ca4a11104"
+          "path": "product-designer.md",
+          "sha256": "6f1122e74847fe47824151ff3878cbc15c84649cde96e85c537b42e782de8f99"
+        }
+      ]
+    },
+    {
+      "kind": "role",
+      "source": "aix",
+      "sourceType": "git",
+      "sourcePath": "roles/project-dev/product-strategist.md",
+      "packagePath": ".agents/packages/workflows/aix/design-plan-execute/roles/project-dev/product-strategist.md",
+      "activationPath": ".agents/roles/product-strategist.md",
+      "originalName": "product-strategist",
+      "activeName": "product-strategist",
+      "requested": false,
+      "owner": {
+        "kind": "workflow",
+        "name": "design-plan-execute"
+      },
+      "packageFiles": [
+        {
+          "path": "product-strategist.md",
+          "sha256": "bfdbd1253504d64a6f5e7262b94c22925d7b339a8ef987ffcf1380615b44e9a5"
+        }
+      ],
+      "activeFiles": [
+        {
+          "path": "product-strategist.md",
+          "sha256": "bfdbd1253504d64a6f5e7262b94c22925d7b339a8ef987ffcf1380615b44e9a5"
+        }
+      ]
+    },
+    {
+      "kind": "role",
+      "source": "aix",
+      "sourceType": "git",
+      "sourcePath": "roles/project-dev/quality-engineer.md",
+      "packagePath": ".agents/packages/workflows/aix/design-plan-execute/roles/project-dev/quality-engineer.md",
+      "activationPath": ".agents/roles/quality-engineer.md",
+      "originalName": "quality-engineer",
+      "activeName": "quality-engineer",
+      "requested": false,
+      "owner": {
+        "kind": "workflow",
+        "name": "design-plan-execute"
+      },
+      "packageFiles": [
+        {
+          "path": "quality-engineer.md",
+          "sha256": "d58879af70fecafbf416ad2eecfa24a386d7c1aba924b4fa2b50a034e4846301"
+        }
+      ],
+      "activeFiles": [
+        {
+          "path": "quality-engineer.md",
+          "sha256": "d58879af70fecafbf416ad2eecfa24a386d7c1aba924b4fa2b50a034e4846301"
+        }
+      ]
+    },
+    {
+      "kind": "role",
+      "source": "aix",
+      "sourceType": "git",
+      "sourcePath": "roles/project-dev/requirements-engineer.md",
+      "packagePath": ".agents/packages/workflows/aix/design-plan-execute/roles/project-dev/requirements-engineer.md",
+      "activationPath": ".agents/roles/requirements-engineer.md",
+      "originalName": "requirements-engineer",
+      "activeName": "requirements-engineer",
+      "requested": false,
+      "owner": {
+        "kind": "workflow",
+        "name": "design-plan-execute"
+      },
+      "packageFiles": [
+        {
+          "path": "requirements-engineer.md",
+          "sha256": "f255a1bf3d8434c376fdbef5708cf312d3b2b292c16744648f40c25633942ee6"
+        }
+      ],
+      "activeFiles": [
+        {
+          "path": "requirements-engineer.md",
+          "sha256": "f255a1bf3d8434c376fdbef5708cf312d3b2b292c16744648f40c25633942ee6"
+        }
+      ]
+    },
+    {
+      "kind": "role",
+      "source": "aix",
+      "sourceType": "git",
+      "sourcePath": "roles/project-dev/security-reviewer.md",
+      "packagePath": ".agents/packages/workflows/aix/design-plan-execute/roles/project-dev/security-reviewer.md",
+      "activationPath": ".agents/roles/security-reviewer.md",
+      "originalName": "security-reviewer",
+      "activeName": "security-reviewer",
+      "requested": false,
+      "owner": {
+        "kind": "workflow",
+        "name": "design-plan-execute"
+      },
+      "packageFiles": [
+        {
+          "path": "security-reviewer.md",
+          "sha256": "8da20bbaa67a96bb571c100cc22f1946b9a9394768e21d7571bb1642c92ac2df"
+        }
+      ],
+      "activeFiles": [
+        {
+          "path": "security-reviewer.md",
+          "sha256": "8da20bbaa67a96bb571c100cc22f1946b9a9394768e21d7571bb1642c92ac2df"
+        }
+      ]
+    },
+    {
+      "kind": "role",
+      "source": "aix",
+      "sourceType": "git",
+      "sourcePath": "roles/project-dev/technical-architect.md",
+      "packagePath": ".agents/packages/workflows/aix/design-plan-execute/roles/project-dev/technical-architect.md",
+      "activationPath": ".agents/roles/technical-architect.md",
+      "originalName": "technical-architect",
+      "activeName": "technical-architect",
+      "requested": false,
+      "owner": {
+        "kind": "workflow",
+        "name": "design-plan-execute"
+      },
+      "packageFiles": [
+        {
+          "path": "technical-architect.md",
+          "sha256": "2c8e65538291d3a7357180617fba85fcf82543d94351532d1ba95ab62de84b79"
+        }
+      ],
+      "activeFiles": [
+        {
+          "path": "technical-architect.md",
+          "sha256": "2c8e65538291d3a7357180617fba85fcf82543d94351532d1ba95ab62de84b79"
+        }
+      ]
+    },
+    {
+      "kind": "role",
+      "source": "aix",
+      "sourceType": "git",
+      "sourcePath": "roles/project-dev/ux-writer.md",
+      "packagePath": ".agents/packages/workflows/aix/design-plan-execute/roles/project-dev/ux-writer.md",
+      "activationPath": ".agents/roles/ux-writer.md",
+      "originalName": "ux-writer",
+      "activeName": "ux-writer",
+      "requested": false,
+      "owner": {
+        "kind": "workflow",
+        "name": "design-plan-execute"
+      },
+      "packageFiles": [
+        {
+          "path": "ux-writer.md",
+          "sha256": "8008b993c93c208d3bf1dd5c46ac0e24d432190eafbad0aa9c2b97fb1a26d7a7"
+        }
+      ],
+      "activeFiles": [
+        {
+          "path": "ux-writer.md",
+          "sha256": "8008b993c93c208d3bf1dd5c46ac0e24d432190eafbad0aa9c2b97fb1a26d7a7"
         }
       ]
     }
@@ -722,7 +1003,7 @@
       "sourceType": "git",
       "sourceUrl": "https://github.com/tekfoundry/ai-extensions.git",
       "requestedRef": "master",
-      "resolvedCommit": "f948cf243816a9f3dc82c8ccb8329c91207ec1ed",
+      "resolvedCommit": "bfba7160319a9e9c287acc9acb97fd91f77a623d",
       "sourcePath": "aix/workflows/design-plan-execute",
       "packagePath": ".agents/packages/workflows/aix/design-plan-execute",
       "name": "design-plan-execute",
@@ -731,7 +1012,7 @@
         {
           "sourcePath": "README.md",
           "targetPath": ".agents/README.md",
-          "sha256": "fa9b9c3c68b39013e1edc96d11d13deb397711794e46f3d5c53daa5ee18ce8b8"
+          "sha256": "3447f6f3818134306466bca3bba2ebc5a8087c10e49b96855fecf8c8c28ff62e"
         },
         {
           "sourcePath": "plan-example.md",
@@ -756,8 +1037,16 @@
       },
       "skills": [
         {
+          "sourcePath": "skills/brainstorming-skill",
+          "activeName": "brainstorming-skill"
+        },
+        {
           "sourcePath": "skills/code-review-refactor",
           "activeName": "code-review-refactor"
+        },
+        {
+          "sourcePath": "skills/delegate-to-role",
+          "activeName": "delegate-to-role"
         },
         {
           "sourcePath": "skills/design-create",
@@ -816,6 +1105,44 @@
           "activeName": "work-verify"
         }
       ],
+      "roles": [
+        {
+          "sourcePath": "roles/project-dev/documentation-specialist.md",
+          "activeName": "documentation-specialist"
+        },
+        {
+          "sourcePath": "roles/project-dev/implementation-engineer.md",
+          "activeName": "implementation-engineer"
+        },
+        {
+          "sourcePath": "roles/project-dev/product-designer.md",
+          "activeName": "product-designer"
+        },
+        {
+          "sourcePath": "roles/project-dev/product-strategist.md",
+          "activeName": "product-strategist"
+        },
+        {
+          "sourcePath": "roles/project-dev/quality-engineer.md",
+          "activeName": "quality-engineer"
+        },
+        {
+          "sourcePath": "roles/project-dev/requirements-engineer.md",
+          "activeName": "requirements-engineer"
+        },
+        {
+          "sourcePath": "roles/project-dev/security-reviewer.md",
+          "activeName": "security-reviewer"
+        },
+        {
+          "sourcePath": "roles/project-dev/technical-architect.md",
+          "activeName": "technical-architect"
+        },
+        {
+          "sourcePath": "roles/project-dev/ux-writer.md",
+          "activeName": "ux-writer"
+        }
+      ],
       "templates": [
         {
           "path": "templates/competitive-analysis.md",
@@ -835,7 +1162,7 @@
         },
         {
           "path": "templates/plan.md",
-          "sha256": "d9369993009fb597e1665ce00d9e564e4e23c85a7c48e99cddbeddb7183bacd5"
+          "sha256": "87d21d45d977dd29d240c9975a79f685113cde9453f744c7afcfd7561de436ef"
         },
         {
           "path": "templates/product-summary.md",
@@ -843,7 +1170,7 @@
         },
         {
           "path": "templates/sections/completion-checklist.md",
-          "sha256": "9c0957755b02fb3984f0b9abb6350e7e2f955079e020d8786f303e5998eaff1a"
+          "sha256": "9c5f63abb68c4f63c8f6141d9738026e5d7a5833f4d7e47c7111d4d517fcdf7d"
         },
         {
           "path": "templates/sections/execution-note.md",
@@ -864,6 +1191,10 @@
         {
           "path": "templates/sections/risks.md",
           "sha256": "e34efc479e0290d6350721295047b4a55828ab5c07ab16786e55f92f4f0717c3"
+        },
+        {
+          "path": "templates/sections/security-review.md",
+          "sha256": "784466d12fe4668f3cfdedbbd9d9dde54974225ff0a121adef1ca042a832f713"
         },
         {
           "path": "templates/sections/task.md",
@@ -889,15 +1220,67 @@
         },
         {
           "path": "README.md",
-          "sha256": "fa9b9c3c68b39013e1edc96d11d13deb397711794e46f3d5c53daa5ee18ce8b8"
+          "sha256": "3447f6f3818134306466bca3bba2ebc5a8087c10e49b96855fecf8c8c28ff62e"
+        },
+        {
+          "path": "roles/project-dev/documentation-specialist.md",
+          "sha256": "a93b5604349bf67e118f8f69b702a647fdd095daac8d5289c1aac6066e32908c"
+        },
+        {
+          "path": "roles/project-dev/implementation-engineer.md",
+          "sha256": "3c94e05886ab110955705399f484527a83b16f56ae0626abb86e6a5195c31d36"
+        },
+        {
+          "path": "roles/project-dev/product-designer.md",
+          "sha256": "6f1122e74847fe47824151ff3878cbc15c84649cde96e85c537b42e782de8f99"
+        },
+        {
+          "path": "roles/project-dev/product-strategist.md",
+          "sha256": "bfdbd1253504d64a6f5e7262b94c22925d7b339a8ef987ffcf1380615b44e9a5"
+        },
+        {
+          "path": "roles/project-dev/quality-engineer.md",
+          "sha256": "d58879af70fecafbf416ad2eecfa24a386d7c1aba924b4fa2b50a034e4846301"
+        },
+        {
+          "path": "roles/project-dev/requirements-engineer.md",
+          "sha256": "f255a1bf3d8434c376fdbef5708cf312d3b2b292c16744648f40c25633942ee6"
+        },
+        {
+          "path": "roles/project-dev/security-reviewer.md",
+          "sha256": "8da20bbaa67a96bb571c100cc22f1946b9a9394768e21d7571bb1642c92ac2df"
+        },
+        {
+          "path": "roles/project-dev/technical-architect.md",
+          "sha256": "2c8e65538291d3a7357180617fba85fcf82543d94351532d1ba95ab62de84b79"
+        },
+        {
+          "path": "roles/project-dev/ux-writer.md",
+          "sha256": "8008b993c93c208d3bf1dd5c46ac0e24d432190eafbad0aa9c2b97fb1a26d7a7"
+        },
+        {
+          "path": "skills/brainstorming-skill/README.md",
+          "sha256": "f09f60a3227ca2fa98b4eb5723d6e430146c391a364c1786f4fd384cff674e16"
+        },
+        {
+          "path": "skills/brainstorming-skill/SKILL.md",
+          "sha256": "92925c881951eac2e2b68e41a01772a7033663469b9c78c61d928392e8cfd1fb"
         },
         {
           "path": "skills/code-review-refactor/README.md",
-          "sha256": "5227a1697333d7ca843ec06d48f2951049ef2d6fc0da7a3e9e2a811409c2c60c"
+          "sha256": "0fd18bed20458fe8ca3a49f2b12aa9fb7977bad366092e7f0b0e7abf73249972"
         },
         {
           "path": "skills/code-review-refactor/SKILL.md",
-          "sha256": "656f1ac64ad73e5d714a602896d449d4d2445d477f1a76925d705fda231f52b3"
+          "sha256": "6e2bd2a386d2e4075aed2267310750b7fa2aff29b068de18a0837e08fd36af0c"
+        },
+        {
+          "path": "skills/delegate-to-role/README.md",
+          "sha256": "f79ec334bc2475d54e847c41189af23e2bf5d51279fdb088b8b4e7c9fe85b3ba"
+        },
+        {
+          "path": "skills/delegate-to-role/SKILL.md",
+          "sha256": "e91386508e7e09368ed97cd6cff51918f0d9d19a32e49e1dc15fdfc2ce68dc2a"
         },
         {
           "path": "skills/design-create/agents/openai.yaml",
@@ -905,11 +1288,11 @@
         },
         {
           "path": "skills/design-create/README.md",
-          "sha256": "1be78d7222e58334191546bb683d22f4791ec94f3eee1892c4ae56e7fa4a82c1"
+          "sha256": "c684dc91013cedbb8bea77bf2d9ad4617ed9474b8773d6820f60acc7c29fcd75"
         },
         {
           "path": "skills/design-create/SKILL.md",
-          "sha256": "9b6a2acbef854994a090a9806f977164e62db18253667686cd3d4a0c0e8a47e9"
+          "sha256": "3d1e29481304fbe8bc80c0c01eb7d196a131877c8e58fc7693280cde387b2d44"
         },
         {
           "path": "skills/design-promote/agents/openai.yaml",
@@ -917,11 +1300,11 @@
         },
         {
           "path": "skills/design-promote/README.md",
-          "sha256": "45bd559647ccc67a1d6a0f35b1a5ffaddc107927f7e3e5620a2d45ec208ac009"
+          "sha256": "e3dd1f4b9a258aba6e511e0d68ce46d69559bb778a13f8b8aa2526916bf775f2"
         },
         {
           "path": "skills/design-promote/SKILL.md",
-          "sha256": "d6d2a216f37bc6261242095a7db174640b2dba61547384c8168b7ecbd27ce61c"
+          "sha256": "d603eff2f1bdc285b35e3e8a47751112f0910ed6d94e119e0d572a0a0b039c50"
         },
         {
           "path": "skills/documentation-review/agents/openai.yaml",
@@ -929,11 +1312,11 @@
         },
         {
           "path": "skills/documentation-review/README.md",
-          "sha256": "26002be8a33426021926b39049c73ac8da403060856e3ff72ceb27da8d8773d6"
+          "sha256": "dfe7089a51bcd0a5dee31a24d31eefdda59520ad28f43601f0d854770faa025f"
         },
         {
           "path": "skills/documentation-review/SKILL.md",
-          "sha256": "62e6ed6bc3b996da19b87723d2c6ebd2e0c92393d59b9e102752f926b95b0cae"
+          "sha256": "b817ea53ac95d159600f844d100bf2ef1f493697be0ce81c972172496769e285"
         },
         {
           "path": "skills/phase-execute/agents/openai.yaml",
@@ -945,7 +1328,7 @@
         },
         {
           "path": "skills/phase-execute/SKILL.md",
-          "sha256": "d05ed6d9ca2b296149f5bb1fcf50861ef3b78e53623cc17681888adcf89196a8"
+          "sha256": "550d408cf61f8a8139a89e225dcdd991e7841ab99a9b78e5d93e54cb7f809d4d"
         },
         {
           "path": "skills/plan-activate/agents/openai.yaml",
@@ -965,11 +1348,11 @@
         },
         {
           "path": "skills/plan-complete/README.md",
-          "sha256": "9efab1125819d4f63710d75a4587e6c6b24574851115da7502d71676b980c40c"
+          "sha256": "99ba0ee70cf5feba489831739d3bfdee1ed5f5e04e3e286789edee343d32bb58"
         },
         {
           "path": "skills/plan-complete/SKILL.md",
-          "sha256": "23b20d876d04e0dc892cf2ca6486131187649165039c26dc077882c2a8cbc9f1"
+          "sha256": "13018b5b1630dcf575942d860d11d9e4d46fe7bb639d046b9d8a43e4989f9bcb"
         },
         {
           "path": "skills/plan-create/agents/openai.yaml",
@@ -977,11 +1360,11 @@
         },
         {
           "path": "skills/plan-create/README.md",
-          "sha256": "7364d5b84a718773c1270ce5e58f580f6424581c5e2ee01c63c4bc5c93f7e2aa"
+          "sha256": "22e27987f69d5140d952f013d213d591480ab4bf2f095dad94f7cd3557338453"
         },
         {
           "path": "skills/plan-create/SKILL.md",
-          "sha256": "330858c10f388d3803b8e05c751d78af605d6e35cb02bc0ac76111964feec18f"
+          "sha256": "96b85badefa5a2a2a1bcfb9d26a758bdf4b52f09d3ed3ac5f848c9a384193d25"
         },
         {
           "path": "skills/plan-defer/agents/openai.yaml",
@@ -1005,7 +1388,7 @@
         },
         {
           "path": "skills/plan-execute/SKILL.md",
-          "sha256": "73d350079b2edb934c9372aea2db4d42bd08bab0d04b620efd4b4c882127047b"
+          "sha256": "afb32b440d99dad4a2f03ff04d6995f33506362406a46de70e588fa4609a96a3"
         },
         {
           "path": "skills/plan-review/agents/openai.yaml",
@@ -1013,11 +1396,11 @@
         },
         {
           "path": "skills/plan-review/README.md",
-          "sha256": "d92df873053a0595f6df24c7ba5609b2355a5b9ce555f8330a24789e90846143"
+          "sha256": "5221b191d091163bc8eafd4498752c10b0bc835bb75c269726a132edc0897985"
         },
         {
           "path": "skills/plan-review/SKILL.md",
-          "sha256": "69ed4451e630ae74eb8abcf04064228dd4f0ea7765cf5ba1396a62fe0d88e80b"
+          "sha256": "e24ffa98245d758f2e89f73a2b030fe4bcfb87708791296e52b6d532cc505a5a"
         },
         {
           "path": "skills/plan-update/agents/openai.yaml",
@@ -1025,11 +1408,11 @@
         },
         {
           "path": "skills/plan-update/README.md",
-          "sha256": "5259916c42ec8c79c2448a701db1b284639e2f3ae38d7cbff8efd22f5e07743a"
+          "sha256": "3f9d1346de8a58959c26112c464ffb37381c5ae9177ec7ad86f2c485054e8e45"
         },
         {
           "path": "skills/plan-update/SKILL.md",
-          "sha256": "a1f1d901c799931ec52d159f59f6e8948002b0b681e8861fa06a0f3aa5c546f9"
+          "sha256": "a962dc345b5b25d3accc77378032f21505c098cc54c2a41ff233a502825006fb"
         },
         {
           "path": "skills/project-init/agents/openai.yaml",
@@ -1053,7 +1436,7 @@
         },
         {
           "path": "skills/task-execute/SKILL.md",
-          "sha256": "99cb80fb2776a166ab2a03ffa5240dd449ac0ac08fc3eaf9ab799e1b4a4db47e"
+          "sha256": "350236a7317e8cbf4ba922b48fd04cbee7c6c16ea5f200bb137f9a580543223a"
         },
         {
           "path": "skills/work-verify/agents/openai.yaml",
@@ -1061,11 +1444,11 @@
         },
         {
           "path": "skills/work-verify/README.md",
-          "sha256": "4dd3df8ee2712719ab52babb5890e53dd4132e34c7244521de6be994accd1cd0"
+          "sha256": "82e09bbdefa17e766bd4fa8eb629d3a4c08e5afe66a65bf5f4de93a5e38f3e52"
         },
         {
           "path": "skills/work-verify/SKILL.md",
-          "sha256": "f139071a27618911c7b266c8b8d4ea2e2a5031e37534a170175ec4f808953d7e"
+          "sha256": "44540275aa58b63fb9a1c14b66cbf5a93176040f912e3543faab68667f095dc3"
         },
         {
           "path": "templates/competitive-analysis.md",
@@ -1085,7 +1468,7 @@
         },
         {
           "path": "templates/plan.md",
-          "sha256": "d9369993009fb597e1665ce00d9e564e4e23c85a7c48e99cddbeddb7183bacd5"
+          "sha256": "87d21d45d977dd29d240c9975a79f685113cde9453f744c7afcfd7561de436ef"
         },
         {
           "path": "templates/product-summary.md",
@@ -1093,7 +1476,7 @@
         },
         {
           "path": "templates/sections/completion-checklist.md",
-          "sha256": "9c0957755b02fb3984f0b9abb6350e7e2f955079e020d8786f303e5998eaff1a"
+          "sha256": "9c5f63abb68c4f63c8f6141d9738026e5d7a5833f4d7e47c7111d4d517fcdf7d"
         },
         {
           "path": "templates/sections/execution-note.md",
@@ -1114,6 +1497,10 @@
         {
           "path": "templates/sections/risks.md",
           "sha256": "e34efc479e0290d6350721295047b4a55828ab5c07ab16786e55f92f4f0717c3"
+        },
+        {
+          "path": "templates/sections/security-review.md",
+          "sha256": "784466d12fe4668f3cfdedbbd9d9dde54974225ff0a121adef1ca042a832f713"
         },
         {
           "path": "templates/sections/task.md",

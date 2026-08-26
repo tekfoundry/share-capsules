@@ -10,6 +10,28 @@ It sequences phases and owns integration, verification review, documentation
 impact, risk tracking, and closeout. It does not bypass `phase-execute` or
 `task-execute`.
 
+## Role Collaboration
+
+`plan-execute` owns plan-level phase sequencing, integration review,
+verification evidence review, documentation impact, risk tracking, and the
+decision to stop or continue. Roles can supply bounded specialist judgment,
+but they do not own phase execution, task execution, command execution, plan
+status, or final plan completion decisions.
+
+When `.agents/roles/implementation-engineer.md` exists and whole-plan
+execution depends on phase order, cross-phase dependencies, changed-area
+ownership, integration risk, documentation impact, or whether the next phase
+is ready for `phase-execute`, use `delegate-to-role` or a prompt-overlay
+delegation to request bounded implementation input.
+
+Fold returned evidence into phase ordering, phase readiness, task-boundary
+notes, changed-file expectations, integration risk, verification handoff,
+documentation impact, residual risk, follow-on tasks, or stop conditions as
+appropriate. Do not require `implementation-engineer` for direct use. If the
+role is unavailable or the host cannot delegate, continue plan execution
+yourself by checking the same implementation readiness and sequencing
+concerns.
+
 ## Workflow
 
 1. Resolve the active plan using `Active Plan Resolution` in

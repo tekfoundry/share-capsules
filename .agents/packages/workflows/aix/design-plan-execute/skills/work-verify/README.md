@@ -45,4 +45,8 @@ The skill identifies the changed subsystem, reads relevant design and quality
 guidance, runs targeted deterministic checks first, adds broader repository
 checks when the changed surface requires them, and reports exact commands,
 outcomes, skipped checks, manual checks, documentation impact, remaining risks,
-and success-criteria status.
+and success-criteria status. When the workflow-owned `security-reviewer` role
+is installed, the skill can use it for bounded security-verification input on
+trust boundaries, credentials, authorization, destructive operations,
+dependency risk, redaction, and no-write guarantees while still checking those
+concerns itself when the role is unavailable.

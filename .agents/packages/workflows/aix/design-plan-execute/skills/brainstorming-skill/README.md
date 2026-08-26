@@ -13,12 +13,12 @@ Installation:
 aix init
 ```
 
-`aix init` activates `brainstorming-skill` by default as a standalone bundled
-skill. In an existing AI Extensions project with the default `aix` skill source
-configured, it can also be activated directly:
+This skill is workflow-owned. `aix init` installs the default
+`design-plan-execute` workflow and activates this skill with it. To install the
+workflow explicitly, run:
 
 ```bash
-aix skill activate aix/brainstorming-skill
+aix workflow install https://github.com/tekfoundry/ai-extensions/tree/master/aix/workflows/design-plan-execute aix
 ```
 
 Dependencies:
@@ -43,6 +43,13 @@ Example prompts:
 The skill starts by reading project context. If the prompt has a focus, it uses
 that focus. If the prompt is broad, it runs a general project brainstorming
 session.
+
+When `.agents/roles/product-strategist.md` is installed and the session needs
+vision, audience, value, scope, tradeoff, or sequencing judgment, the skill can
+delegate that bounded product-strategy pass through `delegate-to-role` or
+prompt-overlay fallback. The brainstorming skill still owns the session flow,
+approval rules, and `_docs/ideas.md` updates. If the role is not installed, the
+skill remains runnable and elicits the basic product-vision inputs directly.
 
 The skill may research comparable products, projects, tools, or workflows. It
 keeps useful links with the ideas they informed so a developer can revisit the
@@ -107,7 +114,9 @@ be saved before review starts and updated after meaningful accepted changes.
 
 ## Prioritization
 
-Approved ideas are ordered by practical value-to-effort. The skill considers:
+Approved ideas are ordered by practical value-to-effort. When available,
+`product-strategist` evidence should inform that ordering. Otherwise the skill
+uses these lightweight standalone factors:
 
 - likely business or developer value
 - difficulty

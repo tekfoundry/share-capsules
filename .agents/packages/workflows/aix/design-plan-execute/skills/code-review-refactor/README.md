@@ -50,3 +50,7 @@ responsibilities, duplication, weak tests, brittle error handling, safety risks,
 and documentation drift. It reports prioritized findings first, then asks the
 developer which findings to refactor. Small behavior-preserving fixes can run
 inline after confirmation. Larger refactors are routed through `plan-create`.
+When the workflow-owned `technical-architect` role is installed, the skill can
+use it for bounded architecture-risk review on coupling, ownership, runtime
+contracts, integration boundaries, and cross-module refactors while preserving
+the normal developer confirmation gate.

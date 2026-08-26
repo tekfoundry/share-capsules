@@ -20,6 +20,15 @@ does not create, activate, execute, or complete workflow plans. When the
 developer chooses one approved idea for implementation planning, route that
 idea through `plan-create`.
 
+This skill owns the brainstorming procedure and the `_docs/ideas.md`
+checkpoint. Product strategy judgment belongs in a role when the project has
+one installed. If `.agents/roles/product-strategist.md` exists and the session
+needs vision, audience, value, scope, tradeoff, or sequencing judgment, use
+`delegate-to-role` or a bounded prompt-overlay delegation to
+`product-strategist`, then fold the returned evidence into the idea list. If
+that role is not installed, continue with the standalone procedure below and
+ask concise product-vision questions yourself.
+
 ## Scope
 
 Brainstorm product, documentation, developer-experience, workflow, testing,
@@ -48,17 +57,28 @@ implementation plan.
    - Read `_docs/ideas.md` when it exists.
    - Inspect relevant source layout and marketing artifacts such as README
      files when they may reveal gaps or stale messaging.
-3. Research comparable products, projects, tools, or workflows when outside
+3. Bring in product strategy when it would improve the session.
+   - If `.agents/roles/product-strategist.md` is installed, delegate a bounded
+     product-strategy pass for audience, user problem, product value, scope,
+     tradeoffs, sequencing, and open questions.
+   - Keep the parent brainstorming context responsible for `_docs/ideas.md`,
+     approval rules, file edits, and final session output.
+   - If the role is unavailable, elicit the same basic vision inputs directly:
+     target user, problem, value, scope boundary, urgency, and risk.
+   - Do not block a usable brainstorming session solely because the role is
+     missing.
+4. Research comparable products, projects, tools, or workflows when outside
    context would improve the session.
    - Prefer official docs, repositories, project pages, and primary sources.
    - Keep research bounded. Do enough to identify useful feature patterns,
      gaps, or marketing examples.
    - Keep source links with the ideas they informed.
-4. Generate an in-flight idea list.
+5. Generate an in-flight idea list.
    - Include useful existing in-flight ideas.
    - Preserve approved ideas unless the developer asks to revisit them.
-   - Add new candidates grounded in the project review and research.
-5. Checkpoint the session before review.
+   - Add new candidates grounded in the project review, product-strategy
+     evidence, and research.
+6. Checkpoint the session before review.
    - Create or update `_docs/ideas.md` as soon as the first useful in-flight
      list exists.
    - Store new candidates in `In-flight ideas` unless the developer has
@@ -66,14 +86,14 @@ implementation plan.
    - Preserve all existing approved and in-flight ideas unless the developer
      accepts a removal, merge, split, rename, or move.
    - Tell the developer that the in-flight list has been checkpointed.
-6. Collaborate with the developer.
+7. Collaborate with the developer.
    - Review, remove, merge, split, rename, and reprioritize ideas.
    - Move ideas between in-flight and approved sections only when the developer
      accepts that change.
    - Do not silently discard existing ideas.
    - Update `_docs/ideas.md` after meaningful list changes so the session can
      be resumed from another conversation.
-7. Approval rules.
+8. Approval rules.
    - Do not promote an idea into `Approved prioritized ideas` without explicit
      developer acceptance.
    - Do not delete or collapse ideas without explicit developer acceptance.
@@ -132,7 +152,9 @@ prioritization changes the order.
 
 ## Prioritization
 
-Prioritize approved ideas by value-to-effort:
+Prioritize approved ideas by practical value-to-effort. When a
+`product-strategist` delegation was used, base prioritization on that returned
+evidence. Otherwise use the lightweight standalone factors below:
 
 1. likely business or developer value
 2. implementation difficulty

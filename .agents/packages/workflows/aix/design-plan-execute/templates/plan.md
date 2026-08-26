@@ -24,10 +24,24 @@ task markers in section headings.
 
 ## High-Level Goal (status: {{ goal:status }})
 
+<!-- DO NOT INCLUDE IN OUTPUT
+Agent note: this is the vision gate. Keep this section focused on what should
+change, who it helps, why it matters, and the scope direction. Do not mark it
+accepted until the developer agrees the vision is clear enough to deepen into
+Design Intent.
+-->
+
 State the agreed outcome in terms of what should change and why that change
 matters.
 
 ## Design Intent (status: {{ design:status }})
+
+<!-- DO NOT INCLUDE IN OUTPUT
+Agent note: this is the design-intent gate. Capture the intended
+implementation direction, boundaries, tradeoffs, safety posture, verification
+needs, and open decisions. Do not draft implementation phases or task lists
+until this section is accepted.
+-->
 
 Capture the accepted implementation direction, ownership boundaries,
 interfaces, tradeoffs, safety posture, and verification expectations.
@@ -53,8 +67,10 @@ rules, or runtime invariants. Remove placeholder bullets.
 ## Implementation Phases
 
 <!-- DO NOT INCLUDE IN OUTPUT
-Agent note: expand each phase with sections/phase.md. Preserve the
-workflow task markers exactly: ⬜️, 🟨, ✅, and ⚠️. 
+Agent note: before Design Intent is accepted, leave this section as a clear
+placeholder such as "Not drafted until Design Intent is accepted." After
+Design Intent is accepted, expand each phase with sections/phase.md. Preserve
+the workflow task markers exactly: ⬜️, 🟨, ✅, and ⚠️.
 -->
 
 {{ repeat:phases section:phase }}
@@ -69,6 +85,8 @@ none remain, write "None." or remove the section.
 - {{ decision:item }}
 
 {{ section:risks }}
+
+{{ section:security-review }}
 
 ## Lessons To Carry Forward
 

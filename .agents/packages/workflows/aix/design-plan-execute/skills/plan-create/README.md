@@ -47,7 +47,35 @@ the plan.
 
 The skill reads repository instructions, workflow guidance, design docs, and
 related plans. It creates a backlog plan early, then works through explicit
-planning gates: high-level goal, design intent, implementation phases, phase
-tasks, risks, verification, and final backlog acceptance. New plans are placed
-under `_docs/plans/backlog/` and pause there until the developer later uses
+planning gates: vision, high-level goal, design intent, implementation phases,
+phase tasks, risks, verification, and final backlog acceptance. It does not
+draft implementation phases or task lists until Design Intent is accepted.
+When the workflow-owned `product-strategist` role is installed, the skill can
+use it for bounded product-vision judgment while still remaining directly
+runnable without role context. When the workflow-owned `product-designer` role
+is installed, the skill can use it for bounded user-flow, interaction,
+accessibility, layout, prompt, terminal UX, and design-system review while
+still asking those questions itself when the role is unavailable. When the
+workflow-owned `requirements-engineer` role is installed after the high-level
+goal is accepted, the skill can use it for bounded requirements, non-goals,
+boundaries, acceptance signals, open decisions, and plan-readiness judgment
+while still eliciting those requirements itself when the role is unavailable.
+When the
+workflow-owned `technical-architect` role is installed, the skill can use it
+for bounded boundary, contract, integration, maintainability, and
+implementation-phase sequencing review while still asking those questions
+itself when the role is unavailable. When the workflow-owned
+`security-reviewer` role is installed, the skill can use it for bounded trust
+boundary, credential, authorization, destructive-operation, dependency, and
+safety-verification review while still asking those questions itself when the
+role is unavailable. When the workflow-owned `ux-writer` role is installed,
+the skill can use it for bounded labels, prompts, errors, empty states,
+onboarding copy, README language, command help, and developer-facing docs
+language review while still asking those questions itself when the role is
+unavailable. When the workflow-owned `documentation-specialist` role is
+installed, the skill can use it for bounded documentation-impact, `_docs`
+placement, design-promotion, current-state docs, README or workflow-doc,
+index-link, and closeout-expectation review while still asking those questions
+itself when the role is unavailable. New plans are placed under
+`_docs/plans/backlog/` and pause there until the developer later uses
 `plan-activate`.

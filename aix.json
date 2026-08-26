@@ -6,7 +6,6 @@
     }
   },
   "skills": [
-    "aix:brainstorming-skill",
     "aix:discover-skill"
   ],
   "workflow": "aix:aix/workflows/design-plan-execute"
