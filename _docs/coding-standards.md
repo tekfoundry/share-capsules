@@ -13,7 +13,7 @@ These standards favor object-oriented design where objects make responsibilities
 - Use composition and delegation before inheritance.
 - Keep security-sensitive paths small, deterministic, and easy to review.
 - Remove duplicated knowledge while resisting premature generalization.
-- Preserve the terminology and invariants defined in `_docs/design` and versioned specifications.
+- Preserve the terminology and invariants defined in `_docs/kb` and versioned specifications.
 
 ## Object-oriented design
 

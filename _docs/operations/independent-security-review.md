@@ -34,14 +34,12 @@ The reviewer should be comfortable evaluating:
    - `./_infra/kit check`
    - `./_infra/kit browser-check`
    - `./_infra/kit npm run release:supply-chain-check`
-4. Provide the reviewer with the design entry points:
-   - `_docs/design/07_security-and-privacy/threat-model-v1.md`
-   - `_docs/design/07_security-and-privacy/cryptographic-suite-v1.md`
-   - `_docs/design/03_architecture/access-and-data-flow.md`
-   - `_docs/design/03_architecture/key-management.md`
-   - `_docs/design/06_viewer/browser-viewer.md`
-   - `_docs/design/05_ctx/authorization-and-key-release.md`
-   - `_docs/design/07_security-and-privacy/privacy-model.md`
+4. Provide the reviewer with the knowledge-base entry points:
+   - `_docs/kb/04-security/security-and-privacy.md`
+   - `_docs/kb/03-architecture/system-architecture.md`
+   - `_docs/kb/03-architecture/v1-contracts-and-specifications.md`
+   - `_docs/kb/05-quality/verification-strategy.md`
+   - `_docs/kb/06-operations/operations-runbook.md`
 5. Provide no production secrets, private keys, user data, logs with personal data, or recovery material.
 
 ## Review Scope

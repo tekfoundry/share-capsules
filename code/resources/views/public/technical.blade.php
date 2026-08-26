@@ -7,16 +7,16 @@
 @php
     $repositoryUrl = rtrim((string) config('sharecapsules.public.repository_url'), '/');
     $sources = [
-        ['System architecture', '_docs/design/03_architecture/system-overview.md'],
-        ['Access and data flow', '_docs/design/03_architecture/access-and-data-flow.md'],
-        ['Official network and registry', '_docs/design/03_architecture/official-network-and-registry.md'],
-        ['Open protocol ADR', '_docs/design/08_decisions/ADR-0001-open-protocol-official-network.md'],
-        ['Capsule design intent', '_docs/design/04_capsule/design-intent.md'],
-        ['CTX design intent', '_docs/design/05_ctx/design-intent.md'],
-        ['Protocol contracts V1', '_docs/design/10_specifications/ctx/protocol-contracts-v1.md'],
-        ['Cryptographic suite V1', '_docs/design/07_security-and-privacy/cryptographic-suite-v1.md'],
-        ['Privacy model', '_docs/design/07_security-and-privacy/privacy-model.md'],
-        ['Threat model V1', '_docs/design/07_security-and-privacy/threat-model-v1.md'],
+        ['Product overview', '_docs/kb/01-product/product-overview.md'],
+        ['V1 requirements', '_docs/kb/02-requirements/v1-requirements.md'],
+        ['System architecture', '_docs/kb/03-architecture/system-architecture.md'],
+        ['V1 contracts and specifications', '_docs/kb/03-architecture/v1-contracts-and-specifications.md'],
+        ['Security and privacy model', '_docs/kb/04-security/security-and-privacy.md'],
+        ['Verification strategy', '_docs/kb/05-quality/verification-strategy.md'],
+        ['Operations runbook', '_docs/kb/06-operations/operations-runbook.md'],
+        ['Open protocol ADR', '_docs/kb/07-decisions/ADR-0001-open-protocol-official-network.md'],
+        ['Glossary', '_docs/kb/glossary.md'],
+        ['Legacy migration inventory', '_docs/kb/migration-inventory.md'],
     ];
 @endphp
 
@@ -45,7 +45,7 @@
                         '#trust-privacy' => 'Trust and privacy',
                         '#scope' => 'V1 scope and limits',
                         '#status' => 'Implementation status',
-                        '#design-sources' => 'Design sources',
+                        '#design-sources' => 'KB sources',
                     ] as $href => $label)
                         <a class="rounded-lg px-3 py-2 transition hover:bg-canvas hover:text-ink" href="{{ $href }}">{{ $label }}</a>
                     @endforeach
@@ -193,9 +193,9 @@
                 <x-public.project-status id="status" class="scroll-mt-8 border-x-0 border-b-0 px-0 py-20 lg:py-24 [&>div]:px-0" />
 
                 <section id="design-sources" class="scroll-mt-8 border-t border-line py-20 lg:py-24">
-                    <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">Design sources</p>
-                    <h2 class="mt-3 text-3xl font-semibold tracking-[-0.035em]">The detailed intent remains in living Markdown.</h2>
-                    <p class="mt-5 max-w-3xl leading-7 text-muted">These are the source design documents behind this overview. Each link opens the corresponding Markdown file in the public project repository when a repository URL is configured.</p>
+                    <p class="text-xs font-bold tracking-[0.16em] text-brand uppercase">KB sources</p>
+                    <h2 class="mt-3 text-3xl font-semibold tracking-[-0.035em]">The current system knowledge remains in living Markdown.</h2>
+                    <p class="mt-5 max-w-3xl leading-7 text-muted">These are the knowledge-base documents behind this overview. Each link opens the corresponding Markdown file in the public project repository when a repository URL is configured.</p>
                     <ul class="mt-7 divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">
                         @foreach ($sources as [$label, $path])
                             <li class="flex flex-col gap-2 p-5 sm:flex-row sm:items-center sm:justify-between">

@@ -55,4 +55,4 @@ Do not add screenshots, source images, protected content, account identifiers, t
 
 ## Release Decision
 
-The profile can be frozen only after representative supported desktops pass this benchmark or the V1 limits are deliberately reduced and the reduced limits are documented in the design/specification files.
+The profile can be frozen only after representative supported desktops pass this benchmark or the V1 limits are deliberately reduced and the reduced limits are documented in the knowledge-base contract files.

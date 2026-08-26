@@ -5,7 +5,7 @@ Thanks for taking a look at Share Capsules. Capsule and CTX are experimental, se
 ## Before Opening A Change
 
 - Read the project [README](README.md), [security policy](SECURITY.md), and current [MVP plan](_docs/plans/initial-mvp.md).
-- For protocol or security changes, read the relevant design/specification documents under `_docs/design`.
+- For protocol or security changes, read the relevant current-state documents under `_docs/kb`.
 - Open a public issue for non-sensitive bugs, questions, or proposals.
 - Do not open public issues for suspected vulnerabilities, exposed secrets, bypasses, privacy failures, or abuse paths. Follow [SECURITY.md](SECURITY.md).
 
@@ -24,7 +24,7 @@ Composer, npm, Artisan, builds, and tests should run through `_infra/kit` so the
 ## Pull Requests
 
 - Keep changes focused and include tests for behavior changes.
-- Update design, operations, or user documentation when the user-facing behavior or security posture changes.
+- Update knowledge-base, operations, or user documentation when the user-facing behavior or security posture changes.
 - Do not commit secrets, private keys, local `.env` files, logs, local databases, browser profiles, or generated unpacked extension directories.
 - Explain security and privacy impact in the pull request when relevant.
 

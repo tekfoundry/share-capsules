@@ -24,7 +24,7 @@ final class TechnicalOverviewPageTest extends TestCase
             ->assertSee('Still coming later');
     }
 
-    public function test_design_sources_become_links_when_the_public_repository_is_configured(): void
+    public function test_knowledge_base_sources_become_links_when_the_public_repository_is_configured(): void
     {
         config()->set('sharecapsules.public.repository_url', 'https://github.com/tekfoundry/share-capsules');
 
@@ -32,11 +32,11 @@ final class TechnicalOverviewPageTest extends TestCase
             ->assertOk()
             ->assertSee('id="design-sources"', false)
             ->assertSee(
-                'href="https://github.com/tekfoundry/share-capsules/blob/master/_docs/design/03_architecture/system-overview.md"',
+                'href="https://github.com/tekfoundry/share-capsules/blob/master/_docs/kb/03-architecture/system-architecture.md"',
                 false,
             )
-            ->assertSee('_docs/design/03_architecture/official-network-and-registry.md')
-            ->assertSee('_docs/design/08_decisions/ADR-0001-open-protocol-official-network.md')
-            ->assertSee('_docs/design/07_security-and-privacy/threat-model-v1.md');
+            ->assertSee('_docs/kb/03-architecture/v1-contracts-and-specifications.md')
+            ->assertSee('_docs/kb/07-decisions/ADR-0001-open-protocol-official-network.md')
+            ->assertSee('_docs/kb/04-security/security-and-privacy.md');
     }
 }

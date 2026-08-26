@@ -71,7 +71,7 @@ When functionality is deferred, document:
 
 ### 6. Record the accepted decision immediately
 
-- Update the relevant `_docs/design` documents after the decision is accepted.
+- Update the relevant `_docs/kb` documents after the decision is accepted.
 - Keep only the current design intent; remove stale open questions or superseded direction.
 - Use an ADR when the rationale and consequences of a consequential architectural commitment need to remain independently discoverable.
 - Ensure later plans treat the accepted decision as an input rather than reopening it accidentally.
@@ -90,11 +90,11 @@ If a user preference reveals a missing long-term constraint, re-run the analysis
 
 ## Documentation Model
 
-### `_docs/design`
+### `_docs/kb`
 
-- This directory holds stable design intent for the application.
-- Documents in this directory should describe the desired current state of the system.
-- Stable design docs should reflect the latest accepted iteration of the codebase.
+- This directory holds current implemented project knowledge for the application.
+- Documents in this directory should describe current shipped behavior and accepted constraints.
+- Knowledge-base docs should reflect the latest accepted iteration of the codebase.
 
 ### `_docs/plans`
 
@@ -102,15 +102,15 @@ If a user preference reveals a missing long-term constraint, re-run the analysis
 - Every non-trivial effort starts with a plan document in this directory unless an existing active plan already covers the work.
 - Plan documents may describe future state, transitional architecture, phased rollout, risks, and open decisions.
 - Plan documents may also contain lessons and implementation feedback gathered while executing the work.
-- Completed plan documents will eventually be deleted, so design intent should be promoted to `_docs/design` and lessons harvested for this document.
+- Completed plan documents will eventually be deleted, so durable current-state knowledge should be promoted to `_docs/kb` and lessons harvested for this document.
 
-### Relationship Between `design`, `plans`, and workflow guidance
+### Relationship Between `kb`, `plans`, and workflow guidance
 
 - Code is the implemented behavior.
-- `_docs/design` is the stable design truth for the intended current system.
+- `_docs/kb` is the stable knowledge base for the intended current system.
 - `_docs/plans` is the temporary and evolving design space for active work.
 - This document captures reusable workflow guidance learned across efforts.
-- When plan work is completed, durable design intent must be moved into `_docs/design`, and useful lessons should be harvested to improve this document.
+- When plan work is completed, durable current-state knowledge must be moved into `_docs/kb`, and useful lessons should be harvested to improve this document.
 
 ## Plan Mode Default
 
@@ -182,7 +182,7 @@ Each plan document in `_docs/plans` should include, at minimum, the following se
 ### 1. Review Existing Context
 
 - Read the relevant code, tests, and documentation before editing.
-- Check `_docs/design` for current intended behavior.
+- Check `_docs/kb` for current intended behavior.
 - Check `_docs/plans` for active or related implementation work.
 - If code, design docs, and plan docs disagree, identify the drift explicitly and resolve it deliberately.
 
@@ -219,7 +219,7 @@ Each plan document in `_docs/plans` should include, at minimum, the following se
 When work covered by a plan document is complete:
 
 1. Verify that the implementation matches the intended outcome.
-2. Move durable design intent into a new or existing document in `_docs/design`.
+2. Move durable design intent into a new or existing document in `_docs/kb`.
 3. Remove ambiguity about what is still future work versus what is now stable design.
 4. Review the plan's `Lessons` section.
 5. Harvest reusable workflow improvements from those lessons into this document.
@@ -241,9 +241,9 @@ The goal is that completed plans should not remain the only place where final de
 Before archiving a plan, confirm all of the following:
 
 - All plan tasks are marked as completed.
-- Stable design intent from the plan has been distributed into the appropriate files under `_docs/design`.
-- The `_docs/design` structure has been reviewed for any refactors or reorganization needed to keep the docs clear and easy to navigate.
-- Any new design docs are referenced from related docs where appropriate and can ultimately be discovered from `_docs/design/README.md`.
+- Stable design intent from the plan has been distributed into the appropriate files under `_docs/kb`.
+- The `_docs/kb` structure has been reviewed for any refactors or reorganization needed to keep the docs clear and easy to navigate.
+- Any new knowledge-base docs are referenced from related docs where appropriate and can ultimately be discovered from `_docs/kb/README.md`.
 - Relevant test coverage is in a good state, with the goal of keeping the test suite green.
 - The plan no longer contains active implementation work, unresolved execution tasks, or validation follow-up that should remain in `_docs/plans`.
 
@@ -296,7 +296,7 @@ A task is done when:
 - Automated tests lock down each implemented, testable design requirement and meaningful failure path.
 - Relevant verification has been run, or any gaps are explicitly documented.
 - The active plan document reflects the final state of the work.
-- Durable design knowledge has been promoted into `_docs/design` when the work is complete.
+- Durable design knowledge has been promoted into `_docs/kb` when the work is complete.
 - Reusable lessons have been considered for inclusion in this document.
 
 ## Plan Template
@@ -350,6 +350,6 @@ Brief name for the effort.
 
 - Reusable implementation or workflow learnings
 
-### Promotion to Design
+### Promotion to Knowledge Base
 
-- Which `_docs/design` documents need to be created or updated when the work is complete
+- Which `_docs/kb` documents need to be created or updated when the work is complete

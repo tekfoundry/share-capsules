@@ -10,12 +10,10 @@ Share Capsules has accepted an open protocol, opinionated official network model
 Reviewed context:
 
 - `_docs/agent-workflow.md`
-- `_docs/design/03_architecture/official-network-and-registry.md`
-- `_docs/design/08_decisions/ADR-0001-open-protocol-official-network.md`
-- `_docs/design/03_architecture/system-overview.md`
-- `_docs/design/03_architecture/access-and-data-flow.md`
-- `_docs/design/05_ctx/authorization-and-key-release.md`
-- `_docs/design/07_security-and-privacy/threat-model-v1.md`
+- `_docs/kb/03-architecture/system-architecture.md`
+- `_docs/kb/03-architecture/v1-contracts-and-specifications.md`
+- `_docs/kb/07-decisions/ADR-0001-open-protocol-official-network.md`
+- `_docs/kb/04-security/security-and-privacy.md`
 
 Assumptions and constraints:
 

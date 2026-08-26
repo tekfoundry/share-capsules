@@ -18,7 +18,7 @@ At plan approval, the repository contained design intent but no application code
 
 Capsule and CTX are intended for public development and independent review. TekFoundry sponsors and initially maintains the project; Share Capsules remains its reference implementation rather than a required provider for the open protocols.
 
-This plan treats the documents under [`_docs/design`](../design/README.md) as accepted inputs. Broad federation, additional content profiles, hosting, mobile support, server-side decryption, general web fallback, behavioral tracking, ownership transfer, adaptive renditions, and chunking are outside the MVP.
+This plan now treats the current-state documents under [`_docs/kb`](../kb/README.md) as accepted inputs. The preserved legacy design tree remains a migration review baseline, not the primary current-state source. Broad federation, additional content profiles, hosting, mobile support, server-side decryption, general web fallback, behavioral tracking, ownership transfer, adaptive renditions, and chunking are outside the MVP.
 
 Phase 2 is intentionally account-independent. It defines pure, versioned schemas, cryptographic behavior, message shapes, validation, fixtures, and test vectors using synthetic identifiers and keys. Phase 3 consumes those contracts for real accounts, OAuth, and registered devices; Phase 2 must not depend on a live account database or completed account implementation. After Phase 1, compatible portions of Phases 2 and 3 may proceed concurrently, but an integrating Phase 3 task waits for its relevant Phase 2 contract to stabilize.
 
